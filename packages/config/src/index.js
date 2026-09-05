@@ -1,0 +1,193 @@
+/**
+ * One place that reads the environment, so no other module ever touches process.env.
+ *
+ * Everything is read once at import. A missing *required* variable throws here, at
+ * boot, rather than at the moment somebody clicks something.
+ */
+
+function req(name, fallback) {
+  const v = process.env[name] ?? fallback;
+  if (v === undefined || v === '') throw new Error(`Missing required env var ${name}`);
+  return v;
+}
+const opt = (name, fallback = '') => process.env[name] ?? fallback;
+const num = (name, fallback) => {
+  const raw = process.env[name];
+  if (raw === undefined || raw === '') return fallback;
+  const n = Number(raw);
+  if (!Number.isFinite(n)) throw new Error(`env ${name} must be a number, got ${raw}`);
+  return n;
+};
+const bool = (name, fallback) => {
+  const raw = process.env[name];
+  if (raw === undefined || raw === '') return fallback;
+  return raw === '1' || raw.toLowerCase() === 'true';
+};
+const list = (name, fallback = '') =>
+  opt(name, fallback)
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+
+export const config = {
+  env: opt('NODE_ENV', 'development'),
+  isProd: opt('NODE_ENV', 'development') === 'production',
+
+  /** Railway injects PORT. Never hardcode it. */
+  port: num('PORT', 3000),
+
+  /** Public origin. Passkey rpID is derived from this, so changing it invalidates
+   *  every credential already registered. */
+  siteUrl: opt('SITE_URL', 'http://localhost:3000').replace(/\/$/, ''),
+  siteName: opt('SITE_NAME', 'NicheDB'),
+
+  /** No fallback, deliberately: a service deployed without it should say so at boot. */
+  databaseUrl: req('DATABASE_URL'),
+  redisUrl: opt('REDIS_URL', 'redis://localhost:6379'),
+
+  /** Which roles this process runs. One service runs "web,worker"; splitting them
+   *  later is a variable change, not a code change. */
+  roles: list('ROLES', 'web,worker'),
+
+  /**
+   * Who may do what.
+   *
+   * The first account ever created is an admin; so is any address listed here
+   * the moment it signs in. Admins manage the system collections and sources.
+   * Everyone signed in may create feeds. Adding a SOURCE -- something that
+   * makes this deployment fetch from a third party on a schedule -- is admins
+   * and Pro members unless OPEN_SOURCES lets everyone.
+   */
+  adminEmails: list('ADMIN_EMAILS').map((e) => e.toLowerCase()),
+  openSources: bool('OPEN_SOURCES', false),
+
+  /** Sent in the User-Agent to upstreams that ask who is calling (SEC does). */
+  contactEmail: opt('CONTACT_EMAIL', ''),
+
+  ingest: {
+    /** How often the scheduler asks "is any source due". */
+    tickSeconds: num('INGEST_TICK_SECONDS', 60),
+    /** Sources fetched at once. Upstreams are rate limited individually inside adapters. */
+    concurrency: num('INGEST_CONCURRENCY', 3),
+    /** Wall-clock ceiling on one run; a run past this records what it has and stops. */
+    runDeadlineMs: num('INGEST_RUN_DEADLINE_MS', 4 * 60_000),
+    /** Detail lookups an adapter may spend per run (appdetails, package docs...). */
+    budget: num('INGEST_DETAIL_BUDGET', 150),
+    /** Sweep every enabled source on boot regardless of next_run_at. */
+    onBoot: bool('INGEST_ON_BOOT', false),
+  },
+
+  feeds: {
+    /** How often followed feeds are checked for new items. */
+    scanSeconds: num('FEED_SCAN_SECONDS', 60),
+    /** Items per feed per scan; more than this collapses into one digest line. */
+    perScan: num('FEED_ITEMS_PER_SCAN', 20),
+    /** Free accounts may own this many feeds. Pro and admins are unlimited. */
+    freeLimit: num('FEED_FREE_LIMIT', 10),
+  },
+
+  api: {
+    /** Requests per hour by tier. Anonymous is by address, keyed is by key. */
+    anonPerHour: num('API_ANON_PER_HOUR', 600),
+    freePerHour: num('API_FREE_PER_HOUR', 6000),
+    proPerHour: num('API_PRO_PER_HOUR', 120_000),
+  },
+
+  adapters: {
+    igdbClientId: opt('IGDB_CLIENT_ID'),
+    igdbClientSecret: opt('IGDB_CLIENT_SECRET'),
+    githubToken: opt('GITHUB_TOKEN'),
+    courtlistenerToken: opt('COURTLISTENER_TOKEN'),
+  },
+
+  membership: {
+    priceCents: num('MEMBERSHIP_PRICE_CENTS', 1000),
+    currency: opt('MEMBERSHIP_CURRENCY', 'USD'),
+    termDays: num('MEMBERSHIP_TERM_DAYS', 365),
+    get enabled() {
+      return Boolean(config.coinpay.enabled);
+    },
+  },
+
+  payments: {
+    blockchain: opt('COINPAY_BLOCKCHAIN', 'BTC'),
+    payoutAddress: opt('COINPAY_PAYOUT_ADDRESS'),
+  },
+
+  coinpay: {
+    /* Read on use rather than snapshotted at import, so tests can set them. */
+    get apiKey() {
+      return opt('COINPAY_API_KEY');
+    },
+    get businessId() {
+      return opt('COINPAY_BUSINESS_ID');
+    },
+    get webhookSecret() {
+      return opt('COINPAY_WEBHOOK_SECRET');
+    },
+    baseUrl: opt('COINPAY_BASE_URL', 'https://coinpayportal.com'),
+    get enabled() {
+      return Boolean(this.apiKey && this.businessId && this.webhookSecret);
+    },
+  },
+
+  /** Selling crawl passes to training crawlers over x402. */
+  x402: {
+    get coinpayKey() {
+      return opt('COINPAY_X402_KEY');
+    },
+    get payTo() {
+      return opt('CRAWL_PAY_TO');
+    },
+    priceCents: num('CRAWL_PRICE_CENTS', 100),
+    passMinutes: num('CRAWL_PASS_MINUTES', 1440),
+    contact: opt('CRAWL_CONTACT'),
+  },
+
+  push: {
+    publicKey: opt('VAPID_PUBLIC_KEY'),
+    privateKey: opt('VAPID_PRIVATE_KEY'),
+    subject: opt('VAPID_SUBJECT', 'mailto:hello@example.com'),
+    get enabled() {
+      return Boolean(this.publicKey && this.privateKey);
+    },
+  },
+
+  mail: {
+    resendKey: opt('RESEND_API_KEY'),
+    from: opt('MAIL_FROM', 'NicheDB <hello@example.com>'),
+    get enabled() {
+      return Boolean(this.resendKey);
+    },
+  },
+
+  analytics: {
+    get crawlproofSite() {
+      return opt('CRAWLPROOF_SITE_ID');
+    },
+    get enabled() {
+      return Boolean(this.crawlproofSite);
+    },
+  },
+
+  cache: {
+    ttlSeconds: num('CACHE_TTL', 60),
+    enabled: bool('CACHE_ENABLED', true),
+  },
+
+  session: {
+    cookie: 'ndb_session',
+    ttlDays: num('SESSION_TTL_DAYS', 90),
+  },
+};
+
+/** Asserted at boot by whichever process is about to depend on it. */
+export function assertCoinpayMerchantKey() {
+  const k = config.coinpay.apiKey;
+  if (!k) return;
+  if (!/^cp_(live|test)_[0-9a-f]{32}$/.test(k)) {
+    throw new Error(
+      'COINPAY_API_KEY is not a merchant API key. Expected cp_live_/cp_test_ + 32 hex.',
+    );
+  }
+}

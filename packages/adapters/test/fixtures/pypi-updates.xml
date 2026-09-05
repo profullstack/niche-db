@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>PyPI recent updates</title>
+    <item>
+      <title>yield-audit 0.3.2</title>
+      <link>https://pypi.org/project/yield-audit/0.3.2/</link>
+      <description>Outcome accounting for AI coding agents.</description>
+      <pubDate>Sat, 05 Sep 2026 15:59:32 GMT</pubDate>
+    </item>
+    <item>
+      <title>aider-ce 1.4.1</title>
+      <link>https://pypi.org/project/aider-ce/1.4.1/</link>
+      <description>Aider community edition</description>
+      <pubDate>Sat, 05 Sep 2026 15:58:00 GMT</pubDate>
+    </item>
+  </channel>
+</rss>

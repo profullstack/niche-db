@@ -1,0 +1,35 @@
+{
+  "name": "@profullstack/nichedb",
+  "version": "0.1.0",
+  "description": "CLI and MCP bridge for NicheDB: browse collections, manage sources and feeds, search items, from any deployment",
+  "type": "module",
+  "main": "src/index.js",
+  "bin": {
+    "nichedb": "./bin/nichedb.js"
+  },
+  "files": [
+    "bin",
+    "src",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "bun test"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "keywords": [
+    "nichedb",
+    "feeds",
+    "data",
+    "cli",
+    "mcp",
+    "agents"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/profullstack/niche-db.git",
+    "directory": "apps/cli"
+  }
+}

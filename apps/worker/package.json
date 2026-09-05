@@ -1,0 +1,16 @@
+{
+  "name": "@nichedb/worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "bun src/main.js"
+  },
+  "dependencies": {
+    "@nichedb/config": "workspace:*",
+    "@nichedb/core": "workspace:*",
+    "@nichedb/db": "workspace:*",
+    "@nichedb/payments": "workspace:*",
+    "@nichedb/queue": "workspace:*"
+  }
+}

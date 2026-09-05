@@ -1,0 +1,24 @@
+{
+  "name": "@nichedb/web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun run --hot src/main.js",
+    "start": "bun src/main.js",
+    "build:client": "bun build-client.js"
+  },
+  "dependencies": {
+    "@nichedb/auth": "workspace:*",
+    "@nichedb/config": "workspace:*",
+    "@nichedb/core": "workspace:*",
+    "@nichedb/db": "workspace:*",
+    "@nichedb/notify": "workspace:*",
+    "@nichedb/payments": "workspace:*",
+    "@nichedb/queue": "workspace:*",
+    "@profullstack/x402-gateway": "^0.1.0",
+    "@simplewebauthn/browser": "^13.2.0",
+    "hono": "^4.10.3",
+    "@profullstack/nichedb": "workspace:*"
+  }
+}

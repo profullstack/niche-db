@@ -1,0 +1,38 @@
+{
+  "name": "niche-db",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "An open platform for large, ever-growing databases of real-time data: sources in, feeds out. Web, API, CLI and MCP on one Postgres.",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/profullstack/niche-db.git"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "bun run --hot apps/web/src/main.js",
+    "start": "bun apps/web/src/main.js",
+    "worker": "bun apps/worker/src/main.js",
+    "migrate": "bun packages/db/src/migrate-cli.js",
+    "ingest": "bun apps/worker/src/ingest-cli.js",
+    "build:client": "bun apps/web/build-client.js",
+    "test": "bun test",
+    "lint": "bun run --bun biome check .",
+    "format": "bun run --bun biome format --write .",
+    "secrets:pull": "logicsrc teams pull profullstack nichedb prod --env .env",
+    "secrets:push": "logicsrc teams push profullstack nichedb prod --env .env"
+  },
+  "engines": {
+    "bun": ">=1.3.0"
+  },
+  "packageManager": "bun@1.4.0",
+  "devDependencies": {
+    "@biomejs/biome": "^2.3.0",
+    "@electric-sql/pglite": "^0.5.5",
+    "@profullstack/favicon-generator": "^1.2.1"
+  }
+}

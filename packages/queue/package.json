@@ -1,0 +1,19 @@
+{
+  "name": "@nichedb/queue",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.js",
+    "./workers": "./src/workers.js"
+  },
+  "dependencies": {
+    "@nichedb/config": "workspace:*",
+    "@nichedb/core": "workspace:*",
+    "@nichedb/db": "workspace:*",
+    "@nichedb/notify": "workspace:*",
+    "@profullstack/autoblog": "^0.4.0",
+    "bullmq": "^5.63.0",
+    "ioredis": "^5.9.0"
+  }
+}

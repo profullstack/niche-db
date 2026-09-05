@@ -1,0 +1,15 @@
+{
+  "name": "@nichedb/auth",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "dependencies": {
+    "@nichedb/config": "workspace:*",
+    "@nichedb/db": "workspace:*",
+    "@profullstack/api-key-manager": "^0.3.0",
+    "@simplewebauthn/server": "^13.2.0"
+  }
+}

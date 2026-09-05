@@ -1,0 +1,15 @@
+{
+  "name": "@nichedb/payments",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.js",
+    "./membership": "./src/membership.js",
+    "./referrals": "./src/referrals.js"
+  },
+  "dependencies": {
+    "@profullstack/coinpay": "^0.8.0",
+    "@profullstack/referrals": "^0.1.0"
+  }
+}
