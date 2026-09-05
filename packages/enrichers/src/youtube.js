@@ -51,6 +51,40 @@ export function parseResultsPage(html) {
   return out;
 }
 
+/**
+ * Does the video title actually mention the thing? The results page ranks by
+ * popularity, so an obscure title's top hit can be an unrelated trailer. A
+ * video has to share a distinctive word with the item to count.
+ */
+export function mentions(videoTitle, subject) {
+  const norm = (t) =>
+    String(t)
+      .toLowerCase()
+      .replace(/[^a-z0-9\s]/g, ' ');
+  const words = norm(subject)
+    .split(/\s+/)
+    .filter((w) => w.length >= 4 && !STOP.has(w));
+  if (words.length === 0) return true;
+  const hay = norm(videoTitle);
+  return words.some((w) => hay.includes(w));
+}
+const STOP = new Set([
+  'the',
+  'with',
+  'from',
+  'official',
+  'trailer',
+  'game',
+  'edition',
+  'series',
+  'launch',
+  'round',
+  'live',
+  'chess',
+  'volume',
+  'part',
+]);
+
 export const youtube = defineEnricher({
   name: 'youtube',
   title: 'YouTube videos',
@@ -91,6 +125,7 @@ export const youtube = defineEnricher({
       videos = parseResultsPage(html).slice(0, 3);
       await Bun.sleep(1500);
     }
+    videos = videos.filter((v) => mentions(v.title, searchTitle(item)));
     if (videos.length === 0) return null;
     return { query: q, videos, imageUrl: videos[0].thumbnail };
   },

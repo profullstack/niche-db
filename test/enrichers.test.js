@@ -7,7 +7,7 @@ import {
   searchTitle,
 } from '../packages/enrichers/src/index.js';
 import { parseMeta } from '../packages/enrichers/src/opengraph.js';
-import { parseResultsPage } from '../packages/enrichers/src/youtube.js';
+import { mentions, parseResultsPage } from '../packages/enrichers/src/youtube.js';
 
 describe('registry', () => {
   test('every enricher is well formed and names real collections', () => {
@@ -52,6 +52,14 @@ describe('youtube results page', () => {
       url: 'https://www.youtube.com/watch?v=abc123',
     });
     expect(parseResultsPage('<html></html>')).toEqual([]);
+  });
+});
+
+describe('youtube relevance', () => {
+  test('a video must share a distinctive word with the item', () => {
+    expect(mentions('My Fair Lady | Official Trailer', 'Cinnabar Nights')).toBe(false);
+    expect(mentions('CINNABAR NIGHTS - launch trailer', 'Cinnabar Nights')).toBe(true);
+    expect(mentions('Dota 2 Gameplay', 'Dota 2')).toBe(true);
   });
 });
 
