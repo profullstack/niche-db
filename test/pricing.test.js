@@ -123,5 +123,23 @@ describe('the sponsored feed item', () => {
     expect(item.tags).toEqual(['sponsored']);
     expect(sponsoredItem({ ok: false })).toBeNull();
     expect(sponsoredItem(null)).toBeNull();
+    // The live answer wraps the fill in `items`.
+    const wrapped = sponsoredItem({
+      ok: true,
+      count: 1,
+      items: [
+        {
+          ok: true,
+          sponsored: true,
+          guid: 'g',
+          headline: 'Wrapped',
+          body: 'b',
+          url: 'https://x.y/a',
+          label: 'Sponsored',
+        },
+      ],
+    });
+    expect(wrapped.title).toBe('Sponsored: Wrapped');
+    expect(sponsoredItem({ ok: true, count: 0, items: [] })).toBeNull();
   });
 });
