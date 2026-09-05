@@ -76,7 +76,9 @@ Migrations apply themselves on boot. The three collections, their default source
 
 Magic link and passkey only; there is no password column. API keys are minted from settings and shown once.
 
-Pro (a yearly membership through [CoinPay](https://coinpayportal.com)) lifts the feed limit, raises the API rate limit and lets an account add its own sources. Referral links give the new customer 20% off and the referrer 60% of the first payment. Training crawlers (GPTBot, ClaudeBot, CCBot, meta-externalagent…) get a 402 with an x402 offer and can buy a day pass at `/crawl`; people, search engines and retrieval crawlers pass through untouched.
+Free pages and feeds carry one [CrawlProof](https://crawlproof.com) ad and a tracker (`CRAWLPROOF_AD_SLOT`, `CRAWLPROOF_SITE_ID`). Pro ($120 a month through [CoinPay](https://coinpayportal.com)) is the tier without them: no ads, no tracking, the high API rate limit, unlimited feeds, own sources, and a crawl pass for the whole term (`GET /api/v1/crawl-pass`) so a member's own agents walk through the paywall. Referral links give the new customer 20% off and the referrer 60% of the first payment.
+
+Training crawlers (GPTBot, ClaudeBot, CCBot, meta-externalagent…) get a 402 with an x402 offer and buy a pass at `/crawl`: $1 a day for everything, and the more a buyer has paid here the less a day costs (`CRAWL_LOYALTY`, default 20% off after $10, 40% after $50, 60% after $100; every sale is a row in `crawl_sales`). A pass may switch ads or tracking off for its own requests with `?disable=ads,tracking`. People, search engines and retrieval crawlers pass through untouched.
 
 ## Stack
 

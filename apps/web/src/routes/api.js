@@ -3,6 +3,7 @@ import { describeAdapters, describeEnrichers } from '@nichedb/core';
 import * as q from '@nichedb/db/queries';
 import { enqueueRun } from '@nichedb/queue';
 import { COMMANDS } from '@profullstack/nichedb';
+import { mintPass } from '@profullstack/x402-gateway';
 import { callerAddress } from '../lib/auth-throttle.js';
 import { isProUser, render, requireUser } from '../lib/http.js';
 import { allowedEnrichers, collectionOut, feedOut, itemOut, sourceOut } from '../lib/serialize.js';
@@ -100,6 +101,31 @@ export function registerApi(app) {
       role: user.role,
       pro: await isProUser(user),
       feeds: await q.countUserFeeds(user.id),
+    });
+  });
+
+  /**
+   * A member's crawl pass: the same signed token a crawler buys at /crawl,
+   * good until the membership ends. Present it as `x-crawl-pass` (or a bearer)
+   * and the paywall opens; add `?disable=ads,tracking` to drop those too.
+   */
+  app.get('/api/v1/crawl-pass', async (c) => {
+    const user = requireUser(c);
+    const term = await q.activeMembership(user.id);
+    if (!term) throw new Denied('A crawl pass comes with Pro.', 402);
+    if (!config.x402.coinpayKey)
+      throw new Denied('Crawl passes are not configured on this deployment.', 400);
+    const expiresAt = Math.floor(new Date(term.expires_at).getTime() / 1000);
+    const pass = await mintPass({
+      secret: config.x402.coinpayKey,
+      ref: `membership:${term.id}`,
+      expiresAt,
+    });
+    return c.json({
+      pass: pass.token,
+      expires_at: new Date(pass.expiresAt * 1000).toISOString(),
+      header: 'x-crawl-pass',
+      use: `curl -H "x-crawl-pass: ${pass.token}" "${config.siteUrl}/f/everything.rss?disable=ads,tracking"`,
     });
   });
 

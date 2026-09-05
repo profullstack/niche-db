@@ -1,6 +1,7 @@
 import { config } from '@nichedb/config';
 import { html } from 'hono/html';
 import { assetUrl } from '../lib/asset-version.js';
+import { currentModules } from '../lib/modules.js';
 
 /** The single HTML shell. Every page renders through here. */
 export const Layout = (props) => (
@@ -59,7 +60,7 @@ export const Layout = (props) => (
       <meta property="og:type" content="website" />
       <meta property="og:image" content={`${config.siteUrl}/icons/icon-512x512.png`} />
       <meta name="twitter:card" content="summary" />
-      {config.analytics.enabled ? (
+      {config.analytics.enabled && currentModules().tracking ? (
         <script
           src="https://crawlproof.com/stats.js"
           data-site={config.analytics.crawlproofSite}
@@ -117,6 +118,10 @@ export const Layout = (props) => (
         {props.children}
       </main>
 
+      {config.ads.enabled && currentModules().ads ? (
+        <aside data-cp-ad data-slot={config.ads.slot} data-format="text_link" />
+      ) : null}
+
       <footer>
         <p>
           {config.siteName} is open source:{' '}
@@ -132,6 +137,9 @@ export const Layout = (props) => (
 
       <script src={assetUrl('vendor-webauthn.js')} defer />
       <script src={assetUrl('app.js')} defer />
+      {config.ads.enabled && currentModules().ads ? (
+        <script src="https://crawlproof.com/ad.js" async />
+      ) : null}
       {props.vapidKey ? html`<script>window.__VAPID = "${props.vapidKey}";</script>` : null}
     </body>
   </html>

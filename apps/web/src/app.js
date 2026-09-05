@@ -1,8 +1,8 @@
 import { config } from '@nichedb/config';
-import { createGateway } from '@profullstack/x402-gateway';
-import { x402Gateway } from '@profullstack/x402-gateway/hono';
 import { Hono } from 'hono';
-import { loadUser, render, wantsJson } from './lib/http.js';
+import { isProUser, loadUser, render, wantsJson } from './lib/http.js';
+import { modulesFor, withModules } from './lib/modules.js';
+import { gateway, gatewayFor } from './lib/pricing.js';
 import { Denied } from './lib/service.js';
 import { registerApi } from './routes/api.js';
 import { registerAuth } from './routes/auth.js';
@@ -30,21 +30,27 @@ app.use('*', async (c, next) => {
  * Training crawlers pay by the day (@profullstack/x402-gateway). People, search
  * engines and retrieval crawlers pass through untouched. The machine surfaces
  * an agent needs in order to USE the data rather than copy it stay open.
+ *
+ * The price is the buyer's own: a dollar a day at list, less the more it has
+ * spent here (lib/pricing.js), so the gateway is chosen per request.
  */
-export const gateway = createGateway({
-  siteUrl: config.siteUrl,
-  siteName: config.siteName,
-  coinpay: { apiKey: config.x402.coinpayKey },
-  payTo: config.x402.payTo,
-  priceCents: config.x402.priceCents,
-  passMinutes: config.x402.passMinutes,
-  contact: config.x402.contact || undefined,
-  openPaths: ['/llms.txt', '/mcp', '/api/', '/healthz', '/manifest.webmanifest'],
-  onSale: (sale) => console.log('[x402] sold a pass', { payer: sale.payer, ua: sale.userAgent }),
+export { gateway };
+
+app.use('*', async (c, next) => {
+  const { gateway: chosen } = await gatewayFor(c.req.raw);
+  const answer = await chosen.handle(c.req.raw);
+  if (answer) return answer;
+  await next();
 });
-app.use('*', x402Gateway(gateway));
 
 app.use('*', loadUser);
+
+/** Ads and tracking: on for free, off for Pro, the buyer's choice with a pass. */
+app.use('*', async (c, next) => {
+  const modules = await modulesFor(c, isProUser);
+  c.set('modules', modules);
+  await withModules(modules, next);
+});
 
 app.onError((err, c) => {
   if (err.redirect) return c.redirect(err.redirect, 303);

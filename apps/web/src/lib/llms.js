@@ -1,11 +1,21 @@
 import { config } from '@nichedb/config';
 import { describeAdapters, describeEnrichers } from '@nichedb/core';
 import * as q from '@nichedb/db/queries';
+import { parseLoyalty } from './pricing.js';
 
 /**
  * llms.txt: the deployment described for language models, in one request.
  * Served at /llms.txt and as the MCP server's one resource.
  */
+/** "20% off after $10, 40% after $50, 60% after $100" from the loyalty ladder. */
+function loyaltyLine() {
+  const tiers = parseLoyalty(config.x402.loyalty);
+  if (!tiers.length) return 'one price for everyone';
+  return tiers
+    .map((t) => `${Math.round(t.off * 100)}% off after $${(t.spentCents / 100).toFixed(0)}`)
+    .join(', ');
+}
+
 export async function llmsTxt() {
   const base = config.siteUrl;
   const [stats, collections, sources, feeds] = await Promise.all([
@@ -67,6 +77,20 @@ export async function llmsTxt() {
     '',
     'Every item carries published_at, time_known and precision. When time_known is false the',
     'date is real and the clock is not.',
+    '',
+    '## Access and pricing',
+    '',
+    'Reading, following and querying is free, and free pages and feeds carry one sponsored',
+    'item and a tracker. Two paid ways in:',
+    '',
+    `- **Pro, $${(config.membership.priceCents / 100).toFixed(0)} a month** (${base}/pro): no ads, no tracking,`,
+    `  ${config.api.proPerHour.toLocaleString('en-US')} API requests an hour, unlimited feeds, your own sources, and a crawl pass`,
+    '  for the whole term so your own agents walk through the paywall on your key. Paid in',
+    '  crypto through CoinPay.',
+    `- **A crawl pass over x402** (${base}/crawl): $${(config.x402.priceCents / 100).toFixed(2)} a day for everything, bought`,
+    '  by any x402 client (the CoinPay CLI, @profullstack/x402-client) with no account. The more',
+    `  you have paid here the less a day costs: ${loyaltyLine()}.`,
+    '  A pass may switch ads or tracking off for its own requests with `?disable=ads,tracking`.',
     '',
     `Source code: https://github.com/profullstack/niche-db (MIT).`,
   ];
