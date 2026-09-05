@@ -648,22 +648,45 @@ export const ProPage = ({ user, pro, enabled, price, notice, error }) => (
     <h1>Pro</h1>
     <Notice notice={notice} error={error} />
     <p class="lede">
-      {config.siteName} is free to read, follow and query. Pro is for people who run it harder.
+      {config.siteName} is free to read, follow and query, and free pages and feeds carry an ad and
+      a tracker. Pro is the tier without them, for people and agents that run it harder.
     </p>
     <ul>
-      <li>Add your own sources: any adapter, your own config, on your own cadence.</li>
-      <li>Unlimited feeds (free accounts keep {config.feeds.freeLimit}).</li>
+      <li>No ads and no tracking, on every page and in every feed.</li>
       <li>
-        A higher API rate limit: {config.api.proPerHour.toLocaleString('en-US')} requests an hour.
+        A crawl pass for the whole term: your own crawlers and agents walk through the paywall on
+        your key, with nothing to pay per day. When the term ends they can keep going a day at a
+        time over x402, paid as they go.
       </li>
+      <li>
+        The high API rate limit: {config.api.proPerHour.toLocaleString('en-US')} requests an hour,
+        and the whole archive, enrichment included.
+      </li>
+      <li>Unlimited feeds (free accounts keep {config.feeds.freeLimit}).</li>
+      <li>Add your own sources: any adapter, your own config, on your own cadence.</li>
     </ul>
     <p class="stats">
-      ${(price.amountCents / 100).toFixed(2)} {config.membership.currency} a year
+      ${(price.amountCents / 100).toFixed(2)} {config.membership.currency}{' '}
+      {config.membership.termDays === 30
+        ? 'a month'
+        : config.membership.termDays === 365
+          ? 'a year'
+          : `for ${config.membership.termDays} days`}
       {price.discountCents ? (
         <span class="muted small"> (referral: ${(price.discountCents / 100).toFixed(2)} off)</span>
       ) : null}
     </p>
-    {pro ? <p class="feedback ok">You are Pro. Buying again extends the term.</p> : null}
+    {pro ? (
+      <p class="feedback ok">
+        You are Pro. Buying again extends the term. Your crawl pass is at{' '}
+        <a href="/api/v1/crawl-pass">/api/v1/crawl-pass</a>.
+      </p>
+    ) : null}
+    <p class="muted small">
+      Just an agent? No account needed: a crawl pass is ${(config.x402.priceCents / 100).toFixed(2)}{' '}
+      a day for everything at <a href="/crawl">/crawl</a>, paid over x402, and the more you have
+      paid here the less a day costs.
+    </p>
     {enabled ? (
       user ? (
         <form method="post" action="/api/membership/buy">

@@ -113,10 +113,15 @@ export const config = {
     courtlistenerToken: opt('COURTLISTENER_TOKEN'),
   },
 
+  /**
+   * Pro: the no-ads tier. A month at a time; no ads, no tracking, the high
+   * API limit, unlimited feeds, own sources, and a crawl pass for the term so
+   * the member's own agents walk through the paywall on their key.
+   */
   membership: {
-    priceCents: num('MEMBERSHIP_PRICE_CENTS', 1000),
+    priceCents: num('MEMBERSHIP_PRICE_CENTS', 12000),
     currency: opt('MEMBERSHIP_CURRENCY', 'USD'),
-    termDays: num('MEMBERSHIP_TERM_DAYS', 365),
+    termDays: num('MEMBERSHIP_TERM_DAYS', 30),
     get enabled() {
       return Boolean(config.coinpay.enabled);
     },
@@ -154,7 +159,27 @@ export const config = {
     },
     priceCents: num('CRAWL_PRICE_CENTS', 100),
     passMinutes: num('CRAWL_PASS_MINUTES', 1440),
+    maxDays: num('CRAWL_MAX_DAYS', 30),
+    /**
+     * Loyalty: the more an agent has paid here, the less a day costs it.
+     * "spent cents:percent off" pairs, ascending. The default takes a buyer
+     * from $1 a day to 40¢ a day once it has spent $100.
+     */
+    loyalty: opt('CRAWL_LOYALTY', '1000:20,5000:40,10000:60'),
+    floorCents: num('CRAWL_FLOOR_CENTS', 10),
     contact: opt('CRAWL_CONTACT'),
+  },
+
+  /** CrawlProof ads on the free tier: the publisher slot pages and feeds fill from. */
+  ads: {
+    get slot() {
+      return opt('CRAWLPROOF_AD_SLOT');
+    },
+    get enabled() {
+      return Boolean(this.slot);
+    },
+    /** Seconds a fetched feed ad is reused for, so a feed's fan-out is one impression. */
+    feedTtlSeconds: num('ADS_FEED_TTL_SECONDS', 600),
   },
 
   push: {

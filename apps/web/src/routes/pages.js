@@ -1,6 +1,8 @@
 import { config } from '@nichedb/config';
 import * as q from '@nichedb/db/queries';
+import { feedAd } from '../lib/ads.js';
 import { cached, isProUser, render, requireUser } from '../lib/http.js';
+import { currentModules } from '../lib/modules.js';
 import { buildJsonFeed, buildRss } from '../lib/rss.js';
 import { allowedEnrichers } from '../lib/serialize.js';
 import { canEditFeed } from '../lib/service.js';
@@ -103,12 +105,15 @@ export function registerPages(app) {
         : await q.feedItems(feed, { limit: m ? 100 : 50, beforeId: before });
 
     if (m) {
+      // A free feed carries one sponsored item at the top; Pro and paid
+      // readers that switched ads off get the items alone.
+      const ad = currentModules().ads ? await feedAd() : null;
       const args = {
         title: feed.name,
         link: `${config.siteUrl}/f/${feed.slug}`,
         description: feed.description,
         selfUrl: `${config.siteUrl}/f/${feed.slug}.${m[2]}`,
-        items,
+        items: ad ? [ad, ...items] : items,
         siteUrl: config.siteUrl,
       };
       c.header('cache-control', 'public, max-age=300');

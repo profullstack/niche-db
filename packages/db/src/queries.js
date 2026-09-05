@@ -922,3 +922,53 @@ export async function enrichmentStats() {
   `;
   return row;
 }
+
+/* ------------------------------------------------------------- crawl sales -- */
+
+/** One x402 sale. The ref (the payment nonce) is unique, so a replayed receipt is one row. */
+export async function recordCrawlSale({
+  payer,
+  ref,
+  days,
+  priceCents,
+  totalCents,
+  currency,
+  userAgent,
+  expiresAt,
+}) {
+  const [row] = await sql`
+    insert into crawl_sales (payer, ref, days, price_cents, total_cents, currency, user_agent, expires_at)
+    values (${payer ?? null}, ${ref ?? null}, ${days ?? 1}, ${priceCents}, ${totalCents},
+            ${currency ?? 'USD'}, ${userAgent ?? null}, ${expiresAt ?? null})
+    on conflict (ref) do nothing
+    returning id
+  `;
+  return row ?? null;
+}
+
+/** What a payer has spent here, ever, in cents. Zero for a stranger. */
+export async function crawlSpendByPayer(payer) {
+  if (!payer) return 0;
+  const [row] = await sql`
+    select coalesce(sum(total_cents), 0)::int as spent from crawl_sales where lower(payer) = lower(${payer})
+  `;
+  return row?.spent ?? 0;
+}
+
+/** The sale a pass came from, by the ref inside the pass. */
+export async function crawlSaleByRef(ref) {
+  if (!ref) return null;
+  const [row] = await sql`select * from crawl_sales where ref = ${ref}`;
+  return row ?? null;
+}
+
+export async function crawlSalesStats() {
+  const [row] = await sql`
+    select count(*)::int as sales,
+           coalesce(sum(total_cents), 0)::int as total_cents,
+           count(distinct lower(payer))::int as payers,
+           count(*) filter (where created_at > now() - interval '1 day')::int as sales_today
+    from crawl_sales
+  `;
+  return row;
+}
