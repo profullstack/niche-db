@@ -14,7 +14,9 @@ const FEED_AD = 'https://crawlproof.com/api/ads/feed';
 let memo = { at: 0, item: null };
 
 /** Turn CrawlProof's `fields` answer into an item the feed builders render. */
-export function sponsoredItem(fields, now = new Date()) {
+export function sponsoredItem(answer, now = new Date()) {
+  // `as=fields` answers `{ ok, count, items: [fields] }`; one fill is the first item.
+  const fields = Array.isArray(answer?.items) ? answer.items[0] : answer;
   if (!fields?.ok || !fields.url) return null;
   const label = fields.label || 'Sponsored';
   const headline = fields.headline || fields.title || '';
