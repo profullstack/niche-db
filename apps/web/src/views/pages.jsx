@@ -10,6 +10,7 @@ import {
   Tags,
   When,
 } from './components.jsx';
+import { EnrichmentBlocks } from './enrichment.jsx';
 import { Layout } from './Layout.jsx';
 
 export const Landing = ({ user, stats, collections, latest, feeds }) => (
@@ -170,6 +171,7 @@ export const FeedPage = ({
   notice,
   error,
   follow,
+  enrichers,
 }) => (
   <Layout
     user={user}
