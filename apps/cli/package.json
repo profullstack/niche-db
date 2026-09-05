@@ -31,5 +31,7 @@
     "type": "git",
     "url": "git+https://github.com/profullstack/niche-db.git",
     "directory": "apps/cli"
-  }
+  },
+  "mcpName": "dev.nichedb/nichedb",
+  "homepage": "https://nichedb.dev"
 }

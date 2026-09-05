@@ -1,0 +1,22 @@
+name: publish
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+jobs:
+  npm:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+      - name: Publish @profullstack/nichedb unless that version is already on npm
+        working-directory: apps/cli
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          v=$(node -p "require('./package.json').version")
+          if npm view "@profullstack/nichedb@$v" version >/dev/null 2>&1; then echo "already published $v"; exit 0; fi
+          npm publish --access public
