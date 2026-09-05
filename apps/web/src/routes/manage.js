@@ -3,6 +3,7 @@ import { config } from '@nichedb/config';
 import { adapterByName, describeAdapters } from '@nichedb/core';
 import { sql } from '@nichedb/db';
 import * as q from '@nichedb/db/queries';
+import { enrichersFor } from '@nichedb/enrichers';
 import * as pay from '@nichedb/payments';
 import { grantMembership, MEMBERSHIP_KIND } from '@nichedb/payments/membership';
 import {
@@ -209,12 +210,13 @@ export function registerManage(app) {
   async function feedFormData(collectionSlug) {
     const collections = await q.listCollections();
     const collection = collections.find((x) => x.slug === collectionSlug) ?? collections[0];
-    if (!collection) return { collections, collection: null, sources: [], kinds: [] };
+    if (!collection)
+      return { collections, collection: null, sources: [], kinds: [], enrichers: [] };
     const [sources, kinds] = await Promise.all([
       q.listSources({ collectionId: collection.id }),
       q.kindsForCollection(collection.id),
     ]);
-    return { collections, collection, sources, kinds };
+    return { collections, collection, sources, kinds, enrichers: enrichersFor(collection.slug) };
   }
 
   app.get('/feeds/new', async (c) => {

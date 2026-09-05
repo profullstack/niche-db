@@ -11,6 +11,7 @@
   "dependencies": {
     "@nichedb/adapters": "workspace:*",
     "@nichedb/config": "workspace:*",
-    "@nichedb/db": "workspace:*"
+    "@nichedb/db": "workspace:*",
+    "@nichedb/enrichers": "workspace:*"
   }
 }

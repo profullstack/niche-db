@@ -1,6 +1,29 @@
+import { defaultEnrichers } from '@nichedb/enrichers';
+
 /** The public shapes of the things the API, the feeds and MCP return. */
 
-export function itemOut(i, siteUrl) {
+/**
+ * Which enrichers a feed shows. A feed with no `enrichers` in its query shows
+ * the collection's defaults; an explicit list shows exactly that list.
+ */
+export function allowedEnrichers(feedOrCollection) {
+  const q = feedOrCollection?.query;
+  const parsed = typeof q === 'string' ? JSON.parse(q) : q;
+  if (Array.isArray(parsed?.enrichers)) return new Set(parsed.enrichers);
+  return new Set(
+    defaultEnrichers(feedOrCollection?.collection_slug ?? feedOrCollection?.slug ?? ''),
+  );
+}
+
+export function enrichmentOut(item, allowed) {
+  const raw =
+    typeof item.enrichment === 'string' ? JSON.parse(item.enrichment) : (item.enrichment ?? {});
+  const out = {};
+  for (const [k, v] of Object.entries(raw)) if (!allowed || allowed.has(k)) out[k] = v;
+  return out;
+}
+
+export function itemOut(i, siteUrl, { enrichers = null } = {}) {
   return {
     id: Number(i.id),
     collection: i.collection_slug,
@@ -17,6 +40,10 @@ export function itemOut(i, siteUrl) {
     tags: i.tags,
     data: i.data,
     first_seen_at: i.first_seen_at,
+    enrichment: enrichmentOut(
+      i,
+      enrichers ?? allowedEnrichers({ collection_slug: i.collection_slug }),
+    ),
     page: `${siteUrl}/i/${i.id}`,
   };
 }

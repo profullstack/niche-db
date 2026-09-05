@@ -1,12 +1,17 @@
 import { describe, expect, test } from 'bun:test';
 import { readFile } from 'node:fs/promises';
+import { parseFeed as parseArxiv } from '../packages/adapters/src/arxiv.js';
 import { parseFeed as parseEdgar, parseTitle } from '../packages/adapters/src/edgar.js';
 import { toItem as frItem } from '../packages/adapters/src/federalregister.js';
+import { parseFeed as parseGdacs } from '../packages/adapters/src/gdacs.js';
 import { toItem as hfItem } from '../packages/adapters/src/huggingface.js';
 import { ADAPTERS, adapterByName } from '../packages/adapters/src/index.js';
+import { toItem as launchItem } from '../packages/adapters/src/launchlibrary.js';
 import { toItem as npmItem } from '../packages/adapters/src/npm.js';
 import { parseUpdates } from '../packages/adapters/src/pypi.js';
+import { toItem as statusItem } from '../packages/adapters/src/statuspage.js';
 import { parseSteamDate, toItem as steamItem } from '../packages/adapters/src/steam.js';
+import { toItem as usgsItem } from '../packages/adapters/src/usgs.js';
 import { looseDate, normaliseItem, xmlItems } from '../packages/core/src/adapter.js';
 
 const fixture = (name) =>
@@ -21,7 +26,21 @@ describe('registry', () => {
       names.add(a.name);
       expect(typeof a.pull).toBe('function');
       expect(a.kinds.length).toBeGreaterThan(0);
-      expect(['games', 'packages', 'filings']).toContain(a.collection);
+      expect([
+        'games',
+        'packages',
+        'filings',
+        'music',
+        'books',
+        'tabletop',
+        'space',
+        'chess',
+        'alerts',
+        'outages',
+        'extensions',
+        'health',
+        'research',
+      ]).toContain(a.collection);
     }
     expect(adapterByName('steam').title).toContain('Steam');
     expect(adapterByName('nope')).toBeNull();
@@ -180,5 +199,85 @@ describe('simple mappers', () => {
     expect(it.externalId).toBe('2026-18279');
     expect(it.precision).toBe('day');
     expect(it.tags).toEqual(['federal-register', 'proposed-rule', 'fcc']);
+  });
+});
+
+describe('new niches', () => {
+  test('arxiv atom', () => {
+    const xml = `<feed xmlns="http://www.w3.org/2005/Atom"><entry><id>http://arxiv.org/abs/2609.01234v1</id><title>A  Paper</title><summary>Abstract here.</summary><published>2026-09-05T00:00:00Z</published><author><name>A. Person</name></author><category term="cs.AI"/><category term="cs.LG"/></entry></feed>`;
+    const [p] = parseArxiv(xml);
+    expect(p.externalId).toBe('2609.01234v1');
+    expect(p.url).toBe('https://arxiv.org/abs/2609.01234');
+    expect(p.tags).toEqual(['arxiv', 'cs.ai', 'cs.lg']);
+    expect(p.data.authors).toEqual(['A. Person']);
+  });
+  test('gdacs rss', () => {
+    const xml = `<rss><channel><item><title>Green earthquake alert</title><link>https://www.gdacs.org/report.aspx?eventid=1</link><guid>EQ1</guid><description>&lt;p&gt;M5&lt;/p&gt;</description><pubDate>Sat, 05 Sep 2026 10:00:00 GMT</pubDate><gdacs:eventtype>EQ</gdacs:eventtype><gdacs:alertlevel>Green</gdacs:alertlevel><gdacs:country>Japan</gdacs:country></item></channel></rss>`;
+    const [d] = parseGdacs(xml);
+    expect(d.externalId).toBe('EQ1');
+    expect(d.tags).toEqual(['gdacs', 'earthquake', 'green-alert', 'japan']);
+    expect(d.summary).toBe('M5');
+  });
+  test('launch precision maps to time_known', () => {
+    const base = {
+      id: 'x',
+      name: 'Falcon 9 | Starlink',
+      slug: 'f9',
+      net: '2026-09-06T01:00:00Z',
+      launch_service_provider: { name: 'SpaceX' },
+      rocket: { configuration: { name: 'Falcon 9' } },
+      status: { name: 'Go', abbrev: 'Go' },
+    };
+    expect(launchItem({ ...base, net_precision: { name: 'Minute' } })).toMatchObject({
+      timeKnown: true,
+      precision: 'minute',
+    });
+    expect(launchItem({ ...base, net_precision: { name: 'Month' } })).toMatchObject({
+      timeKnown: false,
+      precision: 'month',
+    });
+    expect(launchItem(base).tags).toContain('SpaceX');
+  });
+  test('usgs bands magnitude', () => {
+    const f = {
+      id: 'q1',
+      properties: {
+        mag: 6.2,
+        place: '10 km N of Somewhere, Japan',
+        time: 1788631318736,
+        url: 'https://u',
+        tsunami: 0,
+      },
+      geometry: { coordinates: [1, 2, 10] },
+    };
+    const it = usgsItem(f);
+    expect(it.title).toBe('M6.2 — 10 km N of Somewhere, Japan');
+    expect(it.tags).toContain('strong');
+    expect(it.tags).toContain('japan');
+  });
+  test('statuspage incident carries its latest update', () => {
+    const it = statusItem(
+      'www.githubstatus.com',
+      { name: 'GitHub' },
+      {
+        id: 'i1',
+        name: 'Slow pushes',
+        status: 'monitoring',
+        impact: 'minor',
+        created_at: '2026-09-05T00:00:00Z',
+        shortlink: 'https://stspg.io/x',
+        incident_updates: [{ status: 'monitoring', body: 'A fix <b>is</b> deployed.' }],
+        components: [{ name: 'Git Operations' }],
+      },
+    );
+    expect(it.externalId).toBe('www.githubstatus.com:i1');
+    expect(it.summary).toBe('monitoring: A fix is deployed.');
+    expect(it.tags).toEqual([
+      'statuspage',
+      'github',
+      'monitoring',
+      'impact-minor',
+      'git operations',
+    ]);
   });
 });

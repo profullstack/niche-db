@@ -7,10 +7,11 @@ const esc = (s) =>
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
 
-export function buildRss({ title, link, description, selfUrl, items, siteUrl }) {
+export function buildRss({ title, link, description, selfUrl, items, siteUrl, enrichers = null }) {
   const entries = items
     .map((i) => {
       const url = i.url ?? `${siteUrl}/i/${i.id}`;
+      const extra = enrichmentText(i, enrichers);
       const when = i.published_at ? new Date(i.published_at) : new Date(i.first_seen_at);
       return [
         '<item>',
@@ -19,7 +20,9 @@ export function buildRss({ title, link, description, selfUrl, items, siteUrl }) 
         `<guid isPermaLink="false">${esc(`${siteUrl}/i/${i.id}`)}</guid>`,
         `<pubDate>${when.toUTCString()}</pubDate>`,
         ...(i.tags ?? []).slice(0, 10).map((t) => `<category>${esc(t)}</category>`),
-        i.summary ? `<description>${esc(i.summary)}</description>` : '',
+        i.summary || extra
+          ? `<description>${esc([i.summary, extra].filter(Boolean).join('\n\n'))}</description>`
+          : '',
         i.image_url ? `<enclosure url="${esc(i.image_url)}" type="image/jpeg" length="0" />` : '',
         '</item>',
       ].join('');
@@ -40,7 +43,38 @@ export function buildRss({ title, link, description, selfUrl, items, siteUrl }) 
   ].join('\n');
 }
 
-export function buildJsonFeed({ title, link, description, selfUrl, items, siteUrl }) {
+/** A few lines of enrichment for readers that only show text. */
+function enrichmentText(i, allowed) {
+  const e = typeof i.enrichment === 'string' ? JSON.parse(i.enrichment) : (i.enrichment ?? {});
+  const ok = (k) => e[k] && (!allowed || allowed.has(k));
+  const lines = [];
+  if (ok('youtube'))
+    lines.push(...e.youtube.videos.slice(0, 3).map((v) => `Video: ${v.title} ${v.url}`));
+  if (ok('wikipedia'))
+    lines.push(`Wikipedia: ${e.wikipedia.extract.slice(0, 300)} ${e.wikipedia.url}`);
+  if (ok('github-repo'))
+    lines.push(
+      `Repo: ${e['github-repo'].repo} · ${e['github-repo'].stars} stars · ${e['github-repo'].language ?? ''}`,
+    );
+  if (ok('npm-stats')) lines.push(`Downloads last week: ${e['npm-stats'].weeklyDownloads}`);
+  if (ok('semantic-scholar') && e['semantic-scholar'].tldr)
+    lines.push(`TL;DR: ${e['semantic-scholar'].tldr}`);
+  if (ok('sec-company') && e['sec-company'].tickers?.length)
+    lines.push(
+      `Ticker: ${e['sec-company'].tickers.join(', ')} · ${e['sec-company'].industry ?? ''}`,
+    );
+  return lines.join('\n');
+}
+
+export function buildJsonFeed({
+  title,
+  link,
+  description,
+  selfUrl,
+  items,
+  siteUrl,
+  enrichers = null,
+}) {
   return {
     version: 'https://jsonfeed.org/version/1.1',
     title,
@@ -60,7 +94,14 @@ export function buildJsonFeed({ title, link, description, selfUrl, items, siteUr
         source: i.source_slug,
         collection: i.collection_slug,
         data: i.data,
+        enrichment: filterEnrichment(i, enrichers),
       },
     })),
   };
+}
+
+function filterEnrichment(i, allowed) {
+  const e = typeof i.enrichment === 'string' ? JSON.parse(i.enrichment) : (i.enrichment ?? {});
+  if (!allowed) return e;
+  return Object.fromEntries(Object.entries(e).filter(([k]) => allowed.has(k)));
 }

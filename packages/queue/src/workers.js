@@ -1,5 +1,5 @@
 import { config } from '@nichedb/config';
-import { runSource, scanFeeds } from '@nichedb/core';
+import { enrichPending, runSource, scanFeeds } from '@nichedb/core';
 import * as q from '@nichedb/db/queries';
 import { sendEmail, sendPush } from '@nichedb/notify';
 import { buildEvent, sendWebhook } from '@profullstack/autoblog';
@@ -147,6 +147,13 @@ export function startWorkers() {
     }),
     new Worker(QUEUES.scan, runScan, { connection, concurrency: 1 }),
     new Worker(QUEUES.deliver, runDeliver, { connection, concurrency: 8 }),
+    // One at a time: the enrichers talk to rate-limited third parties and
+    // pace themselves inside a run; two runs at once would double that rate.
+    new Worker(QUEUES.enrich, () => enrichPending({ log }), {
+      connection,
+      concurrency: 1,
+      lockDuration: 10 * 60_000,
+    }),
   ];
   for (const w of workers) {
     w.on('failed', (job, err) =>

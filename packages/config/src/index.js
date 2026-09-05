@@ -77,6 +77,19 @@ export const config = {
     onBoot: bool('INGEST_ON_BOOT', false),
   },
 
+  enrich: {
+    /** Enrichment runs after ingest: videos, Wikipedia, repo stats, company profiles. */
+    enabled: bool('ENRICH', true),
+    /** How often the worker looks for un-enriched items. */
+    tickSeconds: num('ENRICH_TICK_SECONDS', 90),
+    /** Items considered per tick. Each enricher also caps itself per run. */
+    perRun: num('ENRICH_PER_RUN', 40),
+    /** Optional: the YouTube Data API key; without it the public results page is read. */
+    youtubeKey: opt('YOUTUBE_API_KEY'),
+    /** Optional: Semantic Scholar key for a higher rate. */
+    s2Key: opt('S2_API_KEY'),
+  },
+
   feeds: {
     /** How often followed feeds are checked for new items. */
     scanSeconds: num('FEED_SCAN_SECONDS', 60),

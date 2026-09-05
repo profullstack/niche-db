@@ -1,6 +1,7 @@
 import { config } from '@nichedb/config';
 import { adapterByName, slugify } from '@nichedb/core';
 import * as q from '@nichedb/db/queries';
+import { enricherByName } from '@nichedb/enrichers';
 
 /**
  * The operations the pages, the API and the MCP tools share, with the rules
@@ -135,6 +136,10 @@ export function normaliseQuery(raw = {}) {
     raw.upcoming === 'true'
   ) {
     out.upcoming = true;
+  }
+  // Enrichers: absent means the collection's defaults; a list (even empty) is explicit.
+  if (raw.enrichers !== undefined && raw.enrichers !== null) {
+    out.enrichers = arr(raw.enrichers).filter((n) => enricherByName(n));
   }
   return out;
 }

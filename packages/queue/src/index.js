@@ -20,6 +20,8 @@ export const QUEUES = {
   scan: 'feed-scan',
   /** One job per (feed, batch of new items). Fans out to followers. */
   deliver: 'feed-deliver',
+  /** Every couple of minutes: enrich the newest items nobody has enriched. */
+  enrich: 'enrich',
 };
 
 const defaults = {
@@ -48,7 +50,7 @@ export const minuteStamp = () => new Date().toISOString().slice(0, 16).replace(/
  * (next_run_at, last_scanned_item_id) decides whether they do anything.
  */
 export async function installSchedules({ log = console.log } = {}) {
-  for (const queue of [queues.tick, queues.scan]) {
+  for (const queue of [queues.tick, queues.scan, queues.enrich]) {
     for (const r of await queue.getRepeatableJobs()) await queue.removeRepeatableByKey(r.key);
   }
   await queues.tick.add(
@@ -67,6 +69,12 @@ export async function installSchedules({ log = console.log } = {}) {
     { jobId: `tick-boot-${minuteStamp()}`, delay: 5_000 },
   );
   await queues.scan.add('scan', {}, { jobId: `scan-boot-${minuteStamp()}`, delay: 20_000 });
+  await queues.enrich.add(
+    'enrich',
+    {},
+    { repeat: { every: config.enrich.tickSeconds * 1000 }, jobId: 'enrich' },
+  );
+  await queues.enrich.add('enrich', {}, { jobId: `enrich-boot-${minuteStamp()}`, delay: 45_000 });
   log('[queue] schedules installed');
 }
 

@@ -278,7 +278,7 @@ export const FeedPage = ({
         </form>
       </details>
     ) : null}
-    <ItemList items={items} />
+    <ItemList items={items} enrichers={enrichers} />
     <Pager items={items} base={`/f/${feed.slug}`} />
   </Layout>
 );
@@ -290,10 +290,12 @@ export function describeQuery(q) {
   if (q.tags?.length) parts.push(`tags: ${q.tags.join(', ')}`);
   if (q.q) parts.push(`matching “${q.q}”`);
   if (q.upcoming) parts.push('upcoming only');
+  if (Array.isArray(q.enrichers))
+    parts.push(q.enrichers.length ? `enriched with ${q.enrichers.join(', ')}` : 'no enrichment');
   return parts.length ? parts.join(' · ') : 'the whole collection';
 }
 
-export const ItemPage = ({ user, item }) => (
+export const ItemPage = ({ user, item, enrichers }) => (
   <Layout
     user={user}
     title={item.title}
@@ -320,6 +322,11 @@ export const ItemPage = ({ user, item }) => (
       </p>
       {item.summary ? <p class="lede">{item.summary}</p> : null}
       <Tags tags={item.tags} collection={item.collection_slug} limit={40} />
+      <EnrichmentBlocks
+        enrichment={Object.fromEntries(
+          Object.entries(item.enrichment ?? {}).filter(([k]) => !enrichers || enrichers.has(k)),
+        )}
+      />
       <h2>Data</h2>
       <pre class="data">{JSON.stringify(item.data, null, 2)}</pre>
       <p class="small muted">

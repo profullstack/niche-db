@@ -28,6 +28,64 @@ export const COLLECTIONS = [
     description:
       'SEC EDGAR filings as they land (Form D raises, insider trades, 8-K events), Federal Register documents, and court opinions.',
   },
+  {
+    slug: 'music',
+    name: 'Music',
+    description:
+      'Upcoming album and single releases from MusicBrainz, with cover art, videos and artist pages.',
+  },
+  {
+    slug: 'books',
+    name: 'Books',
+    description:
+      'New books as they are catalogued at Open Library, with covers, descriptions and subjects.',
+  },
+  {
+    slug: 'tabletop',
+    name: 'Tabletop',
+    description:
+      'Magic: The Gathering sets and the newest cards, with images, oracle text and prices.',
+  },
+  {
+    slug: 'space',
+    name: 'Space',
+    description:
+      'Every upcoming rocket launch worldwide: net time, provider, pad, mission and webcast.',
+  },
+  {
+    slug: 'chess',
+    name: 'Chess',
+    description: 'Official tournaments relayed live on Lichess, one row per event and per round.',
+  },
+  {
+    slug: 'alerts',
+    name: 'Alerts',
+    description:
+      'Earthquakes, US weather warnings and global disaster alerts, minutes after they are issued.',
+  },
+  {
+    slug: 'outages',
+    name: 'Outages',
+    description:
+      'Incidents from the status pages of the platforms developers depend on, as they are posted and resolved.',
+  },
+  {
+    slug: 'extensions',
+    name: 'Extensions',
+    description:
+      'New Firefox add-ons, VS Code extensions and MCP servers, with icons, categories and repo stats.',
+  },
+  {
+    slug: 'health',
+    name: 'Health',
+    description:
+      'FDA recalls and clinical trials as they are posted, with sponsor, phase and reason.',
+  },
+  {
+    slug: 'research',
+    name: 'Research',
+    description: 'New preprints and DOIs with abstracts, authors, TL;DRs and citation counts.',
+  },
 ];
 
 export const DEFAULT_FEEDS = [

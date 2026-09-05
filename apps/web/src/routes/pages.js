@@ -2,6 +2,7 @@ import { config } from '@nichedb/config';
 import * as q from '@nichedb/db/queries';
 import { cached, isProUser, render, requireUser } from '../lib/http.js';
 import { buildJsonFeed, buildRss } from '../lib/rss.js';
+import { allowedEnrichers } from '../lib/serialize.js';
 import { canEditFeed } from '../lib/service.js';
 import {
   About,
@@ -133,6 +134,7 @@ export function registerPages(app) {
           follow={follow}
           canEdit={canEditFeed(user, feed)}
           query={q.feedQuery(feed)}
+          enrichers={allowedEnrichers(feed)}
           notice={c.req.query('notice')}
           error={c.req.query('error')}
         />,
@@ -145,7 +147,19 @@ export function registerPages(app) {
     if (!Number.isInteger(id)) return c.notFound();
     const item = await q.getItem(id);
     if (!item) return c.notFound();
-    return cached(c, `i:${id}`, () => render(<ItemPage user={c.get('user')} item={item} />), 600);
+    return cached(
+      c,
+      `i:${id}`,
+      () =>
+        render(
+          <ItemPage
+            user={c.get('user')}
+            item={item}
+            enrichers={allowedEnrichers({ collection_slug: item.collection_slug })}
+          />,
+        ),
+      600,
+    );
   });
 
   app.get('/search', async (c) => {

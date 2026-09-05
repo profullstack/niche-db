@@ -569,6 +569,10 @@ export const ApiDocs = ({ user, stats }) => (
           ['GET /api/v1', 'This description, live counts and your rate-limit tier.'],
           ['GET /api/v1/collections', 'Every collection with counts.'],
           ['GET /api/v1/adapters', 'Every adapter and the config fields it takes.'],
+          [
+            'GET /api/v1/enrichers',
+            'Every enricher: what it adds and which collections turn it on by default.',
+          ],
           ['GET /api/v1/sources?collection=games', 'Sources, with status and last run.'],
           ['GET /api/v1/sources/:slug', 'One source and its recent runs.'],
           ['GET /api/v1/feeds?collection=packages', 'Public feeds.'],

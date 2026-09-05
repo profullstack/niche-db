@@ -13,16 +13,40 @@ The first deployment is [nichedb.dev](https://nichedb.dev). Run your own on anyt
 | **item** | One row a source produced. Title, URL, when (with `time_known` and `precision`), tags, and the adapter's payload in `data`. |
 | **feed** | A saved query over a collection. Has a page, RSS and JSON Feed renderings, an API endpoint, and followers who are told when it changes by push, email or signed webhook. |
 
-Adapters are one file each in `packages/adapters/src`. Eleven ship today:
+Adapters are one file each in `packages/adapters/src`. Twenty-nine ship today across thirteen collections:
 
-| Adapter | Collection | Key needed |
+| Collection | Adapters | Key needed |
 | --- | --- | --- |
-| `steam`, `steam-news` | games | no |
-| `igdb` | games | Twitch client id + secret |
-| `npm`, `pypi`, `crates`, `huggingface` | packages | no |
-| `github-releases` | packages | optional (higher limit) |
-| `edgar`, `federal-register` | filings | no (SEC wants `CONTACT_EMAIL`) |
-| `courtlistener` | filings | account token |
+| games | `steam`, `steam-news`, `igdb` | IGDB only (Twitch client) |
+| packages | `npm`, `pypi`, `crates`, `go-modules`, `huggingface`, `github-releases` | no (GitHub token optional) |
+| filings | `edgar`, `federal-register`, `courtlistener` | CourtListener only |
+| music | `musicbrainz` | no |
+| books | `openlibrary` | no |
+| tabletop | `scryfall-sets`, `scryfall-cards` | no |
+| space | `launch-library` | no |
+| chess | `lichess-broadcasts` | no |
+| alerts | `usgs-earthquakes`, `nws-alerts`, `gdacs` | no |
+| outages | `statuspage` (any Statuspage host) | no |
+| extensions | `firefox-addons`, `vscode-extensions`, `mcp-registry` | no |
+| health | `openfda-recalls`, `clinical-trials` | no |
+| research | `arxiv`, `crossref` | no |
+
+## Enrichment
+
+After ingest, every item is enriched by the enrichers that apply to it (`packages/enrichers/src`), and the results live on the item under `enrichment.<name>`:
+
+| Enricher | Adds | Default on for |
+| --- | --- | --- |
+| `youtube` | top videos (trailers, official audio, webcasts); Data API key optional | games, music, tabletop, space, chess, books |
+| `wikipedia` | the article's lead paragraph and picture | games, music, books, space, tabletop |
+| `github-repo` | stars, forks, topics, licence, language, last push | packages, extensions |
+| `npm-stats` | last week's downloads | packages |
+| `sec-company` | tickers, exchange, industry, state, website of the filer | filings |
+| `semantic-scholar` | TL;DR, citation counts, open-access PDF (key optional) | research |
+| `openlibrary-work` | description and subjects | books |
+| `opengraph` | the page's own preview image and description | most collections |
+
+A feed's `enrichers` list picks which of these it shows; absent means the collection's defaults. The feed builder exposes them as checkboxes. Items are enriched once, newest first with a fair share per collection, and a missing image, summary or tags are filled from whatever the enrichers found while the source's own words always win.
 
 ## Run it
 
@@ -56,7 +80,7 @@ Pro (a yearly membership through [CoinPay](https://coinpayportal.com)) lifts the
 
 ## Stack
 
-Bun, Hono (server-rendered JSX), Postgres via Bun's native driver, BullMQ on Redis, Biome. Shared Profullstack modules: `@profullstack/x402-gateway`, `@profullstack/emailer`, `@profullstack/coinpay`, `@profullstack/referrals`, `@profullstack/api-key-manager`, `@profullstack/autoblog` (signed webhooks), `@profullstack/favicon-generator`.
+Bun, Hono (server-rendered JSX), Postgres via Bun's native driver, BullMQ on Redis, Biome. `bun apps/worker/src/enrich-cli.js [n]` runs enrichment from a terminal. Shared Profullstack modules: `@profullstack/x402-gateway`, `@profullstack/emailer`, `@profullstack/coinpay`, `@profullstack/referrals`, `@profullstack/api-key-manager`, `@profullstack/autoblog` (signed webhooks), `@profullstack/favicon-generator`.
 
 ## Configuration
 

@@ -1,3 +1,5 @@
+import { Badges } from './enrichment.jsx';
+
 /** Shared bits of markup. Small and dumb on purpose. */
 
 const fmtTimeUtc = (d) =>
@@ -94,7 +96,7 @@ export const Tags = ({ tags, collection, limit = 6 }) => {
   );
 };
 
-export const ItemRow = ({ item, showSource = true }) => (
+export const ItemRow = ({ item, showSource = true, enrichers = null }) => (
   <li class="item">
     {item.image_url ? (
       <img class="thumb" src={item.image_url} alt="" loading="lazy" />
@@ -126,17 +128,27 @@ export const ItemRow = ({ item, showSource = true }) => (
         ) : null}
       </p>
       <Tags tags={item.tags} collection={item.collection_slug} />
+      <Badges
+        enrichment={Object.fromEntries(
+          Object.entries(item.enrichment ?? {}).filter(([k]) => !enrichers || enrichers.has(k)),
+        )}
+      />
     </div>
   </li>
 );
 
-export const ItemList = ({ items, showSource = true, empty = 'Nothing here yet.' }) =>
+export const ItemList = ({
+  items,
+  showSource = true,
+  empty = 'Nothing here yet.',
+  enrichers = null,
+}) =>
   items.length === 0 ? (
     <p class="muted empty">{empty}</p>
   ) : (
     <ul class="items">
       {items.map((i) => (
-        <ItemRow key={i.id} item={i} showSource={showSource} />
+        <ItemRow key={i.id} item={i} showSource={showSource} enrichers={enrichers} />
       ))}
     </ul>
   );

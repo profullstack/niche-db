@@ -1,11 +1,11 @@
 import { config } from '@nichedb/config';
-import { describeAdapters } from '@nichedb/core';
+import { describeAdapters, describeEnrichers } from '@nichedb/core';
 import * as q from '@nichedb/db/queries';
 import { enqueueRun } from '@nichedb/queue';
 import { COMMANDS } from '@profullstack/nichedb';
 import { callerAddress } from '../lib/auth-throttle.js';
 import { isProUser, render, requireUser } from '../lib/http.js';
-import { collectionOut, feedOut, itemOut, sourceOut } from '../lib/serialize.js';
+import { allowedEnrichers, collectionOut, feedOut, itemOut, sourceOut } from '../lib/serialize.js';
 import {
   addSource,
   canEditSource,
@@ -110,6 +110,7 @@ export function registerApi(app) {
     });
   });
   app.get('/api/v1/adapters', (c) => c.json({ adapters: describeAdapters() }));
+  app.get('/api/v1/enrichers', (c) => c.json({ enrichers: describeEnrichers() }));
 
   app.get('/api/v1/sources', async (c) => {
     const col = await collectionOrNull(c.req.query('collection'));
@@ -191,7 +192,7 @@ export function registerApi(app) {
     return c.json({
       feed: feedOut(f, site()),
       count: items.length,
-      items: items.map((i) => itemOut(i, site())),
+      items: items.map((i) => itemOut(i, site(), { enrichers: allowedEnrichers(f) })),
     });
   });
   app.post('/api/v1/feeds', async (c) => {

@@ -482,8 +482,10 @@ export async function upsertItems({ collectionId, sourceId, items }) {
       published_at timestamptz, time_known boolean, precision text, tags text[],
       data jsonb, content_hash text)
     on conflict (source_id, external_id) do update set
-      kind = excluded.kind, title = excluded.title, summary = excluded.summary,
-      url = excluded.url, image_url = excluded.image_url, published_at = excluded.published_at,
+      kind = excluded.kind, title = excluded.title,
+      summary = coalesce(excluded.summary, items.summary),
+      url = excluded.url, image_url = coalesce(excluded.image_url, items.image_url),
+      published_at = excluded.published_at,
       time_known = excluded.time_known, precision = excluded.precision, tags = excluded.tags,
       data = excluded.data, content_hash = excluded.content_hash, updated_at = now()
     where items.content_hash is distinct from excluded.content_hash
@@ -670,6 +672,7 @@ export function feedQuery(feed) {
     tags: arr(q.tags),
     q: String(q.q ?? '').trim(),
     upcoming: Boolean(q.upcoming),
+    enrichers: Array.isArray(q.enrichers) ? q.enrichers : null,
   };
 }
 
@@ -866,4 +869,56 @@ export async function itemsPage({ afterId = 0, limit = 5000 } = {}) {
   return sql`
     select id, updated_at from items where id > ${afterId} order by id limit ${limit}
   `;
+}
+
+/* -------------------------------------------------------------- enrichment -- */
+
+/**
+ * Newest items nobody has enriched yet, a fair share per collection: one
+ * source that lands a thousand rows at once must not starve the others.
+ */
+export async function itemsNeedingEnrichment({ limit = 50, perCollection = 8 } = {}) {
+  return sql`
+    select ${itemColumns}
+    from (
+      select id, row_number() over (partition by collection_id order by id desc) as rn
+      from items where enriched_at is null
+    ) p
+    join items i on i.id = p.id
+    join sources s on s.id = i.source_id join collections c on c.id = i.collection_id
+    where p.rn <= ${perCollection}
+    order by p.rn, i.id desc
+    limit ${limit}
+  `;
+}
+
+/**
+ * Store what the enrichers found. Fills image, summary and tags only where the
+ * item had none, so the source's own words always win.
+ */
+export async function applyEnrichment({
+  id,
+  enrichment,
+  imageUrl = null,
+  summary = null,
+  tags = [],
+}) {
+  await sql`
+    update items set
+      enrichment = ${JSON.stringify(enrichment ?? {})}::text::jsonb,
+      image_url = coalesce(image_url, ${imageUrl}),
+      summary = coalesce(summary, ${summary}),
+      tags = (select array(select distinct t from unnest(tags || ${pgArray(tags)}::text[]) as t)),
+      enriched_at = now()
+    where id = ${id}
+  `;
+}
+
+export async function enrichmentStats() {
+  const [row] = await sql`
+    select
+      (select count(*)::int from items where enriched_at is null) as pending,
+      (select count(*)::int from items where enrichment <> '{}'::jsonb) as enriched
+  `;
+  return row;
 }

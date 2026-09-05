@@ -19,6 +19,7 @@
     "@profullstack/x402-gateway": "^0.1.0",
     "@simplewebauthn/browser": "^13.2.0",
     "hono": "^4.10.3",
-    "@profullstack/nichedb": "workspace:*"
+    "@profullstack/nichedb": "workspace:*",
+    "@nichedb/enrichers": "workspace:*"
   }
 }

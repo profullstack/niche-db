@@ -1,5 +1,5 @@
 import { config } from '@nichedb/config';
-import { describeAdapters } from '@nichedb/core';
+import { describeAdapters, describeEnrichers } from '@nichedb/core';
 import * as q from '@nichedb/db/queries';
 
 /**
@@ -47,6 +47,15 @@ export async function llmsTxt() {
     '## Adapters available',
     '',
     ...describeAdapters().map((a) => `- ${a.name}: ${a.description}`),
+    '',
+    '## Enrichment',
+    '',
+    'Every item is enriched after ingest and carries the results under `enrichment`, keyed by',
+    'enricher name. A feed chooses which enrichers it shows; the collection defaults are on.',
+    '',
+    ...describeEnrichers().map(
+      (e) => `- ${e.name}: ${e.description} (default on for ${e.collections.join(', ')})`,
+    ),
     '',
     '## Machine-readable',
     '',

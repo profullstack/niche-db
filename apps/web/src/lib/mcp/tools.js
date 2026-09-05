@@ -1,8 +1,8 @@
 import { config } from '@nichedb/config';
-import { describeAdapters } from '@nichedb/core';
+import { describeAdapters, describeEnrichers } from '@nichedb/core';
 import * as q from '@nichedb/db/queries';
 import { enqueueRun } from '@nichedb/queue';
-import { collectionOut, feedOut, itemOut, sourceOut } from '../serialize.js';
+import { allowedEnrichers, collectionOut, feedOut, itemOut, sourceOut } from '../serialize.js';
 import { addSource, createFeed, Denied, editSource } from '../service.js';
 
 /**
@@ -50,6 +50,13 @@ export const TOOLS = [
     run: async () => describeAdapters(),
   },
   {
+    name: 'list_enrichers',
+    description:
+      'Every enricher (YouTube videos, Wikipedia, repo stats, downloads, company profiles, TL;DRs) and which collections turn it on by default. Items carry their results under `enrichment`.',
+    inputSchema: { type: 'object', properties: {} },
+    run: async () => describeEnrichers(),
+  },
+  {
     name: 'list_sources',
     description: 'Sources with status, last run and item counts. Optionally one collection.',
     inputSchema: { type: 'object', properties: { collection: str('Collection slug, e.g. games') } },
@@ -88,7 +95,10 @@ export const TOOLS = [
         limit: Math.min(Number(limit) || 30, 200),
         beforeId: before_id ?? null,
       });
-      return { feed: feedOut(f, site()), items: items.map((i) => itemOut(i, site())) };
+      return {
+        feed: feedOut(f, site()),
+        items: items.map((i) => itemOut(i, site(), { enrichers: allowedEnrichers(f) })),
+      };
     },
   },
   {
@@ -191,6 +201,7 @@ export const TOOLS = [
         tags: list('Tags, any match'),
         q: str('Text match'),
         upcoming: { type: 'boolean' },
+        enrichers: list('Enrichers to show; omit for the collection defaults'),
         public: { type: 'boolean', description: 'Default true' },
       },
       required: ['collection', 'name'],
@@ -207,6 +218,7 @@ export const TOOLS = [
           tags: args.tags,
           q: args.q,
           upcoming: args.upcoming,
+          enrichers: args.enrichers,
         },
         isPublic: args.public,
       });
