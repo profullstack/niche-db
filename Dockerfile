@@ -14,6 +14,7 @@ COPY packages/config/package.json packages/config/
 COPY packages/core/package.json packages/core/
 COPY packages/db/package.json packages/db/
 COPY packages/enrichers/package.json packages/enrichers/
+COPY packages/knowledge/package.json packages/knowledge/
 COPY packages/notify/package.json packages/notify/
 COPY packages/payments/package.json packages/payments/
 COPY packages/queue/package.json packages/queue/
