@@ -353,12 +353,37 @@ export const nhtsaRatings = defineAdapter({
       type: 'number',
       help: 'NCAP publishes by model year; 5 covers the current market.',
     },
+    {
+      key: 'perRun',
+      label: 'Lookups per run',
+      type: 'number',
+      help: 'Three calls per vehicle, so this is the hungriest walk here. NHTSA answers 403 rather than 429 when pushed.',
+    },
+    {
+      key: 'paceMs',
+      label: 'Pause between calls',
+      type: 'number',
+      help: 'Milliseconds. A short wait is what keeps NHTSA answering.',
+    },
   ],
-  defaults: { yearsBack: 5 },
+  defaults: { yearsBack: 5, perRun: 60, paceMs: 150 },
   defaultSources: [
-    { slug: 'nhtsa-safety-ratings', name: 'NHTSA: crash-test ratings', config: { yearsBack: 5 } },
+    {
+      slug: 'nhtsa-safety-ratings',
+      name: 'NHTSA: crash-test ratings',
+      config: { yearsBack: 5, perRun: 60, paceMs: 150 },
+    },
   ],
   async pull({ config, cursor, http, log, budget, deadline }) {
+    // Ratings cost three nested calls per vehicle — the make's models, that
+    // model's variants, then each variant's full record — so this is by far
+    // the hungriest walk here. Asked at full speed, NHTSA answers 403 rather
+    // than 429, which no retry-after backoff catches. So it goes deliberately
+    // slowly: a smaller run and a pause between calls. Nothing about a crash
+    // test from a past model year needs to arrive quickly.
+    const cap = Math.min(Math.max(Number(config.perRun) || 60, 5), budget);
+    const paceMs = Math.min(Math.max(Number(config.paceMs) || 0, 0), 2000);
+    const pace = () => (paceMs ? Bun.sleep(paceMs) : Promise.resolve());
     const years = yearsFor(config);
     let yearIdx = Number(cursor.yearIdx) || 0;
     if (yearIdx >= years.length) yearIdx = 0;
@@ -367,7 +392,11 @@ export const nhtsaRatings = defineAdapter({
     let makes = Array.isArray(cursor.makes) && cursor.cursorYear === year ? cursor.makes : null;
 
     if (!makes) {
-      const res = await http.json(`${RATINGS}/modelyear/${year}`);
+      const res = await http.json(`${RATINGS}/modelyear/${year}`).catch((err) => {
+        log(`could not list ${year} makes: ${err.message}`);
+        return null;
+      });
+      if (!res) return { items: [], cursor, note: `${year}: upstream busy, will resume` };
       makes = [...new Set((res.Results ?? []).map((r) => r.Make).filter(Boolean))].sort();
       makeIdx = 0;
       log(`${makes.length} makes rated for ${year}`);
@@ -375,14 +404,16 @@ export const nhtsaRatings = defineAdapter({
 
     const items = [];
     let spent = 0;
-    while (makeIdx < makes.length && spent < budget && Date.now() < deadline) {
+    while (makeIdx < makes.length && spent < cap && Date.now() < deadline) {
       const make = makes[makeIdx];
+      await pace();
       const models = await http
         .json(`${RATINGS}/modelyear/${year}/make/${encodeURIComponent(make)}`)
         .catch(() => ({ Results: [] }));
       spent++;
       for (const m of models.Results ?? []) {
-        if (spent >= budget || Date.now() >= deadline) break;
+        if (spent >= cap || Date.now() >= deadline) break;
+        await pace();
         const detail = await http
           .json(
             `${RATINGS}/modelyear/${year}/make/${encodeURIComponent(make)}/model/${encodeURIComponent(m.Model)}`,
@@ -390,7 +421,8 @@ export const nhtsaRatings = defineAdapter({
           .catch(() => ({ Results: [] }));
         spent++;
         for (const v of detail.Results ?? []) {
-          if (!v.VehicleId || spent >= budget) continue;
+          if (!v.VehicleId || spent >= cap || Date.now() >= deadline) continue;
+          await pace();
           const full = await http.json(`${RATINGS}/VehicleId/${v.VehicleId}`).catch(() => null);
           spent++;
           items.push(ratingToItem(full?.Results?.[0] ?? v, { year, make, model: m.Model }));
