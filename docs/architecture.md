@@ -76,5 +76,6 @@ index, and the Knowledge Influencer tables for people who operate a niche. See
 
 - [knowledge-influencers.md](./knowledge-influencers.md)
 - [agent-questions.md](./agent-questions.md)
+- [revenue-ledger.md](./revenue-ledger.md)
 - [revenue-share.md](./revenue-share.md)
 - [x402-attribution.md](./x402-attribution.md)

@@ -348,6 +348,9 @@ export const InfluencerDashboard = ({
     <QuestionsPanel questions={questions} next="/dashboard/niches" />
 
     <h1>Your niches</h1>
+    <p class="muted">
+      <a href="/dashboard/payouts">Your payouts</a> · <a href="/opportunities">Find a niche</a>
+    </p>
     {niches.length === 0 ? (
       <p class="muted empty">
         You are not operating a niche yet. <a href="/opportunities">Find one</a>.
@@ -381,7 +384,8 @@ export const InfluencerDashboard = ({
                 <a href={`/dashboard/niches/${n.slug}/questions`}>
                   Questions
                   {questionCounts[String(n.id)] ? ` (${questionCounts[String(n.id)]})` : ''}
-                </a>
+                </a>{' '}
+                · <a href={`/dashboard/niches/${n.slug}/revenue`}>Revenue</a>
               </p>
             </li>
           );

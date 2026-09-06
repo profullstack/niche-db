@@ -9,7 +9,8 @@
     "./migrate": "./src/migrate.js",
     "./knowledge": "./src/knowledge.js",
     "./automotive": "./src/automotive.js",
-    "./agents": "./src/agents.js"
+    "./agents": "./src/agents.js",
+    "./revenue": "./src/revenue.js"
   },
   "dependencies": {
     "@nichedb/config": "workspace:*",

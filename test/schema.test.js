@@ -64,6 +64,11 @@ describe('migrations', () => {
       'knowledge_audit_logs',
       'agent_questions',
       'agent_answers',
+      'revenue_events',
+      'revenue_allocations',
+      'payout_accounts',
+      'payouts',
+      'payout_allocations',
     ]) {
       expect(names).toContain(t);
     }
@@ -615,5 +620,224 @@ describe('jsonb columns hold structure, not a string of one', () => {
       [n.id],
     );
     expect(after.v).toBe('70');
+  });
+});
+
+/**
+ * The revenue ledger. These tests are about what the database refuses, because
+ * every one of them is a way somebody gets paid twice or paid wrong.
+ */
+describe('revenue ledger', () => {
+  const niche = async () =>
+    one(`insert into niches (slug, name) values ($1,'N') returning id`, [
+      `v${Math.random()}`.replace('.', ''),
+    ]);
+  const person = async () =>
+    one(`insert into users (email) values ($1) returning id`, [`v${Math.random()}@e.com`]);
+  const event = (nicheId, gross, cost = 0, externalId = null) =>
+    rows(
+      `insert into revenue_events
+         (external_id, niche_id, source_type, gross_amount_minor, direct_cost_minor, net_amount_minor)
+       values ($1, $2, 'x402', $3, $4, $5)
+       on conflict (external_id) do nothing
+       returning id, net_amount_minor`,
+      [externalId, nicheId, gross, cost, gross - cost],
+    );
+
+  test('a row whose parts do not add up cannot be written', async () => {
+    const n = await niche();
+    let threw = null;
+    try {
+      await db.query(
+        `insert into revenue_events (niche_id, source_type, gross_amount_minor, direct_cost_minor, net_amount_minor)
+         values ($1, 'x402', 1000, 30, 999)`,
+        [n.id],
+      );
+    } catch (e) {
+      threw = e.message;
+    }
+    expect(threw).toMatch(/revenue_events_adds_up/);
+  });
+
+  test('negative money is refused', async () => {
+    const n = await niche();
+    let threw = null;
+    try {
+      await db.query(
+        `insert into revenue_events (niche_id, source_type, gross_amount_minor, direct_cost_minor, net_amount_minor)
+         values ($1, 'x402', -100, 0, -100)`,
+        [n.id],
+      );
+    } catch (e) {
+      threw = e.message;
+    }
+    expect(threw).toMatch(/revenue_events_non_negative/);
+  });
+
+  test('a source type nobody defined is refused', async () => {
+    const n = await niche();
+    let threw = null;
+    try {
+      await db.query(
+        `insert into revenue_events (niche_id, source_type, gross_amount_minor, net_amount_minor)
+         values ($1, 'vibes', 100, 100)`,
+        [n.id],
+      );
+    } catch (e) {
+      threw = e.message;
+    }
+    expect(threw).toMatch(/revenue_events_source/);
+  });
+
+  test('a settlement delivered twice books once', async () => {
+    const n = await niche();
+    expect((await event(n.id, 100, 0, 'pay_1')).length).toBe(1);
+    expect((await event(n.id, 100, 0, 'pay_1')).length).toBe(0);
+    // A different payment is a different event.
+    expect((await event(n.id, 100, 0, 'pay_2')).length).toBe(1);
+  });
+
+  test('one allocation per party per event, however many times it is run', async () => {
+    const n = await niche();
+    const u = await person();
+    const [e] = await event(n.id, 1000);
+    const alloc = () =>
+      rows(
+        `insert into revenue_allocations (revenue_event_id, influencer_id, allocation_type, share_bps, amount_minor)
+         values ($1, $2, 'knowledge_influencer', 2000, 200)
+         on conflict do nothing returning id`,
+        [e.id, u.id],
+      );
+    expect((await alloc()).length).toBe(1);
+    expect((await alloc()).length).toBe(0);
+  });
+
+  test('the platform row is unique too, despite having no influencer', async () => {
+    const n = await niche();
+    const [e] = await event(n.id, 1000);
+    const platform = () =>
+      rows(
+        `insert into revenue_allocations (revenue_event_id, influencer_id, allocation_type, share_bps, amount_minor)
+         values ($1, null, 'platform', 10000, 1000)
+         on conflict do nothing returning id`,
+        [e.id],
+      );
+    expect((await platform()).length).toBe(1);
+    // A null influencer must not defeat the uniqueness, which a plain unique
+    // index over a nullable column would.
+    expect((await platform()).length).toBe(0);
+  });
+
+  test('an allocation can belong to at most one payout', async () => {
+    const n = await niche();
+    const u = await person();
+    const [e] = await event(n.id, 1000);
+    const a = await one(
+      `insert into revenue_allocations (revenue_event_id, influencer_id, allocation_type, share_bps, amount_minor)
+       values ($1, $2, 'knowledge_influencer', 2000, 200) returning id`,
+      [e.id, u.id],
+    );
+    const p1 = await one(
+      `insert into payouts (influencer_id, amount_minor) values ($1, 200) returning id`,
+      [u.id],
+    );
+    const p2 = await one(
+      `insert into payouts (influencer_id, amount_minor) values ($1, 200) returning id`,
+      [u.id],
+    );
+    await db.query(`insert into payout_allocations (payout_id, allocation_id) values ($1, $2)`, [
+      p1.id,
+      a.id,
+    ]);
+    let threw = null;
+    try {
+      await db.query(`insert into payout_allocations (payout_id, allocation_id) values ($1, $2)`, [
+        p2.id,
+        a.id,
+      ]);
+    } catch (e2) {
+      threw = e2.message;
+    }
+    // This is the one that matters: the same earning cannot be paid twice.
+    expect(threw).toMatch(/duplicate key|payout_allocations_pkey/i);
+  });
+
+  test('a payout of nothing is refused', async () => {
+    const u = await person();
+    let threw = null;
+    try {
+      await db.query(`insert into payouts (influencer_id, amount_minor) values ($1, 0)`, [u.id]);
+    } catch (e) {
+      threw = e.message;
+    }
+    expect(threw).toMatch(/payouts_positive/);
+  });
+
+  test('deleting a niche keeps the record of money that moved', async () => {
+    const n = await niche();
+    const u = await person();
+    const [e] = await event(n.id, 500);
+    await db.query(
+      `insert into revenue_allocations (revenue_event_id, influencer_id, allocation_type, share_bps, amount_minor)
+       values ($1, $2, 'knowledge_influencer', 2000, 100)`,
+      [e.id, u.id],
+    );
+    await db.query(`delete from niches where id = $1`, [n.id]);
+
+    const kept = await one(`select niche_id, net_amount_minor from revenue_events where id = $1`, [
+      e.id,
+    ]);
+    expect(kept).toBeDefined();
+    // Detached, not deleted. Money that moved is not erased by tidying a niche.
+    expect(kept.niche_id).toBeNull();
+    expect(
+      (await rows(`select id from revenue_allocations where revenue_event_id = $1`, [e.id])).length,
+    ).toBe(1);
+  });
+
+  test('what is owed excludes reversed and already-paid allocations', async () => {
+    const n = await niche();
+    const u = await person();
+    // One allocation per person per event, so five statuses need five events.
+    // That constraint is doing its job; it caught an earlier version of this
+    // very test trying to pay the same person five times out of one earning.
+    for (const [amount, status] of [
+      [100, 'accrued'],
+      [50, 'eligible'],
+      [700, 'paid'],
+      [300, 'reversed'],
+      [40, 'scheduled'],
+    ]) {
+      const [e] = await event(n.id, amount * 5);
+      await db.query(
+        `insert into revenue_allocations (revenue_event_id, influencer_id, allocation_type, share_bps, amount_minor, status)
+         values ($1, $2, 'knowledge_influencer', 2000, $3, $4)`,
+        [e.id, u.id, amount, status],
+      );
+    }
+    const owed = await one(
+      `select coalesce(sum(amount_minor) filter (where status in ('accrued','eligible')),0)::bigint as owed,
+              coalesce(sum(amount_minor) filter (where status = 'paid'),0)::bigint as paid
+       from revenue_allocations where influencer_id = $1`,
+      [u.id],
+    );
+    expect(Number(owed.owed)).toBe(150);
+    expect(Number(owed.paid)).toBe(700);
+  });
+
+  test('an allocation cannot claim more than the whole', async () => {
+    const n = await niche();
+    const [e] = await event(n.id, 100);
+    let threw = null;
+    try {
+      await db.query(
+        `insert into revenue_allocations (revenue_event_id, influencer_id, allocation_type, share_bps, amount_minor)
+         values ($1, null, 'platform', 10001, 100)`,
+        [e.id],
+      );
+    } catch (err) {
+      threw = err.message;
+    }
+    expect(threw).toMatch(/revenue_allocations_bps/);
   });
 });

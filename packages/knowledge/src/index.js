@@ -27,6 +27,7 @@ export {
   BASE_SHARE_BPS,
   CONTRIBUTION_TIERS,
   formatBps,
+  formatMinor,
   MAX_SHARE_BPS,
   nextTierFor,
   shareBpsFor,
