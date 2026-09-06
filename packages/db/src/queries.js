@@ -850,6 +850,15 @@ export async function bumpApiUsage(bucket) {
   return row.count;
 }
 
+/** What a bucket has spent this hour, without the asking counting as a use. */
+export async function apiUsage(bucket) {
+  const [row] = await sql`
+    select count from api_usage
+     where bucket = ${bucket} and hour = date_trunc('hour', now())
+  `;
+  return row?.count ?? 0;
+}
+
 export async function pruneApiUsage({ days = 7 } = {}) {
   await sql`delete from api_usage where hour < now() - (${`${days} days`})::interval`;
 }

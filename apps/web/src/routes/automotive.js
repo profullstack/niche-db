@@ -56,12 +56,18 @@ function radiusFrom(c) {
  * Pro and a valid crawl pass both set `modules.paid` upstream in app.js, so
  * this only has to count what a stranger has used this hour.
  */
-async function meterLookup(c) {
+async function meterLookup(c, { charge = true } = {}) {
   const modules = c.get('modules');
   if (modules?.paid) return null;
 
   const bucket = `auto:${c.get('user')?.id ?? callerAddress(c) ?? 'unknown'}`;
-  const used = await q.bumpApiUsage(bucket).catch(() => 0);
+  // A VIN we have already decoded costs us nothing to answer, so it costs the
+  // caller nothing either. Otherwise re-reading the car you just looked up, or
+  // reloading the page, spends the same allowance as a new one — which is how
+  // somebody who has looked at one car finds the form refusing to work.
+  const used = charge
+    ? await q.bumpApiUsage(bucket).catch(() => 0)
+    : await q.apiUsage(bucket).catch(() => 0);
   const limit = config.automotive.freeLookupsPerHour;
   c.header('x-automotive-limit', String(limit));
   c.header('x-automotive-remaining', String(Math.max(0, limit - used)));
@@ -90,16 +96,16 @@ export function registerAutomotive(app) {
 
   app.get('/vin', async (c) => {
     const vin = normaliseVin(c.req.query('vin') ?? '');
+    const miles = num(c.req.query('miles'));
     let profile = null;
     let error = null;
     if (vin) {
-      const blocked = await meterLookup(c);
+      const seenBefore = await auto.getVin(vin).catch(() => null);
+      const blocked = await meterLookup(c, { charge: !seenBefore });
       if (blocked) {
         error = `Free lookups for this hour are used up. A pass is $${(config.automotive.dayCents / 100).toFixed(2)} a day, or Pro at $${(config.automotive.monthlyCents / 100).toFixed(0)} a month.`;
       } else {
-        profile = await vehicleProfile({ vin, miles: num(c.req.query('miles')) }).catch((err) => ({
-          error: err.message,
-        }));
+        profile = await vehicleProfile({ vin, miles }).catch((err) => ({ error: err.message }));
         error = profile?.error ?? null;
       }
     }
@@ -112,6 +118,7 @@ export function registerAutomotive(app) {
         <AutomotivePage
           user={c.get('user')}
           vin={vin}
+          miles={miles}
           profile={profile?.error ? null : profile}
           error={error}
           stats={stats}
@@ -182,9 +189,10 @@ export function registerAutomotive(app) {
   });
 
   app.get('/api/v1/automotive/vin/:vin', async (c) => {
-    const blocked = await meterLookup(c);
-    if (blocked) return blocked;
     const vin = normaliseVin(c.req.param('vin'));
+    const seenBefore = await auto.getVin(vin).catch(() => null);
+    const blocked = await meterLookup(c, { charge: !seenBefore });
+    if (blocked) return blocked;
     const full = c.req.query('full') !== 'false';
     if (!full) {
       const decoded = await decodeVin(vin);
