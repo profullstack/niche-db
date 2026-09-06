@@ -20,6 +20,7 @@
     "@simplewebauthn/browser": "^13.2.0",
     "hono": "^4.10.3",
     "@profullstack/nichedb": "workspace:*",
-    "@nichedb/enrichers": "workspace:*"
+    "@nichedb/enrichers": "workspace:*",
+    "@profullstack/leaderboard": "^0.3.0"
   }
 }

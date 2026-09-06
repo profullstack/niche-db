@@ -10,6 +10,7 @@ import { registerManage } from './routes/manage.js';
 import { registerMcp } from './routes/mcp.js';
 import { registerPages } from './routes/pages.js';
 import { registerStatic } from './routes/static.js';
+import { leaderboard } from './lib/leaderboard.js';
 import { NotFound } from './views/pages.jsx';
 
 export const app = new Hono();
@@ -44,6 +45,16 @@ app.use('*', async (c, next) => {
 });
 
 app.use('*', loadUser);
+
+/**
+ * The public board: partners earning on one side, agents spending on the
+ * other, kept apart. Serves its own pages, JSON, RSS, per-player share cards
+ * and the embed widget under /leaderboard.
+ */
+app.use('*', async (c, next) => {
+  const answer = await leaderboard.handle(c.req.raw);
+  return answer ?? next();
+});
 
 /** Ads and tracking: on for free, off for Pro, the buyer's choice with a pass. */
 app.use('*', async (c, next) => {
