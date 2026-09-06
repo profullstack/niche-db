@@ -8,7 +8,8 @@
     "./queries": "./src/queries.js",
     "./migrate": "./src/migrate.js",
     "./knowledge": "./src/knowledge.js",
-    "./automotive": "./src/automotive.js"
+    "./automotive": "./src/automotive.js",
+    "./agents": "./src/agents.js"
   },
   "dependencies": {
     "@nichedb/config": "workspace:*",

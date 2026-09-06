@@ -934,3 +934,37 @@ td.evidence {
   max-width: 22rem;
   overflow-wrap: anywhere;
 }
+
+/* the agent question loop */
+.card.question {
+  gap: 0.5rem;
+}
+.badge.urgent {
+  display: inline-block;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 0.1rem 0.4rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--destructive);
+  color: var(--destructive);
+}
+/* What the agent scraped on its way to being stuck. Quoted so a reader can see
+   it is reported text and not the site talking, and collapsed so it does not
+   bury the question it is context for. */
+.agent-summary {
+  cursor: pointer;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.agent-quote {
+  margin: 0.4rem 0 0;
+  padding: 0.5rem 0.75rem;
+  border-left: 2px solid var(--border);
+  color: var(--muted);
+  font-size: 0.85rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  max-height: 18rem;
+  overflow-y: auto;
+}

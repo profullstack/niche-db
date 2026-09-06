@@ -1,4 +1,5 @@
 import { config } from '@nichedb/config';
+import * as agents from '@nichedb/db/agents';
 import * as k from '@nichedb/db/knowledge';
 import {
   CONTRIBUTION_EVENT_TYPES,
@@ -118,10 +119,12 @@ export function registerKnowledge(app) {
 
   app.get('/dashboard/niches', async (c) => {
     const user = requireUser(c);
-    const [niches, contributions, tiers] = await Promise.all([
+    const [niches, contributions, tiers, questions, questionCounts] = await Promise.all([
       k.nichesForUser(user.id),
       k.listContributions({ influencerId: user.id, limit: 50 }),
       k.listTiers(),
+      agents.questionsAwaiting(user.id),
+      agents.openQuestionCounts(user.id),
     ]);
     return c.html(
       await render(
@@ -130,6 +133,8 @@ export function registerKnowledge(app) {
           niches={niches}
           contributions={contributions}
           tiers={tiers}
+          questions={questions}
+          questionCounts={questionCounts}
           notice={c.req.query('notice')}
           error={c.req.query('error')}
         />,

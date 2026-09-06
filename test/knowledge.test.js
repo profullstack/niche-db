@@ -1,6 +1,8 @@
 import { describe, expect, test } from 'bun:test';
 import {
   allocate,
+  asJson,
+  asJsonArray,
   attributableNetMinor,
   CONTRIBUTION_TIERS,
   dedupeKeyFor,
@@ -313,5 +315,38 @@ describe('reserved slugs', () => {
       expect(isReservedNicheSlug(slug)).toBe(true);
     expect(isReservedNicheSlug('SETTINGS')).toBe(true);
     expect(isReservedNicheSlug('commercial-roofing')).toBe(false);
+  });
+});
+
+describe('reading a jsonb column', () => {
+  test('an object comes back as itself', () => {
+    expect(asJson({ software_gap: 80 })).toEqual({ software_gap: 80 });
+    expect(asJsonArray([{ id: 'a' }])).toEqual([{ id: 'a' }]);
+  });
+
+  test('a column that stored a string is parsed rather than iterated', () => {
+    // This is the shape that shipped: Object.keys('{}') is ['0','1'], which is
+    // how two dimensions called 0 and 1 appeared on every opportunity page.
+    expect(Object.keys('{}')).toEqual(['0', '1']);
+    expect(asJson('{}')).toEqual({});
+    expect(Object.keys(asJson('{}'))).toEqual([]);
+    expect(asJson('{"software_gap":80}')).toEqual({ software_gap: 80 });
+    expect(asJsonArray('[{"id":"ea"}]')).toEqual([{ id: 'ea' }]);
+  });
+
+  test('null, nonsense and scalars fall back rather than throwing', () => {
+    expect(asJson(null)).toEqual({});
+    expect(asJson(undefined)).toEqual({});
+    expect(asJson('not json at all')).toEqual({});
+    expect(asJson('"just a string"')).toEqual({});
+    expect(asJson('42')).toEqual({});
+    expect(asJson(42)).toEqual({});
+    expect(asJson(null, { a: 1 })).toEqual({ a: 1 });
+  });
+
+  test('asJsonArray refuses an object, so a map() cannot be reached with one', () => {
+    expect(asJsonArray('{"a":1}')).toEqual([]);
+    expect(asJsonArray({ a: 1 })).toEqual([]);
+    expect(asJsonArray(null)).toEqual([]);
   });
 });

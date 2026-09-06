@@ -86,3 +86,36 @@ export const RESERVED_NICHE_SLUGS = new Set([
 /** Is this slug safe to serve from the root? */
 export const isReservedNicheSlug = (slug) =>
   RESERVED_NICHE_SLUGS.has(String(slug ?? '').toLowerCase());
+
+/**
+ * A jsonb column, as an object.
+ *
+ * Bun's driver passes a string parameter cast to `jsonb` straight through, so
+ * a value written that way is stored as a jsonb STRING and read back as one.
+ * The writes now cast through `text` and store the real structure, but rows
+ * written before that fix are still strings, and a string reaching
+ * `Object.keys` renders its characters as though they were fields. That is
+ * exactly what shipped: two dimensions called `0` and `1`, holding a brace
+ * each, on every opportunity page.
+ *
+ * So every read of one of these columns goes through here. It is the same
+ * defence the ingest side already applies to a source's config.
+ */
+export function asJson(value, fallback = {}) {
+  if (value === null || value === undefined) return fallback;
+  if (typeof value === 'string') {
+    try {
+      const parsed = JSON.parse(value);
+      return parsed === null || typeof parsed !== 'object' ? fallback : parsed;
+    } catch {
+      return fallback;
+    }
+  }
+  return typeof value === 'object' ? value : fallback;
+}
+
+/** The same, for a column that should hold a list. */
+export function asJsonArray(value) {
+  const out = asJson(value, []);
+  return Array.isArray(out) ? out : [];
+}

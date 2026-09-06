@@ -1,4 +1,4 @@
-import { formatBps, nextTierFor } from '@nichedb/knowledge';
+import { asJson, asJsonArray, formatBps, nextTierFor } from '@nichedb/knowledge';
 import { Notice, Num, Relative } from './components.jsx';
 import { Layout } from './Layout.jsx';
 
@@ -232,11 +232,11 @@ export const OpportunityPage = ({ user, opportunity, tiers, claim, notice, error
       </section>
     ) : null}
 
-    {Object.keys(opportunity.dimensions ?? {}).length ? (
+    {Object.keys(asJson(opportunity.dimensions)).length ? (
       <section>
         <h2>How that score is made</h2>
         <ul class="dimensions">
-          {Object.entries(opportunity.dimensions).map(([k, v]) => (
+          {Object.entries(asJson(opportunity.dimensions)).map(([k, v]) => (
             <li key={k}>
               <span class="dim-name">{k.replace(/_/g, ' ')}</span> <span class="num">{v}</span>
             </li>
@@ -330,9 +330,22 @@ export const InfluencerPage = ({ user, influencer }) => (
 );
 
 /** The operator's own view: what needs them, and where they stand. */
-export const InfluencerDashboard = ({ user, niches, contributions, tiers, notice, error }) => (
+export const InfluencerDashboard = ({
+  user,
+  niches,
+  contributions,
+  tiers,
+  questions = [],
+  questionCounts = {},
+  notice,
+  error,
+}) => (
   <Layout user={user} title="Your niches">
     <Notice notice={notice} error={error} />
+
+    {/* First on the page, because this is the thing that actually wants a
+        human today. Everything below it is a record of what already happened. */}
+    <QuestionsPanel questions={questions} next="/dashboard/niches" />
 
     <h1>Your niches</h1>
     {niches.length === 0 ? (
@@ -363,6 +376,12 @@ export const InfluencerDashboard = ({ user, niches, contributions, tiers, notice
                 ) : (
                   <>At the top of the ladder.</>
                 )}
+              </p>
+              <p class="card-links small">
+                <a href={`/dashboard/niches/${n.slug}/questions`}>
+                  Questions
+                  {questionCounts[String(n.id)] ? ` (${questionCounts[String(n.id)]})` : ''}
+                </a>
               </p>
             </li>
           );
@@ -552,6 +571,141 @@ export const KnowledgeAdmin = ({ user, claims, pending, audit, notice, error }) 
             ))}
           </tbody>
         </table>
+      )}
+    </section>
+  </Layout>
+);
+
+/**
+ * One question, with the three things a person can say about it.
+ *
+ * Everything from the agent is rendered as text. `context` in particular is
+ * whatever it scraped on the way to being stuck, so it is untrusted input on
+ * its way to a human and then back to a model: it goes in a quoted block that
+ * says where it came from, and nothing on either side of the loop treats it as
+ * an instruction.
+ */
+export const QuestionCard = ({ question, next }) => (
+  <li class="card question" key={question.id}>
+    <p class="card-title">
+      {question.urgency === 'high' ? <span class="badge urgent">urgent</span> : null}{' '}
+      {question.title}
+    </p>
+    {question.niche_slug ? (
+      <p class="card-desc muted small">
+        <a href={`/${question.niche_slug}`}>{question.niche_name}</a>
+        {question.status === 'researching' ? ' · sent back for research' : ''}
+      </p>
+    ) : null}
+
+    <p>{question.question}</p>
+
+    {question.context ? (
+      <details class="agent-context">
+        <summary class="agent-summary">What the agent found</summary>
+        {/* Quoted, not obeyed. This is crawled text. */}
+        <blockquote class="agent-quote">{question.context}</blockquote>
+      </details>
+    ) : null}
+
+    <form method="post" action={`/dashboard/questions/${question.id}/answer`} class="stack">
+      <input type="hidden" name="next" value={next ?? '/dashboard/niches'} />
+      {asJsonArray(question.options).length ? (
+        <fieldset class="field">
+          <legend class="label">Which is it?</legend>
+          {asJsonArray(question.options).map((o) => (
+            <label class="check" key={o.id}>
+              <input type="radio" name="optionId" value={o.id} />
+              <span>{o.label}</span>
+            </label>
+          ))}
+        </fieldset>
+      ) : null}
+
+      <label class="field">
+        <span class="label">Your answer</span>
+        <textarea name="answer" rows="3" maxlength="8000" placeholder="How it actually works." />
+        <span class="help">
+          What you know, in your own words. This becomes niche knowledge and a scored contribution.
+        </span>
+      </label>
+
+      <p class="row">
+        <button type="submit" name="kind" value="answered" class="btn-primary">
+          Answer
+        </button>
+        <button type="submit" name="kind" value="insufficient_context" class="btn-ghost">
+          Not enough context
+        </button>
+        <button type="submit" name="kind" value="needs_research" class="btn-ghost">
+          Ask the agent to research more
+        </button>
+      </p>
+      <p class="help muted small">
+        Saying you cannot answer costs you nothing. A guess that gets verified becomes wrong
+        knowledge, which is worse for the niche than an unanswered question.
+      </p>
+    </form>
+  </li>
+);
+
+/** The dashboard panel: what is waiting on this person, across every niche. */
+export const QuestionsPanel = ({ questions, next }) => (
+  <section>
+    <h2>Your agent needs you</h2>
+    {questions.length === 0 ? (
+      <p class="muted empty">Nothing waiting. The agents will ask when they get stuck.</p>
+    ) : (
+      <>
+        <p class="muted small">
+          {questions.length} {questions.length === 1 ? 'question needs' : 'questions need'} expert
+          judgement. Each should take a minute or two.
+        </p>
+        <ul class="cards">
+          {questions.map((q) => (
+            <QuestionCard key={q.id} question={q} next={next} />
+          ))}
+        </ul>
+      </>
+    )}
+  </section>
+);
+
+/** One niche's queue, open and recently settled. */
+export const NicheQuestions = ({ user, niche, questions, settled, configured, notice, error }) => (
+  <Layout user={user} title={`${niche.name} questions`}>
+    <Notice notice={notice} error={error} />
+    <h1>{niche.name}: agent questions</h1>
+    <p class="muted">
+      <a href={`/${niche.slug}`}>The niche</a> · <a href="/dashboard/niches">Your niches</a>
+    </p>
+
+    {configured ? null : (
+      <p class="alert info">
+        No agent is wired to this deployment yet (<code>CHOVY_SIGNING_SECRET</code> is unset), so
+        nothing can ask a question.
+      </p>
+    )}
+
+    <QuestionsPanel questions={questions} next={`/dashboard/niches/${niche.slug}/questions`} />
+
+    <section>
+      <h2>Settled</h2>
+      {settled.length === 0 ? (
+        <p class="muted empty">Nothing answered yet.</p>
+      ) : (
+        <ul class="items">
+          {settled.map((q) => (
+            <li class="item" key={q.id}>
+              <div class="item-body">
+                <p class="item-title">{q.title}</p>
+                <p class="item-meta">
+                  answered <Relative at={q.answered_at ?? q.created_at} />
+                </p>
+              </div>
+            </li>
+          ))}
+        </ul>
       )}
     </section>
   </Layout>
