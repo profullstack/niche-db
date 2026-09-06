@@ -197,6 +197,19 @@ export const config = {
      * by default: until somebody is approved, every parts link is a plain one.
      */
     affiliateLinks: opt('AFFILIATE_LINKS'),
+    /**
+     * Amazon Associates. Not part of AFFILIATE_LINKS because Amazon does not
+     * wrap a destination the way CJ, Rakuten and eBay do — the link is our own
+     * amazon.com URL with `tag` on it, which is also what sh1pt's
+     * `affiliate-amazon-associates` adapter does. `AMAZON_ASSOCIATE_TAG` is
+     * the name the rest of the fleet already uses for it.
+     *
+     * The subtag is Amazon's own reporting dimension, so traffic from here is
+     * separable in the Associates dashboard even while the tag is shared with
+     * another property.
+     */
+    amazonTag: opt('AMAZON_ASSOCIATE_TAG'),
+    amazonSubtag: opt('AMAZON_ASSOCIATE_SUBTAG', 'nichedb-vin'),
   },
 
   /** CrawlProof ads on the free tier: the publisher slot pages and feeds fill from. */

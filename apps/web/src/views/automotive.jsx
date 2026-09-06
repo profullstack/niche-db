@@ -236,6 +236,11 @@ const Profile = ({ profile }) => {
           <p class="small muted">
             Some of these links pay us a commission if you buy through them. It costs you nothing
             and it does not change which vendors are listed or their order.
+            {/* Amazon's Operating Agreement requires this sentence, in these
+                words, wherever an Associates link appears. */}
+            {profile.parts.searches.some((p) => p.sponsored && p.key === 'amazon')
+              ? ' As an Amazon Associate I earn from qualifying purchases.'
+              : ''}
           </p>
         ) : null}
       </section>
