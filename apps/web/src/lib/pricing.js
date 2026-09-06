@@ -15,6 +15,7 @@ import { config } from '@nichedb/config';
 import * as q from '@nichedb/db/queries';
 import { createGateway, decodePayment } from '@profullstack/x402-gateway';
 
+import { attributeCrawlSale } from './attribution.js';
 import { splitSale } from './partners.js';
 
 /** "1000:20,5000:40" → [{ spentCents: 1000, off: 0.2 }, …], ascending by spend. */
@@ -146,6 +147,12 @@ export function gatewayOptions(priceCents) {
       // worth more than a 500 to a paying customer.
       await splitSale(sale).catch((err) =>
         console.error('[partners] could not split the sale', err),
+      );
+      // And book it against the niches the crawl actually read, so the people
+      // operating them are owed their share. Same rule: the money has moved,
+      // so a failure here is a log line and a reconciliation job, never a 500.
+      await attributeCrawlSale(sale).catch((err) =>
+        console.error('[revenue] could not attribute the sale', err),
       );
     },
   };

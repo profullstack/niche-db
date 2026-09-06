@@ -81,9 +81,10 @@ clicking at once take disjoint sets instead of blocking or double-claiming.
 
 ## Where earnings come from
 
-Today, only the signed internal endpoint. Wiring the x402 gateway's existing
-`onSale` hook into it is Phase 4 and is now a small job: `machineRevenueEvent`
-already normalises the sale object the gateway hands over, and it is tested.
+Two places. Every paid crawl pass, booked automatically by the gateway's
+`onSale` hook and divided across niches by how much of the index each holds
+(see [x402-attribution.md](./x402-attribution.md)); and the signed internal
+endpoint, for anything else.
 
 ```sh
 BODY='{"payload":{"nicheSlug":"games","externalId":"pay_1","sourceType":"x402",
