@@ -8,6 +8,7 @@ import { gateway, gatewayFor } from './lib/pricing.js';
 import { Denied } from './lib/service.js';
 import { registerApi } from './routes/api.js';
 import { registerAuth } from './routes/auth.js';
+import { registerKnowledge } from './routes/knowledge.js';
 import { registerManage } from './routes/manage.js';
 import { registerMcp } from './routes/mcp.js';
 import { registerPages } from './routes/pages.js';
@@ -96,6 +97,13 @@ registerPages(app);
 registerManage(app);
 registerApi(app);
 registerMcp(app);
+
+/**
+ * Last, because a niche's page is served from the site root: every other
+ * route is registered before `/:slug` can be asked. A niche may not take a
+ * slug the site already uses, so the two can never compete for a name.
+ */
+registerKnowledge(app);
 
 app.notFound(async (c) => {
   if (wantsJson(c)) return c.json({ error: 'not found' }, 404);

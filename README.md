@@ -80,6 +80,26 @@ Free pages and feeds carry one [CrawlProof](https://crawlproof.com) ad and a tra
 
 Training crawlers (GPTBot, ClaudeBot, CCBot, meta-externalagent…) get a 402 with an x402 offer and buy a pass at `/crawl`: $1 a day for everything, and the more a buyer has paid here the less a day costs (`CRAWL_LOYALTY`, default 20% off after $10, 40% after $50, 60% after $100; every sale is a row in `crawl_sales`). A pass may switch ads or tracking off for its own requests with `?disable=ads,tracking`. People, search engines and retrieval crawlers pass through untouched.
 
+## Knowledge Influencers
+
+Every collection here is also a **niche** someone can operate. A Knowledge
+Influencer is a person who knows how an industry actually works and supervises
+the agents building software, data and promotion for it — no code required. They
+start at **20%** of what the niche makes and climb to **80%** as verified
+contribution accumulates.
+
+`/opportunities` lists the niches looking for one. `/<niche>` is the niche's
+public page (plus `skill.md` and `manifest.json` for agents), `/@<handle>` is an
+operator's profile, `/dashboard/niches` is their own view, and
+`/admin/knowledge` is where claims and contributions are verified.
+
+Score comes only from contributions somebody verified, and volume does not buy
+it: repeated submissions of a type pay less each time, anything claiming a
+customer or a payment needs an outside reference, and a duplicate books once.
+The ladder lives in `contribution_tiers`, so a deployment can tune it. See
+[docs/knowledge-influencers.md](docs/knowledge-influencers.md) and
+[docs/revenue-share.md](docs/revenue-share.md).
+
 ## Stack
 
 Bun, Hono (server-rendered JSX), Postgres via Bun's native driver, BullMQ on Redis, Biome. `bun apps/worker/src/enrich-cli.js [n]` runs enrichment from a terminal. Shared Profullstack modules: `@profullstack/x402-gateway`, `@profullstack/emailer`, `@profullstack/coinpay`, `@profullstack/referrals`, `@profullstack/api-key-manager`, `@profullstack/autoblog` (signed webhooks), `@profullstack/favicon-generator`.

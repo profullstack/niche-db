@@ -14,6 +14,7 @@
     "@nichedb/core": "workspace:*",
     "@nichedb/db": "workspace:*",
     "@nichedb/enrichers": "workspace:*",
+    "@nichedb/knowledge": "workspace:*",
     "@nichedb/notify": "workspace:*",
     "@nichedb/payments": "workspace:*",
     "@nichedb/queue": "workspace:*",

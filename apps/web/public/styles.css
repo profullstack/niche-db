@@ -608,3 +608,32 @@ tr.dim td {
   border: 0;
   border-radius: 8px;
 }
+
+/* the knowledge influencer ladder, and the evidence an admin reads */
+.tiers tr.here td {
+  font-weight: 600;
+}
+.dimensions {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  gap: 0.25rem 1rem;
+}
+.dimensions .dim-name {
+  color: var(--muted);
+  text-transform: capitalize;
+}
+.cta-block {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+}
+/* Submitted and crawled text. It wraps and it never becomes markup. */
+td.evidence {
+  font-family: var(--mono, ui-monospace, monospace);
+  font-size: 0.75rem;
+  color: var(--muted);
+  max-width: 22rem;
+  overflow-wrap: anywhere;
+}
