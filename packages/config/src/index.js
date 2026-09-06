@@ -189,6 +189,14 @@ export const config = {
     monthlyCents: num('AUTOMOTIVE_MONTHLY_CENTS', 3000),
     /** Straight-line miles a mechanics search may cover. */
     maxRadiusMiles: num('AUTOMOTIVE_MAX_RADIUS_MILES', 50),
+    /**
+     * Affiliate tracking links for the parts vendors, as
+     * `vendor=template,vendor=template`, where the template holds `{url}` and
+     * the destination is url-encoded into it. Every network builds links that
+     * way, so a new one needs no code — only the template it gave you. Empty
+     * by default: until somebody is approved, every parts link is a plain one.
+     */
+    affiliateLinks: opt('AFFILIATE_LINKS'),
   },
 
   /** CrawlProof ads on the free tier: the publisher slot pages and feeds fill from. */

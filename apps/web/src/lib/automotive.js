@@ -1,3 +1,4 @@
+import { config } from '@nichedb/config';
 import * as auto from '@nichedb/db/automotive';
 
 /**
@@ -541,47 +542,130 @@ export function maintenanceSchedule({
  * a catalogue it does not have. It builds the searches a person would type,
  * with the vehicle already in them, at the places that actually stock parts.
  */
-export function partsSearches({ year, make, model, part = '' }) {
+const q = (s) => encodeURIComponent(String(s).trim());
+
+/**
+ * The vendors, and which of them will pay for a referral.
+ *
+ * `program` is what was actually found when this was checked (2026-09-06), not
+ * what an affiliate-directory site claims: three of the six run a program and
+ * three do not, and saying so keeps anyone from hunting for a RockAuto link id
+ * that has never existed.
+ */
+export const PARTS_VENDORS = [
+  {
+    key: 'rockauto',
+    vendor: 'RockAuto',
+    kind: 'catalogue',
+    note: 'Cheapest for most wear parts; catalogue is by year/make/model.',
+    program: null,
+    url: ({ year, make, model }) =>
+      `https://www.rockauto.com/en/catalog/${q(make.toLowerCase())},${year},${q(model.toLowerCase())}`,
+  },
+  {
+    key: 'ebay',
+    vendor: 'eBay Motors',
+    kind: 'marketplace',
+    note: 'New, used and OEM take-offs. Filter by "fits your vehicle".',
+    program: { network: 'eBay Partner Network', signup: 'https://partnernetwork.ebay.com/' },
+    url: ({ withPart }) => `https://www.ebay.com/sch/6028/i.html?_nkw=${q(withPart)}`,
+  },
+  {
+    key: 'autozone',
+    vendor: 'AutoZone',
+    kind: 'retail',
+    note: 'Same-day pickup in the US.',
+    program: { network: 'CJ Affiliate', signup: 'https://www.cj.com/' },
+    url: ({ withPart }) => `https://www.autozone.com/searchresult?searchText=${q(withPart)}`,
+  },
+  {
+    key: 'oreilly',
+    vendor: "O'Reilly Auto Parts",
+    kind: 'retail',
+    program: null,
+    url: ({ withPart }) => `https://www.oreillyauto.com/search?q=${q(withPart)}`,
+  },
+  {
+    key: 'napa',
+    vendor: 'NAPA',
+    kind: 'retail',
+    program: {
+      network: 'Rakuten Advertising',
+      signup: 'https://www.napaonline.com/en/affiliate-program',
+    },
+    url: ({ withPart }) => `https://www.napaonline.com/en/search?text=${q(withPart)}`,
+  },
+  {
+    key: 'carpart',
+    vendor: 'Car-Part.com',
+    kind: 'salvage',
+    note: 'Recycled and salvage-yard inventory: the only realistic source for body and interior parts on an older car.',
+    program: null,
+    url: () => 'https://www.car-part.com/',
+  },
+];
+
+/**
+ * Affiliate links, without a code change per network.
+ *
+ * Every one of these networks builds a tracking link the same way: their own
+ * URL with the real destination encoded inside it. So rather than teach this
+ * file the shape of CJ, Rakuten and EPN links — and get one of them subtly
+ * wrong — a deployment supplies the template its network gave it and this puts
+ * the destination in the hole:
+ *
+ *   AFFILIATE_LINKS="ebay=https://rover.ebay.com/rover/1/711-53200-19255-0/1?mpre={url}&campid=5338XXXXXX,
+ *                    napa=https://click.linksynergy.com/deeplink?id=ID&mid=MID&murl={url}"
+ *
+ * A vendor with no template is linked to plainly, which is every vendor until
+ * somebody is actually approved.
+ */
+export function parseAffiliateTemplates(spec) {
+  const out = new Map();
+  for (const pair of String(spec ?? '').split(',')) {
+    const at = pair.indexOf('=');
+    if (at < 1) continue;
+    const key = pair.slice(0, at).trim().toLowerCase();
+    const template = pair.slice(at + 1).trim();
+    if (!key || !template.includes('{url}')) continue;
+    if (!/^https:\/\//i.test(template)) continue;
+    out.set(key, template);
+  }
+  return out;
+}
+
+export function applyAffiliate(key, url, templates) {
+  const template = templates?.get?.(key);
+  if (!template) return { url, sponsored: false };
+  return { url: template.replaceAll('{url}', encodeURIComponent(url)), sponsored: true };
+}
+
+/**
+ * Where to get the part.
+ *
+ * Fitment data — which part number fits which vehicle — is the Auto Care
+ * Association's ACES/PIES, and it is licensed per seat. So this does not claim
+ * a catalogue it does not have. It builds the searches a person would type,
+ * with the vehicle already in them, at the places that actually stock parts.
+ */
+export function partsSearches({ year, make, model, part = '', affiliates = null }) {
   if (!year || !make || !model) return [];
   const vehicle = `${year} ${make} ${model}`;
-  const q = (s) => encodeURIComponent(s.trim());
   const withPart = part ? `${vehicle} ${part}` : vehicle;
-  return [
-    {
-      vendor: 'RockAuto',
-      kind: 'catalogue',
-      note: 'Cheapest for most wear parts; catalogue is by year/make/model.',
-      url: `https://www.rockauto.com/en/catalog/${q(make.toLowerCase())},${year},${q(model.toLowerCase())}`,
-    },
-    {
-      vendor: 'eBay Motors',
-      kind: 'marketplace',
-      note: 'New, used and OEM take-offs. Filter by "fits your vehicle".',
-      url: `https://www.ebay.com/sch/6028/i.html?_nkw=${q(withPart)}`,
-    },
-    {
-      vendor: 'AutoZone',
-      kind: 'retail',
-      note: 'Same-day pickup in the US.',
-      url: `https://www.autozone.com/searchresult?searchText=${q(withPart)}`,
-    },
-    {
-      vendor: "O'Reilly Auto Parts",
-      kind: 'retail',
-      url: `https://www.oreillyauto.com/search?q=${q(withPart)}`,
-    },
-    {
-      vendor: 'NAPA',
-      kind: 'retail',
-      url: `https://www.napaonline.com/en/search?text=${q(withPart)}`,
-    },
-    {
-      vendor: 'Car-Part.com',
-      kind: 'salvage',
-      note: 'Recycled and salvage-yard inventory: the only realistic source for body and interior parts on an older car.',
-      url: `https://www.car-part.com/`,
-    },
-  ];
+  const templates = affiliates ?? parseAffiliateTemplates(config.automotive.affiliateLinks);
+  return PARTS_VENDORS.map((v) => {
+    const plain = v.url({ year, make, model, vehicle, withPart });
+    const { url, sponsored } = applyAffiliate(v.key, plain, templates);
+    return {
+      vendor: v.vendor,
+      kind: v.kind,
+      ...(v.note ? { note: v.note } : {}),
+      url,
+      // Said in the payload, not just in the markup: anything reading this
+      // through the API needs to know which links pay us.
+      sponsored,
+    };
+  });
 }
 
 /* -------------------------------------------------------------- mechanics -- */

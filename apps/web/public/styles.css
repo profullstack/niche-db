@@ -739,6 +739,13 @@ time.undated {
   flex-wrap: wrap;
   gap: 0.3rem;
   margin-top: 0.25rem;
+  /* A tag strip is a list whether it is written as one or not. Without these,
+     `<ul class="tags">` keeps the browser's discs and its 40px indent, while
+     the `<span>` spelling next to it does not — the same component rendering
+     two ways depending on the markup somebody reached for. */
+  list-style: none;
+  padding-left: 0;
+  margin-left: 0;
 }
 .tag {
   font-size: 0.78rem;
