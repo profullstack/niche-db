@@ -15,6 +15,8 @@ import { config } from '@nichedb/config';
 import * as q from '@nichedb/db/queries';
 import { createGateway, decodePayment } from '@profullstack/x402-gateway';
 
+import { splitSale } from './partners.js';
+
 /** "1000:20,5000:40" → [{ spentCents: 1000, off: 0.2 }, …], ascending by spend. */
 export function parseLoyalty(spec) {
   return String(spec ?? '')
@@ -112,6 +114,11 @@ export function gatewayOptions(priceCents) {
       '/manifest.webmanifest',
       '/leaderboard',
       '/leaderboard/',
+      // The pitch is how a publisher finds out they can be paid for what a
+      // crawler is already taking. Charging a crawler to read our own
+      // recruiting page would be an odd way to run a marketplace.
+      '/sell',
+      '/sell/',
     ],
     onSale: async (sale) => {
       console.log('[x402] sold a pass', {
@@ -129,6 +136,12 @@ export function gatewayOptions(priceCents) {
         userAgent: sale.userAgent,
         expiresAt: sale.expiresAt,
       });
+      // Pay the people whose writing was crawled. Never allowed to fail the
+      // sale: the money has already moved, and a split we can retry later is
+      // worth more than a 500 to a paying customer.
+      await splitSale(sale).catch((err) =>
+        console.error('[partners] could not split the sale', err),
+      );
     },
   };
 }

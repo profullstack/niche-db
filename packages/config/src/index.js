@@ -213,6 +213,11 @@ export const config = {
     enabled: bool('CACHE_ENABLED', true),
   },
 
+  // Verification tokens for the partner program are HMACs under this. It has
+  // no default: a guessable token would let anyone claim anyone's domain and
+  // be paid for their work, and a weak fallback is how that ships by accident.
+  partnerSecret: opt('PARTNER_VERIFY_SECRET', ''),
+
   session: {
     cookie: 'ndb_session',
     ttlDays: num('SESSION_TTL_DAYS', 90),

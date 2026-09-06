@@ -3,6 +3,7 @@ import { Hono } from 'hono';
 import { isProUser, loadUser, render, wantsJson } from './lib/http.js';
 import { leaderboard } from './lib/leaderboard.js';
 import { modulesFor, withModules } from './lib/modules.js';
+import { partners } from './lib/partners.js';
 import { gateway, gatewayFor } from './lib/pricing.js';
 import { Denied } from './lib/service.js';
 import { registerApi } from './routes/api.js';
@@ -55,6 +56,17 @@ app.use('*', async (c, next) => {
   const answer = await leaderboard.handle(c.req.raw);
   return answer ?? next();
 });
+
+/**
+ * The seller side: where the people whose writing is in this index sign up,
+ * prove they own a site, and get paid a share of what crawlers pay for access.
+ * Null when PARTNER_VERIFY_SECRET is unset, in which case /sell does not exist.
+ */
+if (partners)
+  app.use('*', async (c, next) => {
+    const answer = await partners.handle(c.req.raw);
+    return answer ?? next();
+  });
 
 /** Ads and tracking: on for free, off for Pro, the buyer's choice with a pass. */
 app.use('*', async (c, next) => {

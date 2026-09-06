@@ -13,14 +13,15 @@
     "@nichedb/config": "workspace:*",
     "@nichedb/core": "workspace:*",
     "@nichedb/db": "workspace:*",
+    "@nichedb/enrichers": "workspace:*",
     "@nichedb/notify": "workspace:*",
     "@nichedb/payments": "workspace:*",
     "@nichedb/queue": "workspace:*",
+    "@profullstack/leaderboard": "^0.3.0",
+    "@profullstack/nichedb": "workspace:*",
+    "@profullstack/partners": "0.2.0",
     "@profullstack/x402-gateway": "^0.1.0",
     "@simplewebauthn/browser": "^13.2.0",
-    "hono": "^4.10.3",
-    "@profullstack/nichedb": "workspace:*",
-    "@nichedb/enrichers": "workspace:*",
-    "@profullstack/leaderboard": "^0.3.0"
+    "hono": "^4.10.3"
   }
 }
