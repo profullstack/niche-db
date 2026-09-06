@@ -6,9 +6,11 @@
   "exports": {
     ".": "./src/index.js",
     "./queries": "./src/queries.js",
-    "./migrate": "./src/migrate.js"
+    "./migrate": "./src/migrate.js",
+    "./knowledge": "./src/knowledge.js"
   },
   "dependencies": {
-    "@nichedb/config": "workspace:*"
+    "@nichedb/config": "workspace:*",
+    "@nichedb/knowledge": "workspace:*"
   }
 }

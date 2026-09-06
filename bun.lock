@@ -26,6 +26,7 @@
         "@nichedb/core": "workspace:*",
         "@nichedb/db": "workspace:*",
         "@nichedb/enrichers": "workspace:*",
+        "@nichedb/knowledge": "workspace:*",
         "@nichedb/notify": "workspace:*",
         "@nichedb/payments": "workspace:*",
         "@nichedb/queue": "workspace:*",
@@ -84,6 +85,7 @@
       "version": "0.1.0",
       "dependencies": {
         "@nichedb/config": "workspace:*",
+        "@nichedb/knowledge": "workspace:*",
       },
     },
     "packages/enrichers": {
@@ -92,6 +94,10 @@
       "dependencies": {
         "@nichedb/core": "workspace:*",
       },
+    },
+    "packages/knowledge": {
+      "name": "@nichedb/knowledge",
+      "version": "0.1.0",
     },
     "packages/notify": {
       "name": "@nichedb/notify",
@@ -247,6 +253,8 @@
     "@nichedb/db": ["@nichedb/db@workspace:packages/db"],
 
     "@nichedb/enrichers": ["@nichedb/enrichers@workspace:packages/enrichers"],
+
+    "@nichedb/knowledge": ["@nichedb/knowledge@workspace:packages/knowledge"],
 
     "@nichedb/notify": ["@nichedb/notify@workspace:packages/notify"],
 

@@ -1,4 +1,5 @@
 import { ADAPTERS } from '@nichedb/adapters';
+import { createNiche, upsertOpportunity } from '@nichedb/db/knowledge';
 import * as q from '@nichedb/db/queries';
 
 /**
@@ -264,6 +265,38 @@ export const DEFAULT_FEEDS = [
   },
 ];
 
+/**
+ * A niche for every collection this deployment ships.
+ *
+ * A niche is a market someone can know, and the markets this site already
+ * holds data about are the ones worth offering first: whoever knows how
+ * package registries or SEC filings are actually used can improve what is
+ * here today. Nothing invented, nothing scored — an opportunity score nobody
+ * has measured is left null and the page says so rather than printing a
+ * number it cannot defend.
+ *
+ * Every one is created `open`, so the marketplace has something real on it
+ * and an admin can archive or add to the list without a migration.
+ */
+async function ensureNiches(byCollection, log) {
+  let created = 0;
+  for (const c of COLLECTIONS) {
+    const collection = byCollection[c.slug];
+    if (!collection) continue;
+    const niche = await createNiche({
+      slug: c.slug,
+      name: c.name,
+      description: c.description,
+      collectionId: collection.id,
+    }).catch(() => null);
+    if (!niche) continue;
+    await upsertOpportunity({ nicheId: niche.id, score: null });
+    created++;
+  }
+  if (created) log(`[seed] opened ${created} niche(s) for Knowledge Influencers`);
+  return created;
+}
+
 export async function ensureDefaults({ env = {}, log = console.log } = {}) {
   const byCollection = {};
   for (const c of COLLECTIONS) byCollection[c.slug] = await q.upsertCollection(c);
@@ -300,5 +333,6 @@ export async function ensureDefaults({ env = {}, log = console.log } = {}) {
     });
   }
   if (created) log(`[seed] created ${created} default source(s)`);
-  return { created };
+  const niches = await ensureNiches(byCollection, log);
+  return { created, niches };
 }

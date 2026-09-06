@@ -119,6 +119,11 @@ export function gatewayOptions(priceCents) {
       // recruiting page would be an odd way to run a marketplace.
       '/sell',
       '/sell/',
+      // Same reasoning on the other side of the marketplace: the page that
+      // tells someone they can be paid for what they know is not the page to
+      // charge them to read.
+      '/opportunities',
+      '/opportunities/',
     ],
     onSale: async (sale) => {
       console.log('[x402] sold a pass', {

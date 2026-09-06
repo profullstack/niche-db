@@ -53,6 +53,15 @@ describe('migrations', () => {
       'api_usage',
       'referral_codes',
       'referral_usages',
+      'niches',
+      'niche_members',
+      'niche_claims',
+      'opportunities',
+      'contribution_tiers',
+      'contribution_events',
+      'contribution_scores',
+      'tier_history',
+      'knowledge_audit_logs',
     ]) {
       expect(names).toContain(t);
     }
@@ -182,5 +191,192 @@ describe('feeds and deliveries', () => {
     const n = await one(`select count(*)::int as n from users`);
     const role = n.n === 0 ? 'admin' : 'user';
     expect(['admin', 'user']).toContain(role);
+  });
+});
+
+/**
+ * The Knowledge Influencer tables, against the same in-process Postgres. What
+ * is checked here is the part the application trusts the database to enforce:
+ * that a duplicate submission cannot book twice, that a niche cannot take a
+ * name the site already serves, and that the ladder is on the ladder.
+ */
+describe('knowledge influencers', () => {
+  const niche = async () =>
+    one(`insert into niches (slug, name) values ($1, 'N') returning id`, [
+      `n${Math.random()}`.replace('.', ''),
+    ]);
+  const person = async () =>
+    one(`insert into users (email) values ($1) returning id`, [`k${Math.random()}@e.com`]);
+
+  test('the 20-80 ladder is seeded, in order, capped at 8000 bps', async () => {
+    const tiers = await rows(
+      `select slug, min_score, share_bps from contribution_tiers order by position`,
+    );
+    expect(tiers.length).toBe(7);
+    expect(tiers[0].share_bps).toBe(2000);
+    expect(tiers.at(-1).share_bps).toBe(8000);
+    for (let i = 1; i < tiers.length; i++) {
+      expect(tiers[i].min_score).toBeGreaterThan(tiers[i - 1].min_score);
+      expect(tiers[i].share_bps).toBeGreaterThan(tiers[i - 1].share_bps);
+    }
+  });
+
+  test('nothing may be given a share above the programme maximum', async () => {
+    const n = await niche();
+    const u = await person();
+    let threw = null;
+    try {
+      await db.query(
+        `insert into niche_members (niche_id, user_id, share_cap_bps) values ($1, $2, 9000)`,
+        [n.id, u.id],
+      );
+    } catch (e) {
+      threw = e.message;
+    }
+    expect(threw).toMatch(/niche_members_cap/);
+  });
+
+  test('a slug that is not url-safe is refused by the database, not just the app', async () => {
+    let threw = null;
+    try {
+      await db.query(`insert into niches (slug, name) values ('Not A Slug', 'x')`);
+    } catch (e) {
+      threw = e.message;
+    }
+    expect(threw).toMatch(/niches_slug_shape/);
+  });
+
+  test('the same submission books once; a different one still books', async () => {
+    const n = await niche();
+    const u = await person();
+    const submit = (key) =>
+      rows(
+        `insert into contribution_events (niche_id, influencer_id, event_type, points, dedupe_key)
+         values ($1, $2, 'agent_answer', 3, $3)
+         on conflict (niche_id, influencer_id, dedupe_key) where dedupe_key is not null do nothing
+         returning id`,
+        [n.id, u.id, key],
+      );
+    expect((await submit('abc')).length).toBe(1);
+    expect((await submit('abc')).length).toBe(0);
+    expect((await submit('def')).length).toBe(1);
+  });
+
+  test('events with no natural identity never collide with each other', async () => {
+    const n = await niche();
+    const u = await person();
+    const submit = () =>
+      rows(
+        `insert into contribution_events (niche_id, influencer_id, event_type, points, dedupe_key)
+         values ($1, $2, 'manual_adjustment', 5, null)
+         on conflict (niche_id, influencer_id, dedupe_key) where dedupe_key is not null do nothing
+         returning id`,
+        [n.id, u.id],
+      );
+    expect((await submit()).length).toBe(1);
+    expect((await submit()).length).toBe(1);
+  });
+
+  test('the score sums verified events only, so a reversal stops counting without deleting', async () => {
+    const n = await niche();
+    const u = await person();
+    const add = (points, status) =>
+      db.query(
+        `insert into contribution_events (niche_id, influencer_id, event_type, points, status)
+         values ($1, $2, 'knowledge_created', $3, $4)`,
+        [n.id, u.id, points, status],
+      );
+    const total = async () =>
+      (
+        await one(
+          `select coalesce(sum(points) filter (where status = 'verified'), 0)::int as score
+           from contribution_events where niche_id = $1 and influencer_id = $2`,
+          [n.id, u.id],
+        )
+      ).score;
+
+    await add(20, 'verified');
+    await add(3, 'verified');
+    await add(100, 'pending');
+    await add(50, 'rejected');
+    expect(await total()).toBe(23);
+
+    await add(100, 'verified');
+    expect(await total()).toBe(123);
+    await db.query(
+      `update contribution_events set status = 'reversed'
+       where niche_id = $1 and points = 100 and status = 'verified'`,
+      [n.id],
+    );
+    // The honest 23 survives the reversal, and the reversed row is still there.
+    expect(await total()).toBe(23);
+    const kept = await rows(
+      `select points, status from contribution_events where niche_id = $1 and status = 'reversed'`,
+      [n.id],
+    );
+    expect(kept).toEqual([{ points: 100, status: 'reversed' }]);
+  });
+
+  test('one live application per person per niche, but a decided one does not block a retry', async () => {
+    const n = await niche();
+    const u = await person();
+    const apply = () =>
+      rows(
+        `insert into niche_claims (niche_id, user_id) values ($1, $2)
+         on conflict (niche_id, user_id) where status = 'pending' do nothing returning id`,
+        [n.id, u.id],
+      );
+    const first = await apply();
+    expect(first.length).toBe(1);
+    expect((await apply()).length).toBe(0);
+    await db.query(`update niche_claims set status = 'rejected' where id = $1`, [first[0].id]);
+    expect((await apply()).length).toBe(1);
+  });
+
+  test('a tier a person no longer holds is still in their history', async () => {
+    const n = await niche();
+    const u = await person();
+    for (const [tier, score, bps] of [
+      ['contributor', 0, 2000],
+      ['specialist', 123, 3000],
+      ['contributor', 23, 2000],
+    ]) {
+      await db.query(
+        `insert into tier_history (niche_id, influencer_id, tier_slug, score, share_bps)
+         values ($1, $2, $3, $4, $5)`,
+        [n.id, u.id, tier, score, bps],
+      );
+    }
+    const history = await rows(
+      `select tier_slug, share_bps from tier_history where niche_id = $1 order by id`,
+      [n.id],
+    );
+    expect(history.map((h) => h.share_bps)).toEqual([2000, 3000, 2000]);
+  });
+
+  test('deleting a niche takes its events with it, but not the audit trail', async () => {
+    const n = await niche();
+    const u = await person();
+    await db.query(
+      `insert into contribution_events (niche_id, influencer_id, event_type, points)
+       values ($1, $2, 'agent_answer', 3)`,
+      [n.id, u.id],
+    );
+    await db.query(
+      `insert into knowledge_audit_logs (actor_id, action, subject_type, niche_id)
+       values ($1, 'contribution.verified', 'contribution_event', $2)`,
+      [u.id, n.id],
+    );
+    await db.query(`delete from niches where id = $1`, [n.id]);
+    expect(
+      (await rows(`select id from contribution_events where niche_id = $1`, [n.id])).length,
+    ).toBe(0);
+    // The record of what an admin decided outlives the thing it was about.
+    const audit = await rows(
+      `select action, niche_id from knowledge_audit_logs where actor_id = $1`,
+      [u.id],
+    );
+    expect(audit.length).toBe(1);
+    expect(audit[0].niche_id).toBeNull();
   });
 });
