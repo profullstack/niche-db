@@ -181,7 +181,10 @@ export const config = {
    * Everyone gets a few an hour for nothing, so a person can try it.
    */
   automotive: {
-    freeLookupsPerHour: num('AUTOMOTIVE_FREE_LOOKUPS_PER_HOUR', 5),
+    /* Generous enough that a person comparing a few cars never meets it, and
+       only new decodes are counted at all. The meter is there for agents
+       pulling thousands, not for someone shopping for a used car. */
+    freeLookupsPerHour: num('AUTOMOTIVE_FREE_LOOKUPS_PER_HOUR', 25),
     dayCents: num('AUTOMOTIVE_DAY_CENTS', 100),
     monthlyCents: num('AUTOMOTIVE_MONTHLY_CENTS', 3000),
     /** Straight-line miles a mechanics search may cover. */

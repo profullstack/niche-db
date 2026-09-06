@@ -64,9 +64,10 @@ const Profile = ({ profile }) => {
         </h2>
         {v.vin ? <p class="small muted">VIN {v.vin}</p> : null}
         {h.doNotDrive ? (
-          <p class="notice error">
-            NHTSA says do not drive this vehicle until an open recall is fixed. Details below.
-          </p>
+          <div class="alert alert-destructive" role="alert">
+            <p class="alert-title">Do not drive this vehicle.</p>
+            <p>NHTSA has an open recall on it that says so. The details are below.</p>
+          </div>
         ) : null}
         <p class="stats">
           <Num n={h.openRecalls} /> recalls · <Num n={h.complaints} /> owner complaints ·{' '}
@@ -236,7 +237,7 @@ const Profile = ({ profile }) => {
   );
 };
 
-export const AutomotivePage = ({ user, vin, profile, error, stats, vins }) => (
+export const AutomotivePage = ({ user, vin, miles, profile, error, stats, vins }) => (
   <Layout
     user={user}
     canonical="/vin"
@@ -259,20 +260,51 @@ export const AutomotivePage = ({ user, vin, profile, error, stats, vins }) => (
 
     <section>
       <form class="row" method="get" action="/vin">
-        <label for="vin">VIN</label>
-        <input
-          id="vin"
-          name="vin"
-          value={vin ?? ''}
-          placeholder="1HGCM82633A004352"
-          maxlength="17"
-          autocomplete="off"
-          spellcheck="false"
-        />
-        <label for="miles">Miles</label>
-        <input id="miles" name="miles" type="number" placeholder="84000" min="0" />
-        <button type="submit">Look it up</button>
+        <div class="field">
+          <label class="label" for="vin">
+            VIN
+          </label>
+          <input
+            id="vin"
+            name="vin"
+            type="text"
+            value={vin ?? ''}
+            placeholder="1HGCM82633A004352"
+            maxlength="17"
+            autocomplete="off"
+            autocapitalize="characters"
+            spellcheck="false"
+            aria-describedby="vin-help"
+            aria-invalid={error ? 'true' : undefined}
+          />
+        </div>
+        <div class="field">
+          <label class="label" for="miles">
+            Miles
+          </label>
+          {/* Kept across a submit: retyping the odometer to change one
+              character of the VIN is the kind of small rudeness that makes a
+              form feel broken. */}
+          <input
+            id="miles"
+            name="miles"
+            type="number"
+            value={miles ?? ''}
+            placeholder="84000"
+            min="0"
+            step="1000"
+            inputmode="numeric"
+          />
+        </div>
+        <button class="cta" type="submit">
+          Look it up
+        </button>
       </form>
+      <p class="help" id="vin-help">
+        Seventeen characters, from the corner of the windscreen or the driver's door jamb. A VIN
+        never contains I, O or Q. Miles is optional and only used to work out what the car is due
+        for.
+      </p>
       <Notice error={error} />
     </section>
 

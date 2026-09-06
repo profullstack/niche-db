@@ -1,6 +1,8 @@
 /* NicheDB. One dark ground, one warm accent, tabular numbers where a number is
    the point. Written to read at a glance on a phone. */
 :root {
+  color-scheme: dark;
+
   --ground: oklch(0.15 0.012 260);
   --panel: oklch(0.205 0.014 260);
   --panel2: oklch(0.245 0.015 260);
@@ -13,6 +15,45 @@
   --radius: 10px;
   --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  /* shadcn's token vocabulary, over this site's palette.
+     Every control below is written against THESE names, so a component has one
+     place to read its colour from and a redesign is a change here.
+
+     Two deliberate differences from stock shadcn, because the names were
+     already taken and silently changing them would repaint 600 lines:
+       --muted   here is muted TEXT (shadcn calls that --muted-foreground, and
+                 uses --muted for a surface; --muted-surface is that surface).
+       --accent  here is the brand colour, which is shadcn's --primary. What
+                 shadcn calls --accent, the surface a thing turns on hover, is
+                 --hover. */
+  --background: var(--ground);
+  --foreground: var(--fg);
+  --card: var(--panel);
+  --card-foreground: var(--fg);
+  --popover: var(--panel);
+  --popover-foreground: var(--fg);
+  --primary: var(--accent);
+  --primary-foreground: oklch(0.15 0.012 260);
+  --secondary: var(--panel2);
+  --secondary-foreground: var(--fg);
+  --muted-surface: var(--panel2);
+  --muted-foreground: var(--muted);
+  --hover: var(--panel2);
+  --hover-foreground: var(--fg);
+  --destructive: var(--err);
+  --destructive-foreground: oklch(0.15 0.012 260);
+  --success: var(--ok);
+  --border: var(--line);
+  /* The border a field draws. Its own token in shadcn, because an input's edge
+     wants to be a little brighter than a divider. */
+  --input: oklch(0.36 0.018 260);
+  --ring: var(--accent);
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: var(--radius);
+  /* Every control is this tall, so a field and the button beside it line up. */
+  --control-h: 2.25rem;
 }
 *,
 *::before,
@@ -169,7 +210,20 @@ footer {
   color: var(--muted);
 }
 
-/* controls */
+/* controls
+
+   One vocabulary for every form control on the site, following shadcn/ui's
+   component anatomy: a field is a `.field` wrapping a `.label`, a control, and
+   optional `.help` or `.error-text`. Buttons are `.btn` plus one variant.
+   Colours come only from the tokens at the top of this file, never from a
+   literal, so a control cannot drift from the rest of the site.
+
+   shadcn itself is React, Tailwind and Radix. This site is server-rendered JSX
+   with one stylesheet and almost no client JavaScript, so what is adopted here
+   is its design system rather than its packages: the same token names, the same
+   control height and radius scale, the same focus ring, the same variants.
+*/
+
 input,
 select,
 textarea,
@@ -177,118 +231,312 @@ button {
   font: inherit;
   color: inherit;
 }
-input[type="text"],
-input[type="search"],
-input[type="email"],
-input[type="url"],
-input[type="number"],
+
+/* Every text-like field, selected BY EXCLUSION.
+   Listing the types that should look like a field is exactly how an
+   `<input name="vin">` with no type attribute shipped with a white background
+   and light grey text on it: it matched none of the listed types and fell
+   through to the browser's own styling. An input is a field unless it is one
+   of the few kinds that is not. New field types cost nothing to support. */
+.input,
 select,
-textarea {
+textarea,
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not(
+  [type="color"]
+):not([type="submit"]):not([type="reset"]):not([type="button"]):not([type="image"]):not(
+  [type="hidden"]
+) {
+  display: block;
   width: 100%;
-  background: var(--ground);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 0.5rem 0.65rem;
+  min-height: var(--control-h);
+  background: var(--background);
+  color: var(--foreground);
+  border: 1px solid var(--input);
+  border-radius: var(--radius-md);
+  padding: 0.45rem 0.7rem;
+  /* Set, not inherited. A field nested in a `<label>` would otherwise pick up
+     the label's smaller type and come out shorter than the identical field
+     next to it. 16px is also the size below which iOS zooms the whole page in
+     when the field takes focus. */
+  font-size: 1rem;
+  line-height: 1.35;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
 }
+
+/* Named, rather than left to the browser. The default is a grey chosen for a
+   white page, which on this ground is the faintest thing on screen. */
+::placeholder {
+  color: var(--muted-foreground);
+  /* Firefox dims the placeholder on top of whatever colour it is given. */
+  opacity: 1;
+}
+
 textarea {
   resize: vertical;
   font-family: var(--mono);
   font-size: 0.9rem;
+  min-height: 6rem;
 }
-input:focus,
+
+/* A select is not a text field: it should say it can be opened, and its own
+   arrow is drawn by the platform, so leave room for it rather than padding
+   text underneath it. */
+select {
+  cursor: pointer;
+  padding-right: 2rem;
+}
+
+.input:focus,
 select:focus,
-textarea:focus {
-  outline: 2px solid var(--accent);
-  outline-offset: 1px;
-  border-color: transparent;
+textarea:focus,
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not(
+  [type="color"]
+):not([type="submit"]):not([type="reset"]):not([type="button"]):not([type="image"]):not(
+  [type="hidden"]
+):focus {
+  outline: none;
+  border-color: var(--ring);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 35%, transparent);
 }
+
+/* Chrome paints its own pale yellow over an autofilled field and ignores
+   `background`. An inset shadow the size of the field is the only cover, and
+   without it a saved email lands as near-black text on near-white inside an
+   otherwise dark form. */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+  -webkit-box-shadow: inset 0 0 0 100px var(--background);
+  -webkit-text-fill-color: var(--foreground);
+  caret-color: var(--foreground);
+}
+
+input[aria-invalid="true"],
+select[aria-invalid="true"],
+textarea[aria-invalid="true"],
+.input[aria-invalid="true"] {
+  border-color: var(--destructive);
+}
+
+input:disabled,
+select:disabled,
+textarea:disabled,
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+input[readonly] {
+  color: var(--muted-foreground);
+}
+
+/* Checkboxes and radios keep the platform control, tinted to the brand so a
+   checked box is the same colour as everything else that is "on". */
+input[type="checkbox"],
+input[type="radio"] {
+  accent-color: var(--primary);
+  width: 1rem;
+  height: 1rem;
+  margin: 0;
+  cursor: pointer;
+}
+
+/* buttons */
 button,
-.button {
+.button,
+.btn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.35rem;
-  background: var(--panel2);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 0.5rem 0.9rem;
+  min-height: var(--control-h);
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 0.45rem 0.9rem;
+  /* The same line box as a field, so a button sitting beside one is the same
+     height to the pixel rather than two off. */
+  line-height: 1.35;
+  font-weight: 500;
   cursor: pointer;
   white-space: nowrap;
-  color: var(--fg);
+  text-decoration: none;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    filter 0.15s ease;
 }
 button:hover,
-.button:hover {
+.button:hover,
+.btn:hover {
   text-decoration: none;
-  border-color: var(--muted);
+  background: var(--hover);
+  border-color: var(--muted-foreground);
 }
-.cta {
-  background: var(--accent);
-  color: #12161f;
+button:focus-visible,
+.button:focus-visible,
+.btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--ring) 45%, transparent);
+}
+
+/* Variants. `.cta`, `.ghost` and `.danger` are the names this site already
+   uses; the `.btn-*` spellings are shadcn's, and both resolve here so there is
+   one appearance per intent however it is written. */
+.cta,
+.btn-primary {
+  background: var(--primary);
+  color: var(--primary-foreground);
   border-color: transparent;
   font-weight: 600;
 }
-.cta:hover {
+.cta:hover,
+.btn-primary:hover {
+  background: var(--primary);
+  border-color: transparent;
   filter: brightness(1.08);
 }
-.ghost {
+.btn-secondary {
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+}
+.btn-outline {
+  background: transparent;
+  border-color: var(--input);
+}
+.ghost,
+.btn-ghost {
+  background: transparent;
+  border-color: transparent;
+}
+.ghost:hover,
+.btn-ghost:hover {
+  background: var(--hover);
+  border-color: transparent;
+}
+.danger,
+.btn-destructive {
+  color: var(--destructive);
+  border-color: var(--destructive);
   background: transparent;
 }
-.danger {
-  color: var(--err);
-  border-color: var(--err);
+.danger:hover,
+.btn-destructive:hover {
+  background: color-mix(in oklch, var(--destructive) 15%, transparent);
+  border-color: var(--destructive);
 }
-button.small {
+.btn-link {
+  background: transparent;
+  border-color: transparent;
+  color: var(--primary);
+  padding-inline: 0.25rem;
+}
+.btn-link:hover {
+  background: transparent;
+  text-decoration: underline;
+}
+button.small,
+.btn-sm {
+  min-height: 2rem;
   padding: 0.25rem 0.6rem;
   font-size: 0.85rem;
 }
+.btn-lg {
+  min-height: 2.75rem;
+  padding: 0.6rem 1.25rem;
+}
+
 form.inline {
   display: inline;
   margin-left: 0.35rem;
 }
+
+/* field groups */
 .row {
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-end;
   margin: 0.5rem 0;
 }
-.row input,
-.row select {
+/* Direct children only. A control inside a `.field` is a flex item of that
+   COLUMN, where a flex-basis is a height, so the unscoped version of this rule
+   made every field in a row twelve rems tall. */
+.row > input,
+.row > select,
+.row > .input {
   flex: 1 1 12rem;
   width: auto;
+}
+.row > .field {
+  flex: 1 1 12rem;
+}
+.field > input,
+.field > select,
+.field > textarea,
+.field > .input {
+  flex: 0 0 auto;
+  width: 100%;
 }
 .stack {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
 }
+
+/* A label, a control, and whatever explains it, as one unit. */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+.label,
 .stack label,
 .form label {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
-  font-size: 0.9rem;
-  color: var(--muted);
+  gap: 0.35rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--foreground);
+  line-height: 1.3;
+}
+.field .label {
+  display: block;
 }
 .stack label input,
 .form label input,
 .form label select,
 .form label textarea {
-  color: var(--fg);
+  color: var(--foreground);
+  font-weight: 400;
 }
 label.check,
 .stack label.check {
   flex-direction: row;
   align-items: center;
   gap: 0.5rem;
-  color: var(--fg);
+  color: var(--foreground);
+  font-weight: 400;
 }
 .help {
   font-size: 0.8rem;
-  color: var(--muted);
+  color: var(--muted-foreground);
+}
+.error-text,
+.err-text {
+  font-size: 0.8rem;
+  color: var(--destructive);
 }
 fieldset {
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
   padding: 0.6rem 0.9rem;
   margin: 0;
   display: flex;
@@ -296,28 +544,43 @@ fieldset {
   gap: 0.4rem 1rem;
 }
 legend {
-  color: var(--muted);
+  color: var(--muted-foreground);
   font-size: 0.85rem;
+  font-weight: 500;
   padding: 0 0.3rem;
 }
-.feedback {
-  padding: 0.6rem 0.9rem;
-  border-radius: 8px;
-  border: 1px solid var(--line);
-  background: var(--panel);
+
+/* alerts
+   One block for anything the page needs to say back: the result of a form, or
+   a warning that belongs to the content. `.feedback` is the existing spelling
+   and `.alert` is shadcn's; they are the same thing. */
+.feedback,
+.alert {
+  padding: 0.7rem 0.9rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--card-foreground);
   margin: 0.75rem 0;
 }
-.feedback.ok {
-  border-color: var(--ok);
+.alert-title {
+  font-weight: 600;
+  margin: 0 0 0.15rem;
 }
-.feedback.error {
-  border-color: var(--err);
+.feedback.ok,
+.alert.ok,
+.alert-success {
+  border-color: var(--success);
 }
-.feedback.info {
-  border-color: var(--line);
+.feedback.error,
+.alert.error,
+.alert-destructive {
+  border-color: var(--destructive);
+  background: color-mix(in oklch, var(--destructive) 12%, var(--card));
 }
-.err-text {
-  color: var(--err);
+.feedback.info,
+.alert.info {
+  border-color: var(--border);
 }
 
 /* layout bits */
@@ -519,6 +782,33 @@ time.undated {
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
+/* A key/value table: one subject, its attributes down the side. Different
+   enough from `.table`, which is a grid of many rows of the same shape, to be
+   its own thing — a row header here is a plain label, not a column heading. */
+.kv {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.75rem 0;
+}
+.kv th,
+.kv td {
+  text-align: left;
+  padding: 0.5rem 0.6rem 0.5rem 0;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+}
+.kv th {
+  color: var(--muted-foreground);
+  font-weight: 500;
+  white-space: nowrap;
+  width: 1%;
+  padding-right: 1.25rem;
+}
+.kv tr:last-child th,
+.kv tr:last-child td {
+  border-bottom: 0;
+}
+
 .table.small td {
   font-size: 0.875rem;
 }
