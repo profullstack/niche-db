@@ -1,6 +1,7 @@
 import { config } from '@nichedb/config';
 import { Hono } from 'hono';
 import { isProUser, loadUser, render, wantsJson } from './lib/http.js';
+import { leaderboard } from './lib/leaderboard.js';
 import { modulesFor, withModules } from './lib/modules.js';
 import { gateway, gatewayFor } from './lib/pricing.js';
 import { Denied } from './lib/service.js';
@@ -44,6 +45,16 @@ app.use('*', async (c, next) => {
 });
 
 app.use('*', loadUser);
+
+/**
+ * The public board: partners earning on one side, agents spending on the
+ * other, kept apart. Serves its own pages, JSON, RSS, per-player share cards
+ * and the embed widget under /leaderboard.
+ */
+app.use('*', async (c, next) => {
+  const answer = await leaderboard.handle(c.req.raw);
+  return answer ?? next();
+});
 
 /** Ads and tracking: on for free, off for Pro, the buyer's choice with a pass. */
 app.use('*', async (c, next) => {

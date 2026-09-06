@@ -29,6 +29,7 @@
         "@nichedb/notify": "workspace:*",
         "@nichedb/payments": "workspace:*",
         "@nichedb/queue": "workspace:*",
+        "@profullstack/leaderboard": "^0.3.0",
         "@profullstack/nichedb": "workspace:*",
         "@profullstack/x402-gateway": "^0.1.0",
         "@simplewebauthn/browser": "^13.2.0",
@@ -295,6 +296,8 @@
     "@profullstack/emailer": ["@profullstack/emailer@1.0.3", "", {}, "sha512-VyAtCcfnSI6LOwJvWogCr3ZNmEsaZw+iuWrqnosLsdcKsbRyCrCmXigMNZJZEjlgYlR+lK//PwNPG+xtCFvWAw=="],
 
     "@profullstack/favicon-generator": ["@profullstack/favicon-generator@1.2.1", "", { "dependencies": { "inquirer": "^10.2.2", "sharp": "^0.33.5" }, "bin": { "fav": "bin/cli.js" } }, "sha512-1w+EcoEmi60TXXQd97Brs7kN/BmlaoOcNvE39ZombUWSCBFBNe6fFm2mA7HORXb7TM39mHklNTIoG20glLsgVA=="],
+
+    "@profullstack/leaderboard": ["@profullstack/leaderboard@0.3.0", "", {}, "sha512-SKPmIqhmrAhFQqHl9wJHV1NzJHUCNBsqWc1F6M5AeFfphXWGfKSmgeCC3QN37JH/cQ1NxS8kYC/DqbjQqNBoaQ=="],
 
     "@profullstack/nichedb": ["@profullstack/nichedb@workspace:apps/cli"],
 
