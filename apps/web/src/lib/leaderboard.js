@@ -32,7 +32,10 @@ const badges = {
   async badges() {
     const rows = await sql`select player, badge, awarded_at from leaderboard_badges`;
     const out = {};
-    for (const r of rows) (out[r.player] ??= {})[r.badge] = ms(r.awarded_at);
+    for (const r of rows) {
+      out[r.player] ??= {};
+      out[r.player][r.badge] = ms(r.awarded_at);
+    }
     return out;
   },
 };
@@ -43,7 +46,18 @@ const badges = {
  * does not. A sale with neither is skipped rather than pooled into one
  * "unknown" row, which would outrank every real buyer on the board.
  */
-const KNOWN_AGENTS = ['meta-externalagent', 'GPTBot', 'ClaudeBot', 'anthropic-ai', 'CCBot', 'Bytespider', 'Applebot', 'FacebookBot', 'Lightpanda', 'PerplexityBot'];
+const KNOWN_AGENTS = [
+  'meta-externalagent',
+  'GPTBot',
+  'ClaudeBot',
+  'anthropic-ai',
+  'CCBot',
+  'Bytespider',
+  'Applebot',
+  'FacebookBot',
+  'Lightpanda',
+  'PerplexityBot',
+];
 function agentName(userAgent) {
   const ua = String(userAgent ?? '');
   const known = KNOWN_AGENTS.find((k) => ua.toLowerCase().includes(k.toLowerCase()));
@@ -84,7 +98,8 @@ async function events({ since }) {
     // A partner who set no display name is shown by a stable short id, never
     // by the email they signed up with.
     const name = r.name || `Partner ${String(r.affiliate_id).slice(0, 8)}`;
-    const each = (metric, delta) => out.push({ player: String(r.affiliate_id), name, metric, delta, at });
+    const each = (metric, delta) =>
+      out.push({ player: String(r.affiliate_id), name, metric, delta, at });
     each('earned', Number(r.commission_cents) || 0);
     each('referrals', 1);
   }
@@ -100,11 +115,46 @@ export const leaderboard = createLeaderboard({
   // and an agent spending $209 are not the same fact about NicheDB.
   sides: { sell: 'Partners earning', buy: 'Agents spending', use: 'Crawl usage' },
   boards: {
-    earners: { label: 'Top earners', metric: 'earned', format: 'usd', unit: 'Earned', side: 'sell', actor: 'Partner' },
-    referrers: { label: 'Most referrals', metric: 'referrals', format: 'integer', unit: 'Referrals', side: 'sell', actor: 'Partner' },
-    spenders: { label: 'Biggest spenders', metric: 'spent', format: 'usd', unit: 'Spent', side: 'buy', actor: 'Agent' },
-    passes: { label: 'Most passes bought', metric: 'passes', format: 'integer', unit: 'Passes', side: 'buy', actor: 'Agent' },
-    days: { label: 'Most days of access', metric: 'days', format: 'integer', unit: 'Days', side: 'use', actor: 'Agent' },
+    earners: {
+      label: 'Top earners',
+      metric: 'earned',
+      format: 'usd',
+      unit: 'Earned',
+      side: 'sell',
+      actor: 'Partner',
+    },
+    referrers: {
+      label: 'Most referrals',
+      metric: 'referrals',
+      format: 'integer',
+      unit: 'Referrals',
+      side: 'sell',
+      actor: 'Partner',
+    },
+    spenders: {
+      label: 'Biggest spenders',
+      metric: 'spent',
+      format: 'usd',
+      unit: 'Spent',
+      side: 'buy',
+      actor: 'Agent',
+    },
+    passes: {
+      label: 'Most passes bought',
+      metric: 'passes',
+      format: 'integer',
+      unit: 'Passes',
+      side: 'buy',
+      actor: 'Agent',
+    },
+    days: {
+      label: 'Most days of access',
+      metric: 'days',
+      format: 'integer',
+      unit: 'Days',
+      side: 'use',
+      actor: 'Agent',
+    },
   },
   ladder: true,
   cacheMs: 60_000,

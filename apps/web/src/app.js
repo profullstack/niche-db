@@ -1,6 +1,7 @@
 import { config } from '@nichedb/config';
 import { Hono } from 'hono';
 import { isProUser, loadUser, render, wantsJson } from './lib/http.js';
+import { leaderboard } from './lib/leaderboard.js';
 import { modulesFor, withModules } from './lib/modules.js';
 import { gateway, gatewayFor } from './lib/pricing.js';
 import { Denied } from './lib/service.js';
@@ -10,7 +11,6 @@ import { registerManage } from './routes/manage.js';
 import { registerMcp } from './routes/mcp.js';
 import { registerPages } from './routes/pages.js';
 import { registerStatic } from './routes/static.js';
-import { leaderboard } from './lib/leaderboard.js';
 import { NotFound } from './views/pages.jsx';
 
 export const app = new Hono();

@@ -104,7 +104,15 @@ export function gatewayOptions(priceCents) {
     // alone would open the index and still charge for every board on it. It is
     // the public record of who pays for this data, and an agent that hits a 402
     // on the page ranking it cannot read the case for buying a pass.
-    openPaths: ['/llms.txt', '/mcp', '/api/', '/healthz', '/manifest.webmanifest', '/leaderboard', '/leaderboard/'],
+    openPaths: [
+      '/llms.txt',
+      '/mcp',
+      '/api/',
+      '/healthz',
+      '/manifest.webmanifest',
+      '/leaderboard',
+      '/leaderboard/',
+    ],
     onSale: async (sale) => {
       console.log('[x402] sold a pass', {
         payer: sale.payer,
