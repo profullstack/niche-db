@@ -102,6 +102,7 @@ export const Layout = (props) => (
         <nav>
           <a href="/sources">Sources</a>
           <a href="/feeds">Feeds</a>
+          <a href="/vin">VIN</a>
           {props.user ? <a href="/following">Following</a> : null}
           <a href="/docs/api">API</a>
           {props.user ? (

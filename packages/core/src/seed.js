@@ -87,6 +87,18 @@ export const COLLECTIONS = [
     name: 'Research',
     description: 'New preprints and DOIs with abstracts, authors, TL;DRs and citation counts.',
   },
+  {
+    slug: 'automotive',
+    name: 'Automotive',
+    description:
+      'Every make, model and year sold in the US, and what is known about each one: safety recalls, what owners report going wrong, crash-test ratings, engines and mpg. Decode a VIN and get all of it for one car.',
+  },
+  {
+    slug: 'ai-incidents',
+    name: 'AI incidents',
+    description:
+      'What autonomous AI agents have actually been caught doing, and the harms AI systems have caused in the world, each entry linked to the primary source that evidenced it.',
+  },
 ];
 
 export const DEFAULT_FEEDS = [
@@ -262,6 +274,61 @@ export const DEFAULT_FEEDS = [
     slug: 'go-tagged',
     name: 'Go: tagged module versions',
     query: { sources: ['go-modules'] },
+  },
+  {
+    collection: 'automotive',
+    slug: 'do-not-drive',
+    name: 'Do not drive: the urgent recalls',
+    description: 'Recalls where NHTSA’s advice is to stop driving the car or park it outside.',
+    query: { kinds: ['recall'], tags: ['do-not-drive', 'park-outside'] },
+  },
+  {
+    collection: 'automotive',
+    slug: 'vehicle-recalls',
+    name: 'Vehicle recalls',
+    query: { kinds: ['recall'] },
+  },
+  {
+    collection: 'automotive',
+    slug: 'owner-complaints',
+    name: 'What owners report going wrong',
+    query: { kinds: ['complaint'] },
+  },
+  {
+    collection: 'automotive',
+    slug: 'crashes-and-fires',
+    name: 'Complaints involving a crash or a fire',
+    query: { kinds: ['complaint'], tags: ['crash', 'fire', 'injury', 'fatality'] },
+  },
+  {
+    collection: 'automotive',
+    slug: 'crash-test-ratings',
+    name: 'Crash-test ratings',
+    query: { kinds: ['safety-rating'] },
+  },
+  {
+    collection: 'automotive',
+    slug: 'vehicle-catalog',
+    name: 'Makes, models and years',
+    query: { kinds: ['model'] },
+  },
+  {
+    collection: 'ai-incidents',
+    slug: 'rogue-agent-incidents',
+    name: 'Rogue agent incidents',
+    query: { kinds: ['incident'] },
+  },
+  {
+    collection: 'ai-incidents',
+    slug: 'ai-harms',
+    name: 'AI harms as they are reported',
+    query: { kinds: ['incident-report'] },
+  },
+  {
+    collection: 'ai-incidents',
+    slug: 'agent-research',
+    name: 'Research on agents and multi-agent systems',
+    query: { kinds: ['research'] },
   },
 ];
 

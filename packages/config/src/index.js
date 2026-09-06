@@ -170,6 +170,24 @@ export const config = {
     contact: opt('CRAWL_CONTACT'),
   },
 
+  /**
+   * The automotive lookups: VIN decode, the vehicle profile, mechanics and
+   * parts. The feeds are free like every other collection — these are the
+   * per-vehicle answers assembled live from four upstreams, and they are what
+   * buyers have actually asked to pay for.
+   *
+   * A dollar a day is already the crawl-pass price, so a pass covers them.
+   * `AUTOMOTIVE_MONTHLY_CENTS` is the month-at-a-time price quoted beside it.
+   * Everyone gets a few an hour for nothing, so a person can try it.
+   */
+  automotive: {
+    freeLookupsPerHour: num('AUTOMOTIVE_FREE_LOOKUPS_PER_HOUR', 5),
+    dayCents: num('AUTOMOTIVE_DAY_CENTS', 100),
+    monthlyCents: num('AUTOMOTIVE_MONTHLY_CENTS', 3000),
+    /** Straight-line miles a mechanics search may cover. */
+    maxRadiusMiles: num('AUTOMOTIVE_MAX_RADIUS_MILES', 50),
+  },
+
   /** CrawlProof ads on the free tier: the publisher slot pages and feeds fill from. */
   ads: {
     get slot() {
