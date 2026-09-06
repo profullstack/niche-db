@@ -6,6 +6,7 @@ import { modulesFor, withModules } from './lib/modules.js';
 import { partners } from './lib/partners.js';
 import { gateway, gatewayFor } from './lib/pricing.js';
 import { Denied } from './lib/service.js';
+import { registerAgents } from './routes/agents.js';
 import { registerApi } from './routes/api.js';
 import { registerAuth } from './routes/auth.js';
 import { registerAutomotive } from './routes/automotive.js';
@@ -99,6 +100,12 @@ registerManage(app);
 registerApi(app);
 registerAutomotive(app);
 registerMcp(app);
+
+/**
+ * The agent question loop. Before the niche routes, because its dashboard and
+ * API paths are literal and must be matched before `/:slug` is asked.
+ */
+registerAgents(app);
 
 /**
  * Last, because a niche's page is served from the site root: every other

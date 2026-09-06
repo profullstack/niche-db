@@ -223,7 +223,7 @@ export async function getOpportunity(slug) {
 export async function upsertOpportunity({ nicheId, score, dimensions = {}, rationale = null }) {
   const [row] = await sql`
     insert into opportunities (niche_id, score, dimensions, rationale)
-    values (${Number(nicheId)}, ${score ?? null}, ${JSON.stringify(dimensions)}::jsonb, ${rationale})
+    values (${Number(nicheId)}, ${score ?? null}, ${JSON.stringify(dimensions)}::text::jsonb, ${rationale})
     on conflict (niche_id) do update
       set score = excluded.score, dimensions = excluded.dimensions,
           rationale = excluded.rationale, updated_at = now()
@@ -241,7 +241,7 @@ export async function upsertOpportunity({ nicheId, score, dimensions = {}, ratio
 export async function createClaim({ nicheId, userId, answers = {} }) {
   const [row] = await sql`
     insert into niche_claims (niche_id, user_id, answers)
-    values (${Number(nicheId)}, ${userId}::uuid, ${JSON.stringify(answers)}::jsonb)
+    values (${Number(nicheId)}, ${userId}::uuid, ${JSON.stringify(answers)}::text::jsonb)
     on conflict (niche_id, user_id) where status = 'pending' do nothing
     returning *
   `;
@@ -386,14 +386,17 @@ export async function recordContribution({
     insert into contribution_events
       (niche_id, influencer_id, event_type, points, status, source_type, source_id, evidence, dedupe_key, verified_at)
     values (${Number(nicheId)}, ${influencerId}::uuid, ${type}, ${scored.points}, ${scored.status},
-            ${sourceType}, ${sourceId}, ${JSON.stringify(evidence)}::jsonb, ${scored.dedupeKey},
+            ${sourceType}, ${sourceId}, ${JSON.stringify(evidence)}::text::jsonb, ${scored.dedupeKey},
             ${scored.status === 'verified' ? new Date() : null})
     on conflict (niche_id, influencer_id, dedupe_key) where dedupe_key is not null do nothing
     returning *
   `;
   if (!row) return { event: null, duplicate: true, points: 0, status: 'rejected', ...scored };
 
-  if (row.status === 'verified') await refreshScore({ nicheId, influencerId });
+  // Recomputed whichever way it landed. A pending contribution moves no score
+  // but it does move the count the dashboard shows, and "0 awaiting review"
+  // while something waits is how a person concludes the form is broken.
+  await refreshScore({ nicheId, influencerId });
   return { event: row, ...scored, duplicate: false };
 }
 
@@ -611,7 +614,7 @@ export async function audit({
   await sql`
     insert into knowledge_audit_logs (actor_id, action, subject_type, subject_id, niche_id, detail)
     values (${actorId}::uuid, ${action}, ${subjectType}, ${subjectId}, ${nicheId},
-            ${JSON.stringify(detail)}::jsonb)
+            ${JSON.stringify(detail)}::text::jsonb)
   `;
 }
 

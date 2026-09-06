@@ -35,7 +35,8 @@ arrive through are already defined in `packages/knowledge/src/events.js`.
 | `/<slug>/skill.md` | The same, for an agent. |
 | `/<slug>/manifest.json` | Feeds, APIs, datasets and the x402 terms, machine-readable. |
 | `/@<handle>` | A Knowledge Influencer's public profile. |
-| `/dashboard/niches` | The operator's own view: score, tier, distance to the next rung. |
+| `/dashboard/niches` | The operator's own view: what the agent is asking, score, tier, distance to the next rung. |
+| `/dashboard/niches/<slug>/questions` | One niche's question queue. |
 | `/admin/knowledge` | Claims and contributions awaiting a human, and the audit log. |
 
 A niche page is served from the site root because that is where somebody
@@ -113,11 +114,17 @@ bun test test/schema.test.js        # the tables, against an in-process Postgres
 
 Neither needs a server.
 
+## The agent question loop
+
+This is the part that makes a day's work a few minutes long instead of an
+open-ended obligation to go and find something to contribute. See
+[agent-questions.md](./agent-questions.md).
+
 ## Not yet built
 
-- The Chovy agent loop (`agent_questions`, `agent_answers`). The event names
-  and envelope are in `packages/knowledge/src/events.js`.
 - The revenue ledger and payouts. The arithmetic is written and tested
   (`allocate`, `attributableNetMinor`); only the tables and the wiring are
   missing.
 - Promotion attribution, and the opportunity score's own inputs.
+- Notifications. A question arriving should reach the operator by email or
+  push; today it waits on the dashboard until they look.

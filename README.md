@@ -93,6 +93,13 @@ public page (plus `skill.md` and `manifest.json` for agents), `/@<handle>` is an
 operator's profile, `/dashboard/niches` is their own view, and
 `/admin/knowledge` is where claims and contributions are verified.
 
+When an agent gets stuck on something only a person who has done the job can
+settle, it asks: the question lands on the operator's dashboard, the answer
+becomes niche knowledge and a scored contribution, and Chovy is told. Saying
+"not enough context" is a first-class answer that costs nothing, because a
+guess that gets verified is worse for the niche than an open question. See
+[docs/agent-questions.md](docs/agent-questions.md).
+
 Score comes only from contributions somebody verified, and volume does not buy
 it: repeated submissions of a type pay less each time, anything claiming a
 customer or a payment needs an outside reference, and a duplicate books once.

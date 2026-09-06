@@ -260,6 +260,18 @@ export const config = {
   // be paid for their work, and a weak fallback is how that ships by accident.
   partnerSecret: opt('PARTNER_VERIFY_SECRET', ''),
 
+  // The agent question loop. The internal routes create scored work and move
+  // somebody's revenue share, so they are signed rather than merely internal.
+  // No default and no fallback: unset means the routes answer 503 and the
+  // dashboard simply has no questions on it, which is a visible nothing rather
+  // than an endpoint anyone who can reach the port may post to.
+  chovy: {
+    signingSecret: opt('CHOVY_SIGNING_SECRET', ''),
+    // Where an answer is delivered back. Optional: the loop still records and
+    // scores without it, the agent just has to come and read.
+    webhookUrl: opt('CHOVY_WEBHOOK_URL', ''),
+  },
+
   session: {
     cookie: 'ndb_session',
     ttlDays: num('SESSION_TTL_DAYS', 90),

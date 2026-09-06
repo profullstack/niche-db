@@ -41,6 +41,9 @@ export const NICHEDB_EVENTS = [
   'influencer.joined',
   'influencer.tier_changed',
   'expert_answer.created',
+  // A human read the question and sent it back: the agent has to find out more
+  // before a person can settle it. Not a failure, and not scored.
+  'agent.research_requested',
   'source.approved',
   'source.rejected',
   'product_idea.created',

@@ -62,6 +62,8 @@ describe('migrations', () => {
       'contribution_scores',
       'tier_history',
       'knowledge_audit_logs',
+      'agent_questions',
+      'agent_answers',
     ]) {
       expect(names).toContain(t);
     }
@@ -378,5 +380,240 @@ describe('knowledge influencers', () => {
     );
     expect(audit.length).toBe(1);
     expect(audit[0].niche_id).toBeNull();
+  });
+});
+
+/**
+ * The agent question loop's tables. What is checked here is what the
+ * application trusts the database for: a redelivered question appears once, a
+ * person answers once, and declining leaves no scored trace.
+ */
+describe('agent questions', () => {
+  const niche = async () =>
+    one(`insert into niches (slug, name) values ($1, 'N') returning id`, [
+      `q${Math.random()}`.replace('.', ''),
+    ]);
+  const person = async () =>
+    one(`insert into users (email) values ($1) returning id`, [`a${Math.random()}@e.com`]);
+  const ask = (nicheId, externalId = null, urgency = 'normal') =>
+    rows(
+      `insert into agent_questions (niche_id, external_id, title, question, urgency)
+       values ($1, $2, 'T', 'Q', $3)
+       on conflict (niche_id, external_id) where external_id is not null do nothing
+       returning id`,
+      [nicheId, externalId, urgency],
+    );
+
+  test('a question delivered twice is stored once', async () => {
+    const n = await niche();
+    expect((await ask(n.id, 'chovy-q-1')).length).toBe(1);
+    expect((await ask(n.id, 'chovy-q-1')).length).toBe(0);
+    // A different agent id is a different question.
+    expect((await ask(n.id, 'chovy-q-2')).length).toBe(1);
+  });
+
+  test('the same external id in another niche is another question', async () => {
+    const a = await niche();
+    const b = await niche();
+    expect((await ask(a.id, 'shared')).length).toBe(1);
+    expect((await ask(b.id, 'shared')).length).toBe(1);
+  });
+
+  test('questions raised by hand have no id and never collide', async () => {
+    const n = await niche();
+    expect((await ask(n.id, null)).length).toBe(1);
+    expect((await ask(n.id, null)).length).toBe(1);
+  });
+
+  test('urgency and status are constrained, so a typo cannot hide a question', async () => {
+    const n = await niche();
+    let threw = null;
+    try {
+      await db.query(
+        `insert into agent_questions (niche_id, title, question, urgency) values ($1,'T','Q','asap')`,
+        [n.id],
+      );
+    } catch (e) {
+      threw = e.message;
+    }
+    expect(threw).toMatch(/agent_questions_urgency/);
+
+    threw = null;
+    try {
+      await db.query(
+        `insert into agent_questions (niche_id, title, question, status) values ($1,'T','Q','done')`,
+        [n.id],
+      );
+    } catch (e) {
+      threw = e.message;
+    }
+    expect(threw).toMatch(/agent_questions_status/);
+  });
+
+  test('one answer per person per question', async () => {
+    const n = await niche();
+    const [q] = await ask(n.id, 'once');
+    const u = await person();
+    const answer = () =>
+      rows(
+        `insert into agent_answers (question_id, influencer_id, kind, body)
+         values ($1, $2, 'answered', 'ten percent')
+         on conflict (question_id, influencer_id) do nothing returning id`,
+        [q.id, u.id],
+      );
+    expect((await answer()).length).toBe(1);
+    expect((await answer()).length).toBe(0);
+  });
+
+  test('two operators can each answer the same question', async () => {
+    const n = await niche();
+    const [q] = await ask(n.id, 'two');
+    const a = await person();
+    const b = await person();
+    for (const u of [a, b]) {
+      const out = await rows(
+        `insert into agent_answers (question_id, influencer_id, kind) values ($1, $2, 'answered')
+         on conflict (question_id, influencer_id) do nothing returning id`,
+        [q.id, u.id],
+      );
+      expect(out.length).toBe(1);
+    }
+  });
+
+  test('declining is recorded and carries no contribution', async () => {
+    const n = await niche();
+    const [q] = await ask(n.id, 'decline');
+    const u = await person();
+    await db.query(
+      `insert into agent_answers (question_id, influencer_id, kind) values ($1, $2, 'insufficient_context')`,
+      [q.id, u.id],
+    );
+    const row = await one(
+      `select kind, contribution_event_id from agent_answers where question_id = $1`,
+      [q.id],
+    );
+    expect(row.kind).toBe('insufficient_context');
+    // No points, and nothing to reverse later. Declining has to be free.
+    expect(row.contribution_event_id).toBeNull();
+  });
+
+  test('an answer kind nobody defined is refused', async () => {
+    const n = await niche();
+    const [q] = await ask(n.id, 'kind');
+    const u = await person();
+    let threw = null;
+    try {
+      await db.query(
+        `insert into agent_answers (question_id, influencer_id, kind) values ($1, $2, 'maybe')`,
+        [q.id, u.id],
+      );
+    } catch (e) {
+      threw = e.message;
+    }
+    expect(threw).toMatch(/agent_answers_kind/);
+  });
+
+  test('the open queue is urgent first, then oldest first', async () => {
+    const n = await niche();
+    await ask(n.id, 'low-1', 'low');
+    await ask(n.id, 'high-1', 'high');
+    await ask(n.id, 'normal-1', 'normal');
+    const queue = await rows(
+      `select external_id from agent_questions
+       where niche_id = $1 and status in ('open','researching')
+       order by case urgency when 'high' then 0 when 'normal' then 1 else 2 end, created_at`,
+      [n.id],
+    );
+    expect(queue.map((r) => r.external_id)).toEqual(['high-1', 'normal-1', 'low-1']);
+  });
+
+  test('deleting a question takes its answers, and the contribution outlives it', async () => {
+    const n = await niche();
+    const [q] = await ask(n.id, 'cascade');
+    const u = await person();
+    const ev = await one(
+      `insert into contribution_events (niche_id, influencer_id, event_type, points, status)
+       values ($1, $2, 'agent_answer', 3, 'verified') returning id`,
+      [n.id, u.id],
+    );
+    await db.query(
+      `insert into agent_answers (question_id, influencer_id, kind, contribution_event_id)
+       values ($1, $2, 'answered', $3)`,
+      [q.id, u.id, ev.id],
+    );
+    await db.query(`delete from agent_questions where id = $1`, [q.id]);
+    expect((await rows(`select id from agent_answers where question_id = $1`, [q.id])).length).toBe(
+      0,
+    );
+    // The score does not move because a question was tidied away.
+    expect(await one(`select id from contribution_events where id = $1`, [ev.id])).toBeDefined();
+  });
+});
+
+/**
+ * The jsonb repair. What went wrong is worth pinning down: a stringified
+ * object cast straight to jsonb is stored as a jsonb *string*, and every read
+ * of it then sees characters instead of fields.
+ */
+describe('jsonb columns hold structure, not a string of one', () => {
+  test('casting through text is what parses it', async () => {
+    const direct = await one(`select jsonb_typeof($1::jsonb) as shape`, ['{"software_gap":80}']);
+    const viaText = await one(`select jsonb_typeof($1::text::jsonb) as shape`, [
+      '{"software_gap":80}',
+    ]);
+    // PGlite parses a text parameter on the way in, so both look right here.
+    // The distinction this pins is the SQL, which is what production runs.
+    expect(['string', 'object']).toContain(direct.shape);
+    expect(viaText.shape).toBe('object');
+  });
+
+  test('the repair turns a jsonb string back into the object it spells', async () => {
+    const n = await one(`insert into niches (slug, name) values ($1,'N') returning id`, [
+      `r${Math.random()}`.replace('.', ''),
+    ]);
+    // Store the broken shape on purpose: a jsonb string containing JSON.
+    await db.query(
+      `insert into opportunities (niche_id, dimensions) values ($1, to_jsonb($2::text))`,
+      [n.id, '{"software_gap":80}'],
+    );
+    const before = await one(
+      `select jsonb_typeof(dimensions) as shape from opportunities where niche_id = $1`,
+      [n.id],
+    );
+    expect(before.shape).toBe('string');
+
+    await db.query(
+      `update opportunities set dimensions = (dimensions #>> '{}')::jsonb
+       where jsonb_typeof(dimensions) = 'string'`,
+    );
+
+    const after = await one(
+      `select jsonb_typeof(dimensions) as shape, dimensions->>'software_gap' as gap
+       from opportunities where niche_id = $1`,
+      [n.id],
+    );
+    expect(after.shape).toBe('object');
+    // And it is queryable as jsonb, which a string never was.
+    expect(after.gap).toBe('80');
+  });
+
+  test('the repair leaves a correct row alone and can be run twice', async () => {
+    const n = await one(`insert into niches (slug, name) values ($1,'N') returning id`, [
+      `r${Math.random()}`.replace('.', ''),
+    ]);
+    await db.query(`insert into opportunities (niche_id, dimensions) values ($1, $2::jsonb)`, [
+      n.id,
+      '{"lead_value":70}',
+    ]);
+    const repair = () =>
+      db.query(`update opportunities set dimensions = (dimensions #>> '{}')::jsonb
+                where jsonb_typeof(dimensions) = 'string'`);
+    await repair();
+    await repair();
+    const after = await one(
+      `select dimensions->>'lead_value' as v from opportunities where niche_id = $1`,
+      [n.id],
+    );
+    expect(after.v).toBe('70');
   });
 });
