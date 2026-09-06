@@ -85,19 +85,43 @@ export function splitShareBps(members, { maxBps = MAX_SHARE_BPS } = {}) {
   // scaled by the same factor, so relative standing survives the squeeze.
   if (wanted <= maxBps) return rows.map((r) => ({ ...r, shareBps: r.wanted }));
 
-  const exact = rows.map((r) => (r.wanted * maxBps) / wanted);
-  const floors = exact.map((n) => Math.floor(n));
-  let left = maxBps - floors.reduce((a, b) => a + b, 0);
+  const out = apportion(
+    maxBps,
+    rows.map((r) => r.wanted),
+  );
+  return rows.map((r, i) => ({ ...r, shareBps: out[i] }));
+}
+
+/**
+ * Divide a whole integer between claimants in proportion to their weights,
+ * losing nothing.
+ *
+ * Largest remainder: everyone takes their floor, then the leftover units go to
+ * whoever was cut hardest, one each. The parts sum to exactly `total`, which
+ * matters twice over here. Shares that sum to 7,999 basis points quietly
+ * underpay somebody, and cents that do not add up to the sale mean the ledger
+ * disagrees with the bank.
+ *
+ * Ties break on index so the same input always divides the same way.
+ */
+export function apportion(total, weights) {
+  const whole = Math.max(0, Math.floor(Number(total) || 0));
+  const w = (weights ?? []).map((n) => Math.max(0, Number(n) || 0));
+  const sum = w.reduce((a, b) => a + b, 0);
+  if (whole === 0 || sum === 0) return w.map(() => 0);
+
+  const exact = w.map((n) => (n * whole) / sum);
+  const out = exact.map((n) => Math.floor(n));
+  let left = whole - out.reduce((a, b) => a + b, 0);
   const order = exact
     .map((n, i) => ({ i, frac: n - Math.floor(n) }))
     .sort((a, b) => b.frac - a.frac || a.i - b.i);
-  const out = [...floors];
   for (const { i } of order) {
     if (left <= 0) break;
     out[i] += 1;
     left -= 1;
   }
-  return rows.map((r, i) => ({ ...r, shareBps: out[i] }));
+  return out;
 }
 
 /** "40%" from 4000, for a page. One decimal only when the number needs it. */

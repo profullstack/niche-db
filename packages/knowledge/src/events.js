@@ -10,7 +10,7 @@
  * ledger tables the arithmetic under them is already known to be right.
  */
 
-import { MAX_SHARE_BPS, splitShareBps } from './tiers.js';
+import { apportion, MAX_SHARE_BPS, splitShareBps } from './tiers.js';
 
 /**
  * Every event between NicheDB, Chovy and the gateway carries this envelope.
@@ -183,3 +183,39 @@ export const PAYOUT_STATES = [
   'failed',
   'reversed',
 ];
+
+/**
+ * How one crawl sale divides between niches.
+ *
+ * A pass buys the whole index for a day, not one niche, so there is no single
+ * niche to hand it to. The only measurable answer to "whose data did this pay
+ * for" is how much of the index each niche holds, which is the rule the
+ * partner programme already splits on.
+ *
+ * The share is taken against the WHOLE index, and the part nobody operates is
+ * a claimant too. A niche holding one percent of the rows does not collect the
+ * whole dollar because it happens to be the only one with an operator.
+ *
+ * Returns one entry per operated niche plus the platform remainder.
+ */
+export function splitSaleAcrossNiches({ totalCents, operated, totalItems }) {
+  const total = Math.max(0, Math.round(Number(totalCents) || 0));
+  const all = Math.max(0, Number(totalItems) || 0);
+  if (total === 0 || all === 0 || !operated?.length) return { niches: [], remainderCents: total };
+
+  // The unoperated remainder is a claimant too, so the apportionment covers
+  // the whole index and every cent lands somewhere.
+  const operatedItems = operated.reduce((n, o) => n + Math.max(0, Number(o.items) || 0), 0);
+  const weights = [
+    ...operated.map((o) => Math.max(0, Number(o.items) || 0)),
+    Math.max(0, all - operatedItems),
+  ];
+  const parts = apportion(total, weights);
+
+  // A niche apportioned zero cents contributes nothing, so dropping it cannot
+  // lose money: the kept shares plus the remainder still sum to the sale.
+  return {
+    niches: operated.map((o, i) => ({ ...o, cents: parts[i] })).filter((o) => o.cents > 0),
+    remainderCents: parts.at(-1),
+  };
+}

@@ -21,9 +21,11 @@ export {
   NICHEDB_EVENTS,
   PAYOUT_STATES,
   REVENUE_SOURCE_TYPES,
+  splitSaleAcrossNiches,
 } from './events.js';
 export { dedupeKeyFor, diminishFactor, scoreContribution } from './score.js';
 export {
+  apportion,
   BASE_SHARE_BPS,
   CONTRIBUTION_TIERS,
   formatBps,

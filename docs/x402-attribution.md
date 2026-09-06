@@ -52,13 +52,49 @@ twice is one row.
 A sale with no `ref` is not a ledger event and returns null, because there is
 nothing to be idempotent on.
 
-## Attribution
+## Attribution, as built
 
 Only this side knows whose rows were in the crawl that got paid for, which is
-why the gateway does not attempt it. Where a resource maps to a niche, the sale
-is attributed to that niche and divided by `allocate()` between its members and
-the platform. A sale nobody operates goes entirely to the platform. Not every
-request needs a Knowledge Influencer attached.
+why the gateway does not attempt it. `onSale` now does three things: records
+the sale in `crawl_sales` as before, splits it to partners as before, and books
+it into the revenue ledger.
+
+The hard part is that **a pass buys the whole index for a day, not one niche**.
+There is no single niche to hand it to. The only measurable answer to "whose
+data did this pay for" is how much of the index each niche holds, which is the
+rule the partner split already uses.
+
+So one sale becomes several revenue events:
+
+- one per niche that somebody actually operates, sized pro-rata by the items in
+  its collection **against the whole index**;
+- one unattributed event for the remainder, which is the part of the index
+  nobody operates.
+
+The share is taken against the whole index deliberately. A niche holding one
+percent of the rows does not collect the whole dollar because it happens to be
+the only one with an operator.
+
+```
+index: 100 items (games 90, research 10), only games operated
+$1 sale ->  x402:<ref>:games   90c   attributed, split by the ladder
+            x402:<ref>         10c   platform, unattributed
+                              ----
+                              100c
+```
+
+Every cent lands somewhere: `apportion` divides by largest remainder, so the
+parts sum to exactly the sale rather than to 99 cents. The unoperated part of
+the index is a claimant in that division rather than a leftover.
+
+Each event carries what its share was computed from (`items`, `indexItems`) in
+its metadata, so the number can be argued with rather than just believed.
+
+Idempotency is per event: `x402:<ref>:<niche>` and `x402:<ref>`. A settlement
+delivered twice books once even though it lands as several rows.
+
+Attribution is never allowed to fail the sale. The money has already moved, so
+a failure is a log line, the same rule the partner split follows.
 
 ## What is open, and why
 
