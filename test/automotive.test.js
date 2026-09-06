@@ -8,6 +8,7 @@ process.env.SITE_URL ??= 'https://nichedb.test';
 const {
   checkDigit,
   checkDigitOk,
+  closestModel,
   compactDecode,
   maintenanceSchedule,
   milesBetween,
@@ -127,6 +128,20 @@ describe('parts and places', () => {
 
   test('an incomplete vehicle gets no searches rather than broken ones', () => {
     expect(partsSearches({ year: 2014, make: 'Honda' })).toEqual([]);
+  });
+
+  test('the EPA and vPIC disagree on names, so the closest one wins', () => {
+    // vPIC decodes "Outback"; the EPA lists it with a drivetrain qualifier.
+    expect(closestModel('Outback', ['Outback AWD', 'Outback AWD Turbo', 'Impreza AWD'])).toBe(
+      'Outback AWD',
+    );
+    // Ours can be the longer name instead.
+    expect(closestModel('Civic Hatchback', ['Civic', 'Civic Si', 'Accord'])).toBe('Civic');
+    // An exact name is never second-guessed.
+    expect(closestModel('Accord', ['Accord', 'Accord Hybrid'])).toBe('Accord');
+    // Nothing close is null rather than a wrong car.
+    expect(closestModel('Outback', ['F-150', 'Mustang'])).toBeNull();
+    expect(closestModel('', ['Accord'])).toBeNull();
   });
 
   test('distance is in miles and survives a missing coordinate', () => {

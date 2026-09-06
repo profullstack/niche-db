@@ -341,14 +341,60 @@ export async function ratingFor({ year, make, model }) {
   };
 }
 
+const menuItems = (res) => {
+  const raw = res?.menuItem;
+  return (Array.isArray(raw) ? raw : raw ? [raw] : []).filter(Boolean);
+};
+
+/**
+ * The two databases do not agree on what a car is called.
+ *
+ * vPIC decodes a VIN to "Outback"; the EPA lists "Outback AWD" and
+ * "Outback AWD Turbo" for the same year. An exact match therefore finds
+ * nothing for a great many real cars, so when it misses, ask the EPA what it
+ * calls that make's models that year and take the closest name.
+ */
+export function closestModel(wanted, candidates) {
+  const want = String(wanted ?? '')
+    .trim()
+    .toLowerCase();
+  if (!want) return null;
+  const names = candidates.map((c) => String(c).trim());
+  const exact = names.find((n) => n.toLowerCase() === want);
+  if (exact) return exact;
+  // "Outback" → "Outback AWD": the EPA name usually adds a qualifier.
+  const prefixed = names.filter((n) => n.toLowerCase().startsWith(want));
+  if (prefixed.length) return prefixed.sort((a, b) => a.length - b.length)[0];
+  // "Civic Hatchback" → "Civic": ours is the longer name.
+  const contained = names.filter((n) => want.startsWith(n.toLowerCase()));
+  if (contained.length) return contained.sort((a, b) => b.length - a.length)[0];
+  const loose = names.filter(
+    (n) => n.toLowerCase().includes(want) || want.includes(n.toLowerCase()),
+  );
+  return loose.sort((a, b) => a.length - b.length)[0] ?? null;
+}
+
 export async function economyFor({ year, make, model }) {
   if (!year || !make || !model) return null;
-  const menu = await getJson(
-    `${FE}/vehicle/menu/options?year=${year}&make=${encodeURIComponent(make)}&model=${encodeURIComponent(model)}`,
-    { headers: { accept: 'application/json' } },
-  ).catch(() => null);
-  const raw = menu?.menuItem;
-  const trims = (Array.isArray(raw) ? raw : raw ? [raw] : []).filter(Boolean);
+  const options = (name) =>
+    getJson(
+      `${FE}/vehicle/menu/options?year=${year}&make=${encodeURIComponent(make)}&model=${encodeURIComponent(name)}`,
+      { headers: { accept: 'application/json' } },
+    ).catch(() => null);
+
+  let trims = menuItems(await options(model));
+  let matched = model;
+  if (!trims.length) {
+    const models = menuItems(
+      await getJson(`${FE}/vehicle/menu/model?year=${year}&make=${encodeURIComponent(make)}`, {
+        headers: { accept: 'application/json' },
+      }).catch(() => null),
+    ).map((m) => String(m.value));
+    const best = closestModel(model, models);
+    if (!best) return null;
+    trims = menuItems(await options(best));
+    matched = best;
+  }
   if (!trims.length) return null;
   const detail = await getJson(`${FE}/vehicle/${encodeURIComponent(trims[0].value)}`, {
     headers: { accept: 'application/json' },
@@ -358,6 +404,8 @@ export async function economyFor({ year, make, model }) {
     return Number.isFinite(x) && x !== -1 ? x : null;
   };
   return {
+    // Said out loud when it is not the name that was asked for.
+    matchedModel: matched === model ? null : matched,
     trims: trims.map((t) => ({ id: String(t.value), name: t.text })),
     fuel: detail?.fuelType ?? null,
     cylinders: n(detail?.cylinders),
@@ -590,8 +638,22 @@ export function milesBetween(a, b) {
  * Tuesday — so this tries the mirrors in turn and caches per rounded tile.
  * A miss returns an empty list with a reason rather than failing the profile
  * around it: a VIN lookup should not 500 because a map server is busy.
+ *
+ * It should not take a minute either. Asked from inside a vehicle profile the
+ * budget is short and only the first mirrors are tried, because the rest of
+ * the answer is already waiting; asked on its own, `/mechanics` can afford to
+ * be patient. Either way the tile is cached for a week, so the slow call
+ * happens to one caller and no one after them.
  */
-export async function placesNear({ lat, lon, radiusMiles = 10, kind = 'car_repair', limit = 25 }) {
+export async function placesNear({
+  lat,
+  lon,
+  radiusMiles = 10,
+  kind = 'car_repair',
+  limit = 25,
+  timeoutMs = 25_000,
+  maxMirrors = OVERPASS.length,
+}) {
   if (typeof lat !== 'number' || typeof lon !== 'number' || Number.isNaN(lat) || Number.isNaN(lon))
     return { places: [], error: 'A latitude and longitude are needed.' };
   const filter = OSM_KINDS[kind];
@@ -603,14 +665,17 @@ export async function placesNear({ lat, lon, radiusMiles = 10, kind = 'car_repai
   const cached = await auto.getPlaces(key, 7 * 24 * 3600).catch(() => null);
   if (cached) return { places: cached.slice(0, limit), cached: true, attribution: OSM_ATTRIBUTION };
 
-  const query = `[out:json][timeout:20];nwr[${filter.split('=')[0]}=${filter.split('=')[1]}](around:${radiusM},${lat},${lon});out center ${Math.min(limit * 2, 60)};`;
-  for (const endpoint of OVERPASS) {
+  // Overpass's own server-side timeout is told the same budget, so it gives up
+  // when we would have anyway rather than working on an answer nobody waits for.
+  const serverSeconds = Math.max(5, Math.round(timeoutMs / 1000) - 2);
+  const query = `[out:json][timeout:${serverSeconds}];nwr[${filter.split('=')[0]}=${filter.split('=')[1]}](around:${radiusM},${lat},${lon});out center ${Math.min(limit * 2, 60)};`;
+  for (const endpoint of OVERPASS.slice(0, Math.max(1, maxMirrors))) {
     try {
       const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'user-agent': UA, 'content-type': 'application/x-www-form-urlencoded' },
         body: `data=${encodeURIComponent(query)}`,
-        signal: AbortSignal.timeout(25_000),
+        signal: AbortSignal.timeout(timeoutMs),
       });
       if (!res.ok) continue;
       const json = await res.json();
@@ -633,6 +698,14 @@ export async function placesNear({ lat, lon, radiusMiles = 10, kind = 'car_repai
 }
 
 export const OSM_ATTRIBUTION = '© OpenStreetMap contributors, ODbL';
+
+/**
+ * What a vehicle profile will wait for a map server. Short on purpose: the
+ * other five sections are already answered, and a cold Overpass mirror can
+ * otherwise turn a three-second profile into a fifty-second one. The tile is
+ * cached for a week, so the next caller in that town waits for nothing.
+ */
+const PLACE_BUDGET = { timeoutMs: 9_000, maxMirrors: 2 };
 
 /* ---------------------------------------------------------------- profile -- */
 
@@ -682,10 +755,14 @@ export async function vehicleProfile({
       })
       .catch(() => []),
     wantPlaces
-      ? placesNear({ lat, lon, radiusMiles, kind: 'car_repair' }).catch(() => ({ places: [] }))
+      ? placesNear({ ...PLACE_BUDGET, lat, lon, radiusMiles, kind: 'car_repair' }).catch(() => ({
+          places: [],
+        }))
       : Promise.resolve(null),
     wantPlaces
-      ? placesNear({ lat, lon, radiusMiles, kind: 'car_parts' }).catch(() => ({ places: [] }))
+      ? placesNear({ ...PLACE_BUDGET, lat, lon, radiusMiles, kind: 'car_parts' }).catch(() => ({
+          places: [],
+        }))
       : Promise.resolve(null),
   ]);
 
