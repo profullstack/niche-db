@@ -8,6 +8,7 @@ import { gateway, gatewayFor } from './lib/pricing.js';
 import { Denied } from './lib/service.js';
 import { registerApi } from './routes/api.js';
 import { registerAuth } from './routes/auth.js';
+import { registerAutomotive } from './routes/automotive.js';
 import { registerKnowledge } from './routes/knowledge.js';
 import { registerManage } from './routes/manage.js';
 import { registerMcp } from './routes/mcp.js';
@@ -96,6 +97,7 @@ registerAuth(app);
 registerPages(app);
 registerManage(app);
 registerApi(app);
+registerAutomotive(app);
 registerMcp(app);
 
 /**

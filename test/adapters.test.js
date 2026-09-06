@@ -39,6 +39,8 @@ describe('registry', () => {
         'outages',
         'extensions',
         'health',
+        'automotive',
+        'ai-incidents',
         'research',
       ]).toContain(a.collection);
     }
