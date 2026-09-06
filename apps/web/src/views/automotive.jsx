@@ -213,14 +213,31 @@ const Profile = ({ profile }) => {
         <h3>Parts</h3>
         <ul class="tags">
           {profile.parts.searches.map((p) => (
-            <li key={p.vendor} class="tag">
-              <a href={p.url} rel="noopener nofollow">
+            <li key={p.vendor}>
+              {/* The tag IS the link, as everywhere else on the site. A `.tag`
+                  wrapping a link instead gives a pill with link-coloured text
+                  inside it, which is a second look for the same component. */}
+              {/* `sponsored` is required by Google and by the FTC on a link
+                  that pays us, and it is only true once somebody has actually
+                  been approved for that vendor's programme. */}
+              <a
+                class="tag"
+                href={p.url}
+                rel={p.sponsored ? 'sponsored nofollow noopener' : 'nofollow noopener'}
+                title={p.note ?? p.kind}
+              >
                 {p.vendor}
               </a>
             </li>
           ))}
         </ul>
         <p class="small muted">{profile.parts.note}</p>
+        {profile.parts.searches.some((p) => p.sponsored) ? (
+          <p class="small muted">
+            Some of these links pay us a commission if you buy through them. It costs you nothing
+            and it does not change which vendors are listed or their order.
+          </p>
+        ) : null}
       </section>
 
       <section>

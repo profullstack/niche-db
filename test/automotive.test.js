@@ -6,6 +6,7 @@ import { describe, expect, test } from 'bun:test';
 process.env.DATABASE_URL ??= 'postgres://test:test@localhost:5432/test';
 process.env.SITE_URL ??= 'https://nichedb.test';
 const {
+  applyAffiliate,
   checkDigit,
   checkDigitOk,
   closestModel,
@@ -13,6 +14,7 @@ const {
   maintenanceSchedule,
   milesBetween,
   normaliseVin,
+  parseAffiliateTemplates,
   partsSearches,
   powertrainOf,
   vinModelYear,
@@ -124,6 +126,59 @@ describe('parts and places', () => {
     for (const s of searches) expect(s.url).toStartWith('https://');
     expect(searches.some((s) => s.url.includes('alternator'))).toBe(true);
     expect(searches.some((s) => s.vendor === 'RockAuto')).toBe(true);
+  });
+
+  test('a plain link is the default: nothing is sponsored until it is', () => {
+    const searches = partsSearches({
+      year: 2014,
+      make: 'Honda',
+      model: 'Civic',
+      affiliates: new Map(),
+    });
+    expect(searches.every((s) => s.sponsored === false)).toBe(true);
+    expect(searches.find((s) => s.vendor === 'eBay Motors').url).toStartWith(
+      'https://www.ebay.com/',
+    );
+  });
+
+  test('a template wraps the destination and marks the link sponsored', () => {
+    const templates = parseAffiliateTemplates(
+      'ebay=https://rover.ebay.com/rover/1/711-53200-19255-0/1?mpre={url}&campid=5338999999',
+    );
+    const searches = partsSearches({
+      year: 2014,
+      make: 'Honda',
+      model: 'Civic',
+      part: 'alternator',
+      affiliates: templates,
+    });
+    const ebay = searches.find((s) => s.vendor === 'eBay Motors');
+    expect(ebay.sponsored).toBe(true);
+    expect(ebay.url).toStartWith('https://rover.ebay.com/');
+    expect(ebay.url).toContain('campid=5338999999');
+    // The real destination survives, encoded, inside the tracking link.
+    expect(decodeURIComponent(ebay.url.split('mpre=')[1].split('&')[0])).toContain('alternator');
+    // A vendor with no template is untouched and unmarked.
+    expect(searches.find((s) => s.vendor === 'NAPA').sponsored).toBe(false);
+  });
+
+  test('a template that could not track or could not be trusted is ignored', () => {
+    // No {url} hole: it would send every buyer to the same page.
+    expect(parseAffiliateTemplates('ebay=https://rover.ebay.com/no-hole').size).toBe(0);
+    // Not https.
+    expect(parseAffiliateTemplates('ebay=http://rover.ebay.com/?u={url}').size).toBe(0);
+    // Junk between the commas does not take the rest of the list down with it.
+    const ok = parseAffiliateTemplates('nonsense,napa=https://click.linksynergy.com/?murl={url}');
+    expect(ok.size).toBe(1);
+    expect(ok.has('napa')).toBe(true);
+  });
+
+  test('applyAffiliate leaves an unknown vendor alone', () => {
+    const t = parseAffiliateTemplates('ebay=https://rover.ebay.com/?mpre={url}');
+    expect(applyAffiliate('rockauto', 'https://www.rockauto.com/x', t)).toEqual({
+      url: 'https://www.rockauto.com/x',
+      sponsored: false,
+    });
   });
 
   test('an incomplete vehicle gets no searches rather than broken ones', () => {
