@@ -105,7 +105,11 @@ export function registerAutomotive(app) {
       if (blocked) {
         error = `Free lookups for this hour are used up. A pass is $${(config.automotive.dayCents / 100).toFixed(2)} a day, or Pro at $${(config.automotive.monthlyCents / 100).toFixed(0)} a month.`;
       } else {
-        profile = await vehicleProfile({ vin, miles }).catch((err) => ({ error: err.message }));
+        // `?part=` narrows the parts searches. The JSON endpoint already
+        // honoured it; the page was dropping it on the floor.
+        profile = await vehicleProfile({ vin, miles, part: c.req.query('part') ?? '' }).catch(
+          (err) => ({ error: err.message }),
+        );
         error = profile?.error ?? null;
       }
     }

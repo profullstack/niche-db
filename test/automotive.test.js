@@ -6,6 +6,7 @@ import { describe, expect, test } from 'bun:test';
 process.env.DATABASE_URL ??= 'postgres://test:test@localhost:5432/test';
 process.env.SITE_URL ??= 'https://nichedb.test';
 const {
+  amazonTagged,
   applyAffiliate,
   checkDigit,
   checkDigitOk,
@@ -126,6 +127,52 @@ describe('parts and places', () => {
     for (const s of searches) expect(s.url).toStartWith('https://');
     expect(searches.some((s) => s.url.includes('alternator'))).toBe(true);
     expect(searches.some((s) => s.vendor === 'RockAuto')).toBe(true);
+  });
+
+  test('Amazon is tagged in place, not wrapped in somebody else\u2019s URL', () => {
+    const { url, sponsored } = amazonTagged('https://www.amazon.com/s?k=alternator&i=automotive', {
+      tag: 'parklookup-20',
+      subtag: 'nichedb-vin',
+    });
+    expect(sponsored).toBe(true);
+    const u = new URL(url);
+    // Still Amazon's own URL, with the search intact.
+    expect(u.host).toBe('www.amazon.com');
+    expect(u.searchParams.get('k')).toBe('alternator');
+    expect(u.searchParams.get('i')).toBe('automotive');
+    expect(u.searchParams.get('tag')).toBe('parklookup-20');
+    expect(u.searchParams.get('ascsubtag')).toBe('nichedb-vin');
+  });
+
+  test('a subtag is sanitised, because Amazon drops one with punctuation in it', () => {
+    const { url } = amazonTagged('https://www.amazon.com/s?k=x', {
+      tag: 't-20',
+      subtag: 'niche db/vin lookup',
+    });
+    expect(new URL(url).searchParams.get('ascsubtag')).toBe('niche_db_vin_lookup');
+  });
+
+  test('no tag configured means no tag appended and nothing claimed as sponsored', () => {
+    const before = 'https://www.amazon.com/s?k=x&i=automotive';
+    expect(amazonTagged(before, {})).toEqual({ url: before, sponsored: false });
+    expect(amazonTagged(before, { tag: '' })).toEqual({ url: before, sponsored: false });
+  });
+
+  test('Amazon appears in the vendor list and is tagged from config', () => {
+    const searches = partsSearches({
+      year: 2014,
+      make: 'Honda',
+      model: 'Civic',
+      part: 'alternator',
+      affiliates: new Map(),
+    });
+    const amazon = searches.find((s) => s.key === 'amazon');
+    expect(amazon).toBeTruthy();
+    expect(amazon.url).toContain('amazon.com/s?k=');
+    expect(amazon.url).toContain('alternator');
+    // No AMAZON_ASSOCIATE_TAG in the test environment, so it stays plain.
+    expect(amazon.sponsored).toBe(false);
+    expect(amazon.url).not.toContain('tag=');
   });
 
   test('a plain link is the default: nothing is sponsored until it is', () => {

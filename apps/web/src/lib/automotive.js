@@ -545,6 +545,28 @@ export function maintenanceSchedule({
 const q = (s) => encodeURIComponent(String(s).trim());
 
 /**
+ * Amazon's link is not a wrapper.
+ *
+ * CJ, Rakuten and eBay Partner Network hand you a URL of theirs with the
+ * destination encoded inside it. Amazon instead wants its own URL with `tag`
+ * on it, and optionally `ascsubtag`, which is a reporting dimension rather
+ * than a second account — so traffic from here stays separable in the
+ * Associates dashboard even when the tag is shared with another property.
+ * This is the same shape sh1pt's `affiliate-amazon-associates` adapter builds.
+ *
+ * No tag configured means no tag appended, and the link is not called
+ * sponsored, because it is not.
+ */
+export function amazonTagged(url, { tag, subtag } = {}) {
+  if (!tag) return { url, sponsored: false };
+  const out = new URL(url);
+  out.searchParams.set('tag', tag);
+  // Amazon rejects most punctuation in a subtag and silently drops the value.
+  if (subtag) out.searchParams.set('ascsubtag', String(subtag).replace(/[^A-Za-z0-9_-]+/g, '_'));
+  return { url: out.toString(), sponsored: true };
+}
+
+/**
  * The vendors, and which of them will pay for a referral.
  *
  * `program` is what was actually found when this was checked (2026-09-06), not
@@ -569,6 +591,17 @@ export const PARTS_VENDORS = [
     note: 'New, used and OEM take-offs. Filter by "fits your vehicle".',
     program: { network: 'eBay Partner Network', signup: 'https://partnernetwork.ebay.com/' },
     url: ({ withPart }) => `https://www.ebay.com/sch/6028/i.html?_nkw=${q(withPart)}`,
+  },
+  {
+    key: 'amazon',
+    vendor: 'Amazon',
+    kind: 'marketplace',
+    note: 'Widest range for filters, sensors, brakes and trim; check the fitment box before buying.',
+    program: { network: 'Amazon Associates', signup: 'https://affiliate-program.amazon.com/' },
+    // `i=automotive` keeps a search for "2014 Honda Civic alternator" inside
+    // the Automotive store rather than returning a book about one.
+    url: ({ withPart }) => `https://www.amazon.com/s?k=${q(withPart)}&i=automotive`,
+    affiliate: amazonTagged,
   },
   {
     key: 'autozone',
@@ -655,8 +688,18 @@ export function partsSearches({ year, make, model, part = '', affiliates = null 
   const templates = affiliates ?? parseAffiliateTemplates(config.automotive.affiliateLinks);
   return PARTS_VENDORS.map((v) => {
     const plain = v.url({ year, make, model, vehicle, withPart });
-    const { url, sponsored } = applyAffiliate(v.key, plain, templates);
+    // A network template wins if one is configured; otherwise a vendor that
+    // tags its own links (Amazon) gets to do that.
+    const wrapped = applyAffiliate(v.key, plain, templates);
+    const { url, sponsored } =
+      wrapped.sponsored || !v.affiliate
+        ? wrapped
+        : v.affiliate(plain, {
+            tag: config.automotive.amazonTag,
+            subtag: config.automotive.amazonSubtag,
+          });
     return {
+      key: v.key,
       vendor: v.vendor,
       kind: v.kind,
       ...(v.note ? { note: v.note } : {}),
