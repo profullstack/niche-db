@@ -9,6 +9,7 @@ import {
   diminishFactor,
   domainEvent,
   formatBps,
+  formatMinor,
   isReservedNicheSlug,
   MAX_SHARE_BPS,
   machineRevenueEvent,
@@ -348,5 +349,29 @@ describe('reading a jsonb column', () => {
     expect(asJsonArray('{"a":1}')).toEqual([]);
     expect(asJsonArray({ a: 1 })).toEqual([]);
     expect(asJsonArray(null)).toEqual([]);
+  });
+});
+
+describe('rendering money', () => {
+  test('minor units become a currency string only at the last moment', () => {
+    expect(formatMinor(0)).toBe('$0.00');
+    expect(formatMinor(1)).toBe('$0.01');
+    expect(formatMinor(100)).toBe('$1.00');
+    expect(formatMinor(123_456)).toBe('$1,234.56');
+  });
+
+  test('an odd cent is not lost to rounding on the way to the page', () => {
+    expect(formatMinor(999)).toBe('$9.99');
+    expect(formatMinor(1001)).toBe('$10.01');
+  });
+
+  test('rubbish renders as zero rather than NaN', () => {
+    expect(formatMinor(null)).toBe('$0.00');
+    expect(formatMinor(undefined)).toBe('$0.00');
+    expect(formatMinor('nonsense')).toBe('$0.00');
+  });
+
+  test('an unknown currency code does not take the page down', () => {
+    expect(formatMinor(500, 'NOTACURRENCY')).toContain('5.00');
   });
 });

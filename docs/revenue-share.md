@@ -78,6 +78,8 @@ always sum to the net exactly and rounding never over-pays.
 
 ## Payouts
 
-Not built yet. The states are defined (`PAYOUT_STATES`) and CoinPay is already
-the rail this deployment uses for Pro memberships and crawl passes, so there is
-no second payment integration to write — only the ledger tables and the wiring.
+Built: see [revenue-ledger.md](./revenue-ledger.md). An operator saves an
+address, an admin confirms it and schedules the payout, the money moves out of
+band and the reference is recorded. Nothing sends money automatically, because
+CoinPay's payout API pays a connected merchant account rather than a third
+party's address.

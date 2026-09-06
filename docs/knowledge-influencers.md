@@ -120,11 +120,12 @@ This is the part that makes a day's work a few minutes long instead of an
 open-ended obligation to go and find something to contribute. See
 [agent-questions.md](./agent-questions.md).
 
-## Not yet built
+## The revenue ledger
 
-- The revenue ledger and payouts. The arithmetic is written and tested
-  (`allocate`, `attributableNetMinor`); only the tables and the wiring are
-  missing.
+What a niche earned and whose share of it is whose, including payouts. See
+[revenue-ledger.md](./revenue-ledger.md).
+
+## Not yet built
 - Promotion attribution, and the opportunity score's own inputs.
 - Notifications. A question arriving should reach the operator by email or
   push; today it waits on the dashboard until they look.

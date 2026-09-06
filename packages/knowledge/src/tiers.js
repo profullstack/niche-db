@@ -105,3 +105,20 @@ export function formatBps(bps) {
   const pct = (Number(bps) || 0) / 100;
   return `${Number.isInteger(pct) ? pct : pct.toFixed(1)}%`;
 }
+
+/**
+ * "$12.34" from 1234. For display only.
+ *
+ * The division happens here and nowhere else. Money is integer minor units
+ * everywhere it is stored, compared or divided; the one place it becomes a
+ * fraction is the moment it is about to be read by a person.
+ */
+export function formatMinor(minor, currency = 'USD') {
+  const n = Number(minor) || 0;
+  try {
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(n / 100);
+  } catch {
+    // An unknown currency code should not take a dashboard down.
+    return `${(n / 100).toFixed(2)} ${currency}`;
+  }
+}

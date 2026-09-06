@@ -103,7 +103,10 @@ guess that gets verified is worse for the niche than an open question. See
 Score comes only from contributions somebody verified, and volume does not buy
 it: repeated submissions of a type pay less each time, anything claiming a
 customer or a payment needs an outside reference, and a duplicate books once.
-The ladder lives in `contribution_tiers`, so a deployment can tune it. See
+The ladder lives in `contribution_tiers`, so a deployment can tune it. What a
+niche earns is divided at the moment it settles, using the shares in force
+right then, so a tier that moves tomorrow never re-prices yesterday's sale
+([docs/revenue-ledger.md](docs/revenue-ledger.md)). See
 [docs/knowledge-influencers.md](docs/knowledge-influencers.md) and
 [docs/revenue-share.md](docs/revenue-share.md).
 

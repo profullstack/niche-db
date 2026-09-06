@@ -14,6 +14,7 @@ import { registerKnowledge } from './routes/knowledge.js';
 import { registerManage } from './routes/manage.js';
 import { registerMcp } from './routes/mcp.js';
 import { registerPages } from './routes/pages.js';
+import { registerRevenue } from './routes/revenue.js';
 import { registerStatic } from './routes/static.js';
 import { NotFound } from './views/pages.jsx';
 
@@ -106,6 +107,9 @@ registerMcp(app);
  * API paths are literal and must be matched before `/:slug` is asked.
  */
 registerAgents(app);
+
+/** The revenue ledger: what a niche earned and whose share of it is whose. */
+registerRevenue(app);
 
 /**
  * Last, because a niche's page is served from the site root: every other
