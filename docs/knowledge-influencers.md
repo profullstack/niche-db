@@ -56,9 +56,22 @@ credentials. Someone who has spent seventeen years estimating commercial roofs
 and has never written a line of code is exactly the person this is for.
 
 An approved claim creates an active membership at **20%**, writes the first row
-of tier history, flips the niche to `operated` and closes the opportunity. It is
-one transaction: a membership without the decision that created it is a person
-earning a share nobody can point at a reason for.
+of tier history and flips the niche to `operated`. It is one transaction: a
+membership without the decision that created it is a person earning a share
+nobody can point at a reason for.
+
+**A niche takes as many experts as know it.** It is a subject, the way a Quora
+topic is, not a plot the first arrival takes. So an approved claim deliberately
+leaves the opportunity **open**: the pages keep inviting people, the niche page
+lists everyone covering it, and the application form still appears to somebody
+who is not already a member. Only an admin closes an opportunity.
+
+Joining is not zero-sum, and the arithmetic is the reason. Shares are per
+person by their own verified score, and they only compete once the sum passes
+the 80% ceiling. A second expert who has contributed nothing takes nothing from
+the first: 40% stays 40%. Past the ceiling everyone scales by the same factor,
+so relative standing survives and the parts still total exactly 8000 basis
+points. There are tests for each of those three cases.
 
 ## Contributing
 
