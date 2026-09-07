@@ -80,30 +80,41 @@ export const NichePage = ({ user, niche, members, tiers, contributions }) => (
 
     {members.length ? (
       <section>
-        <h2>Industry knowledge managed by</h2>
+        <h2>
+          {members.length === 1
+            ? 'Expert on this niche'
+            : `Experts on this niche (${members.length})`}
+        </h2>
         <ul class="cards">
           {members.map((m) => (
             <OperatorCard key={m.user_id} member={m} />
           ))}
         </ul>
       </section>
-    ) : (
-      <section class="cta-block">
-        <h2>Know this industry?</h2>
-        <p>
-          Help supervise the agents building software, data and promotion for {niche.name}. You
-          bring what you know about how the business actually works; they do the engineering.
-        </p>
-        <p class="lede">
-          <strong>Start at 20%. Earn up to 80%.</strong>
-        </p>
-        <p>
-          <a class="cta button" href={`/opportunities/${niche.slug}`}>
-            Claim this niche
-          </a>
-        </p>
-      </section>
-    )}
+    ) : null}
+
+    {/* Always offered, however many people are already here. A niche is a
+        subject you can be expert in, not a plot somebody has taken: the
+        second person who actually knows the trade is worth as much as the
+        first, and their share follows what they contribute. */}
+    <section class="cta-block">
+      <h2>{members.length ? 'Know this industry too?' : 'Know this industry?'}</h2>
+      <p>
+        Help supervise the agents building software, data and promotion for {niche.name}. You bring
+        what you know about how the business actually works; they do the engineering.
+        {members.length
+          ? ' Several people can be expert on one niche, and each earns from what they themselves contribute.'
+          : ''}
+      </p>
+      <p class="lede">
+        <strong>Start at 20%. Earn up to 80%.</strong>
+      </p>
+      <p>
+        <a class="cta button" href={`/opportunities/${niche.slug}`}>
+          {members.length ? 'Add your expertise' : 'Claim this niche'}
+        </a>
+      </p>
+    </section>
 
     {contributions?.length ? (
       <section>
@@ -143,7 +154,8 @@ export const OpportunitiesPage = ({ user, opportunities, tiers }) => (
       <h1>Know the niche. Run the AI.</h1>
       <p class="lede">
         Turn what you know about an industry into software, data and a business. You supply the
-        judgement; the agents do the building, the research and the promotion.
+        judgement; the agents do the building, the research and the promotion. A niche takes as many
+        experts as know it: you are not competing for a seat, you are paid for what you contribute.
       </p>
       <p class="stats">
         <strong>Start at 20% of the revenue you help create. Earn up to 80%.</strong>
@@ -151,7 +163,7 @@ export const OpportunitiesPage = ({ user, opportunities, tiers }) => (
     </section>
 
     <section>
-      <h2>Open niches</h2>
+      <h2>Niches looking for experts</h2>
       {opportunities.length === 0 ? (
         <p class="muted empty">No open niches right now.</p>
       ) : (
@@ -171,7 +183,9 @@ export const OpportunitiesPage = ({ user, opportunities, tiers }) => (
                   <>Opportunity {o.score}/100</>
                 )}
                 {' · '}
-                {o.member_count > 0 ? `${o.member_count} operating` : 'Knowledge Influencer wanted'}
+                {o.member_count > 0
+                  ? `${o.member_count} expert${o.member_count === 1 ? '' : 's'} · room for more`
+                  : 'no experts yet'}
               </p>
             </li>
           ))}
@@ -205,7 +219,15 @@ const CLAIM_QUESTIONS = [
   ['audience', 'What audience, relationships or distribution do you have, if any?'],
 ];
 
-export const OpportunityPage = ({ user, opportunity, tiers, claim, notice, error }) => (
+export const OpportunityPage = ({
+  user,
+  opportunity,
+  tiers,
+  claim,
+  members = [],
+  notice,
+  error,
+}) => (
   <Layout
     user={user}
     title={opportunity.name}
@@ -246,7 +268,16 @@ export const OpportunityPage = ({ user, opportunity, tiers, claim, notice, error
     ) : null}
 
     <section>
-      <h2>Claim this niche</h2>
+      <h2>{members.length ? 'Add your expertise' : 'Claim this niche'}</h2>
+      {members.length ? (
+        <p class="muted">
+          {members.length === 1
+            ? `${members[0].display_name ?? members[0].handle} already covers this niche.`
+            : `${members.length} people already cover this niche.`}{' '}
+          More than one person can be expert here. Everyone's share follows their own verified
+          contribution, so joining does not take anything from anybody who is not contributing.
+        </p>
+      ) : null}
       {claim ? (
         <p class="feedback ok" role="status">
           Your application is {claim.status}. {claim.decision_note ?? ''}

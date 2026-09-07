@@ -64,9 +64,10 @@ export function registerKnowledge(app) {
     const opportunity = await k.getOpportunity(c.req.param('slug'));
     if (!opportunity) return c.notFound();
     const user = c.get('user');
-    const [tiers, claims] = await Promise.all([
+    const [tiers, claims, members] = await Promise.all([
       k.listTiers(),
       user ? k.listClaims({ status: null, userId: user.id, limit: 20 }) : [],
+      k.nicheMembers(opportunity.niche_id),
     ]);
     return c.html(
       await render(
@@ -74,6 +75,7 @@ export function registerKnowledge(app) {
           user={user}
           opportunity={opportunity}
           tiers={tiers}
+          members={members}
           claim={claims.find((x) => x.niche_id === opportunity.niche_id) ?? null}
           notice={c.req.query('notice')}
           error={c.req.query('error')}

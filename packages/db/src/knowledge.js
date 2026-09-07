@@ -204,7 +204,12 @@ export async function listOpportunities({ limit = 60 } = {}) {
     from opportunities o
     join niches n on n.id = o.niche_id
     where o.status = 'open' and n.status in ('open', 'operated')
-    order by o.score desc nulls last, n.name
+    -- Niches nobody has claimed yet come first, because that is where a
+    -- newcomer adds the most, but an operated one is still listed and still
+    -- joinable.
+    order by (select count(*) from niche_members m
+               where m.niche_id = n.id and m.status = 'active') asc,
+             o.score desc nulls last, n.name
     limit ${Math.min(Number(limit) || 60, 200)}
   `;
 }
@@ -310,7 +315,11 @@ export async function decideClaim({ claimId, approve, actorId, note = null }) {
         update niches set status = 'operated', updated_at = now()
         where id = ${claim.niche_id} and status = 'open'
       `;
-      await tx`update opportunities set status = 'claimed', updated_at = now() where niche_id = ${claim.niche_id}`;
+      // The opportunity deliberately stays open. A niche is a subject people
+      // are expert in, not territory the first arrival takes: somebody else
+      // who knows the trade should still be able to put their hand up next
+      // month. Only an admin closes one.
+      await tx`update opportunities set updated_at = now() where niche_id = ${claim.niche_id}`;
     }
   });
 
