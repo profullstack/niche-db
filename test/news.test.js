@@ -4,6 +4,7 @@ import {
   DEFAULT_QUERIES,
   toItem as gdeltItem,
   parseResponse as parseGdelt,
+  sectionFor,
   seenDate,
 } from '../packages/adapters/src/gdelt.js';
 import { ADAPTERS, adapterByName } from '../packages/adapters/src/index.js';
@@ -18,6 +19,8 @@ import {
   toItem as feedItem,
   outletOf,
   parseFeed,
+  SECTIONS,
+  splitFeedSpec,
 } from '../packages/adapters/src/newsfeed.js';
 import { normaliseItem } from '../packages/core/src/adapter.js';
 
@@ -90,9 +93,49 @@ describe('newsfeed', () => {
     expect(outletOf('not a url')).toBe('unknown');
   });
 
-  test('the shipped feed list is all absolute http urls', () => {
+  test('every shipped feed names a section and an absolute https url', () => {
     expect(DEFAULT_FEEDS.length).toBeGreaterThan(0);
-    for (const f of DEFAULT_FEEDS) expect(f).toMatch(/^https:\/\//);
+    for (const f of DEFAULT_FEEDS) {
+      const { section, url } = splitFeedSpec(f);
+      expect(SECTIONS).toContain(section);
+      expect(url).toMatch(/^https:\/\//);
+    }
+    // Every declared section is actually covered by at least one feed.
+    const covered = new Set(DEFAULT_FEEDS.map((f) => splitFeedSpec(f).section));
+    for (const s of SECTIONS) expect(covered.has(s)).toBe(true);
+  });
+
+  test('world is listed first so the specific desk wins a duplicate', () => {
+    // A story on two desks collapses to one row by id, so the LAST feed to
+    // carry it decides its section. That is only the right answer while world
+    // stays at the top of the list.
+    const sections = DEFAULT_FEEDS.map((f) => splitFeedSpec(f).section);
+    const lastWorld = sections.lastIndexOf('world');
+    const firstOther = sections.findIndex((s) => s !== 'world');
+    expect(sections[0]).toBe('world');
+    expect(lastWorld).toBeLessThan(firstOther === -1 ? Infinity : firstOther);
+  });
+
+  test('a bare url still works and lands in world', () => {
+    expect(splitFeedSpec('https://example.com/rss')).toEqual({
+      section: 'world',
+      url: 'https://example.com/rss',
+    });
+    expect(splitFeedSpec('politics=https://example.com/rss')).toEqual({
+      section: 'politics',
+      url: 'https://example.com/rss',
+    });
+    // A query string is not a section prefix.
+    expect(splitFeedSpec('https://example.com/rss?a=b').section).toBe('world');
+  });
+
+  test('the section rides on the item but never on its id', () => {
+    const [a] = parseFeed(RSS, 'https://feeds.bbci.co.uk/news/politics/rss.xml', 'politics');
+    const [b] = parseFeed(RSS, 'https://feeds.bbci.co.uk/news/world/rss.xml', 'world');
+    expect(a.data.section).toBe('politics');
+    expect(a.tags).toContain('politics');
+    // The same story on two desks is one story, not two rows.
+    expect(a.externalId).toBe(b.externalId);
   });
 });
 
@@ -128,6 +171,21 @@ describe('gdelt', () => {
 
   test('beats are short enough to stay inside the rate limit', () => {
     expect(DEFAULT_QUERIES.length).toBeLessThanOrEqual(10);
+  });
+
+  test('a beat is a search term; a section is where a reader looks for it', () => {
+    expect(sectionFor('election')).toBe('politics');
+    expect(sectionFor('economy')).toBe('business');
+    // An unmapped beat files under its own name, so adding one needs no change.
+    expect(sectionFor('weather')).toBe('weather');
+    const item = gdeltItem('election', {
+      url: 'https://x.example/a',
+      title: 'A',
+      seendate: '20260908T000000Z',
+      domain: 'x.example',
+    });
+    expect(item.data.section).toBe('politics');
+    expect(item.tags).toContain('politics');
   });
 });
 

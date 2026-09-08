@@ -22,6 +22,17 @@ import { defineAdapter } from '@nichedb/core/adapter';
  */
 export const DEFAULT_QUERIES = ['election', 'economy', 'conflict'];
 
+/**
+ * The desk a beat belongs on.
+ *
+ * GDELT beats are search terms, not sections: "election" is how you ask, and
+ * "politics" is where a reader expects to find the answer. Anything not listed
+ * files under its own name, so adding a beat needs no change here.
+ */
+export const SECTION_OF = { election: 'politics', economy: 'business', conflict: 'world' };
+
+export const sectionFor = (query) => SECTION_OF[query] ?? String(query ?? '').toLowerCase();
+
 /** GDELT stamps articles `20260727T141500Z`, which `new Date()` will not parse. */
 export function seenDate(s) {
   const m = /^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})Z$/.exec(String(s ?? '').trim());
@@ -33,6 +44,7 @@ export function toItem(query, a) {
   if (!a?.url || !a?.title) return null;
   const country = (a.sourcecountry ?? '').trim();
   const language = (a.language ?? '').trim();
+  const section = sectionFor(query);
   return {
     externalId: `gdelt:${a.url}`,
     kind: 'story',
@@ -44,6 +56,7 @@ export function toItem(query, a) {
     publishedAt: seenDate(a.seendate),
     tags: [
       'news',
+      section,
       'gdelt',
       query,
       a.domain?.toLowerCase(),
@@ -51,6 +64,7 @@ export function toItem(query, a) {
       language ? language.toLowerCase() : null,
     ].filter(Boolean),
     data: {
+      section,
       query,
       domain: a.domain ?? null,
       country: country || null,
