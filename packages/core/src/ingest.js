@@ -14,6 +14,7 @@ function envFor() {
     igdbClientSecret: config.adapters.igdbClientSecret,
     githubToken: config.adapters.githubToken,
     courtlistenerToken: config.adapters.courtlistenerToken,
+    blsApiKey: config.adapters.blsApiKey,
     contactEmail: config.contactEmail,
   };
 }

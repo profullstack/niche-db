@@ -100,6 +100,18 @@ export const COLLECTIONS = [
       'Every make, model and year sold in the US, and what is known about each one: safety recalls, what owners report going wrong, crash-test ratings, engines and mpg. Decode a VIN and get all of it for one car.',
   },
   {
+    slug: 'housing',
+    name: 'Housing',
+    description:
+      'What homes cost and what is being built: every property sold in England and Wales with its address and price, harmonised house price indices across Europe, the weekly US mortgage rate, and the building permits US cities issue months before ground is broken.',
+  },
+  {
+    slug: 'jobs',
+    name: 'Jobs',
+    description:
+      'The labour market as governments measure it: the US jobs report series from the BLS, harmonised unemployment and employment rates across Europe, and the WARN notices employers must file before a mass layoff — the one public, named record of jobs actually being cut.',
+  },
+  {
     slug: 'ai-incidents',
     name: 'AI incidents',
     description:
@@ -312,6 +324,89 @@ export const DEFAULT_FEEDS = [
     name: 'Makes, models and years',
     query: { kinds: ['model'] },
   },
+  /* Housing. The events first, then the series: a sale and a permit are things
+     that happened, and an index is a summary of many of them. */
+  {
+    collection: 'housing',
+    slug: 'property-sales',
+    name: 'Property sales',
+    description:
+      'Every home sold in England and Wales, with the address and the price actually paid.',
+    query: { kinds: ['property-sale'] },
+  },
+  {
+    collection: 'housing',
+    slug: 'million-pound-homes',
+    name: 'Homes sold for £1m and up',
+    query: { kinds: ['property-sale'], tags: ['million-plus'] },
+  },
+  {
+    collection: 'housing',
+    slug: 'new-builds',
+    name: 'New-build sales',
+    query: { kinds: ['property-sale'], tags: ['new-build'] },
+  },
+  {
+    collection: 'housing',
+    slug: 'building-permits',
+    name: 'Building permits',
+    description: 'What is about to be built, months before ground is broken.',
+    query: { kinds: ['building-permit'] },
+  },
+  {
+    collection: 'housing',
+    slug: 'new-construction',
+    name: 'New construction permits',
+    query: { kinds: ['building-permit'], tags: ['new-construction'] },
+  },
+  {
+    collection: 'housing',
+    slug: 'house-prices',
+    name: 'House prices and mortgage rates',
+    query: { kinds: ['housing-statistic'] },
+  },
+  {
+    collection: 'housing',
+    slug: 'mortgage-rates',
+    name: 'US mortgage rates',
+    query: { kinds: ['housing-statistic'], tags: ['mortgage'] },
+  },
+
+  /* Jobs. A statistic describes the market; a WARN notice names a company. */
+  {
+    collection: 'jobs',
+    slug: 'jobs-report',
+    name: 'The jobs numbers',
+    description:
+      'Unemployment, payrolls, openings, quits and earnings as the statistical agencies publish them.',
+    query: { kinds: ['labour-statistic'] },
+  },
+  {
+    collection: 'jobs',
+    slug: 'us-jobs-report',
+    name: 'US jobs report',
+    query: { kinds: ['labour-statistic'], tags: ['bls'] },
+  },
+  {
+    collection: 'jobs',
+    slug: 'unemployment',
+    name: 'Unemployment',
+    query: { kinds: ['labour-statistic'], tags: ['unemployment', 'unemployment-rate'] },
+  },
+  {
+    collection: 'jobs',
+    slug: 'layoffs',
+    name: 'Layoffs',
+    description: 'WARN notices: the companies actually cutting jobs, named, counted and dated.',
+    query: { kinds: ['layoff-notice'] },
+  },
+  {
+    collection: 'jobs',
+    slug: 'big-layoffs',
+    name: 'Layoffs of 100 or more',
+    query: { kinds: ['layoff-notice'], tags: ['hundred-plus'] },
+  },
+
   /* Weather. `severe-weather-us` keeps its slug from when it lived under
      `alerts`, because it is a feed people may already be following and a feed
      URL is a promise. Migration 0010 moves the row rather than replacing it. */

@@ -111,6 +111,14 @@ export const config = {
     igdbClientSecret: opt('IGDB_CLIENT_SECRET'),
     githubToken: opt('GITHUB_TOKEN'),
     courtlistenerToken: opt('COURTLISTENER_TOKEN'),
+    /**
+     * The BLS registration key, which is free and optional.
+     *
+     * Everything works without it on the public v1 API; a key switches the
+     * adapter to v2 and its much higher daily limits. Registering is a form
+     * and an email address: https://data.bls.gov/registrationEngine/
+     */
+    blsApiKey: opt('BLS_API_KEY'),
   },
 
   /**
