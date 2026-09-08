@@ -106,6 +106,12 @@ export const COLLECTIONS = [
       'Crime reports as police departments publish them: incident-level records from seven US city open-data portals, street-level crime across England, Wales and Northern Ireland, and the FBI’s state-by-state estimates. Every row carries its country, state or force area, city and neighbourhood, so it can be read by place rather than only as a stream.',
   },
   {
+    slug: 'public-money',
+    name: 'Public money',
+    description:
+      'Who is getting paid by governments, and for what: every US federal contract, grant and loan, every above-threshold tender in the European Union, and UK procurement from both national portals. Three governments, one shape, so an award in Ohio and a tender in Estonia can be read side by side.',
+  },
+  {
     slug: 'ai-incidents',
     name: 'AI incidents',
     description:
@@ -442,6 +448,46 @@ export const DEFAULT_FEEDS = [
     description:
       'The FBI’s estimates, which are comparable between states in a way that summing city portals is not.',
     query: { kinds: ['crime-estimate'] },
+  },
+  /* Public money. Cut by what a reader is: a supplier looking for work wants
+     tenders, a journalist wants awards, and both want the big ones. */
+  {
+    collection: 'public-money',
+    slug: 'public-contracts',
+    name: 'Public contracts awarded',
+    description: 'Money committed: contracts and grants that have been awarded to somebody.',
+    query: { kinds: ['contract-award', 'grant-award'] },
+  },
+  {
+    collection: 'public-money',
+    slug: 'open-tenders',
+    name: 'Tenders open for bidding',
+    description: 'Money about to be spent, and still open to bid on.',
+    query: { kinds: ['tender'] },
+  },
+  {
+    collection: 'public-money',
+    slug: 'big-awards',
+    name: 'The eight-figure awards',
+    query: { tags: ['million-plus'] },
+  },
+  {
+    collection: 'public-money',
+    slug: 'us-federal-spending',
+    name: 'US federal contracts and grants',
+    query: { kinds: ['contract-award', 'grant-award', 'loan', 'direct-payment'], tags: ['us'] },
+  },
+  {
+    collection: 'public-money',
+    slug: 'eu-procurement',
+    name: 'EU procurement',
+    query: { tags: ['eu'] },
+  },
+  {
+    collection: 'public-money',
+    slug: 'uk-procurement',
+    name: 'UK procurement',
+    query: { tags: ['gb'] },
   },
   {
     collection: 'ai-incidents',

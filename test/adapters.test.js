@@ -44,6 +44,7 @@ describe('registry', () => {
         'research',
         'markets',
         'crime',
+        'public-money',
       ]).toContain(a.collection);
     }
     expect(adapterByName('steam').title).toContain('Steam');

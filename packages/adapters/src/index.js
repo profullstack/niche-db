@@ -25,6 +25,7 @@ import { nasdaqHalts } from './nasdaqhalts.js';
 import { nhtsaComplaints, nhtsaRatings, nhtsaRecalls } from './nhtsa.js';
 import { npm } from './npm.js';
 import { nws } from './nws.js';
+import { ocdsTenders } from './ocds.js';
 import { openfda } from './openfda.js';
 import { openlibrary } from './openlibrary.js';
 import { pypi } from './pypi.js';
@@ -33,7 +34,9 @@ import { scryfallCards, scryfallSets } from './scryfall.js';
 import { socrataCrime } from './socratacrime.js';
 import { statuspage } from './statuspage.js';
 import { steam, steamNews } from './steam.js';
+import { tedNotices } from './ted.js';
 import { ukPoliceCrime } from './ukpolice.js';
+import { usaspendingAwards } from './usaspending.js';
 import { usgs } from './usgs.js';
 import { vscodeExtensions } from './vscode.js';
 
@@ -59,6 +62,9 @@ export const ADAPTERS = [
   socrataCrime,
   ukPoliceCrime,
   fbiCrimeEstimates,
+  usaspendingAwards,
+  ocdsTenders,
+  tedNotices,
   musicbrainz,
   openlibrary,
   scryfallSets,
