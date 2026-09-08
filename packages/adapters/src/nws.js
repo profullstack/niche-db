@@ -38,7 +38,12 @@ export function toItem(f) {
 export const nws = defineAdapter({
   name: 'nws-alerts',
   title: 'NWS weather alerts',
-  collection: 'alerts',
+  // Moved out of `alerts` and into `weather` when the weather collection was
+  // added. `alerts` keeps the things that are not weather - earthquakes, and
+  // the GDACS disaster feed - and migration 0010 re-homes the source row and
+  // the feed that already existed, so no history is orphaned and nothing is
+  // ingested twice.
+  collection: 'weather',
   description:
     'Active US weather alerts: warnings, watches and advisories, with area, severity and expiry. Keyless. Optionally one state.',
   docs: 'https://www.weather.gov/documentation/services-web-api',
@@ -64,6 +69,15 @@ export const nws = defineAdapter({
       slug: 'weather-alerts-us',
       name: 'Weather alerts: United States (severe and extreme)',
       config: { severity: 'Severe' },
+    },
+    // Everything, not only the severe: a flood advisory or a winter weather
+    // advisory is the row somebody wants when it is their county, and the
+    // severe-only source above is the one for a national feed.
+    {
+      slug: 'weather-alerts-us-all',
+      name: 'Weather alerts: United States (everything)',
+      config: {},
+      cadenceMinutes: 15,
     },
   ],
   async pull({ config, http, log }) {

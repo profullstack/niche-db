@@ -185,7 +185,7 @@ export function accidentEvidence(complaintRows, vin, { sample = 10 } = {}) {
  */
 export function historyProvider() {
   const url = config.automotive.historyUrl;
-  return url && url.includes('{vin}') ? { url, name: config.automotive.historyProvider } : null;
+  return url?.includes('{vin}') ? { url, name: config.automotive.historyProvider } : null;
 }
 
 function parseHeaders(spec) {
