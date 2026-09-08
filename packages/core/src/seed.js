@@ -1,4 +1,4 @@
-import { ADAPTERS } from '@nichedb/adapters';
+import { ADAPTERS, CRIME_CITIES, UK_CRIME_PLACES } from '@nichedb/adapters';
 import { createNiche, upsertOpportunity } from '@nichedb/db/knowledge';
 import * as q from '@nichedb/db/queries';
 
@@ -98,6 +98,24 @@ export const COLLECTIONS = [
     name: 'Automotive',
     description:
       'Every make, model and year sold in the US, and what is known about each one: safety recalls, what owners report going wrong, crash-test ratings, engines and mpg. Decode a VIN and get all of it for one car.',
+  },
+  {
+    slug: 'markets',
+    name: 'Markets',
+    description:
+      'Every market venue in the world from the ISO 10383 register, across 149 countries, and the events that move the ones we have data for: US dividends, splits, mergers and spin-offs, trading halts as they are declared, the market news wire, and the ECB’s daily euro reference rates.',
+  },
+  {
+    slug: 'crime',
+    name: 'Crime',
+    description:
+      'Crime reports as police departments publish them: incident-level records from seven US city open-data portals, street-level crime across England, Wales and Northern Ireland, and the FBI’s state-by-state estimates. Every row carries its country, state or force area, city and neighbourhood, so it can be read by place rather than only as a stream.',
+  },
+  {
+    slug: 'public-money',
+    name: 'Public money',
+    description:
+      'Who is getting paid by governments, and for what: every US federal contract, grant and loan, every above-threshold tender in the European Union, and UK procurement from both national portals. Three governments, one shape, so an award in Ohio and a tender in Estonia can be read side by side.',
   },
   {
     slug: 'housing',
@@ -324,6 +342,166 @@ export const DEFAULT_FEEDS = [
     name: 'Makes, models and years',
     query: { kinds: ['model'] },
   },
+  /* Markets. The first two are the worldwide half and the rest are US, which
+     is the shape of what is actually given away: the register of the world's
+     venues is public, and their prices are not. */
+  {
+    collection: 'markets',
+    slug: 'world-exchanges',
+    name: 'World exchanges',
+    description:
+      'Every operating market venue on earth from the ISO 10383 register, across 149 countries, with its operator, LEI, category and city.',
+    query: { kinds: ['exchange'] },
+  },
+  {
+    collection: 'markets',
+    slug: 'exchange-changes',
+    name: 'Exchanges opening, closing and renaming',
+    description:
+      'Market identifier codes newly registered, updated or expired. An expired code is an exchange that closed or merged.',
+    query: { kinds: ['exchange'], tags: ['expired', 'updated'] },
+  },
+  {
+    collection: 'markets',
+    slug: 'fx-rates',
+    name: 'Euro FX reference rates',
+    query: { kinds: ['fx-rate'] },
+  },
+  {
+    collection: 'markets',
+    slug: 'us-dividends',
+    name: 'US dividends',
+    query: { kinds: ['dividend'] },
+  },
+  {
+    collection: 'markets',
+    slug: 'stock-splits',
+    name: 'Stock splits',
+    query: { kinds: ['split'] },
+  },
+  {
+    collection: 'markets',
+    slug: 'reverse-splits',
+    name: 'Reverse splits',
+    description:
+      'A reverse split usually follows a long fall in the share price, and often precedes a delisting notice.',
+    query: { kinds: ['split'], tags: ['reverse-split'] },
+  },
+  {
+    collection: 'markets',
+    slug: 'mergers-and-spinoffs',
+    name: 'Mergers, acquisitions and spin-offs',
+    query: { kinds: ['merger', 'spin-off'] },
+  },
+  {
+    collection: 'markets',
+    slug: 'delistings',
+    name: 'Delistings and ticker changes',
+    query: { kinds: ['delisting', 'name-change'] },
+  },
+  {
+    collection: 'markets',
+    slug: 'trading-halts',
+    name: 'US trading halts',
+    query: { kinds: ['halt'] },
+  },
+  {
+    collection: 'markets',
+    slug: 'regulatory-halts',
+    name: 'SEC suspensions and listing-rule halts',
+    description: 'The halts that are a regulator acting rather than a price moving quickly.',
+    query: { kinds: ['halt'], tags: ['regulatory'] },
+  },
+  {
+    collection: 'markets',
+    slug: 'market-news',
+    name: 'Market news',
+    query: { kinds: ['market-news'] },
+  },
+  /* Crime. Cut three ways, because there are three questions people arrive
+     with: what happened near me, what kind of thing is happening, and how does
+     a whole place compare. The per-city feeds are generated from the adapter's
+     own city list further down rather than written out twice. */
+  {
+    collection: 'crime',
+    slug: 'crime-reports',
+    name: 'Crime reports',
+    description: 'Every incident-level report the collection ingests, newest first.',
+    query: { kinds: ['crime-report'] },
+  },
+  {
+    collection: 'crime',
+    slug: 'violent-crime',
+    name: 'Violent crime',
+    query: { kinds: ['crime-report'], tags: ['homicide', 'assault', 'robbery', 'sex-offense'] },
+  },
+  {
+    collection: 'crime',
+    slug: 'homicides',
+    name: 'Homicides',
+    query: { kinds: ['crime-report'], tags: ['homicide'] },
+  },
+  {
+    collection: 'crime',
+    slug: 'burglary-and-theft',
+    name: 'Burglary and theft',
+    query: { kinds: ['crime-report'], tags: ['burglary', 'theft', 'vehicle-theft'] },
+  },
+  {
+    collection: 'crime',
+    slug: 'crime-uk',
+    name: 'Crime in England, Wales and Northern Ireland',
+    query: { kinds: ['crime-report'], tags: ['gb'] },
+  },
+  {
+    collection: 'crime',
+    slug: 'crime-by-state',
+    name: 'US crime by state and year',
+    description:
+      'The FBI’s estimates, which are comparable between states in a way that summing city portals is not.',
+    query: { kinds: ['crime-estimate'] },
+  },
+  /* Public money. Cut by what a reader is: a supplier looking for work wants
+     tenders, a journalist wants awards, and both want the big ones. */
+  {
+    collection: 'public-money',
+    slug: 'public-contracts',
+    name: 'Public contracts awarded',
+    description: 'Money committed: contracts and grants that have been awarded to somebody.',
+    query: { kinds: ['contract-award', 'grant-award'] },
+  },
+  {
+    collection: 'public-money',
+    slug: 'open-tenders',
+    name: 'Tenders open for bidding',
+    description: 'Money about to be spent, and still open to bid on.',
+    query: { kinds: ['tender'] },
+  },
+  {
+    collection: 'public-money',
+    slug: 'big-awards',
+    name: 'The eight-figure awards',
+    query: { tags: ['million-plus'] },
+  },
+  {
+    collection: 'public-money',
+    slug: 'us-federal-spending',
+    name: 'US federal contracts and grants',
+    query: { kinds: ['contract-award', 'grant-award', 'loan', 'direct-payment'], tags: ['us'] },
+  },
+  {
+    collection: 'public-money',
+    slug: 'eu-procurement',
+    name: 'EU procurement',
+    query: { tags: ['eu'] },
+  },
+  {
+    collection: 'public-money',
+    slug: 'uk-procurement',
+    name: 'UK procurement',
+    query: { tags: ['gb'] },
+  },
+
   /* Housing. The events first, then the series: a sale and a permit are things
      that happened, and an index is a summary of many of them. */
   {
@@ -503,6 +681,35 @@ export const DEFAULT_FEEDS = [
     query: { kinds: ['research'] },
   },
 ];
+
+/**
+ * A feed per place, from the same lists the adapters seed their sources from.
+ *
+ * "Crime near me" is the question this collection is actually for, and a feed
+ * per city is how a person subscribes to it. Written out by hand these would
+ * be fifteen near-identical blocks that drift the first time a city is added
+ * to an adapter and not to this file, so they are generated from the adapters'
+ * own place lists and cannot disagree with them.
+ *
+ * Every crime row is tagged with its city slug, its state or force area and
+ * its country, which is what makes a query this short sufficient.
+ */
+for (const [key, c] of Object.entries(CRIME_CITIES)) {
+  DEFAULT_FEEDS.push({
+    collection: 'crime',
+    slug: `crime-${key}`,
+    name: `Crime: ${c.city}, ${c.state}`,
+    query: { kinds: ['crime-report'], tags: [key] },
+  });
+}
+for (const p of UK_CRIME_PLACES) {
+  DEFAULT_FEEDS.push({
+    collection: 'crime',
+    slug: `crime-uk-${p.key}`,
+    name: `Crime: ${p.city}, ${p.region}`,
+    query: { kinds: ['crime-report'], tags: [p.key] },
+  });
+}
 
 /**
  * A niche for every collection this deployment ships.

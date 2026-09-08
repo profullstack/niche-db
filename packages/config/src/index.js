@@ -112,6 +112,30 @@ export const config = {
     githubToken: opt('GITHUB_TOKEN'),
     courtlistenerToken: opt('COURTLISTENER_TOKEN'),
     /**
+     * Alpaca, for US corporate actions and the market news wire.
+     *
+     * `APCA_*` is the variable naming Alpaca's own SDKs use and that the rest
+     * of the fleet already sets, so it is kept rather than renamed. A key is
+     * read-only here: nothing in this deployment places an order, and the
+     * market-data endpoints these adapters call cannot.
+     *
+     * Worth knowing before wiring one up: Alpaca is US-only. Its asset list is
+     * about 14,300 US equities across NASDAQ, NYSE, ARCA, BATS, AMEX and OTC,
+     * plus roughly seventy crypto pairs, and there is no non-US exchange in it
+     * at all. The world's other venues are covered by the ISO 10383 register
+     * (`iso-mic-exchanges`), which is a register and not a price feed.
+     */
+    alpacaKeyId: opt('APCA_API_KEY_ID'),
+    alpacaSecretKey: opt('APCA_API_SECRET_KEY'),
+    /**
+     * api.data.gov, for the FBI's crime estimates by state.
+     *
+     * One free key covers every federal API behind api.data.gov, so it is
+     * named for the gateway rather than for the FBI: the next federal source
+     * added here will want the same one.
+     */
+    dataGovApiKey: opt('DATA_GOV_API_KEY'),
+    /**
      * The BLS registration key, which is free and optional.
      *
      * Everything works without it on the public v1 API; a key switches the
