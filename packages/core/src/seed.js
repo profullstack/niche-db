@@ -135,6 +135,12 @@ export const COLLECTIONS = [
     description:
       'What autonomous AI agents have actually been caught doing, and the harms AI systems have caused in the world, each entry linked to the primary source that evidenced it.',
   },
+  {
+    slug: 'news',
+    name: 'News',
+    description:
+      'The story and the screen: wire copy read straight from newsroom RSS, worldwide coverage from GDELT in 65 languages, and the live news channels you can actually watch, each with its public stream. Every source is free and keyless.',
+  },
 ];
 
 export const DEFAULT_FEEDS = [
@@ -679,6 +685,24 @@ export const DEFAULT_FEEDS = [
     slug: 'agent-research',
     name: 'Research on agents and multi-agent systems',
     query: { kinds: ['research'] },
+  },
+  {
+    collection: 'news',
+    slug: 'world-headlines',
+    name: 'World headlines',
+    query: { sources: ['news-world'] },
+  },
+  {
+    collection: 'news',
+    slug: 'news-global-beats',
+    name: 'Global beats: elections, economy, conflict, climate, health',
+    query: { sources: ['news-global'] },
+  },
+  {
+    collection: 'news',
+    slug: 'live-news-channels',
+    name: 'Live news channels you can watch',
+    query: { kinds: ['channel'] },
   },
 ];
 

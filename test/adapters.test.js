@@ -48,6 +48,7 @@ describe('registry', () => {
         'weather',
         'housing',
         'jobs',
+        'news',
       ]).toContain(a.collection);
     }
     expect(adapterByName('steam').title).toContain('Steam');
