@@ -16,6 +16,7 @@ import { federalRegister } from './federalregister.js';
 import { freddieMacRates } from './freddiemac.js';
 import { fueleconomyCatalog } from './fueleconomy.js';
 import { gdacs } from './gdacs.js';
+import { gdelt } from './gdelt.js';
 import { githubReleases } from './github.js';
 import { goModules } from './golang.js';
 import { huggingface } from './huggingface.js';
@@ -27,6 +28,8 @@ import { mcpRegistry } from './mcpregistry.js';
 import { isoMicExchanges } from './mic.js';
 import { musicbrainz } from './musicbrainz.js';
 import { nasdaqHalts } from './nasdaqhalts.js';
+import { newsChannels } from './newschannels.js';
+import { newsfeed } from './newsfeed.js';
 import { nhcCyclones } from './nhc.js';
 import { nhtsaComplaints, nhtsaRatings, nhtsaRecalls } from './nhtsa.js';
 import { npm } from './npm.js';
@@ -74,6 +77,9 @@ export const ADAPTERS = [
   usaspendingAwards,
   ocdsTenders,
   tedNotices,
+  newsfeed,
+  gdelt,
+  newsChannels,
   musicbrainz,
   openlibrary,
   scryfallSets,
