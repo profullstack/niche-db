@@ -62,7 +62,13 @@ export const COLLECTIONS = [
     slug: 'alerts',
     name: 'Alerts',
     description:
-      'Earthquakes, US weather warnings and global disaster alerts, minutes after they are issued.',
+      'Earthquakes and global disaster alerts, minutes after they are issued. Weather has a collection of its own.',
+  },
+  {
+    slug: 'weather',
+    name: 'Weather',
+    description:
+      'Weather as it is issued rather than forecast: every active US warning, watch and advisory from the National Weather Service, the tropical cyclones the National Hurricane Center is tracking advisory by advisory, geomagnetic storms from NOAA, and the wildfires, floods and severe storms NASA tracks worldwide.',
   },
   {
     slug: 'outages',
@@ -224,12 +230,6 @@ export const DEFAULT_FEEDS = [
     slug: 'big-earthquakes',
     name: 'Earthquakes M5+',
     query: { kinds: ['earthquake'], tags: ['moderate', 'strong', 'major'] },
-  },
-  {
-    collection: 'alerts',
-    slug: 'severe-weather-us',
-    name: 'Severe weather (US)',
-    query: { kinds: ['alert'] },
   },
   {
     collection: 'alerts',
@@ -405,6 +405,84 @@ export const DEFAULT_FEEDS = [
     slug: 'big-layoffs',
     name: 'Layoffs of 100 or more',
     query: { kinds: ['layoff-notice'], tags: ['hundred-plus'] },
+  },
+
+  /* Weather. `severe-weather-us` keeps its slug from when it lived under
+     `alerts`, because it is a feed people may already be following and a feed
+     URL is a promise. Migration 0010 moves the row rather than replacing it. */
+  {
+    collection: 'weather',
+    slug: 'severe-weather-us',
+    name: 'Severe weather (US)',
+    description: 'Every active US warning, watch and advisory, minutes after the NWS issues it.',
+    query: { kinds: ['alert'] },
+  },
+  {
+    collection: 'weather',
+    slug: 'tornadoes-and-thunderstorms',
+    name: 'Tornadoes and severe thunderstorms',
+    query: {
+      kinds: ['alert'],
+      tags: ['tornado-warning', 'tornado-watch', 'severe-thunderstorm-warning'],
+    },
+  },
+  {
+    collection: 'weather',
+    slug: 'winter-storms',
+    name: 'Winter storms and ice',
+    query: {
+      kinds: ['alert'],
+      tags: ['winter-storm-warning', 'blizzard-warning', 'ice-storm-warning'],
+    },
+  },
+  {
+    collection: 'weather',
+    slug: 'flooding',
+    name: 'Flooding',
+    query: { kinds: ['alert', 'flood'], tags: ['flash-flood-warning', 'flood-warning', 'flood'] },
+  },
+  {
+    collection: 'weather',
+    slug: 'hurricanes',
+    name: 'Tropical cyclones',
+    description:
+      'Every advisory on every storm the National Hurricane Center is tracking, Atlantic and Pacific.',
+    query: { kinds: ['cyclone'] },
+  },
+  {
+    collection: 'weather',
+    slug: 'major-hurricanes',
+    name: 'Major hurricanes (category 3 and up)',
+    query: { kinds: ['cyclone'], tags: ['major-hurricane'] },
+  },
+  {
+    collection: 'weather',
+    slug: 'space-weather',
+    name: 'Space weather',
+    description:
+      'Geomagnetic storms, solar radiation storms and radio blackouts, with the NOAA scale and the stated impact on grids, GPS and HF radio.',
+    query: { kinds: ['space-weather'] },
+  },
+  {
+    collection: 'weather',
+    slug: 'aurora-watch',
+    name: 'Aurora watch',
+    description: 'The G3 and stronger geomagnetic storms that drop the aurora into mid-latitudes.',
+    query: { kinds: ['space-weather'], tags: ['aurora-likely'] },
+  },
+  {
+    collection: 'weather',
+    slug: 'wildfires',
+    name: 'Wildfires worldwide',
+    query: { kinds: ['wildfire'] },
+  },
+  {
+    collection: 'weather',
+    slug: 'natural-events',
+    name: 'Natural events worldwide',
+    description:
+      'Storms, floods, drought, dust, snow and sea ice as NASA tracks them, each linked to the agency that reported it.',
+    query: { kinds: ['storm', 'flood', 'drought', 'dust-and-haze', 'snow', 'sea-and-lake-ice'] },
   },
   {
     collection: 'ai-incidents',

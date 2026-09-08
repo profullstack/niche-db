@@ -218,6 +218,31 @@ export const config = {
      */
     amazonTag: opt('AMAZON_ASSOCIATE_TAG'),
     amazonSubtag: opt('AMAZON_ASSOCIATE_SUBTAG', 'nichedb-vin'),
+    /**
+     * The vehicle history provider, if this deployment has bought one.
+     *
+     * Title brands, insurer total-loss records and the odometer readings taken
+     * at each title transfer live in NMVTIS, the federal title database, and
+     * NMVTIS is sold per report through providers approved by the Department
+     * of Justice. There is no free feed of it and there is no scraping it.
+     *
+     * So this is a URL template with `{vin}` in it, exactly like the affiliate
+     * templates above: whoever buys access pastes in the URL their provider
+     * gave them and nothing here needs a code change for a provider we have
+     * never heard of.
+     *
+     *   AUTOMOTIVE_HISTORY_URL="https://api.example.com/v2/report?key=K&vin={vin}"
+     *   AUTOMOTIVE_HISTORY_HEADERS="authorization: Bearer sk-..."
+     *   AUTOMOTIVE_HISTORY_PROVIDER="Example Vehicle History"
+     *
+     * Empty by default, and empty means the history section says plainly that
+     * no title record was checked. It must never mean a clean title.
+     */
+    historyUrl: opt('AUTOMOTIVE_HISTORY_URL'),
+    historyHeaders: opt('AUTOMOTIVE_HISTORY_HEADERS'),
+    historyProvider: opt('AUTOMOTIVE_HISTORY_PROVIDER', 'the configured NMVTIS provider'),
+    /** Days a bought report is reused before it is bought again. */
+    historyTtlDays: num('AUTOMOTIVE_HISTORY_TTL_DAYS', 30),
   },
 
   /** CrawlProof ads on the free tier: the publisher slot pages and feeds fill from. */

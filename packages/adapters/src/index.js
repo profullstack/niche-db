@@ -7,6 +7,7 @@ import { courtlistener } from './courtlistener.js';
 import { crates } from './crates.js';
 import { crossref } from './crossref.js';
 import { edgar } from './edgar.js';
+import { eonetEvents } from './eonet.js';
 import { eurostat } from './eurostat.js';
 import { federalRegister } from './federalregister.js';
 import { freddieMacRates } from './freddiemac.js';
@@ -21,6 +22,7 @@ import { launchLibrary } from './launchlibrary.js';
 import { lichessBroadcasts } from './lichess.js';
 import { mcpRegistry } from './mcpregistry.js';
 import { musicbrainz } from './musicbrainz.js';
+import { nhcCyclones } from './nhc.js';
 import { nhtsaComplaints, nhtsaRatings, nhtsaRecalls } from './nhtsa.js';
 import { npm } from './npm.js';
 import { nws } from './nws.js';
@@ -32,6 +34,7 @@ import { rogueIncidents, rogueResearch } from './rogueaitracker.js';
 import { scryfallCards, scryfallSets } from './scryfall.js';
 import { statuspage } from './statuspage.js';
 import { steam, steamNews } from './steam.js';
+import { swpcSpaceWeather } from './swpc.js';
 import { usgs } from './usgs.js';
 import { vscodeExtensions } from './vscode.js';
 import { warnLayoffs } from './warn.js';
@@ -57,8 +60,11 @@ export const ADAPTERS = [
   launchLibrary,
   lichessBroadcasts,
   usgs,
-  nws,
   gdacs,
+  nws,
+  nhcCyclones,
+  swpcSpaceWeather,
+  eonetEvents,
   statuspage,
   firefoxAddons,
   vscodeExtensions,
