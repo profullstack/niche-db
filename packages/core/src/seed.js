@@ -704,6 +704,19 @@ export const DEFAULT_FEEDS = [
     name: 'Live news channels you can watch',
     query: { kinds: ['channel'] },
   },
+  // One per desk. The section is a tag on every story, so these are plain tag
+  // queries rather than a second source per section.
+  { collection: 'news', slug: 'news-us', name: 'US news', query: { tags: ['us'] } },
+  { collection: 'news', slug: 'news-politics', name: 'Politics', query: { tags: ['politics'] } },
+  { collection: 'news', slug: 'news-business', name: 'Business', query: { tags: ['business'] } },
+  {
+    collection: 'news',
+    slug: 'news-technology',
+    name: 'Technology',
+    query: { tags: ['technology'] },
+  },
+  { collection: 'news', slug: 'news-sport', name: 'Sport', query: { tags: ['sport'] } },
+  { collection: 'news', slug: 'news-climate', name: 'Climate', query: { tags: ['climate'] } },
 ];
 
 /**
