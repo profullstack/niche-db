@@ -17,6 +17,7 @@ function envFor() {
     alpacaKeyId: config.adapters.alpacaKeyId,
     alpacaSecretKey: config.adapters.alpacaSecretKey,
     dataGovApiKey: config.adapters.dataGovApiKey,
+    blsApiKey: config.adapters.blsApiKey,
     contactEmail: config.contactEmail,
   };
 }

@@ -62,7 +62,13 @@ export const COLLECTIONS = [
     slug: 'alerts',
     name: 'Alerts',
     description:
-      'Earthquakes, US weather warnings and global disaster alerts, minutes after they are issued.',
+      'Earthquakes and global disaster alerts, minutes after they are issued. Weather has a collection of its own.',
+  },
+  {
+    slug: 'weather',
+    name: 'Weather',
+    description:
+      'Weather as it is issued rather than forecast: every active US warning, watch and advisory from the National Weather Service, the tropical cyclones the National Hurricane Center is tracking advisory by advisory, geomagnetic storms from NOAA, and the wildfires, floods and severe storms NASA tracks worldwide.',
   },
   {
     slug: 'outages',
@@ -110,6 +116,18 @@ export const COLLECTIONS = [
     name: 'Public money',
     description:
       'Who is getting paid by governments, and for what: every US federal contract, grant and loan, every above-threshold tender in the European Union, and UK procurement from both national portals. Three governments, one shape, so an award in Ohio and a tender in Estonia can be read side by side.',
+  },
+  {
+    slug: 'housing',
+    name: 'Housing',
+    description:
+      'What homes cost and what is being built: every property sold in England and Wales with its address and price, harmonised house price indices across Europe, the weekly US mortgage rate, and the building permits US cities issue months before ground is broken.',
+  },
+  {
+    slug: 'jobs',
+    name: 'Jobs',
+    description:
+      'The labour market as governments measure it: the US jobs report series from the BLS, harmonised unemployment and employment rates across Europe, and the WARN notices employers must file before a mass layoff — the one public, named record of jobs actually being cut.',
   },
   {
     slug: 'ai-incidents',
@@ -230,12 +248,6 @@ export const DEFAULT_FEEDS = [
     slug: 'big-earthquakes',
     name: 'Earthquakes M5+',
     query: { kinds: ['earthquake'], tags: ['moderate', 'strong', 'major'] },
-  },
-  {
-    collection: 'alerts',
-    slug: 'severe-weather-us',
-    name: 'Severe weather (US)',
-    query: { kinds: ['alert'] },
   },
   {
     collection: 'alerts',
@@ -488,6 +500,167 @@ export const DEFAULT_FEEDS = [
     slug: 'uk-procurement',
     name: 'UK procurement',
     query: { tags: ['gb'] },
+  },
+
+  /* Housing. The events first, then the series: a sale and a permit are things
+     that happened, and an index is a summary of many of them. */
+  {
+    collection: 'housing',
+    slug: 'property-sales',
+    name: 'Property sales',
+    description:
+      'Every home sold in England and Wales, with the address and the price actually paid.',
+    query: { kinds: ['property-sale'] },
+  },
+  {
+    collection: 'housing',
+    slug: 'million-pound-homes',
+    name: 'Homes sold for £1m and up',
+    query: { kinds: ['property-sale'], tags: ['million-plus'] },
+  },
+  {
+    collection: 'housing',
+    slug: 'new-builds',
+    name: 'New-build sales',
+    query: { kinds: ['property-sale'], tags: ['new-build'] },
+  },
+  {
+    collection: 'housing',
+    slug: 'building-permits',
+    name: 'Building permits',
+    description: 'What is about to be built, months before ground is broken.',
+    query: { kinds: ['building-permit'] },
+  },
+  {
+    collection: 'housing',
+    slug: 'new-construction',
+    name: 'New construction permits',
+    query: { kinds: ['building-permit'], tags: ['new-construction'] },
+  },
+  {
+    collection: 'housing',
+    slug: 'house-prices',
+    name: 'House prices and mortgage rates',
+    query: { kinds: ['housing-statistic'] },
+  },
+  {
+    collection: 'housing',
+    slug: 'mortgage-rates',
+    name: 'US mortgage rates',
+    query: { kinds: ['housing-statistic'], tags: ['mortgage'] },
+  },
+
+  /* Jobs. A statistic describes the market; a WARN notice names a company. */
+  {
+    collection: 'jobs',
+    slug: 'jobs-report',
+    name: 'The jobs numbers',
+    description:
+      'Unemployment, payrolls, openings, quits and earnings as the statistical agencies publish them.',
+    query: { kinds: ['labour-statistic'] },
+  },
+  {
+    collection: 'jobs',
+    slug: 'us-jobs-report',
+    name: 'US jobs report',
+    query: { kinds: ['labour-statistic'], tags: ['bls'] },
+  },
+  {
+    collection: 'jobs',
+    slug: 'unemployment',
+    name: 'Unemployment',
+    query: { kinds: ['labour-statistic'], tags: ['unemployment', 'unemployment-rate'] },
+  },
+  {
+    collection: 'jobs',
+    slug: 'layoffs',
+    name: 'Layoffs',
+    description: 'WARN notices: the companies actually cutting jobs, named, counted and dated.',
+    query: { kinds: ['layoff-notice'] },
+  },
+  {
+    collection: 'jobs',
+    slug: 'big-layoffs',
+    name: 'Layoffs of 100 or more',
+    query: { kinds: ['layoff-notice'], tags: ['hundred-plus'] },
+  },
+
+  /* Weather. `severe-weather-us` keeps its slug from when it lived under
+     `alerts`, because it is a feed people may already be following and a feed
+     URL is a promise. Migration 0010 moves the row rather than replacing it. */
+  {
+    collection: 'weather',
+    slug: 'severe-weather-us',
+    name: 'Severe weather (US)',
+    description: 'Every active US warning, watch and advisory, minutes after the NWS issues it.',
+    query: { kinds: ['alert'] },
+  },
+  {
+    collection: 'weather',
+    slug: 'tornadoes-and-thunderstorms',
+    name: 'Tornadoes and severe thunderstorms',
+    query: {
+      kinds: ['alert'],
+      tags: ['tornado-warning', 'tornado-watch', 'severe-thunderstorm-warning'],
+    },
+  },
+  {
+    collection: 'weather',
+    slug: 'winter-storms',
+    name: 'Winter storms and ice',
+    query: {
+      kinds: ['alert'],
+      tags: ['winter-storm-warning', 'blizzard-warning', 'ice-storm-warning'],
+    },
+  },
+  {
+    collection: 'weather',
+    slug: 'flooding',
+    name: 'Flooding',
+    query: { kinds: ['alert', 'flood'], tags: ['flash-flood-warning', 'flood-warning', 'flood'] },
+  },
+  {
+    collection: 'weather',
+    slug: 'hurricanes',
+    name: 'Tropical cyclones',
+    description:
+      'Every advisory on every storm the National Hurricane Center is tracking, Atlantic and Pacific.',
+    query: { kinds: ['cyclone'] },
+  },
+  {
+    collection: 'weather',
+    slug: 'major-hurricanes',
+    name: 'Major hurricanes (category 3 and up)',
+    query: { kinds: ['cyclone'], tags: ['major-hurricane'] },
+  },
+  {
+    collection: 'weather',
+    slug: 'space-weather',
+    name: 'Space weather',
+    description:
+      'Geomagnetic storms, solar radiation storms and radio blackouts, with the NOAA scale and the stated impact on grids, GPS and HF radio.',
+    query: { kinds: ['space-weather'] },
+  },
+  {
+    collection: 'weather',
+    slug: 'aurora-watch',
+    name: 'Aurora watch',
+    description: 'The G3 and stronger geomagnetic storms that drop the aurora into mid-latitudes.',
+    query: { kinds: ['space-weather'], tags: ['aurora-likely'] },
+  },
+  {
+    collection: 'weather',
+    slug: 'wildfires',
+    name: 'Wildfires worldwide',
+    query: { kinds: ['wildfire'] },
+  },
+  {
+    collection: 'weather',
+    slug: 'natural-events',
+    name: 'Natural events worldwide',
+    description:
+      'Storms, floods, drought, dust, snow and sea ice as NASA tracks them, each linked to the agency that reported it.',
+    query: { kinds: ['storm', 'flood', 'drought', 'dust-and-haze', 'snow', 'sea-and-lake-ice'] },
   },
   {
     collection: 'ai-incidents',

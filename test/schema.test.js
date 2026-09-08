@@ -841,3 +841,95 @@ describe('revenue ledger', () => {
     expect(threw).toMatch(/revenue_allocations_bps/);
   });
 });
+
+describe('the VIN history tables', () => {
+  test('a bought report is kept per VIN and replaced rather than duplicated', async () => {
+    await db.query(`insert into auto_vin_lookups (vin, wmi) values ('1HGCM82633A004352', '1HG')`);
+    for (const provider of ['first', 'second']) {
+      await db.query(
+        `insert into auto_vin_history (vin, provider, report)
+         values ('1HGCM82633A004352', $1, '{"brands":[]}')
+         on conflict (vin) do update set provider = excluded.provider, fetched_at = now()`,
+        [provider],
+      );
+    }
+    const row = await one(`select provider, count(*) over () as n from auto_vin_history`);
+    expect(row.provider).toBe('second');
+    expect(Number(row.n)).toBe(1);
+  });
+
+  test('a rating is appended, so a grade that moved is visible as a grade that moved', async () => {
+    for (const [score, grade] of [
+      [92, 'A'],
+      [71, 'C'],
+    ]) {
+      await db.query(
+        `insert into auto_vin_ratings (vin, score, grade, confidence, factors)
+         values ('1HGCM82633A004352', $1, $2, 'moderate', '[]')`,
+        [score, grade],
+      );
+    }
+    const all = await rows(
+      `select score from auto_vin_ratings where vin = '1HGCM82633A004352' order by computed_at, id`,
+    );
+    expect(all.map((r) => r.score)).toEqual([92, 71]);
+  });
+
+  test('dropping a decoded VIN takes its bought report with it', async () => {
+    await db.query(`delete from auto_vin_lookups where vin = '1HGCM82633A004352'`);
+    const left = await one(`select count(*)::int as n from auto_vin_history`);
+    expect(left.n).toBe(0);
+  });
+});
+
+describe('the weather collection migration', () => {
+  test('the NWS source, its items and its feed all move, so nothing is ingested twice', async () => {
+    // The whole risk in 0010: leave the source under `alerts` and the next
+    // boot seeds a second one under `weather`, and both poll the National
+    // Weather Service forever.
+    const alerts = await one(
+      `insert into collections (slug, name) values ('alerts', 'Alerts')
+       on conflict (slug) do update set name = excluded.name returning id`,
+    );
+    const s = await one(
+      `insert into sources (collection_id, adapter, slug, name)
+       values ($1, 'nws-alerts', 'weather-alerts-us', 'W') returning id`,
+      [alerts.id],
+    );
+    await db.query(
+      `insert into items (source_id, collection_id, external_id, kind, title, content_hash)
+       values ($1, $2, 'x1', 'alert', 'A warning', 'h1')`,
+      [s.id, alerts.id],
+    );
+    await db.query(
+      `insert into feeds (collection_id, slug, name) values ($1, 'severe-weather-us', 'Severe weather')`,
+      [alerts.id],
+    );
+
+    // Exactly the statements migration 0010 runs, in its order.
+    await db.query(
+      `insert into collections (slug, name) values ('weather', 'Weather') on conflict (slug) do nothing`,
+    );
+    const w = await one(`select id from collections where slug = 'weather'`);
+    await db.query(
+      `update items i set collection_id = $1 from sources s
+        where s.id = i.source_id and s.adapter = 'nws-alerts' and i.collection_id = $2`,
+      [w.id, alerts.id],
+    );
+    await db.query(
+      `update sources set collection_id = $1 where adapter = 'nws-alerts' and collection_id = $2`,
+      [w.id, alerts.id],
+    );
+    await db.query(`update feeds set collection_id = $1 where slug = 'severe-weather-us'`, [w.id]);
+
+    const moved = await one(
+      `select
+         (select count(*)::int from sources where adapter = 'nws-alerts' and collection_id = $1) as sources,
+         (select count(*)::int from items where collection_id = $1) as items,
+         (select count(*)::int from feeds where slug = 'severe-weather-us' and collection_id = $1) as feeds,
+         (select count(*)::int from sources where adapter = 'nws-alerts' and collection_id = $2) as left_behind`,
+      [w.id, alerts.id],
+    );
+    expect(moved).toEqual({ sources: 1, items: 1, feeds: 1, left_behind: 0 });
+  });
+});
