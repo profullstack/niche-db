@@ -81,6 +81,112 @@ export async function vinStats() {
   return row ?? { vins: 0, lookups: 0, manufacturers: 0 };
 }
 
+/* -------------------------------------------------------------- baseline -- */
+
+/**
+ * What an ordinary car's complaints look like, measured rather than assumed.
+ *
+ * A rate on its own says nothing. Eight per cent of a model's complaints
+ * mentioning a crash sounds alarming until you know that eight per cent is
+ * roughly what every model runs at, because people who have been in a crash
+ * are more likely to file. Scoring against zero therefore marks down every car
+ * ever built, which is the same as scoring nothing at all.
+ *
+ * This is the number that fixes it, and it is the one thing here the site can
+ * answer that the upstreams cannot: the collection has already ingested
+ * complaints across every make and model year it has walked, so the population
+ * average is a single aggregate over rows we already hold. A model is then
+ * scored on how far it sits from ordinary, not on how far it sits from
+ * perfect.
+ *
+ * Returns null when the corpus is too thin to average, and the caller falls
+ * back to fixed reference points and says so.
+ */
+export async function complaintBaseline({ minimum = 5000 } = {}) {
+  const [row] = await sql`
+    select
+      count(*)::int as complaints,
+      count(*) filter (where (i.data->>'crash')::boolean)::int as crashes,
+      count(*) filter (where (i.data->>'fire')::boolean)::int as fires,
+      coalesce(sum((i.data->>'injuries')::int), 0)::int as injuries,
+      coalesce(sum((i.data->>'deaths')::int), 0)::int as deaths
+    from items i join collections c on c.id = i.collection_id
+    where c.slug = 'automotive' and i.kind = 'complaint'
+      and i.data ? 'crash'
+  `;
+  if (!row || row.complaints < minimum) return null;
+  return {
+    complaints: row.complaints,
+    crashRate: row.crashes / row.complaints,
+    fireRate: row.fires / row.complaints,
+    harmRate: (row.injuries + row.deaths * 3) / row.complaints,
+    measuredAt: new Date().toISOString(),
+  };
+}
+
+/* --------------------------------------------------------------- history -- */
+
+/**
+ * A bought title record, kept.
+ *
+ * Every other upstream here is free, so a cache is a courtesy. This one is
+ * not: an NMVTIS report costs money per VIN, and buying the same VIN twice
+ * because somebody reloaded the page is money on the floor. The TTL is
+ * generous for the same reason — a title record changes when the car is sold
+ * or written off, which is not this week.
+ */
+export async function getVinHistory(vin, maxAgeSeconds) {
+  const [row] = await sql`
+    select * from auto_vin_history
+     where vin = ${vin} and fetched_at > now() - make_interval(secs => ${maxAgeSeconds})
+  `;
+  return row ?? null;
+}
+
+export async function putVinHistory({ vin, provider, report, costCents = null }) {
+  const [row] = await sql`
+    insert into auto_vin_history (vin, provider, report, cost_cents)
+    values (${vin}, ${provider}, ${JSON.stringify(report ?? {})}::text::jsonb, ${costCents})
+    on conflict (vin) do update set
+      provider   = excluded.provider,
+      report     = excluded.report,
+      cost_cents = coalesce(excluded.cost_cents, auto_vin_history.cost_cents),
+      fetched_at = now()
+    returning *
+  `;
+  return row ?? null;
+}
+
+/**
+ * The score we published for a VIN, on the day we published it.
+ *
+ * Written every time a rating is computed rather than upserted, because the
+ * point is the trail: a grade that fell when a recall opened should be visible
+ * as a grade that fell, and a seller disputing today's number is entitled to
+ * see what the evidence was when it was produced.
+ */
+export async function recordRating({ vin, score, grade, confidence, factors = [], unknown = [] }) {
+  if (!vin) return null;
+  const [row] = await sql`
+    insert into auto_vin_ratings (vin, score, grade, confidence, factors, unknown)
+    values (${vin}, ${score}, ${grade}, ${confidence},
+            ${JSON.stringify(factors)}::text::jsonb, ${JSON.stringify(unknown)}::text::jsonb)
+    returning *
+  `;
+  return row ?? null;
+}
+
+/** Every score this VIN has been given, newest first. */
+export async function ratingHistory(vin, { limit = 20 } = {}) {
+  return sql`
+    select score, grade, confidence, computed_at
+      from auto_vin_ratings
+     where vin = ${vin}
+     order by computed_at desc
+     limit ${Math.min(Math.max(1, limit), 100)}
+  `;
+}
+
 /* ---------------------------------------------------------------- places -- */
 
 export async function getPlaces(key, maxAgeSeconds) {

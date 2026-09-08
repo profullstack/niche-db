@@ -759,6 +759,16 @@ time.undated {
   border-color: var(--accent);
   color: var(--accent);
 }
+/* Used by the recall markup since the collection shipped, and by the history
+   timeline now: a tag that has to be read as a warning rather than a label. */
+.tag.danger {
+  border-color: var(--err);
+  color: var(--err);
+}
+.tag.ok {
+  border-color: var(--ok);
+  color: var(--ok);
+}
 .hero-img {
   max-width: 100%;
   max-height: 22rem;
@@ -967,4 +977,164 @@ td.evidence {
   overflow-wrap: anywhere;
   max-height: 18rem;
   overflow-y: auto;
+}
+
+/* ------------------------------------------------ the VIN history report -- */
+/* The grade is the most quotable object on the site, so it is built to carry
+   its own qualification: the letter, the number it came from and the
+   confidence it was computed at are one block and cannot be screenshotted
+   apart. */
+.report-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+.report-head > div {
+  flex: 1 1 18rem;
+}
+.report-band {
+  margin: 0 0 0.35rem;
+  font-weight: 600;
+}
+.grade {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-rows: auto auto;
+  gap: 0 0.6rem;
+  align-items: center;
+  padding: 0.7rem 1rem;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--muted);
+  border-radius: var(--radius);
+  background: var(--panel2);
+}
+.grade-letter {
+  grid-row: 1 / span 2;
+  font-size: 2.6rem;
+  font-weight: 700;
+  line-height: 1;
+}
+.grade-score {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+.grade-confidence {
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+.grade-a {
+  border-left-color: var(--ok);
+}
+.grade-b {
+  border-left-color: var(--ok);
+}
+.grade-c {
+  border-left-color: var(--accent);
+}
+.grade-d {
+  border-left-color: var(--accent);
+}
+.grade-f {
+  border-left-color: var(--err);
+}
+.grade-a .grade-letter {
+  color: var(--ok);
+}
+.grade-b .grade-letter {
+  color: var(--ok);
+}
+.grade-c .grade-letter,
+.grade-d .grade-letter {
+  color: var(--accent);
+}
+.grade-f .grade-letter {
+  color: var(--err);
+}
+
+.report-block {
+  margin: 1.25rem 0;
+}
+.report-block h4 {
+  margin: 0 0 0.4rem;
+  font-size: 0.95rem;
+}
+
+.factors,
+.events {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+.factor,
+.event {
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--panel);
+}
+.factor-head,
+.event-head {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: baseline;
+  margin: 0 0 0.25rem;
+}
+.factor-label,
+.event-title {
+  font-weight: 600;
+}
+.factor-points {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+.factor-points.down {
+  color: var(--err);
+}
+.event-date {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+/* Severity is a left edge rather than a background: a timeline of twenty
+   coloured blocks reads as decoration, one of twenty rules reads as a list. */
+.event-critical {
+  border-left: 3px solid var(--err);
+}
+.event-high {
+  border-left: 3px solid var(--accent);
+}
+.event-medium {
+  border-left: 3px solid var(--border);
+}
+.event-info {
+  border-left: 3px solid var(--border);
+}
+
+/* Given the same weight as the score itself. The distance between "no crash on
+   record" and "no crash" is the whole report. */
+.gaps {
+  margin-top: 1.25rem;
+  padding: 0.85rem 1rem;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  background: var(--panel2);
+}
+.gaps h4 {
+  margin: 0 0 0.4rem;
+  font-size: 0.9rem;
+}
+.gaps h4 + ul + h4 {
+  margin-top: 0.8rem;
+}
+.gaps ul {
+  margin: 0;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.3rem;
 }

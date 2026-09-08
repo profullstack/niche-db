@@ -1,5 +1,6 @@
 import { config } from '@nichedb/config';
 import * as auto from '@nichedb/db/automotive';
+import { vinReport } from './vin-history.js';
 
 /**
  * One car, everything known about it.
@@ -19,6 +20,16 @@ import * as auto from '@nichedb/db/automotive';
  *   complaints   NHTSA. What owners report. Theirs.
  *   rating       NHTSA NCAP crash tests. Theirs.
  *   economy      EPA/DOE fueleconomy.gov. Engine, drive, mpg. Theirs.
+ *   score        OURS, and marked so. A condition-and-risk rating out of a
+ *                hundred with every deduction itemised, computed in
+ *                `vin-history.js` from the recall, complaint and crash-test
+ *                data above. It is a summary of published evidence, not an
+ *                inspection, and it says which facts it could not see.
+ *   accidents    NHTSA complaints matched to this VIN's exact build on the
+ *                eleven-character partial VIN NHTSA publishes. Theirs.
+ *   history      NMVTIS title brands and total-loss records, through a
+ *                configured provider. Absent unless one is configured, and
+ *                absent is never rendered as clean.
  *   maintenance  OURS, and marked so. Nobody publishes manufacturer service
  *                schedules under a licence we can redistribute, so this is a
  *                mileage-and-age model over the powertrain we decoded, not the
@@ -315,6 +326,10 @@ export async function complaintsFor({ year, make, model }, { sample = 5 } = {}) 
       .sort((a, b) => b.complaints - a.complaints)
       .slice(0, 12),
     recent,
+    // The raw rows, for the history report to match against this VIN's build.
+    // Not part of the payload — `vehicleProfile` takes them off before it
+    // answers, because a popular model has thousands and nobody asked for them.
+    rows,
   };
 }
 
@@ -896,6 +911,21 @@ export async function vehicleProfile({
   const powertrain = powertrainOf({ decoded: decode?.decoded ?? {}, economy });
   const urgent = recalls.filter((r) => r.doNotDrive || r.parkOutside);
 
+  // The history report reuses what has already been fetched: the recall list,
+  // the raw complaint rows and the crash test. Only the title record, which
+  // has to be bought, costs a call of its own, and only when one is configured.
+  const { rows: complaintRows = [], ...complaintSummary } = complaints;
+  const report = await vinReport({
+    vin: decode?.vin ?? null,
+    identity: decode,
+    recalls,
+    complaintRows,
+    complaints: complaintSummary,
+    ncap: rating,
+    modelYear: year,
+    miles,
+  }).catch(() => null);
+
   return {
     vehicle: { year, make, model, vin: decode?.vin ?? null },
     identity: decode,
@@ -903,13 +933,25 @@ export async function vehicleProfile({
       openRecalls: recalls.length,
       urgentRecalls: urgent.length,
       doNotDrive: urgent.some((r) => r.doNotDrive),
-      complaints: complaints.total,
-      crashComplaints: complaints.crashes ?? 0,
+      complaints: complaintSummary.total,
+      crashComplaints: complaintSummary.crashes ?? 0,
       overallSafetyRating: rating?.overall ?? null,
       mpgCombined: economy?.mpgCombined ?? null,
+      // The headline number the page leads with, and the letter beside it.
+      conditionScore: report?.rating?.score ?? null,
+      conditionGrade: report?.rating?.grade ?? null,
+      ratingConfidence: report?.rating?.confidence ?? null,
+      crashesOnThisBuild: report?.accidents?.build?.crashes ?? null,
+      titleRecordChecked: report?.history?.available ?? false,
     },
+    // The report, in the three shapes people read it in: a score with its
+    // working shown, the accident evidence behind it, and a dated timeline.
+    score: report?.rating ?? null,
+    accidents: report?.accidents ?? null,
+    history: report?.history ?? null,
+    timeline: report?.timeline ?? [],
     recalls,
-    complaints,
+    complaints: complaintSummary,
     rating,
     economy,
     maintenance: maintenanceSchedule({ powertrain, miles, modelYear: year }),
