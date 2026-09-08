@@ -1,10 +1,12 @@
 import { aiid } from './aiid.js';
+import { alpacaCorporateActions, alpacaNews } from './alpaca.js';
 import { firefoxAddons } from './amo.js';
 import { arxiv } from './arxiv.js';
 import { clinicalTrials } from './clinicaltrials.js';
 import { courtlistener } from './courtlistener.js';
 import { crates } from './crates.js';
 import { crossref } from './crossref.js';
+import { ecbFxRates } from './ecb.js';
 import { edgar } from './edgar.js';
 import { federalRegister } from './federalregister.js';
 import { fueleconomyCatalog } from './fueleconomy.js';
@@ -16,7 +18,9 @@ import { igdb } from './igdb.js';
 import { launchLibrary } from './launchlibrary.js';
 import { lichessBroadcasts } from './lichess.js';
 import { mcpRegistry } from './mcpregistry.js';
+import { isoMicExchanges } from './mic.js';
 import { musicbrainz } from './musicbrainz.js';
+import { nasdaqHalts } from './nasdaqhalts.js';
 import { nhtsaComplaints, nhtsaRatings, nhtsaRecalls } from './nhtsa.js';
 import { npm } from './npm.js';
 import { nws } from './nws.js';
@@ -44,6 +48,11 @@ export const ADAPTERS = [
   edgar,
   federalRegister,
   courtlistener,
+  isoMicExchanges,
+  alpacaCorporateActions,
+  alpacaNews,
+  nasdaqHalts,
+  ecbFxRates,
   musicbrainz,
   openlibrary,
   scryfallSets,

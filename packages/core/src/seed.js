@@ -94,6 +94,12 @@ export const COLLECTIONS = [
       'Every make, model and year sold in the US, and what is known about each one: safety recalls, what owners report going wrong, crash-test ratings, engines and mpg. Decode a VIN and get all of it for one car.',
   },
   {
+    slug: 'markets',
+    name: 'Markets',
+    description:
+      'Every market venue in the world from the ISO 10383 register, across 149 countries, and the events that move the ones we have data for: US dividends, splits, mergers and spin-offs, trading halts as they are declared, the market news wire, and the ECB’s daily euro reference rates.',
+  },
+  {
     slug: 'ai-incidents',
     name: 'AI incidents',
     description:
@@ -311,6 +317,82 @@ export const DEFAULT_FEEDS = [
     slug: 'vehicle-catalog',
     name: 'Makes, models and years',
     query: { kinds: ['model'] },
+  },
+  /* Markets. The first two are the worldwide half and the rest are US, which
+     is the shape of what is actually given away: the register of the world's
+     venues is public, and their prices are not. */
+  {
+    collection: 'markets',
+    slug: 'world-exchanges',
+    name: 'World exchanges',
+    description:
+      'Every operating market venue on earth from the ISO 10383 register, across 149 countries, with its operator, LEI, category and city.',
+    query: { kinds: ['exchange'] },
+  },
+  {
+    collection: 'markets',
+    slug: 'exchange-changes',
+    name: 'Exchanges opening, closing and renaming',
+    description:
+      'Market identifier codes newly registered, updated or expired. An expired code is an exchange that closed or merged.',
+    query: { kinds: ['exchange'], tags: ['expired', 'updated'] },
+  },
+  {
+    collection: 'markets',
+    slug: 'fx-rates',
+    name: 'Euro FX reference rates',
+    query: { kinds: ['fx-rate'] },
+  },
+  {
+    collection: 'markets',
+    slug: 'us-dividends',
+    name: 'US dividends',
+    query: { kinds: ['dividend'] },
+  },
+  {
+    collection: 'markets',
+    slug: 'stock-splits',
+    name: 'Stock splits',
+    query: { kinds: ['split'] },
+  },
+  {
+    collection: 'markets',
+    slug: 'reverse-splits',
+    name: 'Reverse splits',
+    description:
+      'A reverse split usually follows a long fall in the share price, and often precedes a delisting notice.',
+    query: { kinds: ['split'], tags: ['reverse-split'] },
+  },
+  {
+    collection: 'markets',
+    slug: 'mergers-and-spinoffs',
+    name: 'Mergers, acquisitions and spin-offs',
+    query: { kinds: ['merger', 'spin-off'] },
+  },
+  {
+    collection: 'markets',
+    slug: 'delistings',
+    name: 'Delistings and ticker changes',
+    query: { kinds: ['delisting', 'name-change'] },
+  },
+  {
+    collection: 'markets',
+    slug: 'trading-halts',
+    name: 'US trading halts',
+    query: { kinds: ['halt'] },
+  },
+  {
+    collection: 'markets',
+    slug: 'regulatory-halts',
+    name: 'SEC suspensions and listing-rule halts',
+    description: 'The halts that are a regulator acting rather than a price moving quickly.',
+    query: { kinds: ['halt'], tags: ['regulatory'] },
+  },
+  {
+    collection: 'markets',
+    slug: 'market-news',
+    name: 'Market news',
+    query: { kinds: ['market-news'] },
   },
   {
     collection: 'ai-incidents',
