@@ -127,6 +127,14 @@ export const config = {
      */
     alpacaKeyId: opt('APCA_API_KEY_ID'),
     alpacaSecretKey: opt('APCA_API_SECRET_KEY'),
+    /**
+     * api.data.gov, for the FBI's crime estimates by state.
+     *
+     * One free key covers every federal API behind api.data.gov, so it is
+     * named for the gateway rather than for the FBI: the next federal source
+     * added here will want the same one.
+     */
+    dataGovApiKey: opt('DATA_GOV_API_KEY'),
   },
 
   /**

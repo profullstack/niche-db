@@ -8,6 +8,7 @@ import { crates } from './crates.js';
 import { crossref } from './crossref.js';
 import { ecbFxRates } from './ecb.js';
 import { edgar } from './edgar.js';
+import { fbiCrimeEstimates } from './fbicrime.js';
 import { federalRegister } from './federalregister.js';
 import { fueleconomyCatalog } from './fueleconomy.js';
 import { gdacs } from './gdacs.js';
@@ -29,8 +30,10 @@ import { openlibrary } from './openlibrary.js';
 import { pypi } from './pypi.js';
 import { rogueIncidents, rogueResearch } from './rogueaitracker.js';
 import { scryfallCards, scryfallSets } from './scryfall.js';
+import { socrataCrime } from './socratacrime.js';
 import { statuspage } from './statuspage.js';
 import { steam, steamNews } from './steam.js';
+import { ukPoliceCrime } from './ukpolice.js';
 import { usgs } from './usgs.js';
 import { vscodeExtensions } from './vscode.js';
 
@@ -53,6 +56,9 @@ export const ADAPTERS = [
   alpacaNews,
   nasdaqHalts,
   ecbFxRates,
+  socrataCrime,
+  ukPoliceCrime,
+  fbiCrimeEstimates,
   musicbrainz,
   openlibrary,
   scryfallSets,
@@ -78,6 +84,14 @@ export const ADAPTERS = [
   rogueResearch,
   aiid,
 ];
+
+/**
+ * The place lists two adapters seed their sources from, re-exported so the
+ * seed can build a feed per city from the same list rather than a second copy
+ * of it that drifts the first time a city is added to one and not the other.
+ */
+export { CITIES as CRIME_CITIES } from './socratacrime.js';
+export { UK_PLACES as UK_CRIME_PLACES } from './ukpolice.js';
 
 const byName = new Map(ADAPTERS.map((a) => [a.name, a]));
 

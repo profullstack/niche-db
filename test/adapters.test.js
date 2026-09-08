@@ -43,6 +43,7 @@ describe('registry', () => {
         'ai-incidents',
         'research',
         'markets',
+        'crime',
       ]).toContain(a.collection);
     }
     expect(adapterByName('steam').title).toContain('Steam');

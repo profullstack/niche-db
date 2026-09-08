@@ -16,6 +16,7 @@ function envFor() {
     courtlistenerToken: config.adapters.courtlistenerToken,
     alpacaKeyId: config.adapters.alpacaKeyId,
     alpacaSecretKey: config.adapters.alpacaSecretKey,
+    dataGovApiKey: config.adapters.dataGovApiKey,
     contactEmail: config.contactEmail,
   };
 }

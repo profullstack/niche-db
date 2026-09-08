@@ -1,4 +1,4 @@
-import { ADAPTERS } from '@nichedb/adapters';
+import { ADAPTERS, CRIME_CITIES, UK_CRIME_PLACES } from '@nichedb/adapters';
 import { createNiche, upsertOpportunity } from '@nichedb/db/knowledge';
 import * as q from '@nichedb/db/queries';
 
@@ -98,6 +98,12 @@ export const COLLECTIONS = [
     name: 'Markets',
     description:
       'Every market venue in the world from the ISO 10383 register, across 149 countries, and the events that move the ones we have data for: US dividends, splits, mergers and spin-offs, trading halts as they are declared, the market news wire, and the ECB’s daily euro reference rates.',
+  },
+  {
+    slug: 'crime',
+    name: 'Crime',
+    description:
+      'Crime reports as police departments publish them: incident-level records from seven US city open-data portals, street-level crime across England, Wales and Northern Ireland, and the FBI’s state-by-state estimates. Every row carries its country, state or force area, city and neighbourhood, so it can be read by place rather than only as a stream.',
   },
   {
     slug: 'ai-incidents',
@@ -394,6 +400,49 @@ export const DEFAULT_FEEDS = [
     name: 'Market news',
     query: { kinds: ['market-news'] },
   },
+  /* Crime. Cut three ways, because there are three questions people arrive
+     with: what happened near me, what kind of thing is happening, and how does
+     a whole place compare. The per-city feeds are generated from the adapter's
+     own city list further down rather than written out twice. */
+  {
+    collection: 'crime',
+    slug: 'crime-reports',
+    name: 'Crime reports',
+    description: 'Every incident-level report the collection ingests, newest first.',
+    query: { kinds: ['crime-report'] },
+  },
+  {
+    collection: 'crime',
+    slug: 'violent-crime',
+    name: 'Violent crime',
+    query: { kinds: ['crime-report'], tags: ['homicide', 'assault', 'robbery', 'sex-offense'] },
+  },
+  {
+    collection: 'crime',
+    slug: 'homicides',
+    name: 'Homicides',
+    query: { kinds: ['crime-report'], tags: ['homicide'] },
+  },
+  {
+    collection: 'crime',
+    slug: 'burglary-and-theft',
+    name: 'Burglary and theft',
+    query: { kinds: ['crime-report'], tags: ['burglary', 'theft', 'vehicle-theft'] },
+  },
+  {
+    collection: 'crime',
+    slug: 'crime-uk',
+    name: 'Crime in England, Wales and Northern Ireland',
+    query: { kinds: ['crime-report'], tags: ['gb'] },
+  },
+  {
+    collection: 'crime',
+    slug: 'crime-by-state',
+    name: 'US crime by state and year',
+    description:
+      'The FBI’s estimates, which are comparable between states in a way that summing city portals is not.',
+    query: { kinds: ['crime-estimate'] },
+  },
   {
     collection: 'ai-incidents',
     slug: 'rogue-agent-incidents',
@@ -413,6 +462,35 @@ export const DEFAULT_FEEDS = [
     query: { kinds: ['research'] },
   },
 ];
+
+/**
+ * A feed per place, from the same lists the adapters seed their sources from.
+ *
+ * "Crime near me" is the question this collection is actually for, and a feed
+ * per city is how a person subscribes to it. Written out by hand these would
+ * be fifteen near-identical blocks that drift the first time a city is added
+ * to an adapter and not to this file, so they are generated from the adapters'
+ * own place lists and cannot disagree with them.
+ *
+ * Every crime row is tagged with its city slug, its state or force area and
+ * its country, which is what makes a query this short sufficient.
+ */
+for (const [key, c] of Object.entries(CRIME_CITIES)) {
+  DEFAULT_FEEDS.push({
+    collection: 'crime',
+    slug: `crime-${key}`,
+    name: `Crime: ${c.city}, ${c.state}`,
+    query: { kinds: ['crime-report'], tags: [key] },
+  });
+}
+for (const p of UK_CRIME_PLACES) {
+  DEFAULT_FEEDS.push({
+    collection: 'crime',
+    slug: `crime-uk-${p.key}`,
+    name: `Crime: ${p.city}, ${p.region}`,
+    query: { kinds: ['crime-report'], tags: [p.key] },
+  });
+}
 
 /**
  * A niche for every collection this deployment ships.
