@@ -3,6 +3,7 @@ import * as auto from '@nichedb/db/automotive';
 import * as q from '@nichedb/db/queries';
 import { callerAddress } from '../lib/auth-throttle.js';
 import {
+  complaintsFor,
   decodeVin,
   maintenanceSchedule,
   normaliseVin,
@@ -10,10 +11,12 @@ import {
   partsSearches,
   placesNear,
   powertrainOf,
+  ratingFor,
   recallsFor,
   vehicleProfile,
 } from '../lib/automotive.js';
 import { render } from '../lib/http.js';
+import { vinReport } from '../lib/vin-history.js';
 import { AutomotivePage } from '../views/automotive.jsx';
 
 /**
@@ -153,6 +156,7 @@ export function registerAutomotive(app) {
       metered: {
         endpoints: [
           `${base}/vin/{vin}`,
+          `${base}/history/{vin}`,
           `${base}/vehicle/{year}/{make}/{model}`,
           `${base}/recalls`,
           `${base}/mechanics`,
@@ -169,7 +173,20 @@ export function registerAutomotive(app) {
         { name: 'NHTSA NCAP', use: 'crash-test ratings', licence: 'US public domain' },
         { name: 'EPA/DOE fueleconomy.gov', use: 'catalogue and mpg', licence: 'US public domain' },
         { name: 'OpenStreetMap', use: 'mechanics and parts shops', licence: 'ODbL' },
+        {
+          name: 'NMVTIS',
+          use: 'title brands, total-loss records, odometer history',
+          licence: 'licensed per report through an approved provider',
+          // Said here so an agent reading the index knows what the history
+          // section will and will not contain before it spends a lookup.
+          configured: Boolean(config.automotive.historyUrl),
+        },
       ],
+      rating: {
+        endpoint: `${base}/history/{vin}`,
+        basis: 'nichedb-computed',
+        note: 'A condition-and-risk score out of 100 with every deduction itemised, computed from NHTSA recall, complaint and crash-test data plus any title record available. It is a summary of published evidence about this vehicle and vehicles built like it, not an inspection of this one.',
+      },
     });
   });
 
@@ -212,6 +229,53 @@ export function registerAutomotive(app) {
       radiusMiles: radiusFrom(c),
     });
     return c.json(profile, profile.error ? 400 : 200);
+  });
+
+  /**
+   * The history report on its own, for callers who want the grade and not the
+   * mpg. It is the same work the VIN profile already does, so it is metered
+   * the same way and a VIN already decoded is still free.
+   */
+  app.get('/api/v1/automotive/history/:vin', async (c) => {
+    const vin = normaliseVin(c.req.param('vin'));
+    const seenBefore = await auto.getVin(vin).catch(() => null);
+    const blocked = await meterLookup(c, { charge: !seenBefore });
+    if (blocked) return blocked;
+
+    const decode = await decodeVin(vin).catch((err) => ({ error: err.message }));
+    if (decode?.error && !decode.make) return c.json({ vin, error: decode.error }, 400);
+
+    const vehicle = { year: decode.modelYear, make: decode.make, model: decode.model };
+    const [recalls, complaints, ncap] = await Promise.all([
+      recallsFor(vehicle).catch(() => []),
+      complaintsFor(vehicle).catch(() => ({ total: 0, byComponent: [], rows: [] })),
+      ratingFor(vehicle).catch(() => null),
+    ]);
+    const { rows = [], ...summary } = complaints;
+    const report = await vinReport({
+      vin,
+      identity: decode,
+      recalls,
+      complaintRows: rows,
+      complaints: summary,
+      ncap,
+      modelYear: vehicle.year,
+      miles: num(c.req.query('miles')),
+      refresh: c.req.query('refresh') === 'true',
+    });
+    const past = await auto.ratingHistory(vin).catch(() => []);
+    return c.json({
+      vehicle: { ...vehicle, vin },
+      ...report,
+      // Every grade this VIN has been given here, so a score that moved is
+      // visible as a score that moved rather than as a different number.
+      previousRatings: past.map((r) => ({
+        score: r.score,
+        grade: r.grade,
+        confidence: r.confidence,
+        computedAt: r.computed_at,
+      })),
+    });
   });
 
   app.get('/api/v1/automotive/vehicle/:year/:make/:model', async (c) => {
