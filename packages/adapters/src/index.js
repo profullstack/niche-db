@@ -1,3 +1,4 @@
+import { adsbFlights } from './adsb.js';
 import { aiid } from './aiid.js';
 import { alpacaCorporateActions, alpacaNews } from './alpaca.js';
 import { firefoxAddons } from './amo.js';
@@ -35,6 +36,7 @@ import { mcpRegistry } from './mcpregistry.js';
 import { isoMicExchanges } from './mic.js';
 import { musicbrainz } from './musicbrainz.js';
 import { nasdaqHalts } from './nasdaqhalts.js';
+import { ndbcBuoys } from './ndbc.js';
 import { newsChannels } from './newschannels.js';
 import { newsfeed } from './newsfeed.js';
 import { nhcCyclones } from './nhc.js';
@@ -56,6 +58,7 @@ import { scryfallCards, scryfallSets } from './scryfall.js';
 import { socrataCrime } from './socratacrime.js';
 import { statuspage } from './statuspage.js';
 import { steam, steamNews } from './steam.js';
+import { nwsSurfZone } from './surfzone.js';
 import { swpcSpaceWeather } from './swpc.js';
 import { tedNotices } from './ted.js';
 import { ukPoliceCrime } from './ukpolice.js';
@@ -110,9 +113,12 @@ export const ADAPTERS = [
   aviationHazards,
   aviationMetar,
   ntsbAccidents,
+  adsbFlights,
   nwpsRiverGauges,
   coopsWaterLevels,
   droughtMonitor,
+  ndbcBuoys,
+  nwsSurfZone,
   cfpbComplaints,
   fdicInstitutions,
   fdicStructureChanges,

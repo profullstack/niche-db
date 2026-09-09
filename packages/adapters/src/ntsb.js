@@ -40,14 +40,15 @@ import { defineAdapter, slugify } from '@nichedb/core/adapter';
  *
  * WHAT IT COSTS PER RUN
  *
- * The whole database will not go into one statement: `upsertItems` sends every
- * row in a single insert, and 31,000 accidents carrying their full narratives
- * is a hundred and forty megabytes of text in one query. So a run emits a
- * bounded slice, newest first, and remembers where it stopped. The extracted
- * tables are cached beside the archive and keyed on the file's publication
- * date, so the slices after the first cost no download at all -- and when the
- * NTSB publishes a new file, the date changes, the cache misses, and the walk
- * starts again from the newest accident.
+ * A run emits a bounded slice, newest first, and remembers where it stopped.
+ * Not because of the database -- `runSource` already chunks its writes into
+ * batches of 200 -- but because the whole file is 31,000 accidents carrying a
+ * hundred and forty megabytes of narrative text, and building all of that into
+ * items in one pass would hold the lot in memory and run past the four-minute
+ * ingest deadline. The extracted tables are cached beside the archive and keyed
+ * on the file's publication date, so the slices after the first cost no
+ * download at all -- and when the NTSB publishes a new file, the date changes,
+ * the cache misses, and the walk starts again from the newest accident.
  *
  * NEEDS `mdbtools` AND `unzip` ON THE HOST. Both are in the Dockerfile. There
  * is no pure-JavaScript reader for a 558 MB Access database worth trusting, and
@@ -408,7 +409,7 @@ export const ntsbAccidents = defineAdapter({
       key: 'maxPerRun',
       label: 'Accidents per run',
       type: 'number',
-      help: 'The whole database will not fit in one insert. Default 2,000.',
+      help: 'Bounded so a run stays inside the ingest deadline. Default 2,000.',
     },
     {
       key: 'minYear',
