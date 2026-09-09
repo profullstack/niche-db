@@ -64,7 +64,33 @@ export async function runSource(sourceId, { log = console.log } = {}) {
       deadline: started + config.ingest.runDeadlineMs,
     });
 
-    const items = (result?.items ?? []).map(normaliseItem).filter(Boolean);
+    const pulled = (result?.items ?? []).map(normaliseItem).filter(Boolean);
+
+    /*
+     * Drop what another source in this collection already carries.
+     *
+     * `(source_id, external_id)` cannot see across sources, so without this a
+     * collection that aggregates aggregators hands a reader the same story once
+     * per source that indexed it -- a BBC piece arriving from the newsroom's own
+     * feed, from GDELT and from two directories that both index the BBC.
+     *
+     * Only for a collection that has opted in (the query checks), and never
+     * against this source's own rows, or a source's second run would discard
+     * everything its first run wrote. First writer keeps the story, which makes
+     * the winner a property of source order rather than of luck -- so seed the
+     * source you would rather read from before the ones that echo it.
+     */
+    const claimed = await q.claimedDedupeKeys({
+      collectionId: source.collection_id,
+      sourceId: source.id,
+      keys: pulled.map((it) => it.dedupeKey),
+    });
+    const items = claimed.size
+      ? pulled.filter((it) => !(it.dedupeKey && claimed.has(it.dedupeKey)))
+      : pulled;
+    const deduped = pulled.length - items.length;
+    if (deduped > 0) l(`${deduped} already carried by another source`);
+
     let added = 0;
     let updated = 0;
     for (let i = 0; i < items.length; i += 200) {

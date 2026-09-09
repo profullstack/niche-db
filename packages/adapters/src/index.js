@@ -3,6 +3,7 @@ import { alpacaCorporateActions, alpacaNews } from './alpaca.js';
 import { firefoxAddons } from './amo.js';
 import { arxiv } from './arxiv.js';
 import { blsSeries } from './bls.js';
+import { brisk } from './brisk.js';
 import { clinicalTrials } from './clinicaltrials.js';
 import { courtlistener } from './courtlistener.js';
 import { crates } from './crates.js';
@@ -40,6 +41,7 @@ import { openlibrary } from './openlibrary.js';
 import { buildingPermits } from './permits.js';
 import { pypi } from './pypi.js';
 import { rogueIncidents, rogueResearch } from './rogueaitracker.js';
+import { rssamplifier } from './rssamplifier.js';
 import { scryfallCards, scryfallSets } from './scryfall.js';
 import { socrataCrime } from './socratacrime.js';
 import { statuspage } from './statuspage.js';
@@ -79,6 +81,8 @@ export const ADAPTERS = [
   tedNotices,
   newsfeed,
   gdelt,
+  rssamplifier,
+  brisk,
   newsChannels,
   musicbrainz,
   openlibrary,

@@ -467,33 +467,64 @@ export async function upsertItems({ collectionId, sourceId, items }) {
     tags: it.tags ?? [],
     data: it.data ?? {},
     content_hash: it.contentHash ?? null,
+    dedupe_key: it.dedupeKey ?? null,
   }));
   if (rows.length === 0) return { added: 0, updated: 0 };
 
   const out = await sql`
     insert into items (collection_id, source_id, external_id, kind, title, summary, url,
-                       image_url, published_at, time_known, precision, tags, data, content_hash)
+                       image_url, published_at, time_known, precision, tags, data, content_hash,
+                       dedupe_key)
     select ${collectionId}, ${sourceId}, r.external_id, r.kind, r.title, r.summary, r.url,
            r.image_url, r.published_at, coalesce(r.time_known, true),
            coalesce(r.precision, 'minute'), coalesce(r.tags, '{}'), coalesce(r.data, '{}'),
-           r.content_hash
+           r.content_hash, r.dedupe_key
     from jsonb_to_recordset(${JSON.stringify(rows)}::text::jsonb) as r(
       external_id text, kind text, title text, summary text, url text, image_url text,
       published_at timestamptz, time_known boolean, precision text, tags text[],
-      data jsonb, content_hash text)
+      data jsonb, content_hash text, dedupe_key text)
     on conflict (source_id, external_id) do update set
       kind = excluded.kind, title = excluded.title,
       summary = coalesce(excluded.summary, items.summary),
       url = excluded.url, image_url = coalesce(excluded.image_url, items.image_url),
       published_at = excluded.published_at,
       time_known = excluded.time_known, precision = excluded.precision, tags = excluded.tags,
-      data = excluded.data, content_hash = excluded.content_hash, updated_at = now()
+      data = excluded.data, content_hash = excluded.content_hash,
+      dedupe_key = excluded.dedupe_key, updated_at = now()
     where items.content_hash is distinct from excluded.content_hash
     returning (xmax = 0) as inserted
   `;
   let added = 0;
   for (const r of out) if (r.inserted) added++;
   return { added, updated: out.length - added };
+}
+
+/**
+ * Of these keys, which does another source in this collection already hold?
+ *
+ * The collection flag is checked inside the query on purpose. A collection that
+ * has not opted in matches no rows, so the caller filters nothing and pays one
+ * cheap indexed lookup rather than needing to know the flag first -- and a
+ * collection cannot half-enable this by having the flag read in one place and
+ * not another.
+ *
+ * `source_id <> $2` is what makes it a CROSS-source question. A source must
+ * always be allowed to re-state its own items, or the second run of any source
+ * would discard everything it wrote on the first.
+ */
+export async function claimedDedupeKeys({ collectionId, sourceId, keys }) {
+  const list = [...new Set((keys ?? []).filter(Boolean))];
+  if (list.length === 0) return new Set();
+  const rows = await sql`
+    select distinct i.dedupe_key
+    from items i
+    join collections c on c.id = i.collection_id
+    where i.collection_id = ${collectionId}
+      and c.dedupe_urls
+      and i.source_id <> ${sourceId}
+      and i.dedupe_key = any(${list})
+  `;
+  return new Set(rows.map((r) => r.dedupe_key));
 }
 
 const itemColumns = sql`

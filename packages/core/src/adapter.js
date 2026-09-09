@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { canonicalUrl } from './canonical.js';
 
 /**
  * What an adapter is.
@@ -84,6 +85,14 @@ export function normaliseItem(raw) {
       ...new Set((raw.tags ?? []).map((t) => String(t).trim().toLowerCase()).filter(Boolean)),
     ].slice(0, 40),
     data: raw.data ?? {},
+    /*
+     * Which story this is, as opposed to which row. `(source_id, external_id)`
+     * answers "has this source said this before"; this answers "do we have this
+     * story at all", which is a different question the moment a collection
+     * aggregates aggregators. Null for an item with no URL -- those collide
+     * with nothing.
+     */
+    dedupeKey: canonicalUrl(raw.url),
   };
   item.contentHash = createHash('sha1')
     .update(
@@ -194,14 +203,76 @@ function xmlFields(body) {
   return fields;
 }
 
+/**
+ * The named references that actually turn up in syndicated feeds.
+ *
+ * The typographic ones are the point. A publisher's CMS writes curly quotes,
+ * dashes and ellipses as named references, nothing downstream resolves them, and
+ * the page escapes on the way out -- so a headline reaches a reader as
+ * `it&rsquo;s crazy` and a masthead as `Al Jazeera &#8211; Breaking News`.
+ */
+const NAMED_ENTITIES = {
+  lt: '<',
+  gt: '>',
+  quot: '"',
+  apos: "'",
+  nbsp: ' ',
+  hellip: '\u2026',
+  mdash: '\u2014',
+  ndash: '\u2013',
+  lsquo: '\u2018',
+  rsquo: '\u2019',
+  ldquo: '\u201c',
+  rdquo: '\u201d',
+  laquo: '\u00ab',
+  raquo: '\u00bb',
+  deg: '\u00b0',
+  pound: '\u00a3',
+  euro: '\u20ac',
+  middot: '\u00b7',
+  bull: '\u2022',
+  trade: '\u2122',
+  copy: '\u00a9',
+  reg: '\u00ae',
+};
+
+/**
+ * A code point that cannot be one, left exactly as written.
+ *
+ * `String.fromCodePoint` THROWS above 0x10FFFF, so a feed with one mangled
+ * reference would otherwise take the whole document down at parse time. Lone
+ * surrogates are unpaired halves that corrupt the string rather than throw,
+ * which is worse because it is silent.
+ */
+function codePoint(code, original) {
+  if (!Number.isFinite(code) || code <= 0 || code > 0x10ffff) return original;
+  if (code >= 0xd800 && code <= 0xdfff) return original;
+  try {
+    return String.fromCodePoint(code);
+  } catch {
+    return original;
+  }
+}
+
+/**
+ * Resolve the character references in feed text.
+ *
+ * `&amp;` is resolved LAST, and that ordering is load-bearing: doing it first
+ * turns a double-encoded `&amp;#39;` into `&#39;` and then into an apostrophe
+ * that was never in the text. Decoding one layer too many is how a publisher's
+ * literal ampersand becomes somebody else's markup.
+ *
+ * Always returns a string. The XML parser calls this on every attribute and
+ * every text node, where a null would be a different kind of bug.
+ */
 export function decodeEntities(s) {
   return String(s)
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&apos;/g, "'")
-    .replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(Number(n)))
+    .replace(/&#(\d{1,7});/g, (m, n) => codePoint(Number.parseInt(n, 10), m))
+    .replace(/&#x([0-9a-f]{1,6});/gi, (m, h) => codePoint(Number.parseInt(h, 16), m))
+    .replace(/&([a-z]+);/gi, (m, name) => {
+      const key = name.toLowerCase();
+      return key === 'amp' ? m : (NAMED_ENTITIES[key] ?? m);
+    })
     .replace(/&amp;/g, '&');
 }
 
