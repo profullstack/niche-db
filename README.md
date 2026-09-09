@@ -13,7 +13,7 @@ The first deployment is [nichedb.dev](https://nichedb.dev). Run your own on anyt
 | **item** | One row a source produced. Title, URL, when (with `time_known` and `precision`), tags, and the adapter's payload in `data`. |
 | **feed** | A saved query over a collection. Has a page, RSS and JSON Feed renderings, an API endpoint, and followers who are told when it changes by push, email or signed webhook. |
 
-Adapters are one file each in `packages/adapters/src`. Twenty-nine ship today across thirteen collections:
+Adapters are one file each in `packages/adapters/src`. Seventy-five ship today across twenty-seven collections:
 
 | Collection | Adapters | Key needed |
 | --- | --- | --- |
@@ -25,11 +25,25 @@ Adapters are one file each in `packages/adapters/src`. Twenty-nine ship today ac
 | tabletop | `scryfall-sets`, `scryfall-cards` | no |
 | space | `launch-library` | no |
 | chess | `lichess-broadcasts` | no |
-| alerts | `usgs-earthquakes`, `nws-alerts`, `gdacs` | no |
+| alerts | `usgs-earthquakes`, `gdacs` | no |
+| weather | `nws-alerts`, `nhc-cyclones`, `swpc-space-weather`, `eonet-events` | no |
 | outages | `statuspage` (any Statuspage host) | no |
 | extensions | `firefox-addons`, `vscode-extensions`, `mcp-registry` | no |
 | health | `openfda-recalls`, `clinical-trials` | no |
 | research | `arxiv`, `crossref` | no |
+| automotive | `fueleconomy-catalog`, `nhtsa-recalls`, `nhtsa-complaints`, `nhtsa-safety-ratings` | no |
+| markets | `iso-mic-exchanges`, `alpaca-corporate-actions`, `alpaca-news`, `nasdaq-halts`, `ecb-fx-rates` | Alpaca only |
+| crime | `socrata-crime`, `uk-police-crime`, `fbi-crime-estimates` | FBI only (free api.data.gov key) |
+| public-money | `usaspending-awards`, `ocds-tenders`, `ted-notices` | no |
+| housing | `uk-land-registry`, `freddie-mac-rates`, `building-permits` | no |
+| jobs | `bls-series`, `eurostat`, `warn-layoffs` | no |
+| ai-incidents | `rogue-ai-incidents`, `rogue-ai-research`, `aiid-reports` | no |
+| news | `newsfeed`, `gdelt`, `rssamplifier`, `brisk`, `news-channels` | no |
+| domains | `ntld-totals`, `ntld-tlds`, `ntld-launches`, `ntld-changes` | no |
+| podcasts | `podcasts` | no |
+| aviation | `faa-nas-status`, `aviation-hazards`, `aviation-metar` | no |
+| water | `nwps-river-gauges`, `coops-water-levels`, `drought-monitor` | no |
+| consumer-finance | `cfpb-complaints`, `fdic-institutions`, `fdic-structure-changes` | no |
 
 ## Enrichment
 
@@ -59,7 +73,7 @@ bun run build:client
 bun run dev                             # web + worker in one process on :3000
 ```
 
-Migrations apply themselves on boot. The three collections, their default sources and a dozen feeds are seeded on first boot; sources whose adapter needs a credential the deployment lacks are created paused. The first account to sign in is an admin.
+Migrations apply themselves on boot. Every collection, its default sources and its feeds are seeded on first boot; sources whose adapter needs a credential the deployment lacks are created paused. The first account to sign in is an admin.
 
 `bun run ingest [slug ...]` runs sources from a terminal without Redis. `bun test` runs the suite against an in-process Postgres (PGlite), so it needs no server.
 

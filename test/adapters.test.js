@@ -14,6 +14,12 @@ import { parseSteamDate, toItem as steamItem } from '../packages/adapters/src/st
 import { toItem as usgsItem } from '../packages/adapters/src/usgs.js';
 import { looseDate, normaliseItem, xmlItems } from '../packages/core/src/adapter.js';
 
+// The seed module reaches the database package, which reads the environment at
+// import. It needs the variable to exist, not to connect: nothing here queries.
+process.env.DATABASE_URL ??= 'postgres://test:test@localhost:5432/test';
+process.env.SITE_URL ??= 'https://nichedb.test';
+const { DEFAULT_FEEDS } = await import('../packages/core/src/seed.js');
+
 const fixture = (name) =>
   readFile(new URL(`../packages/adapters/test/fixtures/${name}`, import.meta.url), 'utf8');
 
@@ -51,6 +57,9 @@ describe('registry', () => {
         'news',
         'domains',
         'podcasts',
+        'aviation',
+        'water',
+        'consumer-finance',
       ]).toContain(a.collection);
     }
     expect(adapterByName('steam').title).toContain('Steam');
@@ -65,6 +74,21 @@ describe('registry', () => {
         }
       }
     }
+  });
+  test('no two seeded sources or feeds want the same slug', () => {
+    /* `sources.slug` and `feeds.slug` are each unique across the whole
+     * database, not per collection, so two adapters that happen to pick the
+     * same name do not both get a row: the second insert is swallowed as an
+     * existing one and that source never runs. Nothing in the seed log says
+     * so, which is why this is asserted here rather than discovered later. */
+    const clashes = (slugs) =>
+      [...slugs.reduce((m, s) => m.set(s, (m.get(s) ?? 0) + 1), new Map())]
+        .filter(([, n]) => n > 1)
+        .map(([s]) => s);
+    expect(clashes(ADAPTERS.flatMap((a) => (a.defaultSources ?? []).map((s) => s.slug)))).toEqual(
+      [],
+    );
+    expect(clashes(DEFAULT_FEEDS.map((f) => f.slug))).toEqual([]);
   });
 });
 

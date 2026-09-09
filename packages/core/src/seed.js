@@ -153,6 +153,24 @@ export const COLLECTIONS = [
     description:
       'Podcast shows split the one way no podcast app will split them: by who serves the feed. On one side the shows on a commercial host, a network or a broadcaster — 94% of the medium. On the other the shows published from the maker’s own domain, which is where the independent 6% is, and which nothing else lists separately because nobody sells it.',
   },
+  {
+    slug: 'aviation',
+    name: 'Aviation',
+    description:
+      'Why flights are late, from the three feeds that between them answer it: the traffic management initiatives the FAA has in force right now — ground stops, ground delay programs, airport closures — each written once more when it ends with how long it ran, which the FAA itself never publishes; every SIGMET and AIRMET in the air over the country; and the decoded observation at the airport underneath. One airport, one hour, three sources. All keyless.',
+  },
+  {
+    slug: 'water',
+    name: 'Water',
+    description:
+      'Too much water and too little, measured rather than forecast: every NOAA river gauge at or above its action stage with the height in feet and the flood category behind the warning, the observed level at tide stations on every US coast against the height at which each one floods, and the US Drought Monitor’s weekly read on how much of each state is dry and how badly. The fast half and the slow half of the same system.',
+  },
+  {
+    slug: 'consumer-finance',
+    name: 'Consumer finance',
+    description:
+      'What Americans say their banks, lenders, credit bureaus and debt collectors are doing to them, and who those companies actually are. Around ten thousand complaints a day from the Consumer Financial Protection Bureau, a third of them carrying the consumer’s own account; every FDIC-insured institution with its charter, regulator and assets; and every merger, failure, conversion and branch opening or closing on the FDIC register — which is the only public record of which bank a complaint about a vanished bank now belongs to.',
+  },
 ];
 
 export const DEFAULT_FEEDS = [
@@ -841,6 +859,119 @@ export const DEFAULT_FEEDS = [
     slug: 'self-hosted-podcasts-fr',
     name: 'Self-hosted podcasts in French',
     query: { sources: ['podcasts-self-hosted'], tags: ['lang:fr'] },
+  },
+  /*
+   * Aviation reads as one story per airport, so the feeds are cuts of the
+   * cause rather than of the source: the delays, the weather that explains
+   * them, and the airports where the weather is actually in the way.
+   */
+  {
+    collection: 'aviation',
+    slug: 'ground-stops-and-delays',
+    name: 'Ground stops and delay programs',
+    query: { kinds: ['ground-stop', 'ground-delay', 'airspace-flow', 'trajectory-options'] },
+  },
+  {
+    collection: 'aviation',
+    slug: 'weather-delays',
+    name: 'Delays caused by weather',
+    query: { sources: ['faa-nas-status'], tags: ['weather'] },
+  },
+  {
+    collection: 'aviation',
+    slug: 'airport-closures',
+    name: 'Airport closures',
+    query: { kinds: ['airport-closure'] },
+  },
+  {
+    collection: 'aviation',
+    slug: 'aviation-hazards',
+    name: 'SIGMETs and AIRMETs in force',
+    query: { kinds: ['aviation-hazard'] },
+  },
+  {
+    collection: 'aviation',
+    slug: 'airports-below-vfr',
+    name: 'Airports below VFR',
+    query: { kinds: ['observation'], tags: ['below-vfr'] },
+  },
+  {
+    collection: 'water',
+    slug: 'rivers-in-flood',
+    name: 'Rivers in flood',
+    query: { kinds: ['river-gauge'], tags: ['flood:minor', 'flood:moderate', 'flood:major'] },
+  },
+  {
+    collection: 'water',
+    slug: 'major-flooding',
+    name: 'Major and moderate flooding',
+    query: { tags: ['significant-flooding'] },
+  },
+  {
+    collection: 'water',
+    slug: 'river-forecasts',
+    name: 'Rivers forecast to flood',
+    query: { kinds: ['river-forecast'] },
+  },
+  {
+    collection: 'water',
+    slug: 'coastal-flooding',
+    name: 'Coastal flooding',
+    query: { kinds: ['water-level'], tags: ['flooding'] },
+  },
+  {
+    collection: 'water',
+    slug: 'drought',
+    name: 'Drought by state',
+    query: { kinds: ['drought'] },
+  },
+  {
+    collection: 'water',
+    slug: 'extreme-drought',
+    name: 'Extreme and exceptional drought',
+    query: { tags: ['extreme-drought'] },
+  },
+  {
+    collection: 'consumer-finance',
+    slug: 'consumer-complaints',
+    name: 'Consumer complaints',
+    query: { kinds: ['complaint'] },
+  },
+  {
+    collection: 'consumer-finance',
+    slug: 'complaints-in-their-own-words',
+    name: 'Complaints in the consumer’s own words',
+    query: { kinds: ['complaint'], tags: ['has-narrative'] },
+  },
+  {
+    collection: 'consumer-finance',
+    slug: 'mortgage-complaints',
+    name: 'Mortgage complaints',
+    query: { kinds: ['complaint'], tags: ['mortgage'] },
+  },
+  {
+    collection: 'consumer-finance',
+    slug: 'debt-collection-complaints',
+    name: 'Debt collection complaints',
+    query: { kinds: ['complaint'], tags: ['debt-collection'] },
+  },
+  {
+    collection: 'consumer-finance',
+    slug: 'bank-mergers-and-failures',
+    name: 'Bank mergers and failures',
+    query: { kinds: ['structure-change'], tags: ['merger', 'establishment'] },
+  },
+  {
+    collection: 'consumer-finance',
+    slug: 'branch-closings',
+    name: 'Branches opening and closing',
+    query: { kinds: ['structure-change'], tags: ['branch-closing', 'branch-opening'] },
+  },
+  {
+    collection: 'consumer-finance',
+    slug: 'insured-banks',
+    name: 'FDIC-insured banks',
+    query: { kinds: ['institution'] },
   },
 ];
 
