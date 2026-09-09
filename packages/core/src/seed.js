@@ -717,6 +717,17 @@ export const DEFAULT_FEEDS = [
   },
   { collection: 'news', slug: 'news-sport', name: 'Sport', query: { tags: ['sport'] } },
   { collection: 'news', slug: 'news-climate', name: 'Climate', query: { tags: ['climate'] } },
+  /*
+   * Not a desk any newsroom publishes: the small web is one writer per feed, so
+   * it gets its own address rather than being mixed into a section a reader
+   * opened expecting the wire.
+   */
+  {
+    collection: 'news',
+    slug: 'news-independent',
+    name: 'The small web',
+    query: { tags: ['independent'] },
+  },
 ];
 
 /**

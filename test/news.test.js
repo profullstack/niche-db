@@ -241,10 +241,24 @@ describe('news channels', () => {
 });
 
 describe('the news collection is wired up', () => {
-  test('all three adapters are registered against it', () => {
-    const news = ADAPTERS.filter((a) => a.collection === 'news').map((a) => a.name);
-    expect(news.sort()).toEqual(['gdelt', 'news-channels', 'newsfeed']);
+  /*
+   * Asserts what each adapter contributes rather than how many there are. The
+   * literal list this replaced said "all three" and failed the moment a fourth
+   * arrived -- for a reason that had nothing to do with what it was testing.
+   */
+  test('every corpus the collection needs has an adapter behind it', () => {
+    const news = new Set(ADAPTERS.filter((a) => a.collection === 'news').map((a) => a.name));
+    // Wire copy read straight from the publisher, worldwide coverage, the
+    // screen, the classified newsrooms, and the small web.
+    for (const name of ['newsfeed', 'gdelt', 'news-channels', 'rssamplifier', 'brisk']) {
+      expect(news.has(name)).toBe(true);
+    }
     expect(adapterByName('newsfeed').title).toBe('Newsroom feeds');
+    // Every one of them files stories the same way, or a reader gets the same
+    // desk under two names.
+    for (const name of ['newsfeed', 'rssamplifier', 'brisk']) {
+      expect(adapterByName(name).kinds).toContain('story');
+    }
   });
 
   test('the collection exists and its default feeds name real sources', () => {
