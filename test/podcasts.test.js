@@ -43,6 +43,17 @@ describe('registration', () => {
     ]);
   });
 
+  /*
+   * Fifteen minutes is a decision, not a default. It matches the upstream
+   * directory's own floor for a feed that just published, so a fresh episode is
+   * not sat on for an hour after the directory already had it, and it finishes
+   * the catalogue walk in a quarter of the time. A run costs `backfillPages`
+   * requests rather than one per feed, which is what makes it affordable.
+   */
+  test('polls every fifteen minutes', () => {
+    expect(adapterByName('podcasts').cadenceMinutes).toBe(15);
+  });
+
   test('the collection exists and its feeds only reference sources that do', () => {
     expect(COLLECTIONS.some((c) => c.slug === 'podcasts')).toBe(true);
     const declared = new Set(ADAPTERS.flatMap((a) => (a.defaultSources ?? []).map((s) => s.slug)));

@@ -199,7 +199,24 @@ export const podcasts = defineAdapter({
     'Podcast shows from the rssamplifier.com directory, which files a feed as a podcast from its own document on every crawl. Configured as one of two halves: shows on a commercial hosting platform, or shows served from the publisher’s own domain. Keyless.',
   docs: 'https://rssamplifier.com/llms.txt',
   kinds: ['show'],
-  cadenceMinutes: 60,
+  /*
+   * Every fifteen minutes, for two reasons that want the same number.
+   *
+   * Keeping up: a show that publishes is worth knowing about while it is still
+   * news, and the upstream directory drops a feed that just published to its own
+   * fifteen-minute floor. Polling it hourly would mean sitting on a fresh
+   * episode for up to an hour after the directory already had it, which throws
+   * away three quarters of the freshness somebody else is paying to produce.
+   *
+   * Starting: the walk is the same cost per run either way, so four runs an hour
+   * finishes the catalogue in a quarter of the time -- about three and a half
+   * hours rather than fourteen.
+   *
+   * It is affordable because a run is `backfillPages` requests, not one per
+   * feed: two sources at 100 pages, four times an hour, is 800 requests an hour
+   * against an upstream that asks only to be identified.
+   */
+  cadenceMinutes: 15,
   configFields: [
     {
       key: 'group',
