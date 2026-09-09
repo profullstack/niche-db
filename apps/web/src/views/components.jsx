@@ -96,9 +96,10 @@ export const Tags = ({ tags, collection, limit = 6 }) => {
   );
 };
 
-// A 1x1 transparent GIF: an image that fails to load falls back to this, so the slot keeps the
-// empty-panel look instead of a broken-image icon.
+// A 1x1 transparent GIF. An image that fails to load falls back to this and takes the blank
+// class, so it holds its place as empty space rather than a broken-image icon.
 const BLANK_GIF = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
+const ON_IMG_ERROR = `this.onerror=null;this.src='${BLANK_GIF}';this.classList.add('blank')`;
 
 // Most collections are government and data-API rows that carry no picture at all, so a
 // placeholder there is just a column of grey boxes. Reserve the slot only to keep a mixed list
@@ -106,13 +107,7 @@ const BLANK_GIF = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAE
 export const ItemRow = ({ item, showSource = true, enrichers = null, reserveThumb = false }) => (
   <li class="item">
     {item.image_url ? (
-      <img
-        class="thumb"
-        src={item.image_url}
-        alt=""
-        loading="lazy"
-        onerror={`this.onerror=null;this.src='${BLANK_GIF}'`}
-      />
+      <img class="thumb" src={item.image_url} alt="" loading="lazy" onerror={ON_IMG_ERROR} />
     ) : reserveThumb ? (
       <span class="thumb blank" />
     ) : null}

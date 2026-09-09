@@ -703,8 +703,11 @@ details.panel summary {
   border-radius: 6px;
   background: var(--panel2);
 }
+/* A row with no picture in a list that has some still holds the column so the titles line up,
+   but it holds it with empty space rather than an empty grey panel. */
 .thumb.blank {
   display: block;
+  background: none;
 }
 .item-body {
   min-width: 0;
