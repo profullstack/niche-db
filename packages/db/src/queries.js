@@ -512,6 +512,18 @@ export async function upsertItems({ collectionId, sourceId, items }) {
  * always be allowed to re-state its own items, or the second run of any source
  * would discard everything it wrote on the first.
  */
+/**
+ * Does this collection treat a shared URL as a shared story?
+ *
+ * Asked separately from `claimedDedupeKeys` because an empty result there is
+ * ambiguous -- it means either "the flag is off" or "nothing matched" -- and the
+ * caller needs to tell those apart to know whether to fold its own batch.
+ */
+export async function collectionDedupesUrls(collectionId) {
+  const [row] = await sql`select dedupe_urls from collections where id = ${collectionId}`;
+  return row?.dedupe_urls === true;
+}
+
 export async function claimedDedupeKeys({ collectionId, sourceId, keys }) {
   const list = [...new Set((keys ?? []).filter(Boolean))];
   if (list.length === 0) return new Set();
