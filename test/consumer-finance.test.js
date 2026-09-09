@@ -14,7 +14,7 @@ import {
   money,
   thousands,
 } from '../packages/adapters/src/fdic.js';
-import { adapterByName } from '../packages/adapters/src/index.js';
+import { ADAPTERS, adapterByName } from '../packages/adapters/src/index.js';
 import { normaliseItem, slugify } from '../packages/core/src/adapter.js';
 
 process.env.DATABASE_URL ??= 'postgres://test:test@localhost:5432/test';
@@ -67,9 +67,7 @@ describe('the consumer finance collection', () => {
 
   test('every consumer-finance feed queries kinds these adapters emit', () => {
     const kinds = new Set(
-      ['cfpb-complaints', 'fdic-institutions', 'fdic-structure-changes'].flatMap(
-        (n) => adapterByName(n).kinds,
-      ),
+      ADAPTERS.filter((a) => a.collection === 'consumer-finance').flatMap((a) => a.kinds),
     );
     const feeds = DEFAULT_FEEDS.filter((f) => f.collection === 'consumer-finance');
     expect(feeds.length).toBeGreaterThan(0);

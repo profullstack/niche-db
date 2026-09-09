@@ -22,6 +22,12 @@ RUN bun install --frozen-lockfile || bun install
 
 FROM base AS runtime
 ENV NODE_ENV=production
+# `ntsb-accidents` reads a 558 MB Microsoft Access database out of a zip,
+# because the NTSB publishes no working API. mdbtools turns that into NDJSON.
+# Nothing else in the image needs either, and both are a few hundred kilobytes.
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends mdbtools unzip \
+ && rm -rf /var/lib/apt/lists/*
 # Bun's isolated linker keeps each workspace's node_modules beside it, so the
 # whole deps stage comes across rather than only /app/node_modules.
 COPY --from=deps /app /app

@@ -7,7 +7,7 @@ import {
   STATE_FIPS,
   worstClass,
 } from '../packages/adapters/src/droughtmonitor.js';
-import { adapterByName } from '../packages/adapters/src/index.js';
+import { ADAPTERS, adapterByName } from '../packages/adapters/src/index.js';
 import {
   boxFor,
   category,
@@ -62,11 +62,7 @@ describe('the water collection', () => {
   });
 
   test('every water feed queries kinds these adapters emit', () => {
-    const kinds = new Set(
-      ['nwps-river-gauges', 'coops-water-levels', 'drought-monitor'].flatMap(
-        (n) => adapterByName(n).kinds,
-      ),
-    );
+    const kinds = new Set(ADAPTERS.filter((a) => a.collection === 'water').flatMap((a) => a.kinds));
     const feeds = DEFAULT_FEEDS.filter((f) => f.collection === 'water');
     expect(feeds.length).toBeGreaterThan(0);
     for (const feed of feeds) {

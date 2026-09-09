@@ -157,7 +157,7 @@ export const COLLECTIONS = [
     slug: 'aviation',
     name: 'Aviation',
     description:
-      'Why flights are late, from the three feeds that between them answer it: the traffic management initiatives the FAA has in force right now — ground stops, ground delay programs, airport closures — each written once more when it ends with how long it ran, which the FAA itself never publishes; every SIGMET and AIRMET in the air over the country; and the decoded observation at the airport underneath. One airport, one hour, three sources. All keyless.',
+      'Why flights are late and what happens when it goes wrong. The traffic management initiatives the FAA has in force right now — ground stops, ground delay programs, airport closures — each written once more when it ends with how long it ran, which the FAA itself never publishes. Every SIGMET and AIRMET in the air over the country, and the decoded observation at the airport underneath. And every one of the 31,000 accidents the NTSB has investigated, each carrying the raw weather observation at the moment it happened — the same field, from the same service, that the hourly feed publishes today. All keyless.',
   },
   {
     slug: 'water',
@@ -894,6 +894,24 @@ export const DEFAULT_FEEDS = [
     slug: 'airports-below-vfr',
     name: 'Airports below VFR',
     query: { kinds: ['observation'], tags: ['below-vfr'] },
+  },
+  {
+    collection: 'aviation',
+    slug: 'aviation-accidents',
+    name: 'NTSB accidents and incidents',
+    query: { kinds: ['accident'] },
+  },
+  {
+    collection: 'aviation',
+    slug: 'fatal-aviation-accidents',
+    name: 'Fatal aviation accidents',
+    query: { kinds: ['accident'], tags: ['fatal'] },
+  },
+  {
+    collection: 'aviation',
+    slug: 'accidents-in-instrument-conditions',
+    name: 'Accidents in instrument conditions',
+    query: { kinds: ['accident'], tags: ['instrument-conditions'] },
   },
   {
     collection: 'water',

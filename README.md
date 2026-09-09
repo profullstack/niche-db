@@ -13,7 +13,7 @@ The first deployment is [nichedb.dev](https://nichedb.dev). Run your own on anyt
 | **item** | One row a source produced. Title, URL, when (with `time_known` and `precision`), tags, and the adapter's payload in `data`. |
 | **feed** | A saved query over a collection. Has a page, RSS and JSON Feed renderings, an API endpoint, and followers who are told when it changes by push, email or signed webhook. |
 
-Adapters are one file each in `packages/adapters/src`. Seventy-five ship today across twenty-seven collections:
+Adapters are one file each in `packages/adapters/src`. Seventy-six ship today across twenty-seven collections:
 
 | Collection | Adapters | Key needed |
 | --- | --- | --- |
@@ -41,7 +41,7 @@ Adapters are one file each in `packages/adapters/src`. Seventy-five ship today a
 | news | `newsfeed`, `gdelt`, `rssamplifier`, `brisk`, `news-channels` | no |
 | domains | `ntld-totals`, `ntld-tlds`, `ntld-launches`, `ntld-changes` | no |
 | podcasts | `podcasts` | no |
-| aviation | `faa-nas-status`, `aviation-hazards`, `aviation-metar` | no |
+| aviation | `faa-nas-status`, `aviation-hazards`, `aviation-metar`, `ntsb-accidents` | no (needs mdbtools + unzip, in the Dockerfile) |
 | water | `nwps-river-gauges`, `coops-water-levels`, `drought-monitor` | no |
 | consumer-finance | `cfpb-complaints`, `fdic-institutions`, `fdic-structure-changes` | no |
 

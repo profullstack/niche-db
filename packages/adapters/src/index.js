@@ -41,6 +41,7 @@ import { nhcCyclones } from './nhc.js';
 import { nhtsaComplaints, nhtsaRatings, nhtsaRecalls } from './nhtsa.js';
 import { npm } from './npm.js';
 import { ntldChanges, ntldLaunches, ntldTlds, ntldTotals } from './ntlddata.js';
+import { ntsbAccidents } from './ntsb.js';
 import { nwpsRiverGauges } from './nwps.js';
 import { nws } from './nws.js';
 import { ocdsTenders } from './ocds.js';
@@ -108,6 +109,7 @@ export const ADAPTERS = [
   faaAirportStatus,
   aviationHazards,
   aviationMetar,
+  ntsbAccidents,
   nwpsRiverGauges,
   coopsWaterLevels,
   droughtMonitor,
