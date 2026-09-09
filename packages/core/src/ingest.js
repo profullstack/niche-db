@@ -36,11 +36,23 @@ export async function runSource(sourceId, { log = console.log } = {}) {
 
   const adapter = adapterByName(source.adapter);
   if (!adapter) {
+    /*
+     * Almost always a deploy in flight rather than a broken source: the new
+     * container has seeded a source whose adapter the container still draining
+     * does not have, and that one takes the job. `startRun` has already pushed
+     * `next_run_at` a full cadence out, so without a short retry here the
+     * source does not just fail, it forfeits its slot -- which for a 12-hour
+     * drought source or a 24-hour register is most of a day of nothing over a
+     * rollout that lasted seconds. Two minutes covers the overlap, and
+     * `rescheduleKnownAdapters` on the next boot catches anything already
+     * parked further out.
+     */
     await q.finishRun({
       runId: await q.startRun(source.id),
       sourceId: source.id,
       status: 'error',
       error: `unknown adapter ${source.adapter}`,
+      nextRunAt: new Date(Date.now() + 2 * 60_000),
     });
     return { error: 'unknown adapter' };
   }

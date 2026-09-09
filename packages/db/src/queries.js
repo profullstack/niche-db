@@ -380,6 +380,40 @@ export async function dueSources({ limit = 20, force = false } = {}) {
 }
 
 /**
+ * Sources that failed on an adapter this build now has, brought forward.
+ *
+ * A deploy that adds adapters seeds their sources and enqueues their first
+ * runs, and the container still draining does not have the adapters yet, so it
+ * takes some of those jobs and writes `unknown adapter`. That alone would be
+ * harmless -- except `startRun` has already pushed `next_run_at` a full cadence
+ * into the future, so the source does not merely fail, it forfeits its whole
+ * slot. Measured on the 2026-09-09 deploys: a 5-minute source recovered in
+ * minutes, a 12-hour drought source was scheduled to sit idle until 06:50 the
+ * next morning, and a 24-hour FDIC source until the evening after that. Three
+ * deploys in one afternoon each stranded a fresh batch.
+ *
+ * So on every boot the new container asks which sources are parked on that
+ * error for an adapter it does in fact have, and pulls them forward. It is
+ * deliberately narrow: only `unknown adapter`, only adapters now registered,
+ * only enabled sources. A source failing for any other reason keeps its
+ * schedule, and one naming an adapter that genuinely no longer exists stays
+ * parked rather than spinning every tick.
+ */
+export async function rescheduleKnownAdapters(adapterNames) {
+  const names = [...new Set((adapterNames ?? []).map(String))];
+  if (names.length === 0) return 0;
+  const rows = await sql`
+    update sources set next_run_at = now(), updated_at = now()
+    where enabled
+      and last_error like 'unknown adapter%'
+      and next_run_at > now()
+      and adapter = any(${pgArray(names)}::text[])
+    returning id
+  `;
+  return rows.length;
+}
+
+/**
  * Start a run. Pushes next_run_at forward FIRST so a second scheduler tick
  * during a long run does not enqueue it again; the finish call sets the real
  * next time.
