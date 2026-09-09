@@ -34,6 +34,7 @@ import { newsfeed } from './newsfeed.js';
 import { nhcCyclones } from './nhc.js';
 import { nhtsaComplaints, nhtsaRatings, nhtsaRecalls } from './nhtsa.js';
 import { npm } from './npm.js';
+import { ntldChanges, ntldLaunches, ntldTlds, ntldTotals } from './ntlddata.js';
 import { nws } from './nws.js';
 import { ocdsTenders } from './ocds.js';
 import { openfda } from './openfda.js';
@@ -117,6 +118,10 @@ export const ADAPTERS = [
   rogueIncidents,
   rogueResearch,
   aiid,
+  ntldTotals,
+  ntldTlds,
+  ntldLaunches,
+  ntldChanges,
 ];
 
 /**
