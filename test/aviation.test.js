@@ -15,7 +15,7 @@ import {
   parseStatus,
   reasonTags,
 } from '../packages/adapters/src/faanas.js';
-import { adapterByName } from '../packages/adapters/src/index.js';
+import { ADAPTERS, adapterByName } from '../packages/adapters/src/index.js';
 import { normaliseItem, xmlItems } from '../packages/core/src/adapter.js';
 
 process.env.DATABASE_URL ??= 'postgres://test:test@localhost:5432/test';
@@ -43,9 +43,7 @@ describe('the aviation collection', () => {
 
   test('every aviation feed queries kinds the collection actually emits', () => {
     const kinds = new Set(
-      ['faa-nas-status', 'aviation-hazards', 'aviation-metar'].flatMap(
-        (n) => adapterByName(n).kinds,
-      ),
+      ADAPTERS.filter((a) => a.collection === 'aviation').flatMap((a) => a.kinds),
     );
     const feeds = DEFAULT_FEEDS.filter((f) => f.collection === 'aviation');
     expect(feeds.length).toBeGreaterThan(0);
