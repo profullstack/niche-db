@@ -96,13 +96,26 @@ export const Tags = ({ tags, collection, limit = 6 }) => {
   );
 };
 
-export const ItemRow = ({ item, showSource = true, enrichers = null }) => (
+// A 1x1 transparent GIF: an image that fails to load falls back to this, so the slot keeps the
+// empty-panel look instead of a broken-image icon.
+const BLANK_GIF = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
+
+// Most collections are government and data-API rows that carry no picture at all, so a
+// placeholder there is just a column of grey boxes. Reserve the slot only to keep a mixed list
+// aligned; when nothing in the list has an image, drop it and let the text start at the edge.
+export const ItemRow = ({ item, showSource = true, enrichers = null, reserveThumb = false }) => (
   <li class="item">
     {item.image_url ? (
-      <img class="thumb" src={item.image_url} alt="" loading="lazy" />
-    ) : (
+      <img
+        class="thumb"
+        src={item.image_url}
+        alt=""
+        loading="lazy"
+        onerror={`this.onerror=null;this.src='${BLANK_GIF}'`}
+      />
+    ) : reserveThumb ? (
       <span class="thumb blank" />
-    )}
+    ) : null}
     <div class="item-body">
       <a class="item-title" href={`/i/${item.id}`}>
         {item.title}
@@ -142,16 +155,23 @@ export const ItemList = ({
   showSource = true,
   empty = 'Nothing here yet.',
   enrichers = null,
-}) =>
-  items.length === 0 ? (
-    <p class="muted empty">{empty}</p>
-  ) : (
+}) => {
+  if (items.length === 0) return <p class="muted empty">{empty}</p>;
+  const reserveThumb = items.some((i) => i.image_url);
+  return (
     <ul class="items">
       {items.map((i) => (
-        <ItemRow key={i.id} item={i} showSource={showSource} enrichers={enrichers} />
+        <ItemRow
+          key={i.id}
+          item={i}
+          showSource={showSource}
+          enrichers={enrichers}
+          reserveThumb={reserveThumb}
+        />
       ))}
     </ul>
   );
+};
 
 export const Pager = ({ items, base }) => {
   if (items.length === 0) return null;
