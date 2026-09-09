@@ -464,10 +464,24 @@ export const ntsbAccidents = defineAdapter({
     await mkdir(dir, { recursive: true });
     const stamp = join(dir, `avall-${published}`);
     const eventsFile = `${stamp}.events.ndjson`;
+    /*
+     * The cache is ready when this marker exists, and NOT when the first
+     * extract does.
+     *
+     * Two sources read this archive -- every accident, and the fatal ones --
+     * and they share the directory, which is the point: one 96 MB download
+     * serves both. But `events` is written first and `narratives` last, so a
+     * second source arriving mid-extraction saw `events.ndjson`, concluded the
+     * cache was warm, skipped the download and then failed with ENOENT on a
+     * file still being written. That is exactly what `ntsb-fatal-accidents`
+     * did on its first real run. The marker is written after every table, so
+     * "ready" means all of them.
+     */
+    const marker = `${stamp}.complete`;
 
-    if (!(await exists(eventsFile))) {
+    if (!(await exists(marker))) {
       log(`fetching the ${published} archive (96 MB)`);
-      const zip = join(dir, 'avall.zip');
+      const zip = join(dir, `avall-${published}.zip`);
       const res = await http.request(ARCHIVE, { timeoutMs: 15 * 60_000 });
       if (!res.ok) throw new Error(`${res.status} fetching the NTSB archive`);
       await writeFile(zip, Buffer.from(await res.arrayBuffer()));
@@ -481,7 +495,20 @@ export const ntsbAccidents = defineAdapter({
       // container that keeps both has 650 MB of disk it cannot use for anything.
       await rm(mdb, { force: true });
       await rm(zip, { force: true });
+      await writeFile(marker, `${TABLES.join(',')}\n`);
       log(`extracted ${TABLES.join(', ')} from the ${published} archive`);
+    }
+
+    /* Belt and braces: the marker can only be missing above, never wrong, but a
+     * container that died between two exports leaves a directory that looks
+     * warm to nothing and cold to everything. If a table is genuinely absent
+     * here, say which one rather than letting `readFile` raise a bare ENOENT
+     * against a path nobody can interpret. */
+    for (const table of TABLES) {
+      if (!(await exists(`${stamp}.${table}.ndjson`))) {
+        await rm(marker, { force: true });
+        throw new Error(`the ${published} extract is missing ${table}; it will be re-fetched`);
+      }
     }
 
     const events = newestFirst(
