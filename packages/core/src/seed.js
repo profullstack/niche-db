@@ -147,6 +147,12 @@ export const COLLECTIONS = [
     description:
       'The domain name industry, counted daily from ICANN and IANA public data: how many names exist across the new gTLDs and which way each is moving, who operates every TLD and on whose backend, the sunrise and claims windows registries have filed, and the operators and registrars quietly changing hands. Aggregate figures only — zone data may be analysed but not redistributed.',
   },
+  {
+    slug: 'podcasts',
+    name: 'Podcasts',
+    description:
+      'Podcast shows split the one way no podcast app will split them: by who serves the feed. On one side the shows on a commercial host, a network or a broadcaster — 94% of the medium. On the other the shows published from the maker’s own domain, which is where the independent 6% is, and which nothing else lists separately because nobody sells it.',
+  },
 ];
 
 export const DEFAULT_FEEDS = [
@@ -793,6 +799,48 @@ export const DEFAULT_FEEDS = [
     slug: 'brand-tlds',
     name: 'Brand TLDs',
     query: { kinds: ['tld'], tags: ['brand'] },
+  },
+  /*
+   * The split itself is two feeds, because the split is the product. Everything
+   * below them is a cut of the independent side: the commercial half is already
+   * addressable in every podcast app there is, and a language feed over it would
+   * be a worse Apple. The half worth slicing is the one nothing else lists.
+   */
+  {
+    collection: 'podcasts',
+    slug: 'self-hosted-podcasts',
+    name: 'Self-hosted podcasts',
+    query: { sources: ['podcasts-self-hosted'] },
+  },
+  {
+    collection: 'podcasts',
+    slug: 'commercially-hosted-podcasts',
+    name: 'Podcasts on a commercial host',
+    query: { sources: ['podcasts-commercial'] },
+  },
+  {
+    collection: 'podcasts',
+    slug: 'self-hosted-podcasts-en',
+    name: 'Self-hosted podcasts in English',
+    query: { sources: ['podcasts-self-hosted'], tags: ['lang:en'] },
+  },
+  {
+    collection: 'podcasts',
+    slug: 'self-hosted-podcasts-de',
+    name: 'Self-hosted podcasts in German',
+    query: { sources: ['podcasts-self-hosted'], tags: ['lang:de'] },
+  },
+  {
+    collection: 'podcasts',
+    slug: 'self-hosted-podcasts-es',
+    name: 'Self-hosted podcasts in Spanish',
+    query: { sources: ['podcasts-self-hosted'], tags: ['lang:es'] },
+  },
+  {
+    collection: 'podcasts',
+    slug: 'self-hosted-podcasts-fr',
+    name: 'Self-hosted podcasts in French',
+    query: { sources: ['podcasts-self-hosted'], tags: ['lang:fr'] },
   },
 ];
 
