@@ -43,10 +43,20 @@ const BASE = 'https://rssamplifier.com';
 /**
  * The desks asked for, which are also the topics.
  *
- * The same nine `newsfeed` files under, so a story lands on the desk a reader
- * already browses rather than inventing a tenth. Verified live 2026-09-09: each
- * is a well-covered news topic carrying 20 to 57 distinct newsrooms, all
- * publishing the same day.
+ * The first nine are the ones `newsfeed` files under, so a story lands on a desk
+ * a reader already browses. The last three exist here and nowhere else in this
+ * collection: no newsroom feed we list publishes an entertainment, food or
+ * travel desk, and GDELT has no notion of one, but the directory files hundreds
+ * of newsrooms under each. Leaving them out was leaving the coverage on the
+ * floor.
+ *
+ * Verified live 2026-09-09, each a well-covered news topic publishing the same
+ * day: world, us, politics, business, technology, science, health, sport and
+ * climate carry 20 to 57 distinct newsrooms; entertainment 51, food 54 and
+ * travel 46.
+ *
+ * Keywords are normalised upstream, so `sport` and `sports` are one document and
+ * asking for both would only fetch it twice.
  */
 export const DEFAULT_TOPICS = [
   'world',
@@ -58,6 +68,9 @@ export const DEFAULT_TOPICS = [
   'health',
   'sport',
   'climate',
+  'entertainment',
+  'food',
+  'travel',
 ];
 
 /** The documented ceiling: fifty by default, 200 the most it will serve. */
@@ -185,7 +198,7 @@ export const rssamplifier = defineAdapter({
   title: 'RSS Amplifier newsrooms',
   collection: 'news',
   description:
-    'Stories from the newsrooms in the rssamplifier.com directory, which classifies every feed from its own document on each crawl and files ~24,700 of them as news. One request per desk: world, US, politics, business, technology, science, health, sport and climate. Keyless, and the outlet arrives with its masthead rather than a bare host.',
+    'Stories from the newsrooms in the rssamplifier.com directory, which classifies every feed from its own document on each crawl and files ~24,700 of them as news. One request per desk: world, US, politics, business, technology, science, health, sport, climate, entertainment, food and travel. Keyless, and the outlet arrives with its masthead rather than a bare host.',
   docs: 'https://rssamplifier.com/llms.txt',
   kinds: ['story'],
   cadenceMinutes: 30,

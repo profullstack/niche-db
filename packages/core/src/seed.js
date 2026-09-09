@@ -718,6 +718,18 @@ export const DEFAULT_FEEDS = [
   { collection: 'news', slug: 'news-sport', name: 'Sport', query: { tags: ['sport'] } },
   { collection: 'news', slug: 'news-climate', name: 'Climate', query: { tags: ['climate'] } },
   /*
+   * Three desks the directory covers and no newsroom feed we list does, so they
+   * have no address until the directory supplies one.
+   */
+  {
+    collection: 'news',
+    slug: 'news-entertainment',
+    name: 'Entertainment',
+    query: { tags: ['entertainment'] },
+  },
+  { collection: 'news', slug: 'news-food', name: 'Food', query: { tags: ['food'] } },
+  { collection: 'news', slug: 'news-travel', name: 'Travel', query: { tags: ['travel'] } },
+  /*
    * Not a desk any newsroom publishes: the small web is one writer per feed, so
    * it gets its own address rather than being mixed into a section a reader
    * opened expecting the wire.
