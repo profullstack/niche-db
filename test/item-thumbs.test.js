@@ -39,7 +39,10 @@ describe('ItemList thumbnails', () => {
   });
 
   test('an image that fails to load falls back to a pixel, not a broken-image icon', () => {
-    expect(render([item(1, 'https://example.com/a.png')])).toContain('data:image/gif;base64,');
+    const html = render([item(1, 'https://example.com/a.png')]);
+    expect(html).toContain('data:image/gif;base64,');
+    // and takes the blank class, which drops the grey panel behind it
+    expect(html).toContain('classList.add(&#39;blank&#39;)');
   });
 
   test('an empty list is still the empty notice, not a list', () => {
