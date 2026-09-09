@@ -1144,6 +1144,19 @@ export async function ensureDefaults({ env = {}, log = console.log } = {}) {
     });
   }
   if (created) log(`[seed] created ${created} default source(s)`);
+
+  /*
+   * Anything parked on `unknown adapter` for an adapter this build has is
+   * brought forward. That error is written when a container still draining
+   * takes the first run of a source the new one just seeded, and because
+   * `startRun` pushes `next_run_at` a full cadence out before the lookup
+   * fails, the source forfeits its whole slot over a rollout that lasted
+   * seconds -- up to a day for the register sources. This is the repair, and
+   * it runs here because boot is exactly when the adapter has just appeared.
+   */
+  const revived = await q.rescheduleKnownAdapters(ADAPTERS.map((a) => a.name));
+  if (revived) log(`[seed] brought ${revived} source(s) forward after a rollout`);
+
   const niches = await ensureNiches(byCollection, log);
-  return { created, niches };
+  return { created, niches, revived };
 }
