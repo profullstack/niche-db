@@ -2,17 +2,23 @@ import { aiid } from './aiid.js';
 import { alpacaCorporateActions, alpacaNews } from './alpaca.js';
 import { firefoxAddons } from './amo.js';
 import { arxiv } from './arxiv.js';
+import { aviationHazards, aviationMetar } from './aviationweather.js';
 import { blsSeries } from './bls.js';
 import { brisk } from './brisk.js';
+import { cfpbComplaints } from './cfpb.js';
 import { clinicalTrials } from './clinicaltrials.js';
+import { coopsWaterLevels } from './coops.js';
 import { courtlistener } from './courtlistener.js';
 import { crates } from './crates.js';
 import { crossref } from './crossref.js';
+import { droughtMonitor } from './droughtmonitor.js';
 import { ecbFxRates } from './ecb.js';
 import { edgar } from './edgar.js';
 import { eonetEvents } from './eonet.js';
 import { eurostat } from './eurostat.js';
+import { faaAirportStatus } from './faanas.js';
 import { fbiCrimeEstimates } from './fbicrime.js';
+import { fdicInstitutions, fdicStructureChanges } from './fdic.js';
 import { federalRegister } from './federalregister.js';
 import { freddieMacRates } from './freddiemac.js';
 import { fueleconomyCatalog } from './fueleconomy.js';
@@ -35,6 +41,7 @@ import { nhcCyclones } from './nhc.js';
 import { nhtsaComplaints, nhtsaRatings, nhtsaRecalls } from './nhtsa.js';
 import { npm } from './npm.js';
 import { ntldChanges, ntldLaunches, ntldTlds, ntldTotals } from './ntlddata.js';
+import { nwpsRiverGauges } from './nwps.js';
 import { nws } from './nws.js';
 import { ocdsTenders } from './ocds.js';
 import { openfda } from './openfda.js';
@@ -98,6 +105,15 @@ export const ADAPTERS = [
   nhcCyclones,
   swpcSpaceWeather,
   eonetEvents,
+  faaAirportStatus,
+  aviationHazards,
+  aviationMetar,
+  nwpsRiverGauges,
+  coopsWaterLevels,
+  droughtMonitor,
+  cfpbComplaints,
+  fdicInstitutions,
+  fdicStructureChanges,
   statuspage,
   firefoxAddons,
   vscodeExtensions,
