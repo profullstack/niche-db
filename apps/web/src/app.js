@@ -6,6 +6,7 @@ import { modulesFor, withModules } from './lib/modules.js';
 import { partners } from './lib/partners.js';
 import { gateway, gatewayFor } from './lib/pricing.js';
 import { Denied } from './lib/service.js';
+import { meter } from './lib/throttle.js';
 import { registerAgents } from './routes/agents.js';
 import { registerApi } from './routes/api.js';
 import { registerAuth } from './routes/auth.js';
@@ -46,6 +47,17 @@ app.use('*', async (c, next) => {
   const { gateway: chosen } = await gatewayFor(c.req.raw);
   const answer = await chosen.handle(c.req.raw);
   if (answer) return answer;
+
+  /*
+   * Then the site-wide allowance (lib/throttle.js), which meters every route:
+   * 100 requests a minute per caller, answered 402 at this buyer's own price
+   * rather than 429. The gate above sells to crawlers that say who they are;
+   * this sells to the ones that do not, and nothing counted a page route
+   * before it.
+   */
+  const overLimit = await meter(chosen, c.req.raw);
+  if (overLimit) return overLimit;
+
   await next();
 });
 
