@@ -141,6 +141,12 @@ export const COLLECTIONS = [
     description:
       'The story and the screen: wire copy read straight from newsroom RSS, worldwide coverage from GDELT in 65 languages, and the live news channels you can actually watch, each with its public stream. Every source is free and keyless.',
   },
+  {
+    slug: 'domains',
+    name: 'Domains',
+    description:
+      'The domain name industry, counted daily from ICANN and IANA public data: how many names exist across the new gTLDs and which way each is moving, who operates every TLD and on whose backend, the sunrise and claims windows registries have filed, and the operators and registrars quietly changing hands. Aggregate figures only — zone data may be analysed but not redistributed.',
+  },
 ];
 
 export const DEFAULT_FEEDS = [
@@ -739,6 +745,54 @@ export const DEFAULT_FEEDS = [
     slug: 'news-independent',
     name: 'The small web',
     query: { tags: ['independent'] },
+  },
+  {
+    collection: 'domains',
+    slug: 'new-tlds',
+    name: 'New TLDs in the root zone',
+    query: { kinds: ['delegation'] },
+  },
+  {
+    collection: 'domains',
+    slug: 'tld-launches',
+    name: 'Sunrise and claims windows',
+    query: { kinds: ['launch-phase'] },
+  },
+  {
+    collection: 'domains',
+    slug: 'tld-pipeline',
+    name: 'Contracted and transitioning TLDs',
+    query: { kinds: ['contracted', 'transition'] },
+  },
+  {
+    collection: 'domains',
+    slug: 'registry-changes',
+    name: 'Registries and registrars changing hands',
+    query: { kinds: ['registry-change'] },
+  },
+  {
+    collection: 'domains',
+    slug: 'growing-tlds',
+    name: 'Fastest growing TLDs',
+    query: { sources: ['fastest-growing-tlds'] },
+  },
+  {
+    collection: 'domains',
+    slug: 'declining-tlds',
+    name: 'TLDs losing domains',
+    query: { sources: ['shrinking-tlds'] },
+  },
+  {
+    collection: 'domains',
+    slug: 'domain-totals',
+    name: 'How many domains exist',
+    query: { kinds: ['domain-count'] },
+  },
+  {
+    collection: 'domains',
+    slug: 'brand-tlds',
+    name: 'Brand TLDs',
+    query: { kinds: ['tld'], tags: ['brand'] },
   },
 ];
 
