@@ -157,13 +157,13 @@ export const COLLECTIONS = [
     slug: 'aviation',
     name: 'Aviation',
     description:
-      'Why flights are late and what happens when it goes wrong. The traffic management initiatives the FAA has in force right now — ground stops, ground delay programs, airport closures — each written once more when it ends with how long it ran, which the FAA itself never publishes. Every SIGMET and AIRMET in the air over the country, and the decoded observation at the airport underneath. And every one of the 31,000 accidents the NTSB has investigated, each carrying the raw weather observation at the moment it happened — the same field, from the same service, that the hourly feed publishes today. All keyless.',
+      'Why flights are late, what is flying, and what happens when it goes wrong. The traffic management initiatives the FAA has in force right now — ground stops, ground delay programs, airport closures — each written once more when it ends with how long it ran, which the FAA itself never publishes. Every SIGMET and AIRMET in the air over the country, and the decoded observation at the airport underneath. And every one of the 31,000 accidents the NTSB has investigated, each carrying the raw weather observation at the moment it happened — the same field, from the same service, that the hourly feed publishes today. All keyless.',
   },
   {
     slug: 'water',
     name: 'Water',
     description:
-      'Too much water and too little, measured rather than forecast: every NOAA river gauge at or above its action stage with the height in feet and the flood category behind the warning, the observed level at tide stations on every US coast against the height at which each one floods, and the US Drought Monitor’s weekly read on how much of each state is dry and how badly. The fast half and the slow half of the same system.',
+      'Too much water and too little, measured rather than forecast: every NOAA river gauge at or above its action stage with the height in feet and the flood category behind the warning, the observed level at tide stations on every US coast against the height at which each one floods, and the US Drought Monitor’s weekly read on how much of each state is dry and how badly. Then the sea itself — every NOAA buoy’s wave height, period and direction, which is what a surf report is made of, beside the National Weather Service’s own surf zone forecast saying what it means for anyone standing on the beach.',
   },
   {
     slug: 'consumer-finance',
@@ -948,6 +948,60 @@ export const DEFAULT_FEEDS = [
     slug: 'extreme-drought',
     name: 'Extreme and exceptional drought',
     query: { tags: ['extreme-drought'] },
+  },
+  {
+    collection: 'water',
+    slug: 'surf-report',
+    name: 'Surf report',
+    query: { kinds: ['sea-state'], tags: ['waves'] },
+  },
+  {
+    collection: 'water',
+    slug: 'big-surf',
+    name: 'Big surf',
+    query: { tags: ['big-surf'] },
+  },
+  {
+    collection: 'water',
+    slug: 'groundswell',
+    name: 'Long-period groundswell',
+    query: { tags: ['groundswell'] },
+  },
+  {
+    collection: 'water',
+    slug: 'surf-forecasts',
+    name: 'Surf zone forecasts',
+    query: { kinds: ['surf-forecast'] },
+  },
+  {
+    collection: 'water',
+    slug: 'high-surf-advisories',
+    name: 'High surf advisories and warnings',
+    query: { tags: ['high-surf-advisory', 'high-surf-warning'] },
+  },
+  {
+    collection: 'water',
+    slug: 'rip-current-risk',
+    name: 'High rip current risk',
+    query: { tags: ['rip-current-risk:high'] },
+  },
+  {
+    collection: 'water',
+    slug: 'sea-temperature',
+    name: 'Buoys and sea temperature',
+    query: { kinds: ['sea-state', 'marine-observation'] },
+  },
+  {
+    collection: 'aviation',
+    slug: 'aircraft-emergencies',
+    name: 'Aircraft declaring an emergency',
+    query: { kinds: ['aircraft-emergency'] },
+  },
+  {
+    collection: 'aviation',
+    slug: 'military-aircraft',
+    name: 'Military aircraft airborne',
+    query: { kinds: ['aircraft-sighting'], tags: ['military'] },
   },
   {
     collection: 'consumer-finance',
