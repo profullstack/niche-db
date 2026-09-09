@@ -24,7 +24,16 @@ const { meter } = await import('../apps/web/src/lib/throttle.js');
 const BROWSER =
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36';
 
-/** The gateway that charges this much a day -- the same one the app would pick. */
+/**
+ * The gateway that charges this much a day -- the same one the app would pick.
+ *
+ * Always at a price nothing else uses. `gatewayAt` memoises one gateway per
+ * price, and pricing.js builds the LIST-price one at import; if that import
+ * happened before this file set the environment above, the cached gateway has
+ * no key, cannot take money, and every refusal here is a 429. That is exactly
+ * what happened in CI while these tests asked for the list price and passed
+ * locally, where the files happened to load the other way round.
+ */
 const paid = (priceCents) => gatewayAt(priceCents);
 
 const request = (path, ip, headers = {}) =>
@@ -43,7 +52,7 @@ async function countUntilLimited(gateway, path, ip, attempts, headers = {}) {
 }
 
 describe('the site-wide allowance', () => {
-  const gateway = paid(100);
+  const gateway = paid(250);
 
   test('meters a page route, which nothing here did before', async () => {
     expect(await countUntilLimited(gateway, '/niches/housing', '10.5.0.1', 140)).toBe(100);
@@ -80,18 +89,18 @@ describe('the price a refusal quotes', () => {
   // The price here is the buyer's own: a dollar a day at list, less the more it
   // has spent. A refusal has to quote the price THAT buyer would pay.
   test('follows the gateway the request was priced with', async () => {
-    const discounted = paid(40);
+    const discounted = paid(37);
     for (let i = 0; i < 100; i++) await meter(discounted, request('/niches/markets', '10.5.0.7'));
     const answer = await meter(discounted, request('/niches/markets', '10.5.0.7'));
     expect(answer?.status).toBe(402);
-    expect((await answer.json()).pass.price).toBe('0.40 USD');
+    expect((await answer.json()).pass.price).toBe('0.37 USD');
   });
 
   test('but the counting does not split along with it', async () => {
     // Or a caller crossing a discount threshold mid-window would be handed a
     // fresh hundred requests for the privilege.
-    const list = paid(100);
-    const discounted = paid(40);
+    const list = paid(250);
+    const discounted = paid(37);
     for (let i = 0; i < 60; i++) await meter(list, request('/niches/news', '10.5.0.8'));
     for (let i = 0; i < 40; i++) await meter(discounted, request('/niches/news', '10.5.0.8'));
     const answer = await meter(discounted, request('/niches/news', '10.5.0.8'));
