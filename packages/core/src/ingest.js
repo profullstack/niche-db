@@ -80,16 +80,45 @@ export async function runSource(sourceId, { log = console.log } = {}) {
      * the winner a property of source order rather than of luck -- so seed the
      * source you would rather read from before the ones that echo it.
      */
-    const claimed = await q.claimedDedupeKeys({
-      collectionId: source.collection_id,
-      sourceId: source.id,
-      keys: pulled.map((it) => it.dedupeKey),
-    });
-    const items = claimed.size
-      ? pulled.filter((it) => !(it.dedupeKey && claimed.has(it.dedupeKey)))
-      : pulled;
-    const deduped = pulled.length - items.length;
-    if (deduped > 0) l(`${deduped} already carried by another source`);
+    const dedupes = await q.collectionDedupesUrls(source.collection_id);
+    let items = pulled;
+
+    if (dedupes) {
+      const claimed = await q.claimedDedupeKeys({
+        collectionId: source.collection_id,
+        sourceId: source.id,
+        keys: pulled.map((it) => it.dedupeKey),
+      });
+
+      /*
+       * Two folds, because a story arrives twice in two different ways.
+       *
+       * Across sources: another source in this collection already carries it.
+       * Never against this source's own rows, or a second run would discard
+       * everything the first one wrote.
+       *
+       * Within one pull: one publisher can expose the same article through two
+       * feeds, and an adapter that keys an item on (feed, url) has no way to
+       * see that -- the keys genuinely differ. Measured on the news collection:
+       * aiornot.vote publishes `latest-media` and `photorealistic` carrying the
+       * same posts, which is 5 duplicate URLs in 1,195. The batch fold is what
+       * the cross-source filter cannot do, because it deliberately ignores this
+       * source.
+       *
+       * First one wins in both, so the winner is a property of order rather
+       * than of luck.
+       */
+      const seen = new Set();
+      items = pulled.filter((it) => {
+        if (!it.dedupeKey) return true;
+        if (claimed.has(it.dedupeKey) || seen.has(it.dedupeKey)) return false;
+        seen.add(it.dedupeKey);
+        return true;
+      });
+
+      const dropped = pulled.length - items.length;
+      if (dropped > 0) l(`${dropped} duplicate ${dropped === 1 ? 'story' : 'stories'} dropped`);
+    }
 
     let added = 0;
     let updated = 0;
