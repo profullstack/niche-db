@@ -515,6 +515,19 @@ export async function upsertItems({ collectionId, sourceId, items }) {
 export async function claimedDedupeKeys({ collectionId, sourceId, keys }) {
   const list = [...new Set((keys ?? []).filter(Boolean))];
   if (list.length === 0) return new Set();
+  /*
+   * `pgArray(...)::text[]`, like every other `any()` in this file, and here it
+   * is not a style choice. Bun's driver serialises a JS array by joining it
+   * with commas, so a bare `= any(${list})` reaches Postgres as one string and
+   * fails the whole statement with `malformed array literal`, naming the first
+   * URL in the batch.
+   *
+   * That does not fail politely. The error propagates out of the write and
+   * takes the source's entire run with it, so ingestion for the collection
+   * stops and the only symptom is a complaint about a URL that is perfectly
+   * fine. Shipped exactly that way and caught in production, with both new
+   * sources reporting `item_count: 0`.
+   */
   const rows = await sql`
     select distinct i.dedupe_key
     from items i
@@ -522,7 +535,7 @@ export async function claimedDedupeKeys({ collectionId, sourceId, keys }) {
     where i.collection_id = ${collectionId}
       and c.dedupe_urls
       and i.source_id <> ${sourceId}
-      and i.dedupe_key = any(${list})
+      and i.dedupe_key = any(${pgArray(list)}::text[])
   `;
   return new Set(rows.map((r) => r.dedupe_key));
 }
