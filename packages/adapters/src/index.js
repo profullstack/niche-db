@@ -40,6 +40,7 @@ import { ocdsTenders } from './ocds.js';
 import { openfda } from './openfda.js';
 import { openlibrary } from './openlibrary.js';
 import { buildingPermits } from './permits.js';
+import { podcasts } from './podcasts.js';
 import { pypi } from './pypi.js';
 import { rogueIncidents, rogueResearch } from './rogueaitracker.js';
 import { rssamplifier } from './rssamplifier.js';
@@ -122,8 +123,10 @@ export const ADAPTERS = [
   ntldTlds,
   ntldLaunches,
   ntldChanges,
+  podcasts,
 ];
 
+export { isPlatformHosted, PLATFORM_HOSTS } from './podcastplatforms.js';
 /**
  * The place lists two adapters seed their sources from, re-exported so the
  * seed can build a feed per city from the same list rather than a second copy

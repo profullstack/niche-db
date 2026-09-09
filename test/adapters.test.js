@@ -50,6 +50,7 @@ describe('registry', () => {
         'jobs',
         'news',
         'domains',
+        'podcasts',
       ]).toContain(a.collection);
     }
     expect(adapterByName('steam').title).toContain('Steam');
