@@ -206,6 +206,22 @@ describe('the NTSB bulk reader', () => {
     expect(indexByEvent(rows).get('x').Aircraft_Key).toBe(1);
   });
 
+  test('the two NTSB sources share one archive, so readiness is a marker not a file', () => {
+    /* `ntsb-accidents` and `ntsb-fatal-accidents` read the same extract from
+     * the same directory, which is the point: one 96 MB download serves both.
+     * But `events` is written first and `narratives` last, so treating the
+     * first extract as "the cache is warm" let the second source skip the
+     * download and then fail with ENOENT on a file still being written. That
+     * is what it did on its first real run. Both sources must therefore be
+     * pointed at the same cache and distinguished only by their config. */
+    const sources = adapterByName('ntsb-accidents').defaultSources;
+    expect(sources).toHaveLength(2);
+    expect(sources.map((s) => s.slug)).toEqual(['ntsb-accidents', 'ntsb-fatal-accidents']);
+    // Neither pins its own cacheDir, or they would each download the archive.
+    for (const s of sources) expect(s.config?.cacheDir).toBeUndefined();
+    expect(sources[1].config.accidentsOnly).toBe('yes');
+  });
+
   test('the archive date is read off the listing, so the download is conditional', () => {
     const page =
       '<td>avall.zip</td><td>9/1/2026 7:03:59 AM</td><td>96148686</td><td><a href="x">avall.zip</a></td>';
