@@ -194,37 +194,47 @@ describe('one feed as an item', () => {
   });
 });
 
-describe('pull', () => {
-  const page = (slugs) => ({
-    feeds: slugs.map((s) => feed({ slug: s, feedUrl: `https://${s}.example.org/rss` })),
-  });
+const page = (slugs) => ({
+  feeds: slugs.map((s) => feed({ slug: s, feedUrl: `https://${s}.example.org/rss` })),
+});
 
-  const ctx = (pages, over = {}) => {
-    const seen = [];
-    return {
-      seen,
-      ctx: {
-        config: { group: 'self-hosted', maxPages: 5 },
-        cursor: {},
-        log: () => {},
-        deadline: Date.now() + 60_000,
-        http: {
-          json: async (url) => {
-            seen.push(url);
-            const offset = Number(new URL(url).searchParams.get('offset'));
-            return pages[offset / 200] ?? { feeds: [] };
-          },
+/**
+ * A fake upstream that pages by offset.
+ *
+ * Offsets are resolved against the running total rather than divided by the
+ * page size, because a short page means later requests ask for an offset that
+ * is not a multiple of 200 -- which is exactly what the backfill does.
+ */
+const ctx = (pages, over = {}) => {
+  const flat = pages.flatMap((p) => p.feeds);
+  const seen = [];
+  return {
+    seen,
+    ctx: {
+      config: { group: 'self-hosted', maxPages: 5 },
+      cursor: { backfillDone: true },
+      log: () => {},
+      deadline: Date.now() + 60_000,
+      http: {
+        json: async (url) => {
+          seen.push(url);
+          const params = new URL(url).searchParams;
+          const offset = Number(params.get('offset'));
+          const limit = Number(params.get('limit'));
+          return { feeds: flat.slice(offset, offset + limit) };
         },
-        ...over,
       },
-    };
+      ...over,
+    },
   };
+};
 
+describe('pull', () => {
   test('stops at an empty page and records the newest slug as the marker', async () => {
     const { ctx: c } = ctx([page(['a', 'b'])]);
     const out = await adapterByName('podcasts').pull(c);
     expect(out.items.map((i) => i.externalId)).toEqual(['a', 'b']);
-    expect(out.cursor).toEqual({ newest: 'a' });
+    expect(out.cursor).toEqual({ newest: 'a', backfillDone: true });
   });
 
   /*
@@ -236,7 +246,7 @@ describe('pull', () => {
     const full = (prefix) => page(Array.from({ length: 200 }, (_, i) => `${prefix}${i}`));
     const pages = [full('p0-'), full('p1-'), full('p2-'), full('p3-')];
     pages[1].feeds[10].slug = 'marker';
-    const { ctx: c, seen } = ctx(pages, { cursor: { newest: 'marker' } });
+    const { ctx: c, seen } = ctx(pages, { cursor: { newest: 'marker', backfillDone: true } });
     await adapterByName('podcasts').pull(c);
     expect(seen.length).toBe(3);
     expect(seen[2]).toContain('offset=400');
@@ -260,11 +270,11 @@ describe('pull', () => {
     const lines = [];
     const { ctx: c } = ctx([full('a'), full('b')], {
       config: { group: 'self-hosted', maxPages: 1 },
-      cursor: { newest: 'nowhere' },
+      cursor: { newest: 'nowhere', backfillDone: true },
       log: (m) => lines.push(m),
     });
     const out = await adapterByName('podcasts').pull(c);
-    expect(out.cursor).toEqual({ newest: 'a-0' });
+    expect(out.cursor).toEqual({ newest: 'a-0', backfillDone: true });
     expect(lines.some((l) => l.includes('raise maxPages'))).toBe(true);
   });
 
@@ -278,5 +288,122 @@ describe('pull', () => {
   test('both groups are described on the sources page', () => {
     expect(GROUPS.commercial.slug).toBe('podcasts-commercial');
     expect(GROUPS['self-hosted'].slug).toBe('podcasts-self-hosted');
+  });
+});
+
+/**
+ * The bug this exists to prevent.
+ *
+ * `incremental` reads down from the head until it meets its marker, which is
+ * right for keeping up and useless for starting: the newest pages of this
+ * directory are about 99% self-hosted, so a commercial source that only ever
+ * read the head found 12 shows in 2,000 feeds and nothing would have fixed it.
+ * A new source has to walk the whole listing before it can keep up with it.
+ */
+describe('backfill', () => {
+  const mixed = (n, start = 0) => ({
+    feeds: Array.from({ length: n }, (_, i) => {
+      const k = start + i;
+      // One in fifty is on a platform, which is roughly the real head-of-list
+      // ratio and the thing that made head-only reading useless.
+      return feed({
+        slug: `s${k}`,
+        feedUrl: k % 50 === 0 ? 'https://anchor.fm/s/x/podcast/rss' : `https://own${k}.example/rss`,
+      });
+    }),
+  });
+
+  test('a source with no cursor walks instead of reading only the head', async () => {
+    const { ctx: c, seen } = ctx([mixed(200), mixed(200, 200), mixed(50, 400)], {
+      cursor: {},
+      config: { group: 'commercial', backfillPages: 10 },
+    });
+    const out = await adapterByName('podcasts').pull(c);
+    // 450 feeds walked, one in fifty commercial: 9 shows a head-only read of the
+    // first page would have found one of.
+    expect(out.items.length).toBe(9);
+    expect(seen.length).toBe(3);
+    expect(out.cursor.backfillDone).toBe(true);
+  });
+
+  test('resumes from the stored offset rather than starting over', async () => {
+    const { ctx: c, seen } = ctx([mixed(200), mixed(200, 200), mixed(200, 400)], {
+      cursor: { backfillOffset: 400, backfillHead: 's0' },
+      config: { group: 'self-hosted', backfillPages: 1 },
+    });
+    const out = await adapterByName('podcasts').pull(c);
+    expect(seen[0]).toContain('offset=400');
+    expect(out.cursor).toEqual({ backfillOffset: 600, backfillHead: 's0' });
+  });
+
+  test('stops after its configured pages and keeps walking next run', async () => {
+    const pages = [mixed(200), mixed(200, 200), mixed(200, 400), mixed(200, 600)];
+    const { ctx: c, seen } = ctx(pages, {
+      cursor: {},
+      config: { group: 'self-hosted', backfillPages: 2 },
+    });
+    const out = await adapterByName('podcasts').pull(c);
+    expect(seen.length).toBe(2);
+    expect(out.cursor.backfillOffset).toBe(400);
+    expect(out.cursor.backfillDone).toBeUndefined();
+  });
+
+  /*
+   * The head is captured when the walk starts and held until it ends, so
+   * anything added to the directory during the walk sits above the handover
+   * marker and is picked up by the first incremental run. Promoting the head as
+   * it looks at the END of the walk would skip every one of them.
+   */
+  test('hands over the head as it was when the walk began', async () => {
+    const first = ctx([mixed(200), mixed(200, 200)], {
+      cursor: {},
+      config: { group: 'self-hosted', backfillPages: 1 },
+    });
+    const mid = await adapterByName('podcasts').pull(first.ctx);
+    expect(mid.cursor.backfillHead).toBe('s0');
+
+    const last = ctx([mixed(200), mixed(50, 200)], {
+      cursor: mid.cursor,
+      config: { group: 'self-hosted', backfillPages: 5 },
+    });
+    const out = await adapterByName('podcasts').pull(last.ctx);
+    expect(out.cursor).toEqual({ newest: 's0', backfillDone: true });
+  });
+
+  test('a finished walk never runs again', async () => {
+    const { ctx: c, seen } = ctx([mixed(10)], {
+      cursor: { newest: 's0', backfillDone: true },
+      config: { group: 'self-hosted', maxPages: 1 },
+    });
+    const out = await adapterByName('podcasts').pull(c);
+    expect(seen[0]).toContain('offset=0');
+    expect(out.cursor.backfillDone).toBe(true);
+    expect(out.cursor.backfillOffset).toBeUndefined();
+  });
+
+  /*
+   * backfillPages 0 means "only take new arrivals". It must not leave a
+   * `backfillDone` behind, or turning the setting back on later would silently
+   * do nothing: only a walk that happened may claim to have happened.
+   */
+  test('skipping the walk does not mark it done', async () => {
+    const { ctx: c } = ctx([mixed(10)], {
+      cursor: {},
+      config: { group: 'self-hosted', backfillPages: 0, maxPages: 1 },
+    });
+    const out = await adapterByName('podcasts').pull(c);
+    expect(out.cursor.backfillDone).toBeUndefined();
+  });
+
+  test('stops walking when it runs out of time', async () => {
+    const { ctx: c, seen } = ctx([mixed(200), mixed(200, 200)], {
+      cursor: {},
+      config: { group: 'self-hosted', backfillPages: 50 },
+      deadline: Date.now() - 1,
+    });
+    const out = await adapterByName('podcasts').pull(c);
+    expect(seen.length).toBe(0);
+    expect(out.items).toEqual([]);
+    expect(out.cursor.backfillOffset).toBe(0);
   });
 });
