@@ -933,3 +933,56 @@ describe('the weather collection migration', () => {
     expect(moved).toEqual({ sources: 1, items: 1, feeds: 1, left_behind: 0 });
   });
 });
+
+describe('the podcasts cadence migration', () => {
+  test('moves the two seeded sources to fifteen minutes and nothing else', async () => {
+    // The gap 0013 closes: `insertSource` is idempotent on the slug but its
+    // conflict clause never touches cadence_minutes, so raising the adapter's
+    // cadence reached nothing that already existed.
+    const c = await one(
+      `insert into collections (slug, name) values ('podcasts', 'Podcasts')
+       on conflict (slug) do update set name = excluded.name returning id`,
+    );
+    for (const [slug, cadence] of [
+      ['podcasts-commercial', 60],
+      ['podcasts-self-hosted', 60],
+      // Somebody's own source against the same adapter, and one an operator has
+      // already tuned. Neither may be touched.
+      ['podcasts-mine', 60],
+      ['podcasts-self-hosted-tuned', 5],
+    ]) {
+      await db.query(
+        `insert into sources (collection_id, adapter, slug, name, cadence_minutes)
+         values ($1, 'podcasts', $2, $2, $3)`,
+        [c.id, slug, cadence],
+      );
+    }
+    // Exactly the statement migration 0013 runs.
+    const stmt = `update sources set cadence_minutes = 15, updated_at = now()
+                   where slug in ('podcasts-commercial', 'podcasts-self-hosted')
+                     and cadence_minutes = 60`;
+    await db.query(stmt);
+
+    const after = await one(
+      `select
+         (select cadence_minutes from sources where slug = 'podcasts-commercial') as commercial,
+         (select cadence_minutes from sources where slug = 'podcasts-self-hosted') as self_hosted,
+         (select cadence_minutes from sources where slug = 'podcasts-mine') as mine,
+         (select cadence_minutes from sources where slug = 'podcasts-self-hosted-tuned') as tuned`,
+    );
+    expect(after).toEqual({ commercial: 15, self_hosted: 15, mine: 60, tuned: 5 });
+
+    // Re-running must not walk a later decision back to 15.
+    await db.query(`update sources set cadence_minutes = 60 where slug = 'podcasts-commercial'`);
+    await db.query(`update sources set cadence_minutes = 30 where slug = 'podcasts-self-hosted'`);
+    await db.query(stmt);
+    const again = await one(
+      `select
+         (select cadence_minutes from sources where slug = 'podcasts-commercial') as commercial,
+         (select cadence_minutes from sources where slug = 'podcasts-self-hosted') as self_hosted`,
+    );
+    // The first was genuinely back at 60, so it moves again; the second was
+    // deliberately set to 30 and is left alone.
+    expect(again).toEqual({ commercial: 15, self_hosted: 30 });
+  });
+});
