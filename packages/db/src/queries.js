@@ -1,4 +1,5 @@
 import { sql } from './index.js';
+import { matchFixtures } from './matchups.js';
 
 /**
  * Every query the app runs lives here. Routes, workers and MCP tools import from
@@ -660,13 +661,36 @@ export async function recentItems({
  * quickly; the caller cleans the name first (year, quality tags, dots) so what
  * arrives here is the thing's name and, when known, its year and kind to
  * narrow by. Each row carries `score` in 0..1.
+ *
+ * A matchup ("Chiefs vs Bills") arrives with `teams`, and is answered by the
+ * fixture whose two teams they are (see matchups.js), in the window `date`
+ * names or the default one. When no fixture answers and the caller did not
+ * insist on a fixture, the plain match runs on `fallback` (the name as a
+ * channel), so a channel called "Discovery - Science" still matches.
  */
 export async function matchItems(
   term,
-  { collectionId = null, kind = null, tags = [], year = null, limit = 5, minScore = 0.3 } = {},
+  {
+    collectionId = null,
+    kind = null,
+    tags = [],
+    year = null,
+    limit = 5,
+    minScore = 0.3,
+    teams = null,
+    league = null,
+    date = null,
+    fallback = null,
+    now = new Date(),
+  } = {},
 ) {
-  const t = String(term ?? '').trim();
+  let t = String(term ?? '').trim();
   if (!t) return [];
+  if (teams?.length === 2 && (kind === null || kind === 'fixture')) {
+    const fixtures = await matchFixtures(teams, { league, collectionId, date, now, limit });
+    if (fixtures.length || kind === 'fixture') return fixtures;
+    t = String(fallback ?? '').trim() || t;
+  }
   const wantedTags = (tags ?? []).map((x) => String(x).trim().toLowerCase()).filter(Boolean);
   return sql`
     select ${itemColumns},

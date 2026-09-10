@@ -87,3 +87,87 @@ describe('a name taken apart', () => {
     expect(parseName(null)).toMatchObject({ name: '', kind: 'other' });
   });
 });
+
+describe('a matchup', () => {
+  const fixture = (raw, teams, league = null) => {
+    expect(parseName(raw)).toMatchObject({
+      kind: 'fixture',
+      name: `${teams[0]} vs ${teams[1]}`,
+      teams,
+      league,
+      year: null,
+      season: null,
+      episode: null,
+    });
+  };
+
+  test('two sides around vs, v, at or @ are a fixture, in the playlist forms', () => {
+    fixture('Chiefs vs Bills', ['Chiefs', 'Bills']);
+    fixture('Chiefs vs. Bills', ['Chiefs', 'Bills']);
+    fixture('Chiefs VS Bills', ['Chiefs', 'Bills']);
+    fixture('Lakers @ Celtics', ['Lakers', 'Celtics']);
+    fixture('Arsenal v Chelsea', ['Arsenal', 'Chelsea']);
+    fixture('Bills at Chiefs', ['Bills', 'Chiefs']);
+    fixture('Man Utd v Man City', ['Man Utd', 'Man City']);
+    fixture('San Francisco 49ers at Los Angeles Rams', ['San Francisco 49ers', 'Los Angeles Rams']);
+    fixture('Yankees at Red Sox', ['Yankees', 'Red Sox']);
+    fixture('Saint-Étienne v Lyon', ['Saint-Étienne', 'Lyon']);
+  });
+
+  test('a league or sport label in front is the league, and comes off the name', () => {
+    fixture('NFL: Chiefs vs Bills', ['Chiefs', 'Bills'], 'NFL');
+    fixture('NBA | Lakers @ Celtics', ['Lakers', 'Celtics'], 'NBA');
+    fixture('EPL - Arsenal v Chelsea', ['Arsenal', 'Chelsea'], 'EPL');
+    fixture('NFL Chiefs vs Bills', ['Chiefs', 'Bills'], 'NFL');
+    fixture('Premier League: Arsenal v Chelsea', ['Arsenal', 'Chelsea'], 'Premier League');
+    // A country code is the playlist's, not a league; the label after it is.
+    fixture('US: NFL: Chiefs vs Bills', ['Chiefs', 'Bills'], 'NFL');
+    fixture('UK: Rangers at Celtic', ['Rangers', 'Celtic']);
+    fixture('[Live] Chiefs vs Bills', ['Chiefs', 'Bills']);
+  });
+
+  test('a time, a day or a date behind comes off, and so do the feed decorations', () => {
+    fixture('Rangers at Celtic 19:45', ['Rangers', 'Celtic']);
+    fixture('Chiefs vs Bills 7:30 PM', ['Chiefs', 'Bills']);
+    fixture('Chiefs vs Bills 7:30 PM ET', ['Chiefs', 'Bills']);
+    fixture('Lakers @ Celtics Sat', ['Lakers', 'Celtics']);
+    fixture('Arsenal v Chelsea 12/09', ['Arsenal', 'Chelsea']);
+    fixture('Bills @ Chiefs Dec 25', ['Bills', 'Chiefs']);
+    fixture('Yankees at Red Sox Sep 10th', ['Yankees', 'Red Sox']);
+    fixture('Arsenal v Chelsea (Sat 19:45) HD', ['Arsenal', 'Chelsea']);
+    fixture('Boca Juniors v River Plate 21:00 HD', ['Boca Juniors', 'River Plate']);
+    fixture('Tonight: Chiefs vs Bills', ['Chiefs', 'Bills']);
+    fixture('Lakers vs Celtics 1080p', ['Lakers', 'Celtics']);
+  });
+
+  test('a dash is a separator only when both sides look like teams', () => {
+    fixture('Arsenal - Chelsea', ['Arsenal', 'Chelsea']);
+    fixture('EPL - Arsenal - Chelsea', ['Arsenal', 'Chelsea'], 'EPL');
+    expect(parseName('Sky Sports - Football')).toMatchObject({ kind: 'channel', teams: null });
+    expect(parseName('Fox Sports - West')).toMatchObject({ kind: 'channel', teams: null });
+  });
+
+  test('what is not a matchup still parses as it did', () => {
+    expect(parseName('Dune Part Two')).toMatchObject({
+      name: 'Dune Part Two',
+      kind: 'channel',
+      teams: null,
+      league: null,
+    });
+    // A concert, not a fixture.
+    expect(parseName('Live at Wembley')).toMatchObject({
+      name: 'Live at Wembley',
+      kind: 'channel',
+    });
+    expect(parseName('Salomon vs Mon')).toMatchObject({ kind: 'channel' });
+    // A release with a year is a film, whatever the title says.
+    expect(parseName('Godzilla vs Kong 2021 1080p')).toMatchObject({
+      name: 'Godzilla vs Kong',
+      year: 2021,
+      kind: 'movie',
+      teams: null,
+    });
+    expect(parseName('US: ESPN2 HD')).toMatchObject({ name: 'ESPN2', kind: 'channel' });
+    expect(parseName('UK | Sky Sports Main Event HD')).toMatchObject({ kind: 'channel' });
+  });
+});
