@@ -1,6 +1,6 @@
 import { config } from '@nichedb/config';
 import { describeAdapters, describeEnrichers } from '@nichedb/core';
-import { parseName } from '@nichedb/core/names';
+import { cleanChannelName, parseName } from '@nichedb/core/names';
 import * as q from '@nichedb/db/queries';
 import { enqueueRun } from '@nichedb/queue';
 import { COMMANDS } from '@profullstack/nichedb';
@@ -335,17 +335,26 @@ export function registerApi(app) {
     const col = await collectionOrNull(c.req.query('collection'));
     const parsed = parseName(raw);
     const year = Number(c.req.query('year')) || parsed.year || null;
+    const kind = c.req.query('kind') ?? null;
+    // A matchup is answered by team from the sports collection; a day
+    // (YYYY-MM-DD) looks on that day and the ones either side of it.
+    const date = /^\d{4}-\d{2}-\d{2}$/.test(c.req.query('date') ?? '') ? c.req.query('date') : null;
+    const sports = col === null || col.slug === 'sports' || kind === 'fixture';
     const items = await q.matchItems(parsed.name, {
       collectionId: col?.id ?? null,
-      kind: c.req.query('kind') ?? null,
+      kind,
       tags: (c.req.query('tags') ?? '').split(',').filter(Boolean),
       year,
+      teams: sports ? parsed.teams : null,
+      league: parsed.league,
+      date,
+      fallback: cleanChannelName(raw),
       limit: lim(c.req.query('limit'), 5, 50),
     });
     c.header('cache-control', 'public, max-age=300');
     return c.json({
       q: raw,
-      parsed: { ...parsed, year },
+      parsed: { ...parsed, year, date },
       count: items.length,
       items: items.map((i) => ({ ...itemOut(i, site()), score: Number(i.score) })),
     });

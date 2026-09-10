@@ -14,7 +14,7 @@ import { homedir } from 'node:os';
 import { join } from 'node:path';
 import { createInterface } from 'node:readline';
 
-export const VERSION = '0.7.0';
+export const VERSION = '0.7.1';
 const DEFAULT_API = process.env.NICHEDB_API ?? 'https://nichedb.dev';
 const CONFIG_DIR = join(process.env.XDG_CONFIG_HOME ?? join(homedir(), '.config'), 'nichedb');
 const CONFIG_FILE = join(CONFIG_DIR, 'config.json');
@@ -106,10 +106,19 @@ export const COMMANDS = [
   },
   {
     name: 'match',
-    usage: 'match <name> [--collection …] [--kind …] [--year …] [--tags a,b]',
+    usage: 'match <name> [--collection …] [--kind …] [--year …] [--date YYYY-MM-DD] [--tags a,b]',
     summary:
-      'Which title, channel or fixture is this name? A release name or a playlist entry, cleaned and matched by similarity.',
-    options: ['--collection', '--kind', '--year', '--tags', '--limit', '--json', '--urls'],
+      'Which title, channel or fixture is this name? A release name or a playlist entry, cleaned and matched by similarity; a matchup ("NFL: Chiefs vs Bills") by its two teams, on --date or in the coming week.',
+    options: [
+      '--collection',
+      '--kind',
+      '--year',
+      '--date',
+      '--tags',
+      '--limit',
+      '--json',
+      '--urls',
+    ],
   },
   {
     name: 'upcoming',
@@ -540,7 +549,7 @@ export async function run(
       const name = rest.join(' ');
       if (!name) throw new Error('match <name>');
       const qs = new URLSearchParams({ q: name });
-      for (const k of ['collection', 'kind', 'year', 'tags', 'limit'])
+      for (const k of ['collection', 'kind', 'year', 'date', 'tags', 'limit'])
         if (flags[k]) qs.set(k, flags[k]);
       const answer = await client.get(`/api/v1/match?${qs}`);
       if (json) {
@@ -549,7 +558,7 @@ export async function run(
       }
       const p = answer.parsed;
       console.log(
-        `read as: ${p.name}${p.year ? ` (${p.year})` : ''}${p.season ? ` S${p.season}` : ''}${p.episode ? `E${p.episode}` : ''} · ${p.kind}`,
+        `read as: ${p.league ? `${p.league} ` : ''}${p.name}${p.year ? ` (${p.year})` : ''}${p.season ? ` S${p.season}` : ''}${p.episode ? `E${p.episode}` : ''}${p.date ? ` on ${p.date}` : ''} · ${p.kind}`,
       );
       printItems(
         answer.items.map((i) => ({ ...i, title: `${(i.score * 100).toFixed(0)}%  ${i.title}` })),

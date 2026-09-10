@@ -152,6 +152,21 @@ tags `channel`, `<category>`…, `country:<cc>`, `lang:<code>`…, `network:<slu
 (ISO, on `published_at`), `since=` (ISO, on `updated_at`, for a site mirroring
 the collection), `sort=id|published|updated` and `order=asc|desc`.
 
-`GET /api/v1/match?collection=&q=&kind=&limit=` answers the enrichment question:
+`GET /api/v1/match?collection=&q=&kind=&date=&limit=` answers the enrichment question:
 the best items for a name, by trigram similarity on `title`, each with a `score`.
 This is what nixamp asks with a file name or a playlist entry's name.
+
+A matchup name ("NFL: Chiefs vs Bills", "Lakers @ Celtics", "Arsenal v Chelsea",
+"Rangers at Celtic 19:45") parses as kind `fixture` with `teams: [A, B]` and
+`league` (the label in front, or null), and is answered by team rather than by
+title: every fixture kicking off between 36 hours ago and 7 days ahead (or on
+`date=YYYY-MM-DD` plus a day either side) whose title or abbreviation is near
+either side is scored by whether each side equals, whole-word-contains or is
+contained by `data.home`/`data.away`'s `displayName`, `name` or `abbreviation`
+(case and diacritics folded, "Man Utd" spelled out to "Manchester United"), in
+both orders. Both sides matched scores 1.0 less a little per day between kickoff
+and now (a game in play is 0 away, so it beats next week's rematch), plus a
+little when `league` agrees with the fixture's `league:` tag or
+`data.league.abbreviation`; one side matched scores 0.45, under the 0.5 floor a
+player applies. When no fixture answers and `kind=fixture` was not asked for,
+the plain match runs on the name as a channel.

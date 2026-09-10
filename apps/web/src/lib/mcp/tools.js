@@ -1,6 +1,6 @@
 import { config } from '@nichedb/config';
 import { describeAdapters, describeEnrichers } from '@nichedb/core';
-import { parseName } from '@nichedb/core/names';
+import { cleanChannelName, parseName } from '@nichedb/core/names';
 import * as q from '@nichedb/db/queries';
 import { enqueueRun } from '@nichedb/queue';
 import { allowedEnrichers, collectionOut, feedOut, itemOut, sourceOut } from '../serialize.js';
@@ -180,7 +180,7 @@ export const TOOLS = [
   {
     name: 'match_items',
     description:
-      'Which title, channel or fixture is this name? Give a file name, a release name or a playlist entry ("Top.Gun.Maverick.2022.1080p.mkv", "US: ESPN2 HD"); it is cleaned (year, season and episode, quality tags, playlist decorations) and matched by similarity. Each result carries a score in 0..1. Use screen for films and TV, channels for television channels, sports for fixtures.',
+      'Which title, channel or fixture is this name? Give a file name, a release name or a playlist entry ("Top.Gun.Maverick.2022.1080p.mkv", "US: ESPN2 HD"); it is cleaned (year, season and episode, quality tags, playlist decorations) and matched by similarity. A matchup ("NFL: Chiefs vs Bills", "Lakers @ Celtics", "Rangers at Celtic 19:45") is answered by the fixture whose two teams those are, kicking off between 36 hours ago and 7 days ahead unless date narrows it. Each result carries a score in 0..1. Use screen for films and TV, channels for television channels, sports for fixtures.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -188,18 +188,24 @@ export const TOOLS = [
         collection: str('Collection slug: screen, channels or sports'),
         kind: str('Item kind: title, channel, fixture'),
         year: int('A year to prefer, when known'),
+        date: str('A day (YYYY-MM-DD) to look for a fixture on, plus a day either side'),
         limit: int('Default 5, max 50'),
       },
       required: ['q'],
     },
-    run: async ({ q: term, collection, kind, year, limit }) => {
+    run: async ({ q: term, collection, kind, year, date, limit }) => {
       const col = collection ? await q.getCollection(collection) : null;
       if (collection && !col) throw toolError(`No collection named ${collection}`);
       const parsed = parseName(String(term));
+      const sports = !col || col.slug === 'sports' || kind === 'fixture';
       const items = await q.matchItems(parsed.name, {
         collectionId: col?.id ?? null,
         kind: kind ?? null,
         year: Number(year) || parsed.year || null,
+        teams: sports ? parsed.teams : null,
+        league: parsed.league,
+        date: /^\d{4}-\d{2}-\d{2}$/.test(String(date ?? '')) ? date : null,
+        fallback: cleanChannelName(String(term)),
         limit: Math.min(Number(limit) || 5, 50),
       });
       return {
