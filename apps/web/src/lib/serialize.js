@@ -30,6 +30,11 @@ export function itemOut(i, siteUrl, { enrichers = null } = {}) {
     source: i.source_slug,
     adapter: i.adapter,
     kind: i.kind,
+    // The upstream's own id, so a site mirroring the collection keeps the
+    // key it always had rather than parsing one out of the URL; and when the
+    // row last changed, so a mirror can advance its cursor from the page.
+    external_id: i.external_id,
+    updated_at: i.updated_at,
     title: i.title,
     summary: i.summary,
     url: i.url,
