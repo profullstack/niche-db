@@ -118,6 +118,8 @@ export const config = {
     sportsProxyUrl: opt('SPORTS_PROXY_URL'),
     /** Live Tennis API, which owns tennis: 100 requests a day on the free plan. */
     livetennisApiKey: opt('LIVETENNIS_API_KEY'),
+    /** TheSportsDB, for TV listings. The shared key '3' works but returns one row per query. */
+    sportsdbApiKey: opt('SPORTSDB_API_KEY', '3'),
     igdbClientId: opt('IGDB_CLIENT_ID'),
     igdbClientSecret: opt('IGDB_CLIENT_SECRET'),
     githubToken: opt('GITHUB_TOKEN'),

@@ -72,6 +72,25 @@ linescores, team stats, leaders, officials, duration, attendance, article
 and closing odds. A mirror inserts plays on `(event, play id)` and never
 deletes, since a live item is the tail of the log.
 
+### TV listings
+
+Kind `broadcast`, one item per (event, channel, market) from TheSportsDB's
+day listings (`sportsdb-tv`, every 3 h, 14 days ahead; one request a day on a
+paid key, one per sport and day on the shared key). ESPN's own broadcast field
+is US-only, so this is where "7 Queensland" for an AFL game comes from.
+
+| kind | externalId | title | publishedAt | tags |
+|---|---|---|---|---|
+| broadcast | `sportsdb:tv:<eventId>:<channel>:<country>:<date>` | Home vs Away on Channel | listing time | `broadcast`, `<sport>`, `date:YYYY-MM-DD`, `country:<slug>`, `channel:<slug>` |
+
+```
+{ provider:'thesportsdb', sport, sportName, league, home, away, event, channel,
+  channelId, country, logo, starts_at, timeKnown, date, eventId, listingId }
+```
+A mirror matches `home`/`away` against its own fixtures by team name, in both
+orders and on the day before as well, since the two providers disagree about
+which calendar day a late kickoff belongs to.
+
 ## `screen` (from genrewatch's TMDB, TVmaze, AniList and IMDb providers)
 
 Kinds: `title`, `release`.

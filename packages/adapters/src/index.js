@@ -62,6 +62,7 @@ import { rogueIncidents, rogueResearch } from './rogueaitracker.js';
 import { rssamplifier } from './rssamplifier.js';
 import { scryfallCards, scryfallSets } from './scryfall.js';
 import { socrataCrime } from './socratacrime.js';
+import { sportsdbTv } from './sportsdb.js';
 import { statuspage } from './statuspage.js';
 import { steam, steamNews } from './steam.js';
 import { nwsSurfZone } from './surfzone.js';
@@ -162,6 +163,7 @@ export const ADAPTERS = [
   espnLive,
   espnPlays,
   livetennis,
+  sportsdbTv,
   // Screen: films, TV and anime, and the IMDb ratings behind 400k titles.
   tmdbReleases,
   tvmazeSchedule,

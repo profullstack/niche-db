@@ -13,6 +13,7 @@ function envFor() {
     tmdbApiKey: config.adapters.tmdbApiKey,
     sportsProxyUrl: config.adapters.sportsProxyUrl,
     livetennisApiKey: config.adapters.livetennisApiKey,
+    sportsdbApiKey: config.adapters.sportsdbApiKey,
     igdbClientId: config.adapters.igdbClientId,
     igdbClientSecret: config.adapters.igdbClientSecret,
     githubToken: config.adapters.githubToken,
