@@ -140,6 +140,58 @@ describe('a matchup', () => {
     fixture('Lakers vs Celtics 1080p', ['Lakers', 'Celtics']);
   });
 
+  test('a channel number and a clock behind the label are neither the league nor a side', () => {
+    fixture(
+      'NFL 01: 8:20PM New England Patriots vs Seattle Seahawks',
+      ['New England Patriots', 'Seattle Seahawks'],
+      'NFL',
+    );
+    fixture(
+      'NFL 03: 8:15PM San Francisco 49ers vs Los Angeles Rams',
+      ['San Francisco 49ers', 'Los Angeles Rams'],
+      'NFL',
+    );
+    fixture('NFL 01: 8:20 PM ET Patriots vs Seahawks', ['Patriots', 'Seahawks'], 'NFL');
+    fixture('NFL 01: 8.20pm Patriots vs Seahawks', ['Patriots', 'Seahawks'], 'NFL');
+    fixture('NFL 01: 20:00 Patriots vs Seahawks', ['Patriots', 'Seahawks'], 'NFL');
+    // A channel with a number is not a league; a league with one keeps it.
+    fixture('ESPN+ 017: Rays vs Braves', ['Rays', 'Braves']);
+    fixture('Sky Sports 3: Arsenal v Chelsea', ['Arsenal', 'Chelsea']);
+    fixture('Ligue 1: PSG v Lyon', ['PSG', 'Lyon'], 'Ligue 1');
+  });
+
+  test('the stamps and tags a playlist appends are not a release year', () => {
+    fixture(
+      'US (ESPN+ 017) | MLB: Rays vs. Braves (ESP) (2026-09-10 11:30:10)',
+      ['Rays', 'Braves'],
+      'MLB',
+    );
+    fixture(
+      'US (ESPN+ 014) | American Conference: Alcorn St vs. Memphis (2026-09-10 11:01:00)',
+      ['Alcorn St', 'Memphis'],
+      'American Conference',
+    );
+    fixture('Rays vs Braves (2026-09-10)', ['Rays', 'Braves']);
+    fixture('Rays vs Braves (11:30)', ['Rays', 'Braves']);
+    fixture('Rays vs Braves (ENG) (HD)', ['Rays', 'Braves']);
+    fixture('Rays vs Braves (Español)', ['Rays', 'Braves']);
+    // A year alone is a title, and the sides are still read.
+    expect(parseName('Alien vs Predator (2004)')).toMatchObject({
+      name: 'Alien vs Predator',
+      year: 2004,
+      kind: 'movie',
+      teams: ['Alien', 'Predator'],
+      league: null,
+    });
+    // Unless a league says it is a season, not a release.
+    expect(parseName('MLB: Rays vs Braves (2026)')).toMatchObject({
+      kind: 'fixture',
+      year: 2026,
+      teams: ['Rays', 'Braves'],
+      league: 'MLB',
+    });
+  });
+
   test('a dash is a separator only when both sides look like teams', () => {
     fixture('Arsenal - Chelsea', ['Arsenal', 'Chelsea']);
     fixture('EPL - Arsenal - Chelsea', ['Arsenal', 'Chelsea'], 'EPL');

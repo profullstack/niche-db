@@ -348,7 +348,9 @@ export function registerApi(app) {
       teams: sports ? parsed.teams : null,
       league: parsed.league,
       date,
-      fallback: cleanChannelName(raw),
+      // A matchup that finds no fixture is matched again as the name was
+      // written; a title keeps its cleaned name.
+      fallback: parsed.kind === 'fixture' ? cleanChannelName(raw) : null,
       limit: lim(c.req.query('limit'), 5, 50),
     });
     c.header('cache-control', 'public, max-age=300');

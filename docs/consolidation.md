@@ -157,9 +157,13 @@ the best items for a name, by trigram similarity on `title`, each with a `score`
 This is what nixamp asks with a file name or a playlist entry's name.
 
 A matchup name ("NFL: Chiefs vs Bills", "Lakers @ Celtics", "Arsenal v Chelsea",
-"Rangers at Celtic 19:45") parses as kind `fixture` with `teams: [A, B]` and
-`league` (the label in front, or null), and is answered by team rather than by
-title: every fixture kicking off between 36 hours ago and 7 days ahead (or on
+"Rangers at Celtic 19:45", "NFL 01: 8:20PM Patriots vs Seahawks", "US (ESPN+ 017)
+| MLB: Rays vs. Braves (ESP) (2026-09-10 11:30:10)") parses as kind `fixture`
+with `teams: [A, B]` and `league` (the label in front with any channel number
+dropped, or null for a channel name or a country code); the clocks, stamps and
+tags a playlist adds are not a release year, though a year alone, "(2004)", still
+makes a title (which keeps `teams`, so a fixture is tried first). It is answered
+by team rather than by title: every fixture kicking off between 36 hours ago and 7 days ahead (or on
 `date=YYYY-MM-DD` plus a day either side) whose title or abbreviation is near
 either side is scored by whether each side equals, whole-word-contains or is
 contained by `data.home`/`data.away`'s `displayName`, `name` or `abbreviation`

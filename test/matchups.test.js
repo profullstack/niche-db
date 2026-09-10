@@ -204,6 +204,25 @@ describe('a side against a team', () => {
     expect(sideMatchesTeam('LA Lakers', LAKERS)).toBe(true);
     expect(sideMatchesTeam('Chelsea FC', CHELSEA)).toBe(true);
   });
+
+  test('St and State, Univ and University, Utd and United meet whichever way each was written', () => {
+    const alcorn = team('Braves', 'Alcorn State Braves', 'ALCN');
+    expect(sideMatchesTeam('Alcorn St', alcorn)).toBe(true);
+    expect(sideMatchesTeam('Alcorn State', alcorn)).toBe(true);
+    expect(sideMatchesTeam('Alcorn St.', alcorn)).toBe(true);
+    expect(sideMatchesTeam('Alcorn St', team('Braves', 'Atlanta Braves', 'ATL'))).toBe(false);
+    expect(sideMatchesTeam('St Louis', team('Cardinals', 'St. Louis Cardinals', 'STL'))).toBe(true);
+    expect(sideMatchesTeam('Saint Louis', team('Cardinals', 'St. Louis Cardinals', 'STL'))).toBe(
+      true,
+    );
+    expect(
+      sideMatchesTeam('Boston Univ', team('Terriers', 'Boston University Terriers', 'BU')),
+    ).toBe(true);
+    expect(sideMatchesTeam('Manchester United', team('Man Utd', 'Man Utd', 'MAN'))).toBe(true);
+    expect(sideMatchesTeam('Newcastle Utd', team('Newcastle', 'Newcastle United', 'NEW'))).toBe(
+      true,
+    );
+  });
 });
 
 describe('scoring a fixture', () => {

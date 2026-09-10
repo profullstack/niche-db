@@ -68,6 +68,37 @@ const WHEN = `(?:${TIME}|${WEEKDAY}|${DATE}|live|hd|fhd|uhd|4k|sd|\\d{3,4}[pi]|t
 const TRAILING_WHEN = new RegExp(String.raw`[\s,|@()-]+${WHEN}\s*$`, 'i');
 const LEADING_WHEN = new RegExp(String.raw`^${WHEN}[\s,|@:()-]+(?=\S)`, 'i');
 
+/**
+ * What a playlist hangs on the end of an event name: "(ESP) (2026-09-10
+ * 11:30:10)", "(HD)", "(20:00)", or a bare stamp. A year on its own, "(2004)",
+ * is how a title is written and stays.
+ */
+const TRAILING_EVENT_TAG =
+  /\s*\((?:\d{4}-\d{2}-\d{2}(?:[ T]\d{1,2}:\d{2}(?::\d{2})?)?|\d{1,2}[:.]\d{2}(?::\d{2})?\s*(?:[ap]\.?m\.?)?(?:\s*[a-z]{2,4})?|\d{3,4}[pi]|\p{L}{2,10}\+?)\)\s*$/iu;
+const TRAILING_EVENT_STAMP = /\s+\d{4}-\d{2}-\d{2}(?:[ T]\d{1,2}:\d{2}(?::\d{2})?)?\s*$/;
+
+/** The name without the stamps and tags a playlist appends to an event. */
+export function stripEventTags(raw) {
+  let s = String(raw ?? '').trim();
+  for (let i = 0; i < 6; i++) {
+    const next = s.replace(TRAILING_EVENT_TAG, '').replace(TRAILING_EVENT_STAMP, '').trim();
+    if (next === s) break;
+    s = next;
+  }
+  return s;
+}
+
+/** A clock, a day or a decoration at either end, taken off until none is left. */
+const stripWhen = (text) => {
+  let s = text;
+  for (let i = 0; i < 4; i++) {
+    const next = s.replace(TRAILING_WHEN, '').replace(LEADING_WHEN, '').trim();
+    if (next === s) break;
+    s = next;
+  }
+  return s;
+};
+
 const SIDE_SEPARATOR = /\s+(?:vs\.?|v\.?|at|@)\s+/i;
 const DASH_SEPARATOR = /\s+[-–—]\s+/;
 /** "NFL: ", "NBA | ": a short label before a colon or a bar. */
@@ -103,10 +134,21 @@ const looksLikeTeam = (side) => {
   return !quality;
 };
 
-/** The league label as written, upper-cased when it is an acronym; null for a country code. */
+/** A label that names the channel carrying the game, not the league: "ESPN+ 017", "Sky Sports 3". */
+const CHANNEL_LABEL =
+  /\b(sports?|tv|channel|espn|sky|fox|tnt|bein|dazn|tsn|bt|hd|fhd|uhd|4k|live|feed)\b|\+/i;
+
+/**
+ * The league label as written, upper-cased when it is an acronym. A trailing
+ * channel number comes off ("NFL 01" is NFL; "Ligue 1" keeps its single
+ * digit); a country code, a bare number or a channel name is no league.
+ */
 const leagueOf = (label) => {
-  const s = label.trim().replace(/\s+/g, ' ');
-  if (!s || COUNTRY_CODE.test(s)) return null;
+  const s = label
+    .trim()
+    .replace(/\s+/g, ' ')
+    .replace(/\s+\d{2,4}$/, '');
+  if (!s || COUNTRY_CODE.test(s) || /^\d+$/.test(s) || CHANNEL_LABEL.test(s)) return null;
   return /^[a-z0-9]{2,5}$/i.test(s) ? s.toUpperCase() : s;
 };
 
@@ -128,18 +170,16 @@ export function parseMatchup(raw) {
     .replace(/\s+/g, ' ')
     .trim();
   if (!s) return null;
-  for (let i = 0; i < 4; i++) {
-    const next = s.replace(TRAILING_WHEN, '').replace(LEADING_WHEN, '').trim();
-    if (next === s) break;
-    s = next;
-  }
+  s = stripWhen(s);
   let league = null;
   // "US: NFL: Chiefs vs Bills": the last label before the sides is the league.
+  // "NFL 01: 8:20PM Patriots vs Seahawks": the clock behind a label is a
+  // clock, not the next label, so it comes off before the next one is read.
   for (let i = 0; i < 3; i++) {
     const m = s.match(LEAGUE_COLON);
     if (!m) break;
     league = leagueOf(m[1]) ?? league;
-    s = s.slice(m[0].length);
+    s = stripWhen(s.slice(m[0].length));
   }
   // "EPL - Arsenal v Chelsea", "EPL - Arsenal - Chelsea": a label before a
   // dash is the league only when what follows is still a matchup; "Arsenal -
@@ -233,7 +273,9 @@ export function cleanChannelName(raw) {
  * A matchup ("NFL: Chiefs vs Bills", "Rangers at Celtic 19:45") is a fixture:
  * `teams` holds the two sides as written and `league` the label in front of
  * them when there was one, so the match can score by team rather than by
- * title.
+ * title. The stamps a playlist appends, "(ESP) (2026-09-10 11:30:10)", are not
+ * a release year. A year on its own, "Alien vs Predator (2004)", is a title,
+ * and still carries `teams` so a fixture is tried before the title is.
  *
  * @returns {{ raw: string, name: string, year: number|null, season: number|null,
  *   episode: number|null, kind: 'movie'|'series'|'channel'|'music'|'fixture'|'other',
@@ -241,7 +283,9 @@ export function cleanChannelName(raw) {
  */
 export function parseName(raw) {
   const text = String(raw ?? '').trim();
-  const year = extractYear(text);
+  // "(2026-09-10 11:30:10)" behind an event is a stamp, not a release year.
+  const bare = stripEventTags(text);
+  const year = extractYear(bare);
   let season = null;
   let episode = null;
   for (const re of EPISODE) {
@@ -264,11 +308,8 @@ export function parseName(raw) {
   const series = season !== null || episode !== null || /\bcomplete\s+series\b/i.test(text);
   // A year, a file ending or a codec makes a release. A bare resolution does
   // not: a playlist writes "TF1 (720p)" and means the channel, not a rip.
-  const releaseLike =
-    series ||
-    year !== null ||
-    EXTENSIONS.test(text) ||
-    /\b(x264|x265|hevc|web-?dl|webrip|bluray|bdrip|brrip|hdtv|dvdrip|remux)\b/i.test(text);
+  const codec = /\b(x264|x265|hevc|web-?dl|webrip|bluray|bdrip|brrip|hdtv|dvdrip|remux)\b/i;
+  const releaseLike = series || year !== null || EXTENSIONS.test(bare) || codec.test(bare);
   const music =
     /\b(flac|320kbps|discography|album|ost|soundtrack|\.mp3)\b/i.test(text) ||
     /\.(mp3|flac|m4a|aac|ogg|opus|wav)$/i.test(text);
@@ -277,12 +318,27 @@ export function parseName(raw) {
   let kind;
   let teams = null;
   let league = null;
-  const matchup = releaseLike || music ? null : parseMatchup(text);
+  // A year alone in parentheses is how a title is written, but the sides are
+  // still read, so "MLB: Rays vs Braves (2026)" is a fixture and "Alien vs
+  // Predator (2004)" a title that a fixture is looked for first.
+  const yearOnly =
+    releaseLike &&
+    !series &&
+    /\((19|20)\d{2}\)/.test(bare) &&
+    !EXTENSIONS.test(bare) &&
+    !codec.test(bare);
+  let matchup = null;
+  if (!music && !series) {
+    if (!releaseLike) matchup = parseMatchup(bare);
+    else if (yearOnly) matchup = parseMatchup(bare.replace(/\((19|20)\d{2}\)/g, ' '));
+  }
   if (matchup) {
-    name = matchup.name;
-    kind = 'fixture';
     teams = matchup.teams;
     league = matchup.league;
+  }
+  if (matchup && (!releaseLike || matchup.league)) {
+    name = matchup.name;
+    kind = 'fixture';
   } else if (releaseLike || music) {
     name = cleanReleaseName(text);
     if (year !== null) name = name.replace(new RegExp(`\\b${year}\\b`), '').trim();
