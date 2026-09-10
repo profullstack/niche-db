@@ -101,8 +101,11 @@ const stripWhen = (text) => {
 
 const SIDE_SEPARATOR = /\s+(?:vs\.?|v\.?|at|@)\s+/i;
 const DASH_SEPARATOR = /\s+[-–—]\s+/;
-/** "NFL: ", "NBA | ": a short label before a colon or a bar. */
-const LEAGUE_COLON = /^([\p{L}\p{N}][\p{L}\p{N} .&'+]{0,24}?)\s*[:|]\s*(?=\S)/u;
+/**
+ * "NFL: ", "NBA | ", "United Athletic Conference: ": a label before a colon or
+ * a bar, whatever its words; long enough for a college conference.
+ */
+const LEAGUE_COLON = /^([\p{L}\p{N}][\p{L}\p{N} .&'+-]{0,59}?)\s*[:|]\s*(?=\S)/u;
 /** "EPL - Arsenal v Chelsea": a label before a dash, only when a matchup follows. */
 const LEAGUE_DASH = /^([\p{L}\p{N}][\p{L}\p{N} .&'+]{0,24}?)\s+[-–—]\s+(?=\S)/u;
 /** "NFL Chiefs vs Bills": a bare league word, only when it is one everyone knows. */
