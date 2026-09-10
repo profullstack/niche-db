@@ -140,6 +140,37 @@ describe('a matchup', () => {
     fixture('Lakers vs Celtics 1080p', ['Lakers', 'Celtics']);
   });
 
+  test('a label before a colon is peeled whatever its words and length', () => {
+    fixture(
+      'US (ESPN+ 020) | United Athletic Conference: Sam Houston vs. Tarleton St (2026-09-10 12:00:10)',
+      ['Sam Houston', 'Tarleton St'],
+      'United Athletic Conference',
+    );
+    fixture('UK | Premier League: Man Utd vs Man City', ['Man Utd', 'Man City'], 'Premier League');
+    fixture(
+      'Big 12 Conference: Kansas St at Texas Tech',
+      ['Kansas St', 'Texas Tech'],
+      'Big 12 Conference',
+    );
+    fixture(
+      'Mid-American Conference: Toledo at Ohio',
+      ['Toledo', 'Ohio'],
+      'Mid-American Conference',
+    );
+    fixture(
+      'Southwestern Athletic Conference: Alcorn St vs Jackson St',
+      ['Alcorn St', 'Jackson St'],
+      'Southwestern Athletic Conference',
+    );
+    // A word the label shares with a team name does not make it a side.
+    fixture('Athletic Club vs Real Madrid', ['Athletic Club', 'Real Madrid']);
+    fixture(
+      'United Athletic Conference: Sam Houston vs. Tarleton St',
+      ['Sam Houston', 'Tarleton St'],
+      'United Athletic Conference',
+    );
+  });
+
   test('a channel number and a clock behind the label are neither the league nor a side', () => {
     fixture(
       'NFL 01: 8:20PM New England Patriots vs Seattle Seahawks',
