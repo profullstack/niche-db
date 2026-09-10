@@ -1,12 +1,13 @@
 {
   "name": "@nichedb/core",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "private": true,
   "type": "module",
   "exports": {
     ".": "./src/index.js",
     "./adapter": "./src/adapter.js",
-    "./http": "./src/http.js"
+    "./http": "./src/http.js",
+    "./names": "./src/names.js"
   },
   "dependencies": {
     "@nichedb/adapters": "workspace:*",

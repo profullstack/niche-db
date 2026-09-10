@@ -1,0 +1,368 @@
+{
+  "leagues": [
+    {
+      "id": "28",
+      "name": "National Football League",
+      "abbreviation": "NFL",
+      "slug": "nfl",
+      "logos": [
+        {
+          "href": "https://a.espncdn.com/i/teamlogos/leagues/500/nfl.png"
+        }
+      ]
+    }
+  ],
+  "events": [
+    {
+      "id": "401872657",
+      "date": "2026-09-11T00:35Z",
+      "name": "San Francisco 49ers at Los Angeles Rams",
+      "shortName": "SF VS LAR",
+      "status": {
+        "clock": 0,
+        "displayClock": "0:00",
+        "period": 0,
+        "type": {
+          "id": "1",
+          "name": "STATUS_SCHEDULED",
+          "state": "pre",
+          "completed": false,
+          "description": "Scheduled",
+          "detail": "Thu, September 10th at 8:35 PM EDT",
+          "shortDetail": "9/10 - 8:35 PM EDT"
+        }
+      },
+      "links": [
+        {
+          "rel": [
+            "summary",
+            "desktop",
+            "event"
+          ],
+          "href": "https://www.espn.com/nfl/game/_/gameId/401872657/49ers-rams"
+        }
+      ],
+      "competitions": [
+        {
+          "id": "401872657",
+          "date": "2026-09-11T00:35Z",
+          "attendance": 0,
+          "timeValid": true,
+          "neutralSite": true,
+          "venue": {
+            "id": "9119",
+            "fullName": "Melbourne Cricket Ground",
+            "address": {
+              "city": "Melbourne",
+              "state": "VIC",
+              "country": "Australia"
+            },
+            "indoor": false
+          },
+          "competitors": [
+            {
+              "id": "14",
+              "homeAway": "home",
+              "score": "0",
+              "records": [
+                {
+                  "name": "overall",
+                  "type": "total",
+                  "summary": "0-0"
+                }
+              ],
+              "team": {
+                "id": "14",
+                "location": "Los Angeles",
+                "name": "Rams",
+                "abbreviation": "LAR",
+                "displayName": "Los Angeles Rams",
+                "shortDisplayName": "Rams",
+                "color": "003594",
+                "logo": "https://a.espncdn.com/i/teamlogos/nfl/500/scoreboard/lar.png",
+                "links": [
+                  {
+                    "rel": [
+                      "clubhouse",
+                      "desktop",
+                      "team"
+                    ],
+                    "href": "https://www.espn.com/nfl/team/_/name/lar/los-angeles-rams"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "25",
+              "homeAway": "away",
+              "score": "0",
+              "records": [
+                {
+                  "name": "overall",
+                  "type": "total",
+                  "summary": "0-0"
+                }
+              ],
+              "team": {
+                "id": "25",
+                "location": "San Francisco",
+                "name": "49ers",
+                "abbreviation": "SF",
+                "displayName": "San Francisco 49ers",
+                "shortDisplayName": "49ers",
+                "color": "aa0000",
+                "logo": "https://a.espncdn.com/i/teamlogos/nfl/500/scoreboard/sf.png",
+                "links": [
+                  {
+                    "rel": [
+                      "clubhouse",
+                      "desktop",
+                      "team"
+                    ],
+                    "href": "https://www.espn.com/nfl/team/_/name/sf/san-francisco-49ers"
+                  }
+                ]
+              }
+            }
+          ],
+          "status": {
+            "clock": 0,
+            "displayClock": "0:00",
+            "period": 0,
+            "type": {
+              "id": "1",
+              "name": "STATUS_SCHEDULED",
+              "state": "pre",
+              "completed": false,
+              "description": "Scheduled",
+              "detail": "Thu, September 10th at 8:35 PM EDT",
+              "shortDetail": "9/10 - 8:35 PM EDT"
+            },
+            "isTBDFlex": false
+          },
+          "broadcasts": [
+            {
+              "market": "national",
+              "names": [
+                "Netflix"
+              ]
+            }
+          ],
+          "odds": [
+            {
+              "provider": {
+                "id": "100",
+                "name": "DraftKings",
+                "priority": 1
+              },
+              "details": "LAR -3.5",
+              "overUnder": 48.5,
+              "spread": -3.5,
+              "awayTeamOdds": {
+                "favorite": false,
+                "underdog": true
+              },
+              "homeTeamOdds": {
+                "favorite": true,
+                "underdog": false
+              },
+              "moneyline": {
+                "home": {
+                  "close": {
+                    "odds": "-198"
+                  },
+                  "open": {
+                    "odds": "-155"
+                  }
+                },
+                "away": {
+                  "close": {
+                    "odds": "+164"
+                  },
+                  "open": {
+                    "odds": "+130"
+                  }
+                }
+              },
+              "pointSpread": {
+                "home": {
+                  "close": {
+                    "line": "-3.5"
+                  },
+                  "open": {
+                    "line": "-2.5"
+                  }
+                },
+                "away": {
+                  "close": {
+                    "line": "+3.5"
+                  },
+                  "open": {
+                    "line": "+2.5"
+                  }
+                }
+              },
+              "total": {
+                "over": {
+                  "close": {
+                    "line": "o48.5"
+                  },
+                  "open": {
+                    "line": "o48.5"
+                  }
+                },
+                "under": {
+                  "close": {
+                    "line": "u48.5"
+                  },
+                  "open": {
+                    "line": "u48.5"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "401872656",
+      "date": "2026-09-10T00:20Z",
+      "name": "New England Patriots at Seattle Seahawks",
+      "shortName": "NE @ SEA",
+      "status": {
+        "clock": 0,
+        "displayClock": "0:00",
+        "period": 4,
+        "type": {
+          "id": "3",
+          "name": "STATUS_FINAL",
+          "state": "post",
+          "completed": true,
+          "description": "Final",
+          "detail": "Final",
+          "shortDetail": "Final"
+        }
+      },
+      "links": [
+        {
+          "rel": [
+            "summary",
+            "desktop",
+            "event"
+          ],
+          "href": "https://www.espn.com/nfl/game/_/gameId/401872656/patriots-seahawks"
+        }
+      ],
+      "competitions": [
+        {
+          "id": "401872656",
+          "date": "2026-09-10T00:20Z",
+          "attendance": 68744,
+          "timeValid": true,
+          "neutralSite": false,
+          "venue": {
+            "id": "3673",
+            "fullName": "Lumen Field",
+            "address": {
+              "city": "Seattle",
+              "state": "WA",
+              "country": "USA"
+            },
+            "indoor": false
+          },
+          "competitors": [
+            {
+              "id": "26",
+              "homeAway": "home",
+              "score": "13",
+              "records": [
+                {
+                  "name": "overall",
+                  "type": "total",
+                  "summary": "1-0"
+                }
+              ],
+              "team": {
+                "id": "26",
+                "location": "Seattle",
+                "name": "Seahawks",
+                "abbreviation": "SEA",
+                "displayName": "Seattle Seahawks",
+                "shortDisplayName": "Seahawks",
+                "color": "002a5c",
+                "logo": "https://a.espncdn.com/i/teamlogos/nfl/500/scoreboard/sea.png",
+                "links": [
+                  {
+                    "rel": [
+                      "clubhouse",
+                      "desktop",
+                      "team"
+                    ],
+                    "href": "https://www.espn.com/nfl/team/_/name/sea/seattle-seahawks"
+                  }
+                ]
+              }
+            },
+            {
+              "id": "17",
+              "homeAway": "away",
+              "score": "10",
+              "records": [
+                {
+                  "name": "overall",
+                  "type": "total",
+                  "summary": "0-1"
+                }
+              ],
+              "team": {
+                "id": "17",
+                "location": "New England",
+                "name": "Patriots",
+                "abbreviation": "NE",
+                "displayName": "New England Patriots",
+                "shortDisplayName": "Patriots",
+                "color": "002a5c",
+                "logo": "https://a.espncdn.com/i/teamlogos/nfl/500/scoreboard/ne.png",
+                "links": [
+                  {
+                    "rel": [
+                      "clubhouse",
+                      "desktop",
+                      "team"
+                    ],
+                    "href": "https://www.espn.com/nfl/team/_/name/ne/new-england-patriots"
+                  }
+                ]
+              }
+            }
+          ],
+          "status": {
+            "clock": 0,
+            "displayClock": "0:00",
+            "period": 4,
+            "type": {
+              "id": "3",
+              "name": "STATUS_FINAL",
+              "state": "post",
+              "completed": true,
+              "description": "Final",
+              "detail": "Final",
+              "shortDetail": "Final"
+            },
+            "isTBDFlex": false
+          },
+          "broadcasts": [
+            {
+              "market": "national",
+              "names": [
+                "NBC"
+              ]
+            }
+          ],
+          "odds": []
+        }
+      ]
+    }
+  ]
+}

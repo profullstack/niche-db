@@ -14,7 +14,7 @@ import { homedir } from 'node:os';
 import { join } from 'node:path';
 import { createInterface } from 'node:readline';
 
-export const VERSION = '0.5.1';
+export const VERSION = '0.6.0';
 const DEFAULT_API = process.env.NICHEDB_API ?? 'https://nichedb.dev';
 const CONFIG_DIR = join(process.env.XDG_CONFIG_HOME ?? join(homedir(), '.config'), 'nichedb');
 const CONFIG_FILE = join(CONFIG_DIR, 'config.json');
@@ -86,9 +86,30 @@ export const COMMANDS = [
   },
   {
     name: 'recent',
-    usage: 'recent [--collection …] [--source …] [--kind …]',
-    summary: 'Newest items across a collection or source.',
-    options: ['--collection', '--source', '--kind', '--limit', '--json', '--urls'],
+    usage:
+      'recent [--collection …] [--source …] [--kind …] [--tags a,b] [--from …] [--to …] [--since …] [--sort id|published|updated]',
+    summary:
+      'Newest items across a collection or source, or a window of them, or what changed since.',
+    options: [
+      '--collection',
+      '--source',
+      '--kind',
+      '--tags a,b (every one must be on the item)',
+      '--from / --to (ISO, on published_at)',
+      '--since (ISO, on updated_at)',
+      '--sort id|published|updated',
+      '--order asc|desc',
+      '--limit',
+      '--json',
+      '--urls',
+    ],
+  },
+  {
+    name: 'match',
+    usage: 'match <name> [--collection …] [--kind …] [--year …] [--tags a,b]',
+    summary:
+      'Which title, channel or fixture is this name? A release name or a playlist entry, cleaned and matched by similarity.',
+    options: ['--collection', '--kind', '--year', '--tags', '--limit', '--json', '--urls'],
   },
   {
     name: 'upcoming',
@@ -496,10 +517,44 @@ export async function run(
     }
     case 'recent': {
       const qs = new URLSearchParams();
-      for (const k of ['collection', 'source', 'kind', 'limit', 'before'])
+      for (const k of [
+        'collection',
+        'source',
+        'kind',
+        'tags',
+        'from',
+        'to',
+        'since',
+        'sort',
+        'order',
+        'limit',
+        'before',
+        'after',
+      ])
         if (flags[k]) qs.set(k, flags[k]);
       const { items } = await client.get(`/api/v1/items?${qs}`);
       printItems(items, { json, urls: flags.urls });
+      return 0;
+    }
+    case 'match': {
+      const name = rest.join(' ');
+      if (!name) throw new Error('match <name>');
+      const qs = new URLSearchParams({ q: name });
+      for (const k of ['collection', 'kind', 'year', 'tags', 'limit'])
+        if (flags[k]) qs.set(k, flags[k]);
+      const answer = await client.get(`/api/v1/match?${qs}`);
+      if (json) {
+        console.log(JSON.stringify(answer, null, 2));
+        return 0;
+      }
+      const p = answer.parsed;
+      console.log(
+        `read as: ${p.name}${p.year ? ` (${p.year})` : ''}${p.season ? ` S${p.season}` : ''}${p.episode ? `E${p.episode}` : ''} · ${p.kind}`,
+      );
+      printItems(
+        answer.items.map((i) => ({ ...i, title: `${(i.score * 100).toFixed(0)}%  ${i.title}` })),
+        { json: false, urls: flags.urls },
+      );
       return 0;
     }
     case 'upcoming': {

@@ -1,0 +1,97 @@
+{
+  "leagues": [
+    {
+      "id": "851",
+      "name": "ATP Tour",
+      "abbreviation": "ATP",
+      "slug": "atp",
+      "logos": [{ "href": "https://a.espncdn.com/i/teamlogos/leagues/500/atp.png" }]
+    }
+  ],
+  "events": [
+    {
+      "id": "718-2026",
+      "date": "2026-08-11T04:00Z",
+      "name": "Cincinnati Open",
+      "shortName": "Cincinnati",
+      "status": { "type": { "state": "post", "shortDetail": "Final" } },
+      "venue": { "displayName": "Lindner Family Tennis Center" },
+      "groupings": [
+        {
+          "grouping": { "slug": "mens-singles", "displayName": "Men's Singles" },
+          "competitions": [
+            {
+              "id": "184414",
+              "date": "2026-08-11T16:05Z",
+              "timeValid": true,
+              "status": { "type": { "state": "post", "shortDetail": "Final" }, "period": 3 },
+              "venue": { "fullName": "Cincinnati, USA", "court": "Court 9" },
+              "competitors": [
+                {
+                  "id": "4030",
+                  "type": "athlete",
+                  "order": 2,
+                  "athlete": {
+                    "displayName": "Dane Sweeny",
+                    "shortName": "D. Sweeny",
+                    "flag": { "href": "https://a.espncdn.com/i/teamlogos/countries/500/aus.png" }
+                  },
+                  "linescores": [{ "winner": false }, { "winner": true }, { "winner": false }]
+                },
+                {
+                  "id": "3301",
+                  "type": "athlete",
+                  "order": 1,
+                  "athlete": { "displayName": "Christopher O'Connell", "shortName": "C. O'Connell" },
+                  "linescores": [{ "winner": true }, { "winner": false }, { "winner": true }]
+                }
+              ]
+            },
+            {
+              "id": "999999",
+              "date": "2026-08-30T04:00Z",
+              "timeValid": false,
+              "status": { "type": { "state": "pre" } },
+              "competitors": [
+                { "id": "-3", "order": 1, "athlete": { "displayName": "TBD" } },
+                { "id": "-4", "order": 2, "athlete": { "displayName": "TBD" } }
+              ]
+            }
+          ]
+        },
+        {
+          "grouping": { "slug": "womens-doubles", "displayName": "Women's Doubles" },
+          "competitions": [
+            {
+              "id": "182450",
+              "date": "2026-08-16T15:05Z",
+              "status": { "type": { "state": "post" } },
+              "competitors": [
+                {
+                  "id": "1652-3970",
+                  "type": "team",
+                  "order": 2,
+                  "homeAway": "away",
+                  "roster": {
+                    "displayName": "Ulrikke Eikeri / Quinn Gleason",
+                    "shortDisplayName": "U. Eikeri / Q. Gleason",
+                    "athletes": [{ "flag": { "href": "https://a.espncdn.com/i/teamlogos/countries/500/nor.png" } }]
+                  },
+                  "linescores": [{ "winner": true }, { "winner": false }, { "winner": true }]
+                },
+                {
+                  "id": "5000-6000",
+                  "type": "team",
+                  "order": 1,
+                  "homeAway": "home",
+                  "roster": { "displayName": "A Player / B Player", "shortDisplayName": "A. P / B. P" },
+                  "linescores": [{ "winner": false }, { "winner": true }, { "winner": false }]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

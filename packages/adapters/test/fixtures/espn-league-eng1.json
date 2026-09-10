@@ -1,0 +1,17 @@
+{
+  "id": "700",
+  "name": "English Premier League",
+  "abbreviation": "Premier League",
+  "slug": "eng.1",
+  "logos": [
+    {
+      "href": "https://a.espncdn.com/i/leaguelogos/soccer/500/23.png"
+    }
+  ],
+  "country": {
+    "id": "31",
+    "slug": "england",
+    "name": "England",
+    "abbreviation": "ENG"
+  }
+}

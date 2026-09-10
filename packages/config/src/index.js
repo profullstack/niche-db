@@ -107,6 +107,15 @@ export const config = {
   },
 
   adapters: {
+    /** TMDB, for the screen collection's film calendar. Free, but a key. */
+    tmdbApiKey: opt('TMDB_API_KEY'),
+    /**
+     * ESPN answers a datacenter with 403, so on cloud egress the sports
+     * sources go through a residential proxy. Optional: unset means direct.
+     */
+    sportsProxyUrl: opt('SPORTS_PROXY_URL'),
+    /** Live Tennis API, which owns tennis: 100 requests a day on the free plan. */
+    livetennisApiKey: opt('LIVETENNIS_API_KEY'),
     igdbClientId: opt('IGDB_CLIENT_ID'),
     igdbClientSecret: opt('IGDB_CLIENT_SECRET'),
     githubToken: opt('GITHUB_TOKEN'),

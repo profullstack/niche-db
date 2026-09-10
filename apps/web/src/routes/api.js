@@ -1,5 +1,6 @@
 import { config } from '@nichedb/config';
 import { describeAdapters, describeEnrichers } from '@nichedb/core';
+import { parseName } from '@nichedb/core/names';
 import * as q from '@nichedb/db/queries';
 import { enqueueRun } from '@nichedb/queue';
 import { COMMANDS } from '@profullstack/nichedb';
@@ -297,15 +298,57 @@ export function registerApi(app) {
     const col = await collectionOrNull(c.req.query('collection'));
     const src = c.req.query('source') ? await q.getSource(c.req.query('source')) : null;
     if (c.req.query('source') && !src) return c.json({ error: 'no such source' }, 404);
+    const when = (v) => {
+      if (!v) return null;
+      const d = new Date(v);
+      return Number.isNaN(d.getTime()) ? null : d.toISOString();
+    };
+    const sort = ['id', 'published', 'updated'].includes(c.req.query('sort'))
+      ? c.req.query('sort')
+      : 'id';
     const items = await q.recentItems({
       collectionId: col?.id ?? null,
       sourceId: src?.id ?? null,
       kind: c.req.query('kind') ?? null,
+      // Facets a site's pages are made of: every tag named must be on the item.
+      tags: (c.req.query('tags') ?? '').split(',').filter(Boolean),
+      // When the thing happens, and when the row last changed.
+      from: when(c.req.query('from')),
+      to: when(c.req.query('to')),
+      since: when(c.req.query('since')),
+      sort,
+      order: c.req.query('order') === 'asc' ? 'asc' : 'desc',
       limit: lim(c.req.query('limit'), 50, 200),
       beforeId: Number(c.req.query('before')) || null,
+      afterId: Number(c.req.query('after')) || null,
     });
-    c.header('cache-control', 'public, max-age=60');
+    // A mirror asking "what changed since" must not be handed a stale page.
+    c.header('cache-control', c.req.query('since') ? 'no-store' : 'public, max-age=60');
     return c.json({ count: items.length, items: items.map((i) => itemOut(i, site())) });
+  });
+  app.get('/api/v1/match', async (c) => {
+    // The enrichment question: which title, channel or fixture is this name?
+    // A player asks it with a file name or a playlist entry; the name is
+    // cleaned here so every caller matches the same way.
+    const raw = (c.req.query('q') ?? '').trim();
+    if (!raw) return c.json({ error: 'q is required' }, 400);
+    const col = await collectionOrNull(c.req.query('collection'));
+    const parsed = parseName(raw);
+    const year = Number(c.req.query('year')) || parsed.year || null;
+    const items = await q.matchItems(parsed.name, {
+      collectionId: col?.id ?? null,
+      kind: c.req.query('kind') ?? null,
+      tags: (c.req.query('tags') ?? '').split(',').filter(Boolean),
+      year,
+      limit: lim(c.req.query('limit'), 5, 50),
+    });
+    c.header('cache-control', 'public, max-age=300');
+    return c.json({
+      q: raw,
+      parsed: { ...parsed, year },
+      count: items.length,
+      items: items.map((i) => ({ ...itemOut(i, site()), score: Number(i.score) })),
+    });
   });
   app.get('/api/v1/items/upcoming', async (c) => {
     const col = await collectionOrNull(c.req.query('collection'));
