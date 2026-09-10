@@ -205,7 +205,7 @@ export const TOOLS = [
         teams: sports ? parsed.teams : null,
         league: parsed.league,
         date: /^\d{4}-\d{2}-\d{2}$/.test(String(date ?? '')) ? date : null,
-        fallback: cleanChannelName(String(term)),
+        fallback: parsed.kind === 'fixture' ? cleanChannelName(String(term)) : null,
         limit: Math.min(Number(limit) || 5, 50),
       });
       return {

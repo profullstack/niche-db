@@ -62,6 +62,23 @@ const CLUB_WORDS = new Set([
   'as',
 ]);
 
+/**
+ * The short form both a side and a team name are brought to before they are
+ * compared, so "Alcorn St" meets "Alcorn State Braves" and "Man Utd" meets
+ * "Manchester United" whichever way round each was written.
+ */
+const SHORT = new Map([
+  ['state', 'st'],
+  ['saint', 'st'],
+  ['university', 'univ'],
+  ['united', 'utd'],
+  ['manchester', 'man'],
+  ['athletic', 'ath'],
+  ['atletico', 'atl'],
+  ['internazionale', 'inter'],
+  ['juventus', 'juve'],
+]);
+
 /** Lower case, diacritics folded, punctuation to spaces. */
 export function foldName(value) {
   return String(value ?? '')
@@ -86,6 +103,15 @@ export function expandSide(side) {
     .trim();
 }
 
+/** Folded, club suffixes dropped, long words shortened: what is compared. */
+export function canonName(value) {
+  return foldName(value)
+    .split(' ')
+    .filter((t) => t && !CLUB_WORDS.has(t))
+    .map((t) => SHORT.get(t) ?? t)
+    .join(' ');
+}
+
 const wholeWordIn = (needle, haystack) =>
   needle.length > 0 && ` ${haystack} `.includes(` ${needle} `);
 
@@ -97,16 +123,16 @@ const wholeWordIn = (needle, haystack) =>
  */
 export function sideMatchesTeam(side, team) {
   if (!team) return false;
-  const raw = foldName(side);
-  const expanded = expandSide(side);
+  const raw = canonName(side);
+  const expanded = canonName(expandSide(side));
   if (!raw) return false;
   // The abbreviation only ever matches whole: "MAN" is Manchester United, but
   // "Man City" is not.
   const abbreviation = foldName(team.abbreviation);
-  if (abbreviation && (abbreviation === raw || abbreviation === expanded)) return true;
+  if (abbreviation && (abbreviation === raw || abbreviation === foldName(side))) return true;
   const fields = [team.displayName, team.name, team.shortName, team.location]
     .filter(Boolean)
-    .map(foldName)
+    .map(canonName)
     .filter(Boolean);
   for (const f of fields) {
     if (f === raw || f === expanded) return true;
@@ -117,7 +143,7 @@ export function sideMatchesTeam(side, team) {
     if (raw.length >= 3 && wholeWordIn(f, raw)) return true;
     if (expanded.length >= 3 && wholeWordIn(f, expanded)) return true;
   }
-  const words = new Set(longFields.flatMap((f) => f.split(' ')).filter((w) => !CLUB_WORDS.has(w)));
+  const words = new Set(longFields.flatMap((f) => f.split(' ')));
   const tokens = expanded.split(' ').filter(Boolean);
   return (
     tokens.length > 0 && tokens.some((t) => t.length >= 4) && tokens.every((t) => words.has(t))
