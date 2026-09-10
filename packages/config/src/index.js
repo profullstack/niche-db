@@ -84,6 +84,8 @@ export const config = {
     tickSeconds: num('ENRICH_TICK_SECONDS', 90),
     /** Items considered per tick. Each enricher also caps itself per run. */
     perRun: num('ENRICH_PER_RUN', 40),
+    /** Of those, at most this many from any one collection, so a source that lands a thousand rows at once cannot starve the others. */
+    perCollection: num('ENRICH_PER_COLLECTION', 8),
     /** Optional: the YouTube Data API key; without it the public results page is read. */
     youtubeKey: opt('YOUTUBE_API_KEY'),
     /** Optional: Semantic Scholar key for a higher rate. */

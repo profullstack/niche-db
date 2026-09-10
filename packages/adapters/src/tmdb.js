@@ -47,6 +47,12 @@ export const DIGITAL = 4;
 /** TMDB refuses discover pages beyond 500 whatever the result count. */
 const MAX_PAGE = 500;
 
+/** How many names each provider list (`data.providers.stream|rent|buy`) carries. */
+export const MAX_PROVIDERS = 8;
+
+/** The empty answer, so `data.providers` has the same shape detailed or not. */
+export const NO_PROVIDERS = Object.freeze({ stream: [], rent: [], buy: [] });
+
 /** Genres TMDB carries that this collection files elsewhere. */
 const REROUTED = new Set(['tv movie']);
 
@@ -104,6 +110,33 @@ export function homeReleases(payload, { region = 'US' } = {}) {
   };
 }
 
+/**
+ * Where a film can be watched at home in one region, from a watch/providers
+ * payload (JustWatch, via TMDB): the subscription services it is included in, the
+ * shops that rent it, the shops that sell it. Names only, each list capped, order
+ * as TMDB gives it (their display priority).
+ *
+ * `stream` is `data.watch` without the six-name cap. Rent and buy are what a
+ * reader who is NOT subscribed anywhere wants to know, and what a "Rent or buy"
+ * release row can name.
+ *
+ * @returns {{stream: string[], rent: string[], buy: string[]}}
+ */
+export function watchProviders(payload, { region = 'US' } = {}) {
+  const country = payload?.results?.[region] ?? {};
+  const names = (list) =>
+    (Array.isArray(list) ? list : [])
+      .map((p) => (typeof p?.provider_name === 'string' ? p.provider_name.trim() : ''))
+      .filter(Boolean)
+      .slice(0, MAX_PROVIDERS);
+  return { stream: names(country.flatrate), rent: names(country.rent), buy: names(country.buy) };
+}
+
+/** Rent and buy shops as one list, each shop once, for a "Rent or buy" row. */
+export function rentOrBuyServices(providers) {
+  return [...new Set([...(providers?.rent ?? []), ...(providers?.buy ?? [])])];
+}
+
 /** Genre names for a movie, from a detail response or a discover row + table. */
 export function genreNames(m, genreById = new Map()) {
   const names = Array.isArray(m.genres)
@@ -126,15 +159,17 @@ export function detailOf(d, { region = 'US' } = {}) {
     (v) => v.type === 'Trailer' && v.site === 'YouTube' && v.key,
   );
   const trailer = vids.find((v) => v.official) ?? vids[0];
-  const providers = d['watch/providers']?.results?.[region] ?? {};
+  const providers = watchProviders(d['watch/providers'], { region });
   return {
     imdbId: d.imdb_id || null,
     runtimeMin: d.runtime || null,
     tagline: d.tagline?.trim() || null,
     trailerUrl: trailer ? `https://www.youtube.com/watch?v=${trailer.key}` : null,
-    // Flat-rate streaming only. Rent and buy are a different question from "is
-    // it included where I already subscribe".
-    watch: (providers.flatrate ?? []).map((p) => p.provider_name).slice(0, 6),
+    // Flat-rate streaming only, and at most six. Rent and buy are a different
+    // question from "is it included where I already subscribe", so they live
+    // apart in `providers` and nothing that reads `watch` sees them.
+    watch: providers.stream.slice(0, 6),
+    providers,
     cast: (credits.cast ?? []).slice(0, 8).map((c) => c.name),
     director: (credits.crew ?? []).find((c) => c.job === 'Director')?.name ?? null,
     studios: (d.production_companies ?? []).map((c) => c.name).slice(0, 3),
@@ -189,6 +224,8 @@ export function titleItem(m, { genreById, detail = null, region = 'US' } = {}) {
       trailerUrl: detail?.trailerUrl ?? null,
       runtimeMin: detail?.runtimeMin ?? null,
       watch: detail?.watch ?? [],
+      // Subscription, rent and buy, apart. Empty lists until detailed, like `watch`.
+      providers: detail?.providers ?? { ...NO_PROVIDERS },
       watchRegion: region,
       originalTitle: m.original_title ?? null,
       releaseDate: isYmd(m.release_date) ? m.release_date : null,
@@ -212,6 +249,13 @@ export function titleItem(m, { genreById, detail = null, region = 'US' } = {}) {
  * Keyed apart (`tmdb:release:`, `tmdb:digital:`, `tmdb:stream:<id>:<service>`) so
  * a film that opens in June and lands on Disney+ in September is two things a
  * reader can be told about separately.
+ *
+ * The digital row exists when TMDB has a type-4 date with no service in its note
+ * (the rule genrewatch used), never from the rent/buy provider list alone: a shop
+ * carrying the film says nothing about WHEN it arrived, and a release is a date.
+ * The shops do ride on that row as `data.services`, and the streaming row names
+ * its one service the same way, so a reader can be told "Rent or buy: Apple TV,
+ * Amazon" and "Disney+" in the same field.
  */
 export function releaseItems(m, { genreById, detail = null, region = 'US' } = {}) {
   if (!m?.id || !m.title) return [];
@@ -220,7 +264,7 @@ export function releaseItems(m, { genreById, detail = null, region = 'US' } = {}
   const poster = m.poster_path ? `${POSTER}${m.poster_path}` : null;
   const backdrop = m.backdrop_path ? `${BACKDROP}${m.backdrop_path}` : null;
   const votes = Number(m.vote_count ?? 0);
-  const base = (slot, type, dateStr, venue, venueRegion) => {
+  const base = (slot, type, dateStr, venue, venueRegion, services = []) => {
     const when = looseDate(dateStr);
     if (!when.publishedAt) return null;
     return {
@@ -244,6 +288,7 @@ export function releaseItems(m, { genreById, detail = null, region = 'US' } = {}
         number: null,
         venue,
         venueRegion,
+        services,
         runtimeMin: detail?.runtimeMin ?? null,
         tmdbId: id,
         imdbId: detail?.imdbId ?? null,
@@ -261,7 +306,14 @@ export function releaseItems(m, { genreById, detail = null, region = 'US' } = {}
       ? base(`${PROVIDER}:release:${id}`, 'theatrical', m.release_date, 'Cinemas', null)
       : null,
     home?.vod
-      ? base(`${PROVIDER}:digital:${id}`, 'digital', home.vod, 'Rent or buy', region)
+      ? base(
+          `${PROVIDER}:digital:${id}`,
+          'digital',
+          home.vod,
+          'Rent or buy',
+          region,
+          rentOrBuyServices(detail?.providers),
+        )
       : null,
     home?.streaming
       ? base(
@@ -270,6 +322,7 @@ export function releaseItems(m, { genreById, detail = null, region = 'US' } = {}
           home.streaming.date,
           home.streaming.service,
           region,
+          [home.streaming.service],
         )
       : null,
   ].filter(Boolean);

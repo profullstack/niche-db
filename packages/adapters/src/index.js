@@ -19,6 +19,7 @@ import { ecbFxRates } from './ecb.js';
 import { edgar } from './edgar.js';
 import { eonetEvents } from './eonet.js';
 import { espnCatalogue, espnLive, espnSchedule } from './espn.js';
+import { espnPlays } from './espnplays.js';
 import { eurostat } from './eurostat.js';
 import { faaAirportStatus } from './faanas.js';
 import { fbiCrimeEstimates } from './fbicrime.js';
@@ -159,6 +160,7 @@ export const ADAPTERS = [
   espnCatalogue,
   espnSchedule,
   espnLive,
+  espnPlays,
   livetennis,
   // Screen: films, TV and anime, and the IMDb ratings behind 400k titles.
   tmdbReleases,

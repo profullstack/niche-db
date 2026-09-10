@@ -13,9 +13,13 @@ import { makeHttp } from './http.js';
  * An item is stamped enriched even when nothing was found, so a miss costs
  * one attempt and not one attempt per tick forever.
  */
-export async function enrichPending({ log = console.log, limit = config.enrich.perRun } = {}) {
+export async function enrichPending({
+  log = console.log,
+  limit = config.enrich.perRun,
+  perCollection = config.enrich.perCollection,
+} = {}) {
   if (!config.enrich.enabled) return { skipped: 'disabled' };
-  const items = await q.itemsNeedingEnrichment({ limit });
+  const items = await q.itemsNeedingEnrichment({ limit, perCollection });
   if (items.length === 0) return { items: 0 };
   const http = makeHttp({
     userAgent: `niche-db/0.1 (+${config.siteUrl}${config.contactEmail ? `; ${config.contactEmail}` : ''})`,
