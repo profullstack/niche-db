@@ -1088,6 +1088,10 @@ export async function itemsNeedingEnrichment({ limit = 50, perCollection = 8 } =
 /**
  * Store what the enrichers found. Fills image, summary and tags only where the
  * item had none, so the source's own words always win.
+ *
+ * Finding something is a change to the row, so updated_at moves with it and a
+ * site walking the collection by since= sees the poster arrive. Finding
+ * nothing is not, or every miss would look like news to every mirror.
  */
 export async function applyEnrichment({
   id,
@@ -1096,13 +1100,15 @@ export async function applyEnrichment({
   summary = null,
   tags = [],
 }) {
+  const found = Object.keys(enrichment ?? {}).length > 0;
   await sql`
     update items set
       enrichment = ${JSON.stringify(enrichment ?? {})}::text::jsonb,
       image_url = coalesce(image_url, ${imageUrl}),
       summary = coalesce(summary, ${summary}),
       tags = (select array(select distinct t from unnest(tags || ${pgArray(tags)}::text[]) as t)),
-      enriched_at = now()
+      enriched_at = now(),
+      updated_at = case when ${found} then now() else updated_at end
     where id = ${id}
   `;
 }
