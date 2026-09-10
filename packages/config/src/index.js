@@ -84,6 +84,8 @@ export const config = {
     tickSeconds: num('ENRICH_TICK_SECONDS', 90),
     /** Items considered per tick. Each enricher also caps itself per run. */
     perRun: num('ENRICH_PER_RUN', 40),
+    /** Of those, at most this many from any one collection, so a source that lands a thousand rows at once cannot starve the others. */
+    perCollection: num('ENRICH_PER_COLLECTION', 8),
     /** Optional: the YouTube Data API key; without it the public results page is read. */
     youtubeKey: opt('YOUTUBE_API_KEY'),
     /** Optional: Semantic Scholar key for a higher rate. */
@@ -116,6 +118,8 @@ export const config = {
     sportsProxyUrl: opt('SPORTS_PROXY_URL'),
     /** Live Tennis API, which owns tennis: 100 requests a day on the free plan. */
     livetennisApiKey: opt('LIVETENNIS_API_KEY'),
+    /** TheSportsDB, for TV listings. The shared key '3' works but returns one row per query. */
+    sportsdbApiKey: opt('SPORTSDB_API_KEY', '3'),
     igdbClientId: opt('IGDB_CLIENT_ID'),
     igdbClientSecret: opt('IGDB_CLIENT_SECRET'),
     githubToken: opt('GITHUB_TOKEN'),

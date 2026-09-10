@@ -19,6 +19,7 @@ import { ecbFxRates } from './ecb.js';
 import { edgar } from './edgar.js';
 import { eonetEvents } from './eonet.js';
 import { espnCatalogue, espnLive, espnSchedule } from './espn.js';
+import { espnPlays } from './espnplays.js';
 import { eurostat } from './eurostat.js';
 import { faaAirportStatus } from './faanas.js';
 import { fbiCrimeEstimates } from './fbicrime.js';
@@ -61,6 +62,7 @@ import { rogueIncidents, rogueResearch } from './rogueaitracker.js';
 import { rssamplifier } from './rssamplifier.js';
 import { scryfallCards, scryfallSets } from './scryfall.js';
 import { socrataCrime } from './socratacrime.js';
+import { sportsdbTv } from './sportsdb.js';
 import { statuspage } from './statuspage.js';
 import { steam, steamNews } from './steam.js';
 import { nwsSurfZone } from './surfzone.js';
@@ -159,7 +161,9 @@ export const ADAPTERS = [
   espnCatalogue,
   espnSchedule,
   espnLive,
+  espnPlays,
   livetennis,
+  sportsdbTv,
   // Screen: films, TV and anime, and the IMDb ratings behind 400k titles.
   tmdbReleases,
   tvmazeSchedule,

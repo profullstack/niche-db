@@ -22,6 +22,7 @@ describe('registry', () => {
     expect(defaultEnrichers('games')).toContain('youtube');
     expect(defaultEnrichers('filings')).toEqual(['sec-company']);
     expect(defaultEnrichers('alerts')).toEqual([]);
+    expect(defaultEnrichers('screen')).toEqual(['tmdb-artwork']);
     expect(enrichersFor('packages').map((e) => e.name)).toContain('github-repo');
   });
 });

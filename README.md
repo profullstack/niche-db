@@ -44,7 +44,7 @@ Adapters are one file each in `packages/adapters/src`. Seventy-nine ship today a
 | aviation | `faa-nas-status`, `aviation-hazards`, `aviation-metar`, `ntsb-accidents`, `adsb-flights` | no (NTSB needs mdbtools + unzip, in the Dockerfile) |
 | water | `nwps-river-gauges`, `coops-water-levels`, `drought-monitor`, `ndbc-buoys`, `nws-surf-zone` | no |
 | consumer-finance | `cfpb-complaints`, `fdic-institutions`, `fdic-structure-changes` | no |
-| sports | `espn-catalogue`, `espn-schedule`, `espn-live`, `livetennis` | Live Tennis only (ESPN is keyless; `SPORTS_PROXY_URL` for cloud egress) |
+| sports | `espn-catalogue`, `espn-schedule`, `espn-live`, `espn-plays`, `livetennis`, `sportsdb-tv` | Live Tennis; TheSportsDB (`SPORTSDB_API_KEY`, the shared key `3` returns one row per query); ESPN is keyless (`SPORTS_PROXY_URL` for cloud egress) |
 | screen | `tmdb-releases`, `tvmaze-schedule`, `anilist-airing`, `imdb-ratings` | TMDB only |
 | channels | `iptv-org-channels` | no |
 
@@ -62,8 +62,9 @@ After ingest, every item is enriched by the enrichers that apply to it (`package
 | `semantic-scholar` | TL;DR, citation counts, open-access PDF (key optional) | research |
 | `openlibrary-work` | description and subjects | books |
 | `opengraph` | the page's own preview image and description | most collections |
+| `tmdb-artwork` | poster, backdrop, synopsis, rating and TMDB id for a title that came in from the IMDb dumps with none (`TMDB_API_KEY`) | screen |
 
-A feed's `enrichers` list picks which of these it shows; absent means the collection's defaults. The feed builder exposes them as checkboxes. Items are enriched once, newest first with a fair share per collection, and a missing image, summary or tags are filled from whatever the enrichers found while the source's own words always win.
+A feed's `enrichers` list picks which of these it shows; absent means the collection's defaults. The feed builder exposes them as checkboxes. Items are enriched once, newest first with a fair share per collection (`ENRICH_PER_RUN` a tick, `ENRICH_PER_COLLECTION` of them from any one collection), and a missing image, summary or tags are filled from whatever the enrichers found while the source's own words always win.
 
 ## Run it
 

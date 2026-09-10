@@ -46,7 +46,50 @@ Fixture `data`:
 Sources: `espn-catalogue` (leagues + teams, daily), `espn-schedule` (fixtures in
 the near window, every 3 h; the whole horizon daily by config), `espn-live`
 (leagues with a game on, every minute), `livetennis` (tennis fixtures and live
-scores within its 100/day budget).
+scores within its 100/day budget), `espn-plays` (below).
+
+### Play-by-play and recaps
+
+Kind `plays`, one item per fixture that is in play or ended in the last six
+hours, from `espn-plays` (every 2 minutes, at most `summariesPerRun` = 8
+summaries a run, which is tipoffwatch's own line).
+
+| kind | externalId | title | publishedAt | tags |
+|---|---|---|---|---|
+| plays | `espn:plays:<league key>/<event id>` | Away at Home | kickoff | `plays`, `<sport>`, `league:<slug>`, `state:in|post`, `fixture:<fixture externalId>` |
+
+```
+{ provider, sport, fixtureExternalId, fixtureKey, eventId,
+  league:{slug,key,name,abbreviation,region}, home/away:{id,name,score},
+  state, statusDetail, playsSupported, boxscoreSupported,
+  plays:[{ id, sequence, text, period, periodLabel, clock, homeScore, awayScore,
+           scoring, type, team:'home'|'away'|null, teamId }],
+  playsTotal, playsTruncated, recap, final, fetchedAt }
+```
+While a game is on `plays` is the last 400 (`playsTruncated` says so) and
+`recap` is null; once final the whole log is there and `recap` carries the
+linescores, team stats, leaders, officials, duration, attendance, article
+and closing odds. A mirror inserts plays on `(event, play id)` and never
+deletes, since a live item is the tail of the log.
+
+### TV listings
+
+Kind `broadcast`, one item per (event, channel, market) from TheSportsDB's
+day listings (`sportsdb-tv`, every 3 h, 14 days ahead; one request a day on a
+paid key, one per sport and day on the shared key). ESPN's own broadcast field
+is US-only, so this is where "7 Queensland" for an AFL game comes from.
+
+| kind | externalId | title | publishedAt | tags |
+|---|---|---|---|---|
+| broadcast | `sportsdb:tv:<eventId>:<channel>:<country>:<date>` | Home vs Away on Channel | listing time | `broadcast`, `<sport>`, `date:YYYY-MM-DD`, `country:<slug>`, `channel:<slug>` |
+
+```
+{ provider:'thesportsdb', sport, sportName, league, home, away, event, channel,
+  channelId, country, logo, starts_at, timeKnown, date, eventId, listingId }
+```
+A mirror matches `home`/`away` against its own fixtures by team name, in both
+orders and on the day before as well, since the two providers disagree about
+which calendar day a late kickoff belongs to.
 
 ## `screen` (from genrewatch's TMDB, TVmaze, AniList and IMDb providers)
 
@@ -61,14 +104,29 @@ Title `data`:
 ```
 { provider, category, form: 'movie'|'series', year, normTitle,
   imdbId, tmdbId, tvmazeId, anilistId, genres:[name], rating, ratingCount,
-  popularity, backdropUrl, tagline, trailerUrl, runtimeMin, watch:[service] }
+  popularity, backdropUrl, tagline, trailerUrl, runtimeMin, watch:[service],
+  providers: { stream:[name], rent:[name], buy:[name] } }
 ```
+`watch` is the flat-rate services (at most six); `providers` is the same region's
+subscription, rent and buy lists apart (at most eight each), so "included where
+I subscribe" and "available to rent" stay two questions.
+
 Release `data`:
 ```
 { provider, category, type, titleExternalId, titleName, season, number,
-  venue, venueRegion, runtimeMin }
+  venue, venueRegion, services:[name], runtimeMin }
 ```
+`services` names the shops on a `Rent or buy` row and the one service on a
+stream row. A digital row exists only when TMDB has a type-4 date (a shop
+carrying the film is not a date).
+
 `imageUrl` is the poster (title) or the episode/backdrop image (release).
+
+The `tmdb-artwork` enricher (default-on for `screen`, needs `TMDB_API_KEY`) asks
+TMDB `find/{imdbId}` for every IMDb-only title and backfills the poster and
+synopsis onto the item, storing the TMDB id, backdrop, popularity, rating and
+release day under `enrichment['tmdb-artwork']`; a miss is stored as
+`{ tmdbId: null }` so the title is never asked again.
 
 Sources: `tmdb-releases` (forward calendar + home releases, 12 h), `tvmaze-schedule`
 (3 h), `anilist-airing` (6 h), `imdb-ratings` (daily dumps, cursor-paginated so a

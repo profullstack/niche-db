@@ -1083,6 +1083,18 @@ export const DEFAULT_FEEDS = [
     query: { kinds: ['fixture'], tags: ['state:post'] },
   },
   { collection: 'sports', slug: 'leagues', name: 'Leagues', query: { kinds: ['league'] } },
+  {
+    collection: 'sports',
+    slug: 'play-by-play',
+    name: 'Play-by-play and recaps',
+    query: { kinds: ['plays'] },
+  },
+  {
+    collection: 'sports',
+    slug: 'tv-listings',
+    name: 'TV listings',
+    query: { kinds: ['broadcast'], upcoming: true },
+  },
   // Screen: the calendar, by how a title arrives.
   {
     collection: 'screen',

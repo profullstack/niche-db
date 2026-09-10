@@ -27,12 +27,15 @@ import {
 import {
   detailOf,
   homeReleases,
+  MAX_PROVIDERS,
   namesAService,
   readCursor,
   releaseItems,
+  rentOrBuyServices,
   tmdbReleases,
   titleItem as tmdbTitle,
   trimSeen,
+  watchProviders,
 } from '../packages/adapters/src/tmdb.js';
 import {
   classify,
@@ -160,8 +163,14 @@ const DETAIL = {
     results: {
       US: {
         flatrate: Array.from({ length: 8 }, (_, i) => ({ provider_name: `Service ${i}` })),
-        rent: [{ provider_name: 'Apple TV' }],
+        rent: [
+          { provider_name: 'Apple TV' },
+          { provider_name: 'Amazon Video' },
+          ...Array.from({ length: 8 }, (_, i) => ({ provider_name: `Shop ${i}` })),
+        ],
+        buy: [{ provider_name: 'Apple TV' }, { provider_name: 'Google Play Movies' }],
       },
+      GB: { flatrate: [{ provider_name: 'Sky Go' }], buy: [{ provider_name: 'Sky Store' }] },
     },
   },
   release_dates: RELEASE_DATES,
@@ -193,6 +202,67 @@ describe('tmdb home releases', () => {
     expect(namesAService('Letterboxd Video Store - Unreleased Gems (30 days)')).toBe(false);
     expect(namesAService('Netflix / Rockstar Games official YouTube channel')).toBe(false);
     expect(namesAService('')).toBe(false);
+  });
+});
+
+describe('tmdb watch providers', () => {
+  test('subscription, rent and buy come apart, named, in TMDB order, capped at eight', () => {
+    const p = watchProviders(DETAIL['watch/providers']);
+    expect(p.stream).toHaveLength(8);
+    expect(p.stream[0]).toBe('Service 0');
+    expect(p.rent).toHaveLength(MAX_PROVIDERS);
+    expect(p.rent.slice(0, 2)).toEqual(['Apple TV', 'Amazon Video']);
+    expect(p.rent).not.toContain('Shop 7');
+    expect(p.buy).toEqual(['Apple TV', 'Google Play Movies']);
+  });
+
+  test('quotes the region it is asked for; a missing region or payload is three empty lists', () => {
+    expect(watchProviders(DETAIL['watch/providers'], { region: 'GB' })).toEqual({
+      stream: ['Sky Go'],
+      rent: [],
+      buy: ['Sky Store'],
+    });
+    const empty = { stream: [], rent: [], buy: [] };
+    expect(watchProviders(DETAIL['watch/providers'], { region: 'FR' })).toEqual(empty);
+    expect(watchProviders(null)).toEqual(empty);
+    expect(watchProviders({ results: { US: { flatrate: 'nope', rent: [{}] } } })).toEqual(empty);
+  });
+
+  test('rent and buy fold into one list with each shop once', () => {
+    expect(rentOrBuyServices(watchProviders(DETAIL['watch/providers']))).toEqual([
+      'Apple TV',
+      'Amazon Video',
+      ...Array.from({ length: 6 }, (_, i) => `Shop ${i}`),
+      'Google Play Movies',
+    ]);
+    expect(rentOrBuyServices(null)).toEqual([]);
+  });
+
+  test('watch stays the six flat-rate names while providers carries all three lists', () => {
+    const d = detailOf(DETAIL);
+    expect(d.watch).toEqual(Array.from({ length: 6 }, (_, i) => `Service ${i}`));
+    expect(d.providers.stream).toHaveLength(8);
+    expect(d.providers.stream.slice(0, 6)).toEqual(d.watch);
+    expect(d.providers.rent[0]).toBe('Apple TV');
+    expect(d.providers.buy).toEqual(['Apple TV', 'Google Play Movies']);
+
+    const t = tmdbTitle(DETAIL, { detail: d });
+    expect(t.data.watch).toEqual(d.watch);
+    expect(t.data.providers).toEqual(d.providers);
+    expect(t.data.watchRegion).toBe('US');
+
+    const gb = tmdbTitle(DETAIL, { detail: detailOf(DETAIL, { region: 'GB' }), region: 'GB' });
+    expect(gb.data.watch).toEqual(['Sky Go']);
+    expect(gb.data.providers).toEqual({ stream: ['Sky Go'], rent: [], buy: ['Sky Store'] });
+    expect(gb.data.watchRegion).toBe('GB');
+  });
+
+  test('an undetailed title carries empty lists, one object per title', () => {
+    const a = tmdbTitle(DISCOVER, { genreById: GENRES });
+    const b = tmdbTitle(DISCOVER, { genreById: GENRES });
+    expect(a.data.providers).toEqual({ stream: [], rent: [], buy: [] });
+    expect(a.data.providers).not.toBe(b.data.providers);
+    expect(a.data.watch).toEqual([]);
   });
 });
 
@@ -268,10 +338,16 @@ describe('tmdb items', () => {
     expect(digital.publishedAt).toEqual(noon('2026-08-18'));
     expect(digital.data.venue).toBe('Rent or buy');
     expect(digital.data.venueRegion).toBe('US');
+    // The shops that rent or sell it ride on the rent-or-buy row, each once.
+    expect(digital.data.services.slice(0, 2)).toEqual(['Apple TV', 'Amazon Video']);
+    expect(digital.data.services).toContain('Google Play Movies');
+    expect(new Set(digital.data.services).size).toBe(digital.data.services.length);
 
     expect(stream.tags).toContain('type:stream');
     expect(stream.publishedAt).toEqual(noon('2026-09-23'));
     expect(stream.data.venue).toBe('Disney+');
+    expect(stream.data.services).toEqual(['Disney+']);
+    expect(theatrical.data.services).toEqual([]);
     for (const r of rows) {
       expect(r.kind).toBe('release');
       expect(r.timeKnown).toBe(false);
@@ -287,6 +363,38 @@ describe('tmdb items', () => {
       'tmdb:release:1084242',
     ]);
     expect(releaseItems({ ...DISCOVER, release_date: '' })).toEqual([]);
+  });
+
+  test('a shop carrying the film is not a date: no type-4 entry, no digital row', () => {
+    // Rent and buy providers, but the only home date names a service.
+    const noVod = {
+      ...DETAIL,
+      release_dates: {
+        results: [
+          {
+            iso_3166_1: 'US',
+            release_dates: [
+              { type: 3, release_date: '2026-06-19T00:00:00.000Z', note: '' },
+              { type: 4, release_date: '2026-09-23T00:00:00.000Z', note: 'Disney+' },
+            ],
+          },
+        ],
+      },
+    };
+    const d = detailOf(noVod);
+    expect(d.providers.rent.length).toBeGreaterThan(0);
+    expect(releaseItems(noVod, { detail: d }).map((r) => r.externalId)).toEqual([
+      'tmdb:release:1084242',
+      'tmdb:stream:1084242:disney',
+    ]);
+
+    // The other way round: a plain digital date with no shop listed yet still
+    // is a release, with nothing to name.
+    const noShops = { ...DETAIL, 'watch/providers': { results: {} } };
+    const rows = releaseItems(noShops, { detail: detailOf(noShops) });
+    const digital = rows.find((r) => r.externalId === 'tmdb:digital:1084242');
+    expect(digital.data.venue).toBe('Rent or buy');
+    expect(digital.data.services).toEqual([]);
   });
 
   test('items survive normalisation with their tags intact', () => {

@@ -22,7 +22,7 @@ import { defineAdapter, slugify } from '@nichedb/core/adapter';
  */
 
 const CORE = 'https://sports.core.api.espn.com/v2';
-const SITE = 'https://site.api.espn.com/apis/site/v2/sports';
+export const SITE = 'https://site.api.espn.com/apis/site/v2/sports';
 
 /** A scoreboard response caps out around 100 events regardless of `limit`. */
 export const PAGE_CAP = 100;
@@ -57,7 +57,7 @@ export const PRIORITY = new Map([
  * rather than a match, so the summary endpoint has no play log for the id stored.
  * Measured on tipoffwatch 2026-08-21, one finished fixture per sport.
  */
-const NO_PLAYS = new Set([
+export const NO_PLAYS = new Set([
   'field-hockey',
   'lacrosse',
   'rugby',
@@ -71,7 +71,7 @@ const NO_PLAYS = new Set([
 ]);
 
 /** Sports whose summary has no box score either (see NO_PLAYS for why). */
-const NO_BOXSCORE = new Set(['tennis', 'golf', 'racing', 'mma']);
+export const NO_BOXSCORE = new Set(['tennis', 'golf', 'racing', 'mma']);
 
 /**
  * Where a competition is played, for the ones the provider will not say.
@@ -904,7 +904,7 @@ export function leagueKeysOf(config, catalogue = []) {
     .map((s) => (s.includes('/') ? s : (bySlug.get(s) ?? s)));
 }
 
-async function ensureCatalogue(ctx, client, cursor) {
+export async function ensureCatalogue(ctx, client, cursor) {
   const skipSports = skipSportsOf(ctx.config);
   if (catalogueFresh(cursor)) {
     return cursor.leagues.filter((l) => !skipSports.includes(l.sport));
@@ -927,7 +927,7 @@ async function ensureCatalogue(ctx, client, cursor) {
 }
 
 /** Run `fn` over `items` with `n` in flight, stopping at the deadline. Returns the leftover. */
-async function pool(items, n, deadline, fn) {
+export async function pool(items, n, deadline, fn) {
   let i = 0;
   const workers = Array.from({ length: Math.min(n, items.length) }, async () => {
     while (i < items.length && Date.now() < deadline) {
@@ -940,11 +940,11 @@ async function pool(items, n, deadline, fn) {
 }
 
 /** How much of the run is left for the fetches: a margin for the write. */
-const DEADLINE_MARGIN_MS = 15_000;
+export const DEADLINE_MARGIN_MS = 15_000;
 
 /* ------------------------------------------------------------- catalogue -- */
 
-const SKIP_SPORTS_FIELD = {
+export const SKIP_SPORTS_FIELD = {
   key: 'skipSports',
   label: 'Skip sports',
   type: 'list',
@@ -1176,7 +1176,7 @@ export const espnSchedule = defineAdapter({
 export const WATCH_LEAD_MS = 2 * HOUR_MS;
 
 /** How long a league stays watched after the last fixture worth watching. */
-const WATCH_GRACE_MS = 15 * 60_000;
+export const WATCH_GRACE_MS = 15 * 60_000;
 
 /**
  * Whether a fixture is worth emitting from the live tick: on now, about to start,

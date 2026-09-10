@@ -4,6 +4,7 @@ import { opengraph } from './opengraph.js';
 import { openlibraryWork } from './openlibrary.js';
 import { secCompany } from './sec.js';
 import { semanticScholar } from './semanticscholar.js';
+import { tmdbArtwork } from './tmdb-artwork.js';
 import { wikipedia } from './wikipedia.js';
 import { youtube } from './youtube.js';
 
@@ -17,6 +18,7 @@ export const ENRICHERS = [
   semanticScholar,
   openlibraryWork,
   opengraph,
+  tmdbArtwork,
 ];
 
 const byName = new Map(ENRICHERS.map((e) => [e.name, e]));
