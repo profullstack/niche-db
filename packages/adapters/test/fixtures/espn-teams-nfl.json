@@ -1,0 +1,118 @@
+{
+  "sports": [
+    {
+      "id": "20",
+      "slug": "football",
+      "name": "Football",
+      "leagues": [
+        {
+          "id": "28",
+          "name": "National Football League",
+          "abbreviation": "NFL",
+          "slug": "nfl",
+          "teams": [
+            {
+              "team": {
+                "id": "22",
+                "slug": "arizona-cardinals",
+                "location": "Arizona",
+                "name": "Cardinals",
+                "abbreviation": "ARI",
+                "displayName": "Arizona Cardinals",
+                "shortDisplayName": "Cardinals",
+                "color": "a40227",
+                "alternateColor": "ffffff",
+                "isActive": true,
+                "logos": [
+                  {
+                    "href": "https://a.espncdn.com/i/teamlogos/nfl/500/ari.png",
+                    "rel": [
+                      "full",
+                      "default"
+                    ]
+                  }
+                ],
+                "links": [
+                  {
+                    "rel": [
+                      "clubhouse",
+                      "desktop",
+                      "team"
+                    ],
+                    "href": "https://www.espn.com/nfl/team/_/name/ari/arizona-cardinals"
+                  }
+                ]
+              }
+            },
+            {
+              "team": {
+                "id": "1",
+                "slug": "atlanta-falcons",
+                "location": "Atlanta",
+                "name": "Falcons",
+                "abbreviation": "ATL",
+                "displayName": "Atlanta Falcons",
+                "shortDisplayName": "Falcons",
+                "color": "a71930",
+                "alternateColor": "000000",
+                "isActive": true,
+                "logos": [
+                  {
+                    "href": "https://a.espncdn.com/i/teamlogos/nfl/500/atl.png",
+                    "rel": [
+                      "full",
+                      "default"
+                    ]
+                  }
+                ],
+                "links": [
+                  {
+                    "rel": [
+                      "clubhouse",
+                      "desktop",
+                      "team"
+                    ],
+                    "href": "https://www.espn.com/nfl/team/_/name/atl/atlanta-falcons"
+                  }
+                ]
+              }
+            },
+            {
+              "team": {
+                "id": "33",
+                "slug": "baltimore-ravens",
+                "location": "Baltimore",
+                "name": "Ravens",
+                "abbreviation": "BAL",
+                "displayName": "Baltimore Ravens",
+                "shortDisplayName": "Ravens",
+                "color": "29126f",
+                "alternateColor": "000000",
+                "isActive": true,
+                "logos": [
+                  {
+                    "href": "https://a.espncdn.com/i/teamlogos/nfl/500/bal.png",
+                    "rel": [
+                      "full",
+                      "default"
+                    ]
+                  }
+                ],
+                "links": [
+                  {
+                    "rel": [
+                      "clubhouse",
+                      "desktop",
+                      "team"
+                    ],
+                    "href": "https://www.espn.com/nfl/team/_/name/bal/baltimore-ravens"
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -171,6 +171,24 @@ export const COLLECTIONS = [
     description:
       'What Americans say their banks, lenders, credit bureaus and debt collectors are doing to them, and who those companies actually are. Around ten thousand complaints a day from the Consumer Financial Protection Bureau, a third of them carrying the consumer’s own account; every FDIC-insured institution with its charter, regulator and assets; and every merger, failure, conversion and branch opening or closing on the FDIC register — which is the only public record of which bank a complaint about a vanished bank now belongs to.',
   },
+  {
+    slug: 'sports',
+    name: 'Sports',
+    description:
+      'Every fixture across 17 sports and 350 leagues: schedule, live score, line, venue and broadcast, with the leagues and teams behind them, and tennis by tournament. The data tipoffwatch.com is built on, kept here so every site and player can read it.',
+  },
+  {
+    slug: 'screen',
+    name: 'Screen',
+    description:
+      'Films, TV and anime: what is coming to cinemas, to rent, to a streaming service and to air, with posters, genres and IMDb ratings for 400,000 titles. The data genrewatch.com is built on.',
+  },
+  {
+    slug: 'channels',
+    name: 'Channels',
+    description:
+      'The whole iptv-org directory: 31,000 television channels worldwide with logo, country, language, category and network, and the public stream where one exists. What a player matches a playlist entry against.',
+  },
 ];
 
 export const DEFAULT_FEEDS = [
@@ -1044,6 +1062,59 @@ export const DEFAULT_FEEDS = [
     slug: 'insured-banks',
     name: 'FDIC-insured banks',
     query: { kinds: ['institution'] },
+  },
+  // Sports: fixtures by state, the way the site's pages ask for them.
+  {
+    collection: 'sports',
+    slug: 'live-now',
+    name: 'Live now',
+    query: { kinds: ['fixture'], tags: ['state:in'] },
+  },
+  {
+    collection: 'sports',
+    slug: 'upcoming-fixtures',
+    name: 'Upcoming fixtures',
+    query: { kinds: ['fixture'], tags: ['state:pre'], upcoming: true },
+  },
+  {
+    collection: 'sports',
+    slug: 'final-scores',
+    name: 'Final scores',
+    query: { kinds: ['fixture'], tags: ['state:post'] },
+  },
+  { collection: 'sports', slug: 'leagues', name: 'Leagues', query: { kinds: ['league'] } },
+  // Screen: the calendar, by how a title arrives.
+  {
+    collection: 'screen',
+    slug: 'in-cinemas',
+    name: 'Coming to cinemas',
+    query: { kinds: ['release'], tags: ['type:theatrical'], upcoming: true },
+  },
+  {
+    collection: 'screen',
+    slug: 'home-releases',
+    name: 'To rent, buy or stream',
+    query: { kinds: ['release'], tags: ['type:digital', 'type:stream'], upcoming: true },
+  },
+  {
+    collection: 'screen',
+    slug: 'on-air',
+    name: 'Episodes airing',
+    query: { kinds: ['release'], tags: ['type:episode', 'type:airing'], upcoming: true },
+  },
+  { collection: 'screen', slug: 'titles', name: 'Titles', query: { kinds: ['title'] } },
+  // Channels: what can be watched, and everything else by name.
+  {
+    collection: 'channels',
+    slug: 'streamable-channels',
+    name: 'Channels with a public stream',
+    query: { kinds: ['channel'], tags: ['streamable'] },
+  },
+  {
+    collection: 'channels',
+    slug: 'all-channels',
+    name: 'Every channel',
+    query: { kinds: ['channel'] },
   },
 ];
 

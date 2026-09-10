@@ -2,11 +2,13 @@ import { adsbFlights } from './adsb.js';
 import { aiid } from './aiid.js';
 import { alpacaCorporateActions, alpacaNews } from './alpaca.js';
 import { firefoxAddons } from './amo.js';
+import { anilistAiring } from './anilist.js';
 import { arxiv } from './arxiv.js';
 import { aviationHazards, aviationMetar } from './aviationweather.js';
 import { blsSeries } from './bls.js';
 import { brisk } from './brisk.js';
 import { cfpbComplaints } from './cfpb.js';
+import { channels } from './channels.js';
 import { clinicalTrials } from './clinicaltrials.js';
 import { coopsWaterLevels } from './coops.js';
 import { courtlistener } from './courtlistener.js';
@@ -16,6 +18,7 @@ import { droughtMonitor } from './droughtmonitor.js';
 import { ecbFxRates } from './ecb.js';
 import { edgar } from './edgar.js';
 import { eonetEvents } from './eonet.js';
+import { espnCatalogue, espnLive, espnSchedule } from './espn.js';
 import { eurostat } from './eurostat.js';
 import { faaAirportStatus } from './faanas.js';
 import { fbiCrimeEstimates } from './fbicrime.js';
@@ -29,9 +32,11 @@ import { githubReleases } from './github.js';
 import { goModules } from './golang.js';
 import { huggingface } from './huggingface.js';
 import { igdb } from './igdb.js';
+import { imdbRatings } from './imdb.js';
 import { landRegistrySales } from './landregistry.js';
 import { launchLibrary } from './launchlibrary.js';
 import { lichessBroadcasts } from './lichess.js';
+import { livetennis } from './livetennis.js';
 import { mcpRegistry } from './mcpregistry.js';
 import { isoMicExchanges } from './mic.js';
 import { musicbrainz } from './musicbrainz.js';
@@ -61,6 +66,8 @@ import { steam, steamNews } from './steam.js';
 import { nwsSurfZone } from './surfzone.js';
 import { swpcSpaceWeather } from './swpc.js';
 import { tedNotices } from './ted.js';
+import { tmdbReleases } from './tmdb.js';
+import { tvmazeSchedule } from './tvmaze.js';
 import { ukPoliceCrime } from './ukpolice.js';
 import { usaspendingAwards } from './usaspending.js';
 import { usgs } from './usgs.js';
@@ -148,9 +155,22 @@ export const ADAPTERS = [
   ntldLaunches,
   ntldChanges,
   podcasts,
+  // Sports: every league, team and fixture ESPN publishes, and tennis by tour.
+  espnCatalogue,
+  espnSchedule,
+  espnLive,
+  livetennis,
+  // Screen: films, TV and anime, and the IMDb ratings behind 400k titles.
+  tmdbReleases,
+  tvmazeSchedule,
+  anilistAiring,
+  imdbRatings,
+  // Channels: the whole iptv-org directory, for matching a playlist by name.
+  channels,
 ];
 
 export { isPlatformHosted, PLATFORM_HOSTS } from './podcastplatforms.js';
+export { normaliseTitle, normTitleOrNull, titleKey } from './screen-titles.js';
 /**
  * The place lists two adapters seed their sources from, re-exported so the
  * seed can build a feed per city from the same list rather than a second copy

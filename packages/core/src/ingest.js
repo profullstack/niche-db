@@ -10,6 +10,9 @@ const UA = () =>
 /** Deployment secrets adapters may ask for, by the keys their configFields name. */
 function envFor() {
   return {
+    tmdbApiKey: config.adapters.tmdbApiKey,
+    sportsProxyUrl: config.adapters.sportsProxyUrl,
+    livetennisApiKey: config.adapters.livetennisApiKey,
     igdbClientId: config.adapters.igdbClientId,
     igdbClientSecret: config.adapters.igdbClientSecret,
     githubToken: config.adapters.githubToken,

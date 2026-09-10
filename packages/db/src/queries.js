@@ -600,24 +600,94 @@ export async function getItem(id) {
   return row ?? null;
 }
 
-/** Newest first, keyset on id. */
+/**
+ * A page of a collection, the way a site mirroring it asks.
+ *
+ * Newest first, keyset on id, as it always was -- and now also by tags (all of
+ * them must be on the item), by when the thing happens (`from`/`to` on
+ * published_at) and by when the row last changed (`since` on updated_at), in
+ * either order on any of the three clocks. A site that keeps its own copy of
+ * `sports` asks `since=<its last sync>` every minute and gets only what moved;
+ * a page of today's fixtures asks `from`/`to` and `sort=published`.
+ */
 export async function recentItems({
   collectionId = null,
   sourceId = null,
   kind = null,
+  tags = [],
+  from = null,
+  to = null,
+  since = null,
+  sort = 'id',
+  order = 'desc',
   beforeId = null,
+  afterId = null,
   limit = 50,
 } = {}) {
+  const wantedTags = (tags ?? []).map((t) => String(t).trim().toLowerCase()).filter(Boolean);
+  const byPublished = sort === 'published';
+  const byUpdated = sort === 'updated';
+  const asc = order === 'asc';
   return sql`
     select ${itemColumns}
     from items i join sources s on s.id = i.source_id join collections c on c.id = i.collection_id
     where (${collectionId === null} or i.collection_id = ${collectionId})
       and (${sourceId === null} or i.source_id = ${sourceId})
       and (${kind === null} or i.kind = ${kind})
+      and (${wantedTags.length === 0} or i.tags @> ${pgArray(wantedTags)}::text[])
+      and (${from === null} or i.published_at >= ${from})
+      and (${to === null} or i.published_at < ${to})
+      and (${since === null} or i.updated_at >= ${since})
       and (${beforeId === null} or i.id < ${beforeId ?? 0})
-    order by i.id desc
+      and (${afterId === null} or i.id > ${afterId ?? 0})
+    order by
+      case when ${byPublished && asc} then i.published_at end asc nulls last,
+      case when ${byPublished && !asc} then i.published_at end desc nulls last,
+      case when ${byUpdated && asc} then i.updated_at end asc,
+      case when ${byUpdated && !asc} then i.updated_at end desc,
+      case when ${!byPublished && !byUpdated && asc} then i.id end asc,
+      i.id desc
     limit ${Math.min(Math.max(1, limit), 500)}
   `;
+}
+
+/**
+ * The best items for a name.
+ *
+ * What a player asks with a file called "Top.Gun.Maverick.2022.1080p.mkv" or a
+ * playlist entry called "ESPN2 HD": which title, which channel, which fixture
+ * is this? Trigram similarity on the title, which the GIN index answers
+ * quickly; the caller cleans the name first (year, quality tags, dots) so what
+ * arrives here is the thing's name and, when known, its year and kind to
+ * narrow by. Each row carries `score` in 0..1.
+ */
+export async function matchItems(
+  term,
+  { collectionId = null, kind = null, tags = [], year = null, limit = 5, minScore = 0.3 } = {},
+) {
+  const t = String(term ?? '').trim();
+  if (!t) return [];
+  const wantedTags = (tags ?? []).map((x) => String(x).trim().toLowerCase()).filter(Boolean);
+  return sql`
+    select ${itemColumns},
+      similarity(i.title, ${t}) as score
+    from items i join sources s on s.id = i.source_id join collections c on c.id = i.collection_id
+    where (${collectionId === null} or i.collection_id = ${collectionId})
+      and (${kind === null} or i.kind = ${kind})
+      and (${wantedTags.length === 0} or i.tags @> ${pgArray(wantedTags)}::text[])
+      and (${year === null} or (i.data->>'year')::int between ${(year ?? 0) - 1} and ${(year ?? 0) + 1})
+      and (i.title % ${t} or i.title ilike ${`%${t}%`})
+    order by
+      (case when lower(i.title) = lower(${t}) then 1 else 0 end) desc,
+      (case when ${year !== null} and (i.data->>'year')::int = ${year ?? 0} then 1 else 0 end) desc,
+      score desc,
+      i.id desc
+    limit ${Math.min(Math.max(1, limit), 50)}
+  `.then((rows) =>
+    rows.filter(
+      (r) => Number(r.score) >= minScore || String(r.title).toLowerCase().includes(t.toLowerCase()),
+    ),
+  );
 }
 
 /** What is coming: items dated in the future, soonest first. */

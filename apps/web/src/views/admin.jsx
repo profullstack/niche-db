@@ -581,8 +581,12 @@ export const ApiDocs = ({ user, stats }) => (
             'What a feed selects, newest first.',
           ],
           [
-            'GET /api/v1/items?collection=&source=&kind=&limit=&before=',
-            'Newest items, keyset paged.',
+            'GET /api/v1/items?collection=&source=&kind=&tags=&from=&to=&since=&sort=&order=&limit=&before=&after=',
+            'Newest items, keyset paged. tags= is every tag the item must carry (state:in,league:nba); from=/to= bound published_at; since= is what changed on updated_at, for a site keeping its own copy; sort=id|published|updated.',
+          ],
+          [
+            'GET /api/v1/match?q=&collection=&kind=&year=&tags=',
+            'Which title, channel or fixture is this name? q is cleaned like a release name (year, S02E03, quality tags, playlist decorations stripped) and matched by trigram similarity; each item carries score.',
           ],
           [
             'GET /api/v1/items/upcoming?collection=games&days=30',

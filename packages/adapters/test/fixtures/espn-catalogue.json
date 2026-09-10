@@ -1,0 +1,84 @@
+{
+  "sports": {
+    "count": 17,
+    "items": [
+      {
+        "$ref": "http://sports.core.api.espn.com/v2/sports/australian-football?lang=en&region=us"
+      },
+      {
+        "$ref": "http://sports.core.api.espn.com/v2/sports/baseball?lang=en&region=us"
+      },
+      {
+        "$ref": "http://sports.core.api.espn.com/v2/sports/basketball?lang=en&region=us"
+      },
+      {
+        "$ref": "http://sports.core.api.espn.com/v2/sports/cricket?lang=en&region=us"
+      },
+      {
+        "$ref": "http://sports.core.api.espn.com/v2/sports/field-hockey?lang=en&region=us"
+      },
+      {
+        "$ref": "http://sports.core.api.espn.com/v2/sports/football?lang=en&region=us"
+      },
+      {
+        "$ref": "http://sports.core.api.espn.com/v2/sports/golf?lang=en&region=us"
+      },
+      {
+        "$ref": "http://sports.core.api.espn.com/v2/sports/hockey?lang=en&region=us"
+      },
+      {
+        "$ref": "http://sports.core.api.espn.com/v2/sports/lacrosse?lang=en&region=us"
+      },
+      {
+        "$ref": "http://sports.core.api.espn.com/v2/sports/mma?lang=en&region=us"
+      },
+      {
+        "$ref": "http://sports.core.api.espn.com/v2/sports/racing?lang=en&region=us"
+      },
+      {
+        "$ref": "http://sports.core.api.espn.com/v2/sports/rugby?lang=en&region=us"
+      },
+      {
+        "$ref": "http://sports.core.api.espn.com/v2/sports/rugby-league?lang=en&region=us"
+      },
+      {
+        "$ref": "http://sports.core.api.espn.com/v2/sports/soccer?lang=en&region=us"
+      },
+      {
+        "$ref": "http://sports.core.api.espn.com/v2/sports/tennis?lang=en&region=us"
+      },
+      {
+        "$ref": "http://sports.core.api.espn.com/v2/sports/volleyball?lang=en&region=us"
+      },
+      {
+        "$ref": "http://sports.core.api.espn.com/v2/sports/water-polo?lang=en&region=us"
+      }
+    ]
+  },
+  "soccerLeagues": {
+    "count": 218,
+    "items": [
+      {
+        "$ref": "http://sports.core.api.espn.com/v2/sports/soccer/leagues/fifa.world?lang=en&region=us"
+      },
+      {
+        "$ref": "http://sports.core.api.espn.com/v2/sports/soccer/leagues/fifa.wwc?lang=en&region=us"
+      },
+      {
+        "$ref": "http://sports.core.api.espn.com/v2/sports/soccer/leagues/uefa.champions?lang=en&region=us"
+      },
+      {
+        "$ref": "http://sports.core.api.espn.com/v2/sports/soccer/leagues/eng.1?lang=en&region=us"
+      },
+      {
+        "$ref": "http://sports.core.api.espn.com/v2/sports/soccer/leagues/global.u20.intercontinental_cup?lang=en&region=us"
+      },
+      {
+        "$ref": "http://sports.core.api.espn.com/v2/sports/soccer/leagues/fifa.intercontinental_cup?lang=en&region=us"
+      },
+      {
+        "$ref": "http://sports.core.api.espn.com/v2/sports/soccer/leagues/fifa.intercontinental.cup?lang=en&region=us"
+      }
+    ]
+  }
+}
