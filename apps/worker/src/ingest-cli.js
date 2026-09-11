@@ -1,5 +1,5 @@
 import { config } from '@nichedb/config';
-import { ensureDefaults, runSource } from '@nichedb/core';
+import { ensureDefaults, envFor, runSource } from '@nichedb/core';
 import { close } from '@nichedb/db';
 import { migrate } from '@nichedb/db/migrate';
 import * as q from '@nichedb/db/queries';
@@ -9,7 +9,7 @@ import * as q from '@nichedb/db/queries';
  * No arguments runs everything that is enabled.
  */
 await migrate({ log: () => {} });
-await ensureDefaults({ env: config.adapters, log: () => {} });
+await ensureDefaults({ env: envFor(), log: () => {} });
 const wanted = process.argv.slice(2);
 const sources = await q.listSources({ all: true });
 const chosen = wanted.length

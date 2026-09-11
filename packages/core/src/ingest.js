@@ -8,7 +8,7 @@ const UA = () =>
   `niche-db/0.1 (+${config.siteUrl}${config.contactEmail ? `; ${config.contactEmail}` : ''})`;
 
 /** Deployment secrets adapters may ask for, by the keys their configFields name. */
-function envFor() {
+export function envFor() {
   return {
     tmdbApiKey: config.adapters.tmdbApiKey,
     sportsProxyUrl: config.adapters.sportsProxyUrl,

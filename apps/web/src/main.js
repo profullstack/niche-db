@@ -1,5 +1,5 @@
 import { assertCoinpayMerchantKey, config } from '@nichedb/config';
-import { ensureDefaults } from '@nichedb/core';
+import { ensureDefaults, envFor } from '@nichedb/core';
 import { close as closeDb, healthcheck, sql } from '@nichedb/db';
 import { migrate } from '@nichedb/db/migrate';
 import { configurePayments } from '@nichedb/payments';
@@ -33,7 +33,7 @@ async function preflight(what, fn) {
 
 await preflight('postgres', () => migrate());
 if (!(await healthcheck())) throw new Error('database healthcheck failed at boot');
-await ensureDefaults({ env: config.adapters });
+await ensureDefaults({ env: envFor() });
 
 let workers = [];
 if (config.roles.includes('worker')) {
