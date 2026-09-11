@@ -911,13 +911,23 @@ describe('espn-catalogue pull', () => {
   });
 });
 
+/**
+ * The schedule adapter reads the real clock, so a board copied from ESPN on a
+ * given day is a board of games already played once that day has gone. Move
+ * every game two days ahead of now for the tests that need it upcoming.
+ */
+function soon(board) {
+  const when = new Date(Date.now() + 2 * 86_400_000).toISOString();
+  return { ...board, events: (board.events ?? []).map((e) => ({ ...e, date: when })) };
+}
+
 describe('espn-schedule pull', () => {
   test('sweeps the horizon on the first run of the day, then only the near window', async () => {
     const boards = [];
     const http = fakeEspn({
       onScoreboard: (url) => {
         boards.push(url);
-        return url.includes('football/nfl') ? json(nfl) : json({ events: [] });
+        return url.includes('football/nfl') ? json(soon(nfl)) : json({ events: [] });
       },
     });
     const config = { ...espnSchedule.defaults };

@@ -111,6 +111,7 @@ describe('alpaca-assets', () => {
     expect(item.publishedAt).toBeNull();
     expect(item.tags).toEqual([
       'symbol',
+      'symbol:aapl',
       'exchange:nasdaq',
       'class:us_equity',
       'tradable',
@@ -135,7 +136,7 @@ describe('alpaca-assets', () => {
 
   test('an OTC name is tagged otc and carries no flag it does not have', () => {
     const item = assetToItem(PINK);
-    expect(item.tags).toEqual(['symbol', 'exchange:otc', 'class:us_equity', 'otc']);
+    expect(item.tags).toEqual(['symbol', 'symbol:tsnpd', 'exchange:otc', 'class:us_equity', 'otc']);
     expect(item.data.attributes).toEqual([]);
   });
 

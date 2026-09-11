@@ -175,10 +175,10 @@ roughly 260 MB a day of JSON, most of it Kraken's ticker and Binance.US's.
 Instead of `discoverPairs()`:
 
 ```
-GET /api/v1/items?collection=crypto&kind=pair&tags=stable-quote&limit=2500
+GET /api/v1/items?collection=crypto&kind=pair&tags=stable-quote&limit=200&sort=id&order=asc&after=<last id>
 ```
 
-then group by `data.base` across `data.venue`. Each row carries the venue's
+(a page is at most 200 rows, so walk the keyset until a short page: about seven pages for the dollar-quoted pairs, three for the assets) then group by `data.base` across `data.venue`. Each row carries the venue's
 `volume24hQuote` (dollars, since the quote is a dollar stable) and `priceUsd`,
 so the old `$50k per venue` and `on at least two venues` rules are a filter
 over that grouping: keep a base whose rows on two or more venues each have
@@ -190,7 +190,7 @@ everywhere.
 For the market-cap floor:
 
 ```
-GET /api/v1/items?collection=crypto&kind=asset&limit=500
+GET /api/v1/items?collection=crypto&kind=asset&limit=200&sort=id&order=asc&after=<last id>
 ```
 
 keyed by `data.symbol` (upper-cased to match `base`), `data.marketCapUsd >=

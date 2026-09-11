@@ -112,6 +112,7 @@ export function assetToItem(a) {
     precision: 'day',
     tags: [
       'symbol',
+      `symbol:${String(a.symbol).toLowerCase()}`,
       `exchange:${exchange}`,
       `class:${assetClass}`,
       a.tradable ? 'tradable' : null,
