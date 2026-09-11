@@ -335,6 +335,13 @@ export async function insertSource({
     on conflict (slug) do update set
       name = excluded.name,
       description = coalesce(excluded.description, sources.description),
+      -- A source seeded off because its key was missing turns on when the key
+      -- arrives: it has never run, so nobody chose to stop it. One that has
+      -- run keeps whatever it was set to, since that may be a person's choice.
+      enabled = case
+        when sources.run_count = 0 and sources.last_run_at is null then excluded.enabled
+        else sources.enabled
+      end,
       updated_at = now()
     returning *, (xmax = 0) as created
   `;
@@ -585,6 +592,33 @@ export async function claimedDedupeKeys({ collectionId, sourceId, keys }) {
       and i.dedupe_key = any(${pgArray(list)}::text[])
   `;
   return new Set(rows.map((r) => r.dedupe_key));
+}
+
+/**
+ * The `data` this source last wrote for these external ids, keyed by id.
+ *
+ * Adapters emit whole items, so one that keeps a window of history per item
+ * (four hundred daily bars a symbol) must read the window back before it can
+ * extend it -- carrying 8k windows in the cursor is out of the question. This
+ * is deliberately narrow: this source's own rows, `data` only, nothing that
+ * lets an adapter read across sources. Chunked so a batch of ids never becomes
+ * one enormous statement, and `pgArray` for the reason `claimedDedupeKeys`
+ * explains at length.
+ *
+ * @returns {Promise<Map<string, object>>} absent ids are simply not in the map
+ */
+export async function previousItemData({ sourceId, externalIds }) {
+  const ids = [...new Set((externalIds ?? []).map((v) => String(v ?? '')).filter(Boolean))];
+  const out = new Map();
+  for (let i = 0; i < ids.length; i += 500) {
+    const rows = await sql`
+      select external_id, data from items
+      where source_id = ${sourceId}
+        and external_id = any(${pgArray(ids.slice(i, i + 500))}::text[])
+    `;
+    for (const r of rows) out.set(r.external_id, r.data ?? {});
+  }
+  return out;
 }
 
 const itemColumns = sql`

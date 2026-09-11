@@ -141,6 +141,16 @@ export const config = {
     alpacaKeyId: opt('APCA_API_KEY_ID'),
     alpacaSecretKey: opt('APCA_API_SECRET_KEY'),
     /**
+     * Which tape the price history reads: `iex` (free, one venue) or `sip`
+     * (the consolidated tape, a paid data plan). A source's own `feed` config
+     * overrides it.
+     */
+    alpacaFeed: opt('APCA_FEED', 'iex'),
+    /** CoinGecko demo key, optional; keyless works at ~30 requests a minute. Sent as x-cg-demo-api-key. */
+    coingeckoApiKey: opt('COINGECKO_API_KEY'),
+    /** Binance.US answers a datacenter with 403/451; a residential proxy for that one host. Optional. */
+    cryptoProxyUrl: opt('CRYPTO_PROXY_URL'),
+    /**
      * api.data.gov, for the FBI's crime estimates by state.
      *
      * One free key covers every federal API behind api.data.gov, so it is

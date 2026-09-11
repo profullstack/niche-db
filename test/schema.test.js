@@ -986,3 +986,49 @@ describe('the podcasts cadence migration', () => {
     expect(again).toEqual({ commercial: 15, self_hosted: 30 });
   });
 });
+
+describe('a source seeded off for a missing key', () => {
+  test('turns on when the key arrives, unless somebody chose to stop it', async () => {
+    const c = await one(
+      `insert into collections (slug, name) values ('markets', 'Markets')
+       on conflict (slug) do update set name = excluded.name returning id`,
+    );
+    // Never ran, seeded off (no key); ran and was switched off by a person;
+    // never ran and on, but the key has since gone missing.
+    for (const [slug, enabled, runs] of [
+      ['alpaca-never-ran', false, 0],
+      ['alpaca-stopped', false, 3],
+      ['alpaca-key-gone', true, 0],
+    ]) {
+      await db.query(
+        `insert into sources (collection_id, adapter, slug, name, enabled, run_count, last_run_at)
+         values ($1, 'alpaca-news', $2, $2, $3, $4, case when $4 > 0 then now() else null end)`,
+        [c.id, slug, enabled, runs],
+      );
+    }
+    // Exactly the conflict clause insertSource runs, with what the seed now knows.
+    const reseed = (slug, enabled) =>
+      db.query(
+        `insert into sources (collection_id, adapter, slug, name, enabled)
+         values ($1, 'alpaca-news', $2, $2, $3)
+         on conflict (slug) do update set
+           name = excluded.name,
+           enabled = case
+             when sources.run_count = 0 and sources.last_run_at is null then excluded.enabled
+             else sources.enabled
+           end,
+           updated_at = now()`,
+        [c.id, slug, enabled],
+      );
+    await reseed('alpaca-never-ran', true);
+    await reseed('alpaca-stopped', true);
+    await reseed('alpaca-key-gone', false);
+    const after = await one(
+      `select
+         (select enabled from sources where slug = 'alpaca-never-ran') as never_ran,
+         (select enabled from sources where slug = 'alpaca-stopped') as stopped,
+         (select enabled from sources where slug = 'alpaca-key-gone') as key_gone`,
+    );
+    expect(after).toEqual({ never_ran: true, stopped: false, key_gone: false });
+  });
+});

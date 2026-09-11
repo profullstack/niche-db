@@ -106,6 +106,12 @@ export const COLLECTIONS = [
       'Every market venue in the world from the ISO 10383 register, across 149 countries, and the events that move the ones we have data for: US dividends, splits, mergers and spin-offs, trading halts as they are declared, the market news wire, and the ECB’s daily euro reference rates.',
   },
   {
+    slug: 'crypto',
+    name: 'Crypto',
+    description:
+      'The crypto universe as the market prices it: every asset CoinGecko ranks by market cap with its price, supply and all-time high, and every spot pair on the four US venues that matter, Kraken, Coinbase, Binance.US and Gemini, each with its 24-hour ticker: price, bid and ask, high, low, change and volume. One row per pair per venue, refreshed every five minutes, so the same coin can be read across venues side by side.',
+  },
+  {
     slug: 'crime',
     name: 'Crime',
     description:
@@ -420,6 +426,71 @@ export const DEFAULT_FEEDS = [
     slug: 'fx-rates',
     name: 'Euro FX reference rates',
     query: { kinds: ['fx-rate'] },
+  },
+  {
+    collection: 'crypto',
+    slug: 'top-100',
+    name: 'Top 100 by market cap',
+    query: { kinds: ['asset'], tags: ['rank:top100'] },
+  },
+  {
+    collection: 'crypto',
+    slug: 'all-assets',
+    name: 'Every asset by market cap',
+    query: { kinds: ['asset'] },
+  },
+  {
+    collection: 'crypto',
+    slug: 'pairs-kraken',
+    name: 'Kraken spot pairs',
+    query: { kinds: ['pair'], tags: ['venue:kraken'] },
+  },
+  {
+    collection: 'crypto',
+    slug: 'pairs-coinbase',
+    name: 'Coinbase spot pairs',
+    query: { kinds: ['pair'], tags: ['venue:coinbase'] },
+  },
+  {
+    collection: 'crypto',
+    slug: 'pairs-binance-us',
+    name: 'Binance.US spot pairs',
+    query: { kinds: ['pair'], tags: ['venue:binance-us'] },
+  },
+  {
+    collection: 'crypto',
+    slug: 'pairs-gemini',
+    name: 'Gemini spot pairs',
+    query: { kinds: ['pair'], tags: ['venue:gemini'] },
+  },
+  {
+    collection: 'crypto',
+    slug: 'usd-pairs',
+    name: 'Dollar-quoted pairs, every venue',
+    query: { kinds: ['pair'], tags: ['stable-quote'] },
+  },
+  {
+    collection: 'markets',
+    slug: 'us-symbols',
+    name: 'US symbols',
+    description: 'Every tradable US equity and crypto asset Alpaca lists, refreshed daily.',
+    query: { kinds: ['symbol'] },
+  },
+  {
+    collection: 'markets',
+    slug: 'price-history',
+    name: 'Price history',
+    description:
+      'Four hundred daily bars for every active US equity, one item a symbol, refreshed after each session settles.',
+    query: { kinds: ['history'] },
+  },
+  {
+    collection: 'markets',
+    slug: 'fundamentals',
+    name: 'Fundamentals',
+    description:
+      'Revenue, income, EPS, assets, cash and shares from every SEC filer’s XBRL facts, one item a company, walked weekly.',
+    query: { kinds: ['fundamentals'] },
   },
   {
     collection: 'markets',

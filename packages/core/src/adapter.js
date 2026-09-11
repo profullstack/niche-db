@@ -37,6 +37,8 @@ import { canonicalUrl } from './canonical.js';
  * @property {(msg: string) => void} log
  * @property {number} budget        detail lookups this run may spend
  * @property {number} deadline      Date.now() past which the adapter should return
+ * @property {(externalIds: string[]) => Promise<Map<string, object>>} previous
+ *                                  the `data` this source last wrote for those ids
  *
  * @typedef {object} PullResult
  * @property {Item[]} items

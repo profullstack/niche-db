@@ -1,0 +1,46 @@
+{
+  "timezone": "UTC",
+  "serverTime": 1789107133725,
+  "symbols": [
+    {
+      "symbol": "BTCUSD4",
+      "status": "BREAK",
+      "baseAsset": "BTC",
+      "quoteAsset": "USD4",
+      "isSpotTradingAllowed": true,
+      "permissions": []
+    },
+    {
+      "symbol": "ETHUSDT",
+      "status": "TRADING",
+      "baseAsset": "ETH",
+      "quoteAsset": "USDT",
+      "isSpotTradingAllowed": true,
+      "permissions": []
+    },
+    {
+      "symbol": "ETHBTC",
+      "status": "TRADING",
+      "baseAsset": "ETH",
+      "quoteAsset": "BTC",
+      "isSpotTradingAllowed": true,
+      "permissions": []
+    },
+    {
+      "symbol": "SOLUSDC",
+      "status": "TRADING",
+      "baseAsset": "SOL",
+      "quoteAsset": "USDC",
+      "isSpotTradingAllowed": true,
+      "permissions": []
+    },
+    {
+      "symbol": "BTCUSD",
+      "status": "TRADING",
+      "baseAsset": "BTC",
+      "quoteAsset": "USD",
+      "isSpotTradingAllowed": true,
+      "permissions": []
+    }
+  ]
+}

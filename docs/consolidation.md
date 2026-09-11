@@ -174,3 +174,9 @@ little when `league` agrees with the fixture's `league:` tag or
 `data.league.abbreviation`; one side matched scores 0.45, under the 0.5 floor a
 player applies. When no fixture answers and `kind=fixture` was not asked for,
 the plain match runs on the name as a channel.
+
+## `markets` additions and `crypto` (from advis0r.com and b1dz.com)
+
+The tradable symbol directory, daily price history and SEC XBRL fundamentals
+are documented in [markets.md](markets.md); the crypto universe (assets by
+market cap, spot pairs per venue with their 24h ticker) in [crypto.md](crypto.md).
