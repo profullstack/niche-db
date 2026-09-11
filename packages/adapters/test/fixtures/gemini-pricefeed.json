@@ -1,0 +1,47 @@
+[
+  {
+    "pair": "DRIFTRLUSD",
+    "price": "0.0111",
+    "percentChange24h": "-0.0672"
+  },
+  {
+    "pair": "BTCUSDCPERP",
+    "price": "77353.5",
+    "percentChange24h": "-0.0150"
+  },
+  {
+    "pair": "BTCUSD",
+    "price": "77274.71",
+    "percentChange24h": "-0.0130"
+  },
+  {
+    "pair": "SOLUSDC",
+    "price": "99.845",
+    "percentChange24h": "-0.0190"
+  },
+  {
+    "pair": "ETHUSD",
+    "price": "2467.9",
+    "percentChange24h": "-0.0031"
+  },
+  {
+    "pair": "AAVEGUSD",
+    "price": "122.9155",
+    "percentChange24h": "-0.0192"
+  },
+  {
+    "pair": "ETHGBP",
+    "price": "1449.96",
+    "percentChange24h": "0.0000"
+  },
+  {
+    "pair": "2ZUSD",
+    "price": "0.050816",
+    "percentChange24h": "0.0000"
+  },
+  {
+    "pair": "EFILFIL",
+    "price": "1",
+    "percentChange24h": "0.0000"
+  }
+]

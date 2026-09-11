@@ -14,10 +14,12 @@ import { coopsWaterLevels } from './coops.js';
 import { courtlistener } from './courtlistener.js';
 import { crates } from './crates.js';
 import { crossref } from './crossref.js';
+import { coingeckoAssets, cryptoPairs } from './crypto.js';
 import { droughtMonitor } from './droughtmonitor.js';
 import { ecbFxRates } from './ecb.js';
 import { edgar } from './edgar.js';
 import { eonetEvents } from './eonet.js';
+import { alpacaAssets, equityHistory, secFundamentals } from './equities.js';
 import { espnCatalogue, espnLive, espnSchedule } from './espn.js';
 import { espnPlays } from './espnplays.js';
 import { eurostat } from './eurostat.js';
@@ -93,6 +95,11 @@ export const ADAPTERS = [
   isoMicExchanges,
   alpacaCorporateActions,
   alpacaNews,
+  alpacaAssets,
+  equityHistory,
+  secFundamentals,
+  coingeckoAssets,
+  cryptoPairs,
   nasdaqHalts,
   ecbFxRates,
   socrataCrime,

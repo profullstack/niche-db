@@ -20,6 +20,9 @@ function envFor() {
     courtlistenerToken: config.adapters.courtlistenerToken,
     alpacaKeyId: config.adapters.alpacaKeyId,
     alpacaSecretKey: config.adapters.alpacaSecretKey,
+    alpacaFeed: config.adapters.alpacaFeed,
+    coingeckoApiKey: config.adapters.coingeckoApiKey,
+    cryptoProxyUrl: config.adapters.cryptoProxyUrl,
     dataGovApiKey: config.adapters.dataGovApiKey,
     blsApiKey: config.adapters.blsApiKey,
     contactEmail: config.contactEmail,
@@ -78,6 +81,9 @@ export async function runSource(sourceId, { log = console.log } = {}) {
       log: l,
       budget: config.ingest.budget,
       deadline: started + config.ingest.runDeadlineMs,
+      // What this source wrote last time for these ids, so an adapter that
+      // keeps a rolling window per item can extend it rather than restate it.
+      previous: (externalIds) => q.previousItemData({ sourceId: source.id, externalIds }),
     });
 
     const pulled = (result?.items ?? []).map(normaliseItem).filter(Boolean);

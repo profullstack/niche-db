@@ -49,6 +49,7 @@ describe('registry', () => {
         'ai-incidents',
         'research',
         'markets',
+        'crypto',
         'crime',
         'public-money',
         'weather',
