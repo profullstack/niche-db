@@ -1,0 +1,10 @@
+{
+  "name": "@nichedb/premium",
+  "version": "0.8.2",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.js",
+    "./comparison": "./src/comparison.js"
+  }
+}

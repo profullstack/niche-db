@@ -1,6 +1,7 @@
 import { config } from '@nichedb/config';
 import * as agents from '@nichedb/db/agents';
 import * as k from '@nichedb/db/knowledge';
+import * as premiumDb from '@nichedb/db/premium';
 import {
   CONTRIBUTION_EVENT_TYPES,
   isKnownEventType,
@@ -421,7 +422,20 @@ export function registerKnowledge(app) {
     if (slug.startsWith('@')) {
       const influencer = await k.influencerByHandle(slug.slice(1));
       if (!influencer) return c.notFound();
-      return c.html(await render(<InfluencerPage user={c.get('user')} influencer={influencer} />));
+      // The badge is a fact about the person whose page this is, not about who
+      // is reading it, so it is looked up for them rather than taken off the
+      // request. A lapsed membership is no badge, because the lookup only ever
+      // returns unexpired terms.
+      const plans = await premiumDb.plansForUsers([influencer.id]).catch(() => ({}));
+      return c.html(
+        await render(
+          <InfluencerPage
+            user={c.get('user')}
+            influencer={influencer}
+            plan={plans[influencer.id] ?? 'free'}
+          />,
+        ),
+      );
     }
 
     if (isReservedNicheSlug(slug)) return c.notFound();
@@ -433,10 +447,19 @@ export function registerKnowledge(app) {
         k.listTiers(),
         k.listContributions({ nicheId: niche.id, status: 'verified', limit: 15 }),
       ]);
+      // One statement for the whole list, so a badge beside fifteen names is
+      // not fifteen extra queries.
+      const plans = await premiumDb
+        .plansForUsers([
+          ...contributions.map((e) => e.influencer_id),
+          ...members.map((m) => m.user_id),
+        ])
+        .catch(() => ({}));
       return render(
         <NichePage
           user={c.get('user')}
           niche={niche}
+          plans={plans}
           members={members}
           tiers={tiers}
           contributions={contributions}

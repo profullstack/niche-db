@@ -19,6 +19,7 @@ packages/
   knowledge/   the Knowledge Influencer domain: pure, no database, no HTTP
   notify/      email, push, signed webhooks
   payments/    CoinPay, memberships, referrals
+  premium/     what a plan is worth: pure, no database, no HTTP
   queue/       BullMQ wiring
 ```
 

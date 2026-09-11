@@ -1,5 +1,6 @@
 import { config } from '@nichedb/config';
 import * as q from '@nichedb/db/queries';
+import { APP_ICONS, appIconFor } from '@nichedb/premium';
 import { assetUrl, isCurrentVersion, loadAssetVersions } from '../lib/asset-version.js';
 import { llmsTxt } from '../lib/llms.js';
 
@@ -16,6 +17,7 @@ const VERSIONED_ICONS = [
   ...[76, 120, 144, 152, 180].map((s) => `icons/apple-touch-icon-${s}x${s}.png`),
   ...[48, 128, 192, 256, 384, 512].map((s) => `icons/icon-${s}x${s}.png`),
   ...[192, 512].map((s) => `icons/icon-${s}x${s}-maskable.png`),
+  ...APP_ICONS.filter((i) => !i.free).map((i) => i.file),
 ];
 const ICON_TYPES = {
   png: 'image/png',
@@ -65,8 +67,25 @@ export function registerStatic(app, gateway) {
     return c.body(await f.arrayBuffer());
   });
 
-  app.get('/manifest.webmanifest', (c) =>
-    c.json({
+  /**
+   * The installed app's manifest.
+   *
+   * A member's chosen icon is added at the front, which is what makes "and in
+   * the installed app" true rather than decorative: an installed PWA takes its
+   * home-screen icon from here, so the choice has to be in this document and
+   * not only in the page's <link rel=icon>. The stock icons stay behind it, so
+   * a lapsed membership installs exactly what it always did.
+   */
+  app.get('/manifest.webmanifest', (c) => {
+    const chosen = appIconFor({
+      plan: c.get('plan') ?? 'free',
+      icon: c.get('user')?.premium_icon,
+    });
+    const memberIcon =
+      chosen === APP_ICONS[0].file
+        ? []
+        : [{ src: assetUrl(chosen), sizes: 'any', type: 'image/svg+xml', purpose: 'any' }];
+    return c.json({
       name: config.siteName,
       short_name: config.siteName,
       description: 'Sources in, feeds out. An open, ever-growing database of real-time data.',
@@ -75,6 +94,7 @@ export function registerStatic(app, gateway) {
       background_color: '#12161f',
       theme_color: '#12161f',
       icons: [
+        ...memberIcon,
         ...[48, 128, 192, 256, 384, 512].map((s) => ({
           src: assetUrl(`icons/icon-${s}x${s}.png`),
           sizes: `${s}x${s}`,
@@ -88,8 +108,8 @@ export function registerStatic(app, gateway) {
           purpose: 'maskable',
         })),
       ],
-    }),
-  );
+    });
+  });
 
   app.get('/robots.txt', (c) =>
     c.text(

@@ -17,6 +17,7 @@
     "@nichedb/knowledge": "workspace:*",
     "@nichedb/notify": "workspace:*",
     "@nichedb/payments": "workspace:*",
+    "@nichedb/premium": "workspace:*",
     "@nichedb/queue": "workspace:*",
     "@profullstack/leaderboard": "^0.3.0",
     "@profullstack/nichedb": "workspace:*",

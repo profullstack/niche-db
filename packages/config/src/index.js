@@ -105,6 +105,8 @@ export const config = {
     /** Requests per hour by tier. Anonymous is by address, keyed is by key. */
     anonPerHour: num('API_ANON_PER_HOUR', 600),
     freePerHour: num('API_FREE_PER_HOUR', 6000),
+    /** Premium sits between a free key and the operator tier. */
+    premiumPerHour: num('API_PREMIUM_PER_HOUR', 30_000),
     proPerHour: num('API_PRO_PER_HOUR', 120_000),
   },
 
@@ -177,6 +179,28 @@ export const config = {
     priceCents: num('MEMBERSHIP_PRICE_CENTS', 12000),
     currency: opt('MEMBERSHIP_CURRENCY', 'USD'),
     termDays: num('MEMBERSHIP_TERM_DAYS', 30),
+    get enabled() {
+      return Boolean(config.coinpay.enabled);
+    },
+  },
+
+  /**
+   * Premium: the tier a person buys, at the house price of a dollar a day.
+   *
+   * A day is the unit everything else on this site is already priced in (a
+   * crawl pass is a dollar a day, a vehicle lookup is a dollar a day), so the
+   * month and the year are that same day rate with the discount for paying up
+   * front made explicit: 30 days for $30, and a year for the price of ten
+   * months. Sold through CoinPay for a term, or over x402 for a single day
+   * with no account at all.
+   */
+  premium: {
+    dayCents: num('PREMIUM_DAY_CENTS', 100),
+    monthCents: num('PREMIUM_MONTH_CENTS', 3000),
+    yearCents: num('PREMIUM_YEAR_CENTS', 30000),
+    currency: opt('PREMIUM_CURRENCY', 'USD'),
+    /** Credits a member is granted on the first of each month. */
+    monthlyCredits: num('PREMIUM_MONTHLY_CREDITS', 1000),
     get enabled() {
       return Boolean(config.coinpay.enabled);
     },

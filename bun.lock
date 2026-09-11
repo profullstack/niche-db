@@ -12,14 +12,14 @@
     },
     "apps/cli": {
       "name": "@profullstack/nichedb",
-      "version": "0.3.1",
+      "version": "0.8.2",
       "bin": {
         "nichedb": "./bin/nichedb.js",
       },
     },
     "apps/web": {
       "name": "@nichedb/web",
-      "version": "0.3.1",
+      "version": "0.8.2",
       "dependencies": {
         "@nichedb/auth": "workspace:*",
         "@nichedb/config": "workspace:*",
@@ -29,6 +29,7 @@
         "@nichedb/knowledge": "workspace:*",
         "@nichedb/notify": "workspace:*",
         "@nichedb/payments": "workspace:*",
+        "@nichedb/premium": "workspace:*",
         "@nichedb/queue": "workspace:*",
         "@profullstack/leaderboard": "^0.3.0",
         "@profullstack/nichedb": "workspace:*",
@@ -41,7 +42,7 @@
     },
     "apps/worker": {
       "name": "@nichedb/worker",
-      "version": "0.3.1",
+      "version": "0.8.2",
       "dependencies": {
         "@nichedb/config": "workspace:*",
         "@nichedb/core": "workspace:*",
@@ -52,14 +53,14 @@
     },
     "packages/adapters": {
       "name": "@nichedb/adapters",
-      "version": "0.3.1",
+      "version": "0.8.2",
       "dependencies": {
         "@nichedb/core": "workspace:*",
       },
     },
     "packages/auth": {
       "name": "@nichedb/auth",
-      "version": "0.3.1",
+      "version": "0.8.2",
       "dependencies": {
         "@nichedb/config": "workspace:*",
         "@nichedb/db": "workspace:*",
@@ -69,11 +70,11 @@
     },
     "packages/config": {
       "name": "@nichedb/config",
-      "version": "0.3.1",
+      "version": "0.8.2",
     },
     "packages/core": {
       "name": "@nichedb/core",
-      "version": "0.3.1",
+      "version": "0.8.2",
       "dependencies": {
         "@nichedb/adapters": "workspace:*",
         "@nichedb/config": "workspace:*",
@@ -83,7 +84,7 @@
     },
     "packages/db": {
       "name": "@nichedb/db",
-      "version": "0.3.1",
+      "version": "0.8.2",
       "dependencies": {
         "@nichedb/config": "workspace:*",
         "@nichedb/knowledge": "workspace:*",
@@ -91,18 +92,18 @@
     },
     "packages/enrichers": {
       "name": "@nichedb/enrichers",
-      "version": "0.3.1",
+      "version": "0.8.2",
       "dependencies": {
         "@nichedb/core": "workspace:*",
       },
     },
     "packages/knowledge": {
       "name": "@nichedb/knowledge",
-      "version": "0.3.1",
+      "version": "0.8.2",
     },
     "packages/notify": {
       "name": "@nichedb/notify",
-      "version": "0.3.1",
+      "version": "0.8.2",
       "dependencies": {
         "@nichedb/config": "workspace:*",
         "@nichedb/db": "workspace:*",
@@ -112,15 +113,19 @@
     },
     "packages/payments": {
       "name": "@nichedb/payments",
-      "version": "0.3.1",
+      "version": "0.8.2",
       "dependencies": {
         "@profullstack/coinpay": "^0.8.0",
         "@profullstack/referrals": "^0.1.0",
       },
     },
+    "packages/premium": {
+      "name": "@nichedb/premium",
+      "version": "0.8.2",
+    },
     "packages/queue": {
       "name": "@nichedb/queue",
-      "version": "0.3.1",
+      "version": "0.8.2",
       "dependencies": {
         "@nichedb/config": "workspace:*",
         "@nichedb/core": "workspace:*",
@@ -260,6 +265,8 @@
     "@nichedb/notify": ["@nichedb/notify@workspace:packages/notify"],
 
     "@nichedb/payments": ["@nichedb/payments@workspace:packages/payments"],
+
+    "@nichedb/premium": ["@nichedb/premium@workspace:packages/premium"],
 
     "@nichedb/queue": ["@nichedb/queue@workspace:packages/queue"],
 

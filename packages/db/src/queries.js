@@ -211,10 +211,19 @@ export async function pushSubscriptionCount(userId) {
 
 /* -------------------------------------------------------------- membership -- */
 
-export async function activeMembership(userId) {
+/**
+ * The unexpired term that makes somebody Pro.
+ *
+ * Plan-scoped on purpose. `memberships` now holds Premium terms too, and an
+ * unfiltered "do they have a membership" would hand a $30 Premium member the
+ * $120 operator tier — the crawl pass, the top API allowance and the rest — on
+ * the strength of a row existing. Pass a plan to ask about a different one.
+ */
+export async function activeMembership(userId, { plan = 'pro' } = {}) {
   if (!userId) return null;
   const [row] = await sql`
-    select * from memberships where user_id = ${userId} and expires_at > now()
+    select * from memberships
+    where user_id = ${userId} and expires_at > now() and plan = ${plan}
     order by expires_at desc limit 1
   `;
   return row ?? null;
@@ -623,7 +632,7 @@ export async function previousItemData({ sourceId, externalIds }) {
 
 const itemColumns = sql`
   i.*, s.slug as source_slug, s.name as source_name, s.adapter,
-  c.slug as collection_slug, c.name as collection_name
+  c.slug as collection_slug, c.name as collection_name, c.early_access
 `;
 
 export async function getItem(id) {

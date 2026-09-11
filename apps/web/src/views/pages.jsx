@@ -12,6 +12,7 @@ import {
 } from './components.jsx';
 import { EnrichmentBlocks } from './enrichment.jsx';
 import { Layout } from './Layout.jsx';
+import { AwardForm, AwardPills, PlanBadge } from './premium.jsx';
 
 export const Landing = ({ user, stats, collections, latest, feeds }) => (
   <Layout user={user} canonical="/">
@@ -297,7 +298,15 @@ export function describeQuery(q) {
   return parts.length ? parts.join(' · ') : 'the whole collection';
 }
 
-export const ItemPage = ({ user, item, enrichers }) => (
+export const ItemPage = ({
+  user,
+  item,
+  enrichers,
+  plan = 'free',
+  awardCounts = [],
+  awards = [],
+  balance = 0,
+}) => (
   <Layout
     user={user}
     title={item.title}
@@ -323,6 +332,14 @@ export const ItemPage = ({ user, item, enrichers }) => (
         ) : null}
       </p>
       {item.summary ? <p class="lede">{item.summary}</p> : null}
+      <AwardPills counts={awardCounts} />
+      <AwardForm
+        targetType="item"
+        targetId={item.id}
+        awards={awards}
+        plan={plan}
+        balance={balance}
+      />
       <Tags tags={item.tags} collection={item.collection_slug} limit={40} />
       <EnrichmentBlocks
         enrichment={Object.fromEntries(
@@ -463,6 +480,8 @@ export const Settings = ({
   passkeys,
   apiKeys,
   newKey,
+  plan = 'free',
+  balance = 0,
   notice,
   error,
   pro,
@@ -585,6 +604,27 @@ export const Settings = ({
       </form>
     </section>
 
+    {/* The profile is the second place the upsell belongs: somebody looking at
+        their own account is the person deciding what it should be. */}
+    <section class="panel">
+      <h2>Your plan</h2>
+      <p class="stats">
+        {plan === 'free' ? 'Free' : plan} <PlanBadge plan={plan} />
+        {plan !== 'free' ? <span class="muted small"> · {balance} credits</span> : null}
+      </p>
+      {plan === 'free' ? (
+        <p class="small">
+          Free pages and feeds carry an ad and a tracker. <a href="/premium">Premium</a> turns both
+          off and opens the Lounge, the credits, the themes and early access for $
+          {(config.premium.dayCents / 100).toFixed(2)} a day.
+        </p>
+      ) : (
+        <p class="small">
+          <a href="/lounge">The Lounge</a> · <a href="/premium">manage or extend</a>
+        </p>
+      )}
+    </section>
+
     <section class="panel">
       <h2>Pro</h2>
       {pro ? (
@@ -686,6 +726,13 @@ export const ProPage = ({ user, pro, enabled, price, notice, error }) => (
       Just an agent? No account needed: a crawl pass is ${(config.x402.priceCents / 100).toFixed(2)}{' '}
       a day for everything at <a href="/crawl">/crawl</a>, paid over x402, and the more you have
       paid here the less a day costs.
+    </p>
+    <p class="muted small">
+      Reading rather than crawling? <a href="/premium">Premium</a> is $
+      {(config.premium.dayCents / 100).toFixed(2)} a day or $
+      {(config.premium.monthCents / 100).toFixed(0)} a month: everything above except the operator
+      limits and the term-long crawl pass, plus the Lounge, the credits, the themes and early
+      access.
     </p>
     {enabled ? (
       user ? (

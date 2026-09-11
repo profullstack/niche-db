@@ -81,8 +81,8 @@ async function meterLookup(c, { charge = true } = {}) {
       error: `${limit} vehicle lookups an hour are free. Past that a lookup needs a pass.`,
       pricing: {
         day: { cents: config.automotive.dayCents, get: `${config.siteUrl}/api/v1/crawl-pass` },
-        month: { cents: config.automotive.monthlyCents, get: `${config.siteUrl}/pro` },
-        note: 'A crawl pass is bought over x402 and presented as `x-crawl-pass`. Pro includes it for the term.',
+        month: { cents: config.premium.monthCents, get: `${config.siteUrl}/premium` },
+        note: 'A crawl pass is bought over x402 and presented as `x-crawl-pass`. Premium and Pro both include these lookups for the term.',
       },
       free: {
         note: 'The recall, complaint, rating and catalogue feeds are free and unmetered.',
@@ -106,7 +106,7 @@ export function registerAutomotive(app) {
       const seenBefore = await auto.getVin(vin).catch(() => null);
       const blocked = await meterLookup(c, { charge: !seenBefore });
       if (blocked) {
-        error = `Free lookups for this hour are used up. A pass is $${(config.automotive.dayCents / 100).toFixed(2)} a day, or Pro at $${(config.automotive.monthlyCents / 100).toFixed(0)} a month.`;
+        error = `Free lookups for this hour are used up. Premium is $${(config.premium.dayCents / 100).toFixed(2)} a day or $${(config.premium.monthCents / 100).toFixed(0)} a month and includes them.`;
       } else {
         // `?part=` narrows the parts searches. The JSON endpoint already
         // honoured it; the page was dropping it on the floor.

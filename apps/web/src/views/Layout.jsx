@@ -1,11 +1,23 @@
 import { config } from '@nichedb/config';
+import { appIconFor, themeFor } from '@nichedb/premium';
 import { html } from 'hono/html';
 import { assetUrl } from '../lib/asset-version.js';
 import { currentModules } from '../lib/modules.js';
 
-/** The single HTML shell. Every page renders through here. */
+/**
+ * The single HTML shell. Every page renders through here.
+ *
+ * The theme and the icon are a member's, and both go through the domain
+ * package rather than being read straight off the user row: a stored theme
+ * belonging to a membership that has lapsed resolves back to the default, so
+ * the appearance a page gets is always one the reader is currently entitled
+ * to. The same call is what makes an unknown value impossible to render.
+ */
 export const Layout = (props) => (
-  <html lang="en">
+  <html
+    lang="en"
+    data-theme={themeFor({ plan: currentModules().plan, theme: props.user?.premium_theme })}
+  >
     <head>
       <meta charset="utf-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -23,7 +35,11 @@ export const Layout = (props) => (
       />
       <meta name="theme-color" content="#12161f" />
       <link rel="manifest" href="/manifest.webmanifest" />
-      <link rel="icon" type="image/svg+xml" href={assetUrl('logo.svg')} />
+      <link
+        rel="icon"
+        type="image/svg+xml"
+        href={assetUrl(appIconFor({ plan: currentModules().plan, icon: props.user?.premium_icon }))}
+      />
       <link rel="icon" type="image/png" sizes="32x32" href={assetUrl('icons/favicon-32.png')} />
       <link rel="icon" type="image/png" sizes="16x16" href={assetUrl('icons/favicon-16.png')} />
       {[180, 152, 144, 120, 76].map((s) => (
@@ -77,7 +93,14 @@ export const Layout = (props) => (
       </a>
       <header class="topbar">
         <a class="brand" href="/">
-          <img src={assetUrl('logo.svg')} alt="" width="28" height="28" />
+          <img
+            src={assetUrl(
+              appIconFor({ plan: currentModules().plan, icon: props.user?.premium_icon }),
+            )}
+            alt=""
+            width="28"
+            height="28"
+          />
           <span>{config.siteName}</span>
         </a>
         <search class="topsearch">
@@ -105,6 +128,13 @@ export const Layout = (props) => (
           <a href="/vin">VIN</a>
           {props.user ? <a href="/following">Following</a> : null}
           <a href="/docs/api">API</a>
+          {currentModules().premium ? (
+            <a href="/lounge">Lounge</a>
+          ) : (
+            <a class="premium-link" href="/premium">
+              Premium
+            </a>
+          )}
           {props.user ? (
             <a href="/settings">Settings</a>
           ) : (
@@ -119,8 +149,20 @@ export const Layout = (props) => (
         {props.children}
       </main>
 
+      {/* The ad, and the offer to be rid of it. The upsell belongs exactly here
+          and nowhere else: the only honest moment to sell an ad-free tier is
+          beside the ad it removes. */}
       {config.ads.enabled && currentModules().ads ? (
-        <aside data-cp-ad data-slot={config.ads.slot} data-format="text_link" />
+        <aside class="ad-slot">
+          <div data-cp-ad data-slot={config.ads.slot} data-format="text_link" />
+          <p class="small muted upsell">
+            Ads and the tracker pay for the free tier.{' '}
+            <a href="/premium">
+              Premium turns both off for ${(config.premium.dayCents / 100).toFixed(2)} a day
+            </a>
+            .
+          </p>
+        </aside>
       ) : null}
 
       <footer>
@@ -131,7 +173,8 @@ export const Layout = (props) => (
         </p>
         <p class="muted">
           <a href="/about">About</a> · <a href="/docs/api">API</a> · <a href="/docs/cli">CLI</a> ·{' '}
-          <a href="/docs/mcp">MCP</a> · <a href="/llms.txt">llms.txt</a> · <a href="/pro">Pro</a> ·{' '}
+          <a href="/docs/mcp">MCP</a> · <a href="/llms.txt">llms.txt</a> ·{' '}
+          <a href="/premium">Premium</a> · <a href="/pro">Pro</a> ·{' '}
           <a href="/crawl">Crawl access</a> · <a href="/opportunities">Opportunities</a>
         </p>
       </footer>

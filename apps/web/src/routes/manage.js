@@ -5,7 +5,7 @@ import { sql } from '@nichedb/db';
 import * as q from '@nichedb/db/queries';
 import { enrichersFor } from '@nichedb/enrichers';
 import * as pay from '@nichedb/payments';
-import { grantMembership, MEMBERSHIP_KIND } from '@nichedb/payments/membership';
+import { grantMembership, MEMBERSHIP_KIND, PLANS } from '@nichedb/payments/membership';
 import {
   buildReferralUrl,
   codeFor,
@@ -24,6 +24,7 @@ import {
   setFlash,
   takeFlash,
 } from '../lib/http.js';
+import { premiumSnapshot } from '../lib/premium.js';
 import {
   addSource,
   canAddSources,
@@ -62,7 +63,7 @@ export function registerManage(app) {
   app.get('/sources/new', async (c) => {
     const user = requireUser(c);
     if (!(await canAddSources(user)))
-      throw new Denied('Adding a source needs an admin or Pro account here.');
+      throw new Denied('Adding your own sources comes with Premium. See /premium.');
     const adapter = c.req.query('adapter') ? adapterByName(c.req.query('adapter')) : null;
     return c.html(
       await render(
@@ -370,12 +371,13 @@ export function registerManage(app) {
 
   app.get('/settings', async (c) => {
     const user = requireUser(c);
-    const [passkeys, apiKeys, pro, terms, newKey] = await Promise.all([
+    const [passkeys, apiKeys, pro, terms, newKey, snapshot] = await Promise.all([
       q.listPasskeys(user.id),
       auth.listApiKeys(user.id),
       isProUser(user),
       q.membershipTerms(user.id, { limit: 3 }),
       takeFlash(c),
+      premiumSnapshot(c),
     ]);
     let referral = null;
     try {
@@ -396,6 +398,8 @@ export function registerManage(app) {
           apiKeys={apiKeys}
           newKey={newKey}
           pro={pro}
+          plan={snapshot.plan}
+          balance={snapshot.balance}
           terms={terms}
           referral={referral}
           vapidKey={config.push.publicKey || null}
@@ -443,6 +447,12 @@ export function registerManage(app) {
 
   /* ----------------------------------------------------------------- pro -- */
 
+  /**
+   * The terms a checkout is allowed to have bought. A webhook naming anything
+   * else gets the Pro term, never the number it asked for.
+   */
+  const TERM_DAYS = [30, 365, config.membership.termDays];
+
   app.post('/api/membership/buy', async (c) => {
     const user = requireUser(c);
     if (!config.membership.enabled)
@@ -459,6 +469,8 @@ export function registerManage(app) {
       description: `${config.siteName} Pro, ${config.membership.termDays} days`,
       metadata: {
         kind: MEMBERSHIP_KIND,
+        plan: 'pro',
+        term_days: String(config.membership.termDays),
         referral_code: price.code ?? '',
         list_price_cents: String(config.membership.priceCents),
       },
@@ -480,12 +492,22 @@ export function registerManage(app) {
     const result = await pay.settleWebhook(payload, {
       grant: async (tx, { meta, payment }) => {
         if (meta.kind !== MEMBERSHIP_KIND) return null;
+        // The plan and the term ride on the checkout's metadata, which is the
+        // only thing tying this webhook to what was bought. Both are validated
+        // rather than trusted: an unknown plan is Pro's price paid for Pro, and
+        // a term that is not one we sell falls back to the Pro term instead of
+        // minting whatever number arrived.
+        const plan = PLANS.includes(meta.plan) ? meta.plan : 'pro';
+        const days = TERM_DAYS.includes(Number(meta.term_days))
+          ? Number(meta.term_days)
+          : config.membership.termDays;
         const term = await grantMembership(tx, {
           userId: meta.user_id,
           paymentId: payment.id,
           priceCents: payment.amount_cents,
           currency: payment.currency,
-          termDays: config.membership.termDays,
+          termDays: days,
+          plan,
         });
         if (meta.referral_code) {
           await recordReferral(tx, {
