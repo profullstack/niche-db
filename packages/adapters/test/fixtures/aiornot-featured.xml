@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>AIorNot.vote — Featured media</title>
+    <link>https://aiornot.vote/search?featured=1</link>
+    <atom:link href="https://aiornot.vote/rss/featured.xml" rel="self" type="application/rss+xml" />
+    <description>Hand-picked featured media.</description>
+    <language>en</language>
+    <lastBuildDate>Sat, 12 Sep 2026 20:53:05 GMT</lastBuildDate>
+    <generator>AIorNot.vote</generator>
+    <item>
+      <title>AI or Not: Street</title>
+      <link>https://aiornot.vote/m/ai-or-not-street-2</link>
+      <guid isPermaLink="false">media:med_a4f2f47e9ea445ae8064b849d026c952</guid>
+      <pubDate>Tue, 07 Jul 2026 11:46:01 GMT</pubDate>
+      <category>photorealistic</category><category>image</category>
+      <enclosure url="https://aiornot.vote/media/ai-variants/mral20q6-v9ff33.webp" type="image/webp" />
+      <description><![CDATA[<img src="https://aiornot.vote/media/ai-variants/mral20q6-v9ff33.webp" alt="AI or Not: Street" />
+<p>Guess: AI or Not AI.</p>
+<p>No guesses yet — be the first.</p>
+<p>Tags: Photorealistic, Image</p>]]></description>
+    </item>
+    <item>
+      <title>AI or Not: Portrait</title>
+      <link>https://aiornot.vote/m/ai-or-not-portrait-1</link>
+      <guid isPermaLink="false">media:med_ebb5735f189141b8ad29c11324478e8e</guid>
+      <pubDate>Tue, 07 Jul 2026 11:16:49 GMT</pubDate>
+      <category>cinematic</category><category>photorealistic</category><category>portrait</category><category>image</category>
+      
+      <description><![CDATA[<img src="https://picsum.photos/seed/ai-or-not-portrait-1/500/625" alt="AI or Not: Portrait" />
+<p>Guess: AI or Not AI.</p>
+<p>No guesses yet — be the first.</p>
+<p>Tags: Cinematic, Photorealistic, Portrait, Image</p>]]></description>
+    </item>
+    <item>
+      <title>AI or Not: Cinematic</title>
+      <link>https://aiornot.vote/m/golden-hour-portrait-on-a-rooftop-1</link>
+      <guid isPermaLink="false">media:med_dc5324be943449f6b9827b5006a71787</guid>
+      <pubDate>Tue, 07 Jul 2026 04:02:53 GMT</pubDate>
+      <category>cinematic</category><category>photorealistic</category><category>portrait</category><category>image</category>
+      
+      <description><![CDATA[<img src="https://picsum.photos/seed/golden-hour-portrait-on-a-rooftop-1/500/625" alt="AI or Not: Cinematic" />
+<p>Guess: AI or Not AI.</p>
+<p>No guesses yet — be the first.</p>
+<p>Tags: Cinematic, Photorealistic, Portrait, Image</p>]]></description>
+    </item>
+  </channel>
+</rss>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <channel>
+    <title>General discussion — tsbb</title>
+    <link>https://tsbb.dev</link>
+    <description>Anything that does not fit anywhere else.</description>
+    <atom:link href="https://tsbb.dev/f/general/feed.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sat, 12 Sep 2026 20:53:09 GMT</lastBuildDate>
+    <item>
+      <title>This is neat</title>
+      <link>https://tsbb.dev/t/this-is-neat-1</link>
+      <guid isPermaLink="true">https://tsbb.dev/t/this-is-neat-1</guid>
+      <dc:creator>anthony</dc:creator>
+      <pubDate>Sun, 30 Aug 2026 15:22:50 GMT</pubDate>
+      <description>a new bulletin system in 2 hours.</description>
+    </item>
+  </channel>
+</rss>

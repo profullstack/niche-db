@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<opml version="2.0">
+<head>
+  <title>p0dcasters - independent podcasts</title>
+  <dateCreated>Sat, 12 Sep 2026 20:51:00 GMT</dateCreated>
+</head>
+<body>
+  <outline type="rss" text="Shade Mountain Christian Fellowship" title="Shade Mountain Christian Fellowship" xmlUrl="http://shademountain.org/recordings/feed/" htmlUrl="http://shademountain.org" />
+  <outline type="rss" text="Sunday Sermons" title="Sunday Sermons" xmlUrl="https://www.graceinracine.com/feeds/channel/sunday-sermons" htmlUrl="https://www.graceinracine.com/" />
+  <outline type="rss" text="Christian Sermons from Calvary Chapel Greenmeadow, North Kingstown, RI" title="Christian Sermons from Calvary Chapel Greenmeadow, North Kingstown, RI" xmlUrl="http://podcasts.calvarygreenmeadow.com/podcasts/ccgreen-rss.xml" htmlUrl="http://podcasts.calvarygreenmeadow.com" />
+  <outline type="rss" text="Die 5-Finger-Formel: 5F = besser leben" title="Die 5-Finger-Formel: 5F = besser leben" xmlUrl="https://5-finger.com/podcast.xml" htmlUrl="https://5-finger.com/" />
+  <outline type="rss" text="&quot; Reluctant Radio syndicated radio show" title="&quot; Reluctant Radio syndicated radio show" xmlUrl="http://www.ReluctantRadio.org/Podcast/ReluctantRadio/oaks.rss" htmlUrl="https://www.reluctantradio.org/" />
+  <outline type="rss" text="Faith Community Church - Oxnard, California" title="Faith Community Church - Oxnard, California" xmlUrl="https://www.fccoxnard.org/audio/podcast.xml" />
+  <outline type="rss" text="Shade Mountain Christian Fellowship" title="Shade Mountain Christian Fellowship" xmlUrl="http://shademountain.org/recordings/feed/" htmlUrl="http://shademountain.org" />
+</body>
+</opml>

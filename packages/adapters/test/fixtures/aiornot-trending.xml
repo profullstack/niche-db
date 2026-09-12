@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>AIorNot.vote — Trending media</title>
+    <link>https://aiornot.vote/search?sort=trending</link>
+    <atom:link href="https://aiornot.vote/rss/trending.xml" rel="self" type="application/rss+xml" />
+    <description>The media people are guessing on right now.</description>
+    <language>en</language>
+    <lastBuildDate>Sat, 12 Sep 2026 20:53:06 GMT</lastBuildDate>
+    <generator>AIorNot.vote</generator>
+    <item>
+      <title>AI or Not: Food</title>
+      <link>https://aiornot.vote/m/ai-or-not-food-msp6dj4t</link>
+      <guid isPermaLink="false">media:med_b73ec5d4abd14bc29f1835a6e2e76023</guid>
+      <pubDate>Tue, 11 Aug 2026 21:31:18 GMT</pubDate>
+      <category>food</category><category>photorealistic</category><category>image</category>
+      <enclosure url="https://aiornot.vote/media/pool/d8e5311b-db2d-461e-9ebd-22a45d244cd7.webp" type="image/webp" />
+      <description><![CDATA[<img src="https://aiornot.vote/media/pool/d8e5311b-db2d-461e-9ebd-22a45d244cd7.webp" alt="AI or Not: Food" />
+<p>Guess: AI or Not AI.</p>
+<p>Current crowd result: 50% AI, 50% Not AI.</p>
+<p>Tags: Food, Photorealistic, Image</p>]]></description>
+    </item>
+    <item>
+      <title>AI or Not: Fashion</title>
+      <link>https://aiornot.vote/m/ai-or-not-fashion-45</link>
+      <guid isPermaLink="false">media:med_4e46b74293254009bbcd38c45af8d3cd</guid>
+      <pubDate>Mon, 20 Jul 2026 10:25:51 GMT</pubDate>
+      <category>fashion</category><category>photorealistic</category><category>image</category>
+      <enclosure url="https://aiornot.vote/media/ai-variants/mrt2wz7z-v4bybj.webp" type="image/webp" />
+      <description><![CDATA[<img src="https://aiornot.vote/media/ai-variants/mrt2wz7z-v4bybj.webp" alt="AI or Not: Fashion" />
+<p>Guess: AI or Not AI.</p>
+<p>Current crowd result: 100% AI, 0% Not AI.</p>
+<p>Tags: Fashion, Photorealistic, Image</p>]]></description>
+    </item>
+  </channel>
+</rss>

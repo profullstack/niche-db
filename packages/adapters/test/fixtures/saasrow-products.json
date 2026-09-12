@@ -1,0 +1,92 @@
+{
+  "data": [
+    {
+      "id": "fe9f761d-01c2-4f50-9a54-f6f146123c22",
+      "name": "nixamp",
+      "description": "A Winamp-shaped music player for the terminal that turns your library into a discoverable stream. Listeners find it in the public directory, and popular streams can charge with x402 micropayments.",
+      "website": "https://nixamp.com",
+      "saasrow_url": "https://www.saasrow.com/software/fe9f761d-01c2-4f50-9a54-f6f146123c22",
+      "category": "Music",
+      "tags": [
+        "music",
+        "player",
+        "terminal",
+        "streaming",
+        "x402"
+      ],
+      "use_cases": [],
+      "audiences": [],
+      "platforms": [],
+      "pricing_model": "free",
+      "alternatives": [],
+      "logo_url": "https://yfkuksfqyddufusonyuf.supabase.co/storage/v1/object/public/software-logos/1789037681375-pvzbe38.png",
+      "image_url": "https://yfkuksfqyddufusonyuf.supabase.co/storage/v1/object/public/software-images/1789037688104-fhfyzu0.png",
+      "upvotes": 0,
+      "downvotes": 0,
+      "views": 1,
+      "featured": false,
+      "created_at": "2026-09-10T10:48:17.566913+00:00",
+      "updated_at": "2026-09-10T10:54:48.385339+00:00"
+    },
+    {
+      "id": "98d0e452-c2af-414f-9e6e-a4aeba64dc21",
+      "name": "WatchNews",
+      "description": "Know who reported it. Follow a section or a newsroom and read what they actually published, from free sources only.",
+      "website": "https://watchnews.now",
+      "saasrow_url": "https://www.saasrow.com/software/98d0e452-c2af-414f-9e6e-a4aeba64dc21",
+      "category": "News & Media",
+      "tags": [
+        "news",
+        "newsrooms",
+        "alerts",
+        "free"
+      ],
+      "use_cases": [],
+      "audiences": [],
+      "platforms": [],
+      "pricing_model": "free",
+      "alternatives": [],
+      "logo_url": "https://yfkuksfqyddufusonyuf.supabase.co/storage/v1/object/public/software-logos/1789037690998-lrwl8ld.png",
+      "image_url": "https://yfkuksfqyddufusonyuf.supabase.co/storage/v1/object/public/software-images/1789037691205-6sx83e7.png",
+      "upvotes": 0,
+      "downvotes": 0,
+      "views": 0,
+      "featured": false,
+      "created_at": "2026-09-10T10:48:14.964605+00:00",
+      "updated_at": "2026-09-10T10:54:59.479949+00:00"
+    },
+    {
+      "id": "1a93fe02-5e49-4c70-9f11-178f664a2d35",
+      "name": "readm3",
+      "description": "A terminal Markdown reader: a file browser on the left, the rendered document on the right. Built on Bun.",
+      "website": "https://readm3.com",
+      "saasrow_url": "https://www.saasrow.com/software/1a93fe02-5e49-4c70-9f11-178f664a2d35",
+      "category": "Productivity",
+      "tags": [
+        "markdown",
+        "terminal",
+        "reader",
+        "cli"
+      ],
+      "use_cases": [],
+      "audiences": [],
+      "platforms": [],
+      "pricing_model": "free",
+      "alternatives": [],
+      "logo_url": "https://yfkuksfqyddufusonyuf.supabase.co/storage/v1/object/public/software-logos/1789037702372-c4kueqb.svg",
+      "image_url": "https://yfkuksfqyddufusonyuf.supabase.co/storage/v1/object/public/software-images/1789037708871-z1efon0.png",
+      "upvotes": 0,
+      "downvotes": 0,
+      "views": 0,
+      "featured": false,
+      "created_at": "2026-09-10T10:48:12.193901+00:00",
+      "updated_at": "2026-09-10T10:55:09.626883+00:00"
+    }
+  ],
+  "pagination": {
+    "total": 467,
+    "limit": 100,
+    "offset": 0,
+    "next": 100
+  }
+}

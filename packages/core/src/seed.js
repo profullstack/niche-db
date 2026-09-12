@@ -201,6 +201,30 @@ export const COLLECTIONS = [
     description:
       'The whole iptv-org directory: 31,000 television channels worldwide with logo, country, language, category and network, and the public stream where one exists. What a player matches a playlist entry against.',
   },
+  {
+    slug: 'saas',
+    name: 'SaaS',
+    description:
+      'Software products and listings from the house directories: every product on saasrow.com with its category, tags, pricing model, platforms, alternatives and the votes readers gave it.',
+  },
+  {
+    slug: 'marketplace',
+    name: 'Marketplace',
+    description:
+      'Asks and offers from the house marketplaces: what customers on d0rz.com and bl0ggers.com want done and what providers will do, each with its category, city and the budget or rate lifted out of the post.',
+  },
+  {
+    slug: 'ai-media',
+    name: 'AI media',
+    description:
+      'AI or not: photorealistic images and videos submitted to aiornot.vote and judged by people, the newest, the featured set and what is trending, each with its media file and categories.',
+  },
+  {
+    slug: 'forums',
+    name: 'Forums',
+    description:
+      'Posts from the house bulletin boards: every topic on tsbb.dev with its opening post, author and the forum it was posted in.',
+  },
 ];
 
 export const DEFAULT_FEEDS = [
@@ -1233,6 +1257,82 @@ export const DEFAULT_FEEDS = [
     slug: 'all-channels',
     name: 'Every channel',
     query: { kinds: ['channel'] },
+  },
+  // House aggregators: one feed per directory, board and side.
+  {
+    collection: 'podcasts',
+    slug: 'p0dcasters-directory',
+    name: 'Podcasts: the p0dcasters directory',
+    query: { sources: ['p0dcasters-shows'] },
+  },
+  {
+    collection: 'jobs',
+    slug: 'job-postings',
+    name: 'Job postings',
+    description: 'Open postings on the house job boards, newest first.',
+    query: { kinds: ['job'] },
+  },
+  {
+    collection: 'jobs',
+    slug: 'agent-friendly-jobs',
+    name: 'Jobs an AI agent may apply for',
+    query: { kinds: ['job'], tags: ['agents:welcome'] },
+  },
+  {
+    collection: 'saas',
+    slug: 'saas-products',
+    name: 'SaaS products',
+    query: { kinds: ['product'] },
+  },
+  {
+    collection: 'saas',
+    slug: 'featured-saas',
+    name: 'Featured SaaS products',
+    query: { kinds: ['product'], tags: ['featured'] },
+  },
+  {
+    collection: 'saas',
+    slug: 'free-saas',
+    name: 'Free software',
+    query: { kinds: ['product'], tags: ['pricing:free'] },
+  },
+  { collection: 'marketplace', slug: 'marketplace-asks', name: 'Asks', query: { kinds: ['ask'] } },
+  {
+    collection: 'marketplace',
+    slug: 'marketplace-offers',
+    name: 'Offers',
+    query: { kinds: ['offer'] },
+  },
+  {
+    collection: 'ai-media',
+    slug: 'ai-media-latest',
+    name: 'Newest media to judge',
+    query: { kinds: ['submission'] },
+  },
+  {
+    collection: 'ai-media',
+    slug: 'ai-media-featured',
+    name: 'Featured media',
+    query: { kinds: ['submission'], tags: ['featured'] },
+  },
+  {
+    collection: 'ai-media',
+    slug: 'ai-media-trending',
+    name: 'Trending media',
+    query: { kinds: ['submission'], tags: ['trending'] },
+  },
+  {
+    collection: 'ai-media',
+    slug: 'ai-media-videos',
+    name: 'Videos to judge',
+    query: { kinds: ['submission'], tags: ['video'] },
+  },
+  { collection: 'forums', slug: 'forum-posts', name: 'Forum posts', query: { kinds: ['post'] } },
+  {
+    collection: 'forums',
+    slug: 'tsbb-announcements',
+    name: 'tsbb announcements',
+    query: { kinds: ['post'], tags: ['forum:announcements'] },
   },
 ];
 
