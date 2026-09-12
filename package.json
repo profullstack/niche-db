@@ -1,6 +1,6 @@
 {
   "name": "niche-db",
-  "version": "0.8.2",
+  "version": "0.9.0",
   "private": true,
   "type": "module",
   "description": "An open platform for large, ever-growing databases of real-time data: sources in, feeds out. Web, API, CLI and MCP on one Postgres.",
