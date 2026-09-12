@@ -77,25 +77,40 @@ describe('modules', () => {
     expect([...parseDisable(undefined)]).toEqual([]);
   });
 
-  test('free gets everything, Pro gets nothing, a pass gets its choice', () => {
-    expect(decideModules({ pro: false, paid: false, disable: 'ads,tracking' })).toBe(ALL_ON);
-    expect(decideModules({ pro: true, paid: true, disable: undefined })).toEqual({
+  test('free gets everything, a member gets nothing, a pass gets its choice', () => {
+    expect(decideModules({ plan: 'free', paid: false, disable: 'ads,tracking' })).toBe(ALL_ON);
+    expect(decideModules({ plan: 'pro', paid: true, disable: undefined })).toEqual({
       ads: false,
       tracking: false,
       paid: true,
       pro: true,
+      premium: true,
+      plan: 'pro',
     });
-    expect(decideModules({ pro: false, paid: true, disable: 'ads' })).toEqual({
+    // Premium buys the same silence Pro does; the tiers differ in limits.
+    expect(decideModules({ plan: 'premium', paid: true, disable: undefined })).toEqual({
+      ads: false,
+      tracking: false,
+      paid: true,
+      pro: false,
+      premium: true,
+      plan: 'premium',
+    });
+    expect(decideModules({ plan: 'free', paid: true, disable: 'ads' })).toEqual({
       ads: false,
       tracking: true,
       paid: true,
       pro: false,
+      premium: false,
+      plan: 'free',
     });
-    expect(decideModules({ pro: false, paid: true, disable: undefined })).toEqual({
+    expect(decideModules({ plan: 'free', paid: true, disable: undefined })).toEqual({
       ads: true,
       tracking: true,
       paid: true,
       pro: false,
+      premium: false,
+      plan: 'free',
     });
   });
 });

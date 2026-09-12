@@ -1,7 +1,9 @@
 import { config } from '@nichedb/config';
 import { adapterByName, slugify } from '@nichedb/core';
+import * as premiumDb from '@nichedb/db/premium';
 import * as q from '@nichedb/db/queries';
 import { enricherByName } from '@nichedb/enrichers';
+import { entitlements, planFor } from '@nichedb/premium';
 
 /**
  * The operations the pages, the API and the MCP tools share, with the rules
@@ -17,17 +19,30 @@ export class Denied extends Error {
 
 export const isAdmin = (user) => user?.role === 'admin';
 
-export async function isPro(user) {
-  if (!user?.id) return false;
-  if (isAdmin(user)) return true;
-  return Boolean(await q.activeMembership(user.id));
+/**
+ * The plan a user holds, asked straight from the database.
+ *
+ * The request path has this on the context already (`lib/premium.js`); this is
+ * for the shared operations, which are also called by MCP tools and by the CLI
+ * and so cannot assume a Hono context exists.
+ */
+export async function planOfUser(user) {
+  if (!user?.id) return 'free';
+  if (isAdmin(user)) return 'pro';
+  const terms = await premiumDb.activeTerms(user.id).catch(() => []);
+  return planFor({ user, terms });
+}
+
+/** Anybody paying: Premium or Pro. The two tiers differ in limits, not in access. */
+export async function isMember(user) {
+  return (await planOfUser(user)) !== 'free';
 }
 
 /** Adding a source makes the deployment fetch on a schedule; that is gated. */
 export async function canAddSources(user) {
   if (!user) return false;
   if (isAdmin(user) || config.openSources) return true;
-  return isPro(user);
+  return entitlements(await planOfUser(user)).ownSources;
 }
 
 export function canEditSource(user, source) {
@@ -148,10 +163,14 @@ export async function createFeed(user, { collection, name, description, query, i
   if (!user) throw new Denied('Sign in to create a feed.', 401);
   const col = await q.getCollection(collection);
   if (!col) throw new Denied(`No collection named ${collection}`, 400);
-  if (!isAdmin(user) && !(await isPro(user))) {
+  if (!isAdmin(user) && !entitlements(await planOfUser(user)).unlimitedFeeds) {
     const n = await q.countUserFeeds(user.id);
     if (n >= config.feeds.freeLimit) {
-      throw new Denied(`Free accounts can keep ${config.feeds.freeLimit} feeds. Pro lifts that.`);
+      throw new Denied(
+        `Free accounts can keep ${config.feeds.freeLimit} feeds. Premium lifts that, at $${(
+          config.premium.dayCents / 100
+        ).toFixed(2)} a day: ${config.siteUrl}/premium`,
+      );
     }
   }
   const title = String(name ?? '').trim();

@@ -1,6 +1,7 @@
 import { asJson, asJsonArray, formatBps, nextTierFor } from '@nichedb/knowledge';
 import { Notice, Num, Relative } from './components.jsx';
 import { Layout } from './Layout.jsx';
+import { PlanBadge } from './premium.jsx';
 
 /**
  * The Knowledge Influencer surfaces.
@@ -32,11 +33,12 @@ export const TierTable = ({ tiers, current = null }) => (
   </table>
 );
 
-const OperatorCard = ({ member }) => (
+const OperatorCard = ({ member, plan = 'free' }) => (
   <li class="card" key={member.user_id}>
     <a class="card-title" href={`/@${member.handle ?? ''}`}>
       {member.display_name ?? member.handle ?? 'A Knowledge Influencer'}
-    </a>
+    </a>{' '}
+    <PlanBadge plan={plan} />
     <p class="card-desc muted">
       {member.role === 'operator' ? 'Knowledge Influencer' : member.role}
     </p>
@@ -51,7 +53,7 @@ const OperatorCard = ({ member }) => (
  * A niche's public page: what the industry is, who runs it, what has been
  * built for it, and — when nobody runs it — the offer to.
  */
-export const NichePage = ({ user, niche, members, tiers, contributions }) => (
+export const NichePage = ({ user, niche, members, tiers, contributions, plans = {} }) => (
   <Layout
     user={user}
     title={niche.name}
@@ -87,7 +89,7 @@ export const NichePage = ({ user, niche, members, tiers, contributions }) => (
         </h2>
         <ul class="cards">
           {members.map((m) => (
-            <OperatorCard key={m.user_id} member={m} />
+            <OperatorCard key={m.user_id} member={m} plan={plans[m.user_id] ?? 'free'} />
           ))}
         </ul>
       </section>
@@ -120,12 +122,16 @@ export const NichePage = ({ user, niche, members, tiers, contributions }) => (
       <section>
         <h2>Latest knowledge</h2>
         <ul class="items">
+          {/* A member's contribution is lifted rather than decorated: the
+              highlight is a class on the row, so it reads as the list
+              treating their work differently, which is what was sold. */}
           {contributions.map((e) => (
-            <li class="item" key={e.id}>
+            <li class={`item${plans[e.influencer_id] ? ' highlighted' : ''}`} key={e.id}>
               <div class="item-body">
                 <p class="item-title">{e.event_type.replace(/_/g, ' ')}</p>
                 <p class="item-meta">
-                  <a href={`/@${e.handle ?? ''}`}>{e.display_name ?? e.handle ?? 'operator'}</a> ·{' '}
+                  <a href={`/@${e.handle ?? ''}`}>{e.display_name ?? e.handle ?? 'operator'}</a>{' '}
+                  <PlanBadge plan={plans[e.influencer_id] ?? 'free'} /> ·{' '}
                   <Relative at={e.verified_at ?? e.created_at} />
                 </p>
               </div>
@@ -320,7 +326,7 @@ export const OpportunityPage = ({
  * A public profile. The tier is public because it is a credential; what
  * somebody earns is not, unless they say so.
  */
-export const InfluencerPage = ({ user, influencer }) => (
+export const InfluencerPage = ({ user, influencer, plan = 'free' }) => (
   <Layout
     user={user}
     title={influencer.display_name ?? influencer.handle}
@@ -328,7 +334,9 @@ export const InfluencerPage = ({ user, influencer }) => (
     description={`${influencer.display_name ?? influencer.handle} operates ${influencer.niches.length} niche(s) on this site.`}
   >
     <section class="hero">
-      <h1>{influencer.display_name ?? influencer.handle}</h1>
+      <h1>
+        {influencer.display_name ?? influencer.handle} <PlanBadge plan={plan} />
+      </h1>
       <p class="lede">Knowledge Influencer</p>
       <p class="stats">
         <Num n={influencer.totals.verified} /> verified contributions ·{' '}

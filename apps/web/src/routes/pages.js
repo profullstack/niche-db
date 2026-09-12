@@ -1,8 +1,11 @@
 import { config } from '@nichedb/config';
+import * as premiumDb from '@nichedb/db/premium';
 import * as q from '@nichedb/db/queries';
+import { awardKinds } from '@nichedb/premium';
 import { feedAd } from '../lib/ads.js';
-import { cached, isProUser, render, requireUser } from '../lib/http.js';
+import { cached, isProUser, render, requireUser, wantsJson } from '../lib/http.js';
 import { currentModules } from '../lib/modules.js';
+import { entitlementsOf, planOf } from '../lib/premium.js';
 import { buildJsonFeed, buildRss } from '../lib/rss.js';
 import { allowedEnrichers } from '../lib/serialize.js';
 import { canEditFeed } from '../lib/service.js';
@@ -15,6 +18,29 @@ import {
   Landing,
   SearchPage,
 } from '../views/pages.jsx';
+
+/**
+ * What a free reader gets where a members-only collection would be.
+ *
+ * A 402 rather than a 404: the thing exists, it is not theirs yet, and a page
+ * that pretends it is not there cannot sell them the thing that would open it.
+ */
+function earlyAccessWall(c, subject) {
+  const price = `$${(config.premium.dayCents / 100).toFixed(2)} a day`;
+  const name = subject.name ?? subject.title ?? 'This';
+  if (wantsJson(c))
+    return c.json(
+      {
+        error: `${name} is open to members first.`,
+        premium: { price, url: `${config.siteUrl}/premium` },
+      },
+      402,
+    );
+  return c.redirect(
+    `/premium?notice=${encodeURIComponent(`${name} is in early access — members see it first (${price}).`)}`,
+    303,
+  );
+}
 
 export function registerPages(app) {
   app.get('/', async (c) =>
@@ -29,7 +55,9 @@ export function registerPages(app) {
         <Landing
           user={c.get('user')}
           stats={stats}
-          collections={collections}
+          collections={collections.filter(
+            (col) => !col.early_access || entitlementsOf(c).plan !== 'free',
+          )}
           latest={latest}
           feeds={feeds}
         />,
@@ -40,6 +68,10 @@ export function registerPages(app) {
   app.get('/c/:slug', async (c) => {
     const collection = await q.getCollection(c.req.param('slug'));
     if (!collection) return c.notFound();
+    // Early access is a real gate, not a label: a collection being built is
+    // readable by members and by nobody else until it is opened.
+    if (collection.early_access && entitlementsOf(c).plan === 'free')
+      return earlyAccessWall(c, collection);
     const tag = c.req.query('tag') ?? null;
     const kind = c.req.query('kind') ?? null;
     const before = Number(c.req.query('before')) || null;
@@ -152,14 +184,24 @@ export function registerPages(app) {
     if (!Number.isInteger(id)) return c.notFound();
     const item = await q.getItem(id);
     if (!item) return c.notFound();
+    if (item.early_access && entitlementsOf(c).plan === 'free') return earlyAccessWall(c, item);
+    const user = c.get('user');
+    const [counts, balance] = await Promise.all([
+      premiumDb.awardCounts({ targetType: 'item', targetId: id }).catch(() => []),
+      user ? premiumDb.creditBalance(user.id).catch(() => 0) : Promise.resolve(0),
+    ]);
     return cached(
       c,
       `i:${id}`,
       () =>
         render(
           <ItemPage
-            user={c.get('user')}
+            user={user}
             item={item}
+            plan={planOf(c)}
+            awardCounts={counts}
+            awards={awardKinds()}
+            balance={balance}
             enrichers={allowedEnrichers({ collection_slug: item.collection_slug })}
           />,
         ),

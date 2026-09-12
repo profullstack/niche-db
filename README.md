@@ -95,7 +95,12 @@ Migrations apply themselves on boot. Every collection, its default sources and i
 
 Magic link and passkey only; there is no password column. API keys are minted from settings and shown once.
 
-Free pages and feeds carry one [CrawlProof](https://crawlproof.com) ad and a tracker (`CRAWLPROOF_AD_SLOT`, `CRAWLPROOF_SITE_ID`). Pro ($120 a month through [CoinPay](https://coinpayportal.com)) is the tier without them: no ads, no tracking, the high API rate limit, unlimited feeds, own sources, and a crawl pass for the whole term (`GET /api/v1/crawl-pass`) so a member's own agents walk through the paywall. Referral links give the new customer 20% off and the referrer 60% of the first payment.
+Free pages and feeds carry one [CrawlProof](https://crawlproof.com) ad and a tracker (`CRAWLPROOF_AD_SLOT`, `CRAWLPROOF_SITE_ID`). Two tiers buy them away, both through [CoinPay](https://coinpayportal.com):
+
+- **Premium** — $1 a day, $30 a month or $300 a year (`/premium`). No ads, no tracking, the members' Lounge, 1,000 credits a month to give awards with, a badge, six themes and five app icons, early access to new collections, 30,000 API requests an hour, unlimited feeds, own sources, and the metered vehicle lookups included. `/premium` carries a line-by-line comparison with Reddit Premium; `GET /api/v1/premium` is the same thing as JSON. See [docs/premium.md](docs/premium.md).
+- **Pro** — $120 a month (`/pro`). Everything Premium has, plus 120,000 API requests an hour and a crawl pass for the whole term (`GET /api/v1/crawl-pass`) so a member's own agents walk through the paywall.
+
+Referral links give the new customer 20% off and the referrer 60% of the first payment.
 
 Training crawlers (GPTBot, ClaudeBot, CCBot, meta-externalagent…) get a 402 with an x402 offer and buy a pass at `/crawl`: $1 a day for everything, and the more a buyer has paid here the less a day costs (`CRAWL_LOYALTY`, default 20% off after $10, 40% after $50, 60% after $100; every sale is a row in `crawl_sales`). A pass may switch ads or tracking off for its own requests with `?disable=ads,tracking`. People, search engines and retrieval crawlers pass through untouched.
 

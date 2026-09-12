@@ -7,6 +7,7 @@ import { COMMANDS } from '@profullstack/nichedb';
 import { mintPass } from '@profullstack/x402-gateway';
 import { callerAddress } from '../lib/auth-throttle.js';
 import { isProUser, render, requireUser } from '../lib/http.js';
+import { apiLimitFor, planOf } from '../lib/premium.js';
 import { allowedEnrichers, collectionOut, feedOut, itemOut, sourceOut } from '../lib/serialize.js';
 import {
   addSource,
@@ -21,23 +22,38 @@ import { ApiDocs, CliDocs } from '../views/admin.jsx';
 const lim = (v, d, max) => Math.min(Math.max(1, Number(v) || d), max);
 const site = () => config.siteUrl;
 
-/** Per-hour metering: by key when there is one, by address otherwise. Pro keys get more. */
+/**
+ * Per-hour metering: by key when there is one, by address otherwise, and the
+ * allowance is the plan's. A 429 says what the next tier up would have given
+ * them, because the moment somebody hits a limit is the moment the price of
+ * not hitting it is worth knowing.
+ */
 async function rateLimit(c, next) {
   const user = c.get('user');
   const viaKey = c.get('viaKey');
+  const plan = planOf(c);
   const bucket = viaKey ? `key:${user.api_key_id}` : `ip:${callerAddress(c) ?? 'unknown'}`;
-  const limit = viaKey
-    ? (await isProUser(user))
-      ? config.api.proPerHour
-      : config.api.freePerHour
-    : config.api.anonPerHour;
+  const limit = viaKey ? apiLimitFor(plan) : config.api.anonPerHour;
   const used = await q.bumpApiUsage(bucket);
   c.header('x-ratelimit-limit', String(limit));
   c.header('x-ratelimit-remaining', String(Math.max(0, limit - used)));
+  c.header('x-plan', plan);
   if (used > limit) {
     c.header('retry-after', '3600');
     return c.json(
-      { error: `Rate limit of ${limit}/hour reached for this ${viaKey ? 'key' : 'address'}.` },
+      {
+        error: `Rate limit of ${limit}/hour reached for this ${viaKey ? 'key' : 'address'}.`,
+        plan,
+        ...(plan === 'free'
+          ? {
+              premium: {
+                requests_per_hour: config.api.premiumPerHour,
+                price: `$${(config.premium.dayCents / 100).toFixed(2)} a day`,
+                url: `${site()}/premium`,
+              },
+            }
+          : {}),
+      },
       429,
     );
   }
@@ -81,6 +97,7 @@ export function registerApi(app) {
         ? {
             email: user.email,
             role: user.role,
+            plan: planOf(c),
             pro: await isProUser(user),
             via: c.get('viaKey') ? 'key' : 'session',
           }
@@ -88,6 +105,7 @@ export function registerApi(app) {
       limits: {
         anonymous: config.api.anonPerHour,
         key: config.api.freePerHour,
+        premium: config.api.premiumPerHour,
         pro: config.api.proPerHour,
       },
       note: 'Every item carries time_known and precision. A false time_known means the date is real and the clock is not.',
@@ -100,6 +118,8 @@ export function registerApi(app) {
       id: user.id,
       email: user.email,
       role: user.role,
+      plan: planOf(c),
+      entitlements: c.get('entitlements'),
       pro: await isProUser(user),
       feeds: await q.countUserFeeds(user.id),
     });

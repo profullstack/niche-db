@@ -1,9 +1,10 @@
 import { config } from '@nichedb/config';
 import { Hono } from 'hono';
-import { isProUser, loadUser, render, wantsJson } from './lib/http.js';
+import { loadUser, render, wantsJson } from './lib/http.js';
 import { leaderboard } from './lib/leaderboard.js';
 import { modulesFor, withModules } from './lib/modules.js';
 import { partners } from './lib/partners.js';
+import { loadPlan } from './lib/premium.js';
 import { gateway, gatewayFor } from './lib/pricing.js';
 import { Denied } from './lib/service.js';
 import { meter } from './lib/throttle.js';
@@ -15,6 +16,7 @@ import { registerKnowledge } from './routes/knowledge.js';
 import { registerManage } from './routes/manage.js';
 import { registerMcp } from './routes/mcp.js';
 import { registerPages } from './routes/pages.js';
+import { registerPremium } from './routes/premium.js';
 import { registerRevenue } from './routes/revenue.js';
 import { registerStatic } from './routes/static.js';
 import { NotFound } from './views/pages.jsx';
@@ -84,9 +86,13 @@ if (partners)
     return answer ?? next();
   });
 
-/** Ads and tracking: on for free, off for Pro, the buyer's choice with a pass. */
+/**
+ * The plan first, then the modules that follow from it: ads and tracking on
+ * for free, off for anyone paying, the buyer's own choice with a crawl pass.
+ */
+app.use('*', loadPlan);
 app.use('*', async (c, next) => {
-  const modules = await modulesFor(c, isProUser);
+  const modules = await modulesFor(c, c.get('plan'));
   c.set('modules', modules);
   await withModules(modules, next);
 });
@@ -111,6 +117,7 @@ registerAuth(app);
 registerPages(app);
 registerManage(app);
 registerApi(app);
+registerPremium(app);
 registerAutomotive(app);
 registerMcp(app);
 

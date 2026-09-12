@@ -10,7 +10,8 @@
     "./knowledge": "./src/knowledge.js",
     "./automotive": "./src/automotive.js",
     "./agents": "./src/agents.js",
-    "./revenue": "./src/revenue.js"
+    "./revenue": "./src/revenue.js",
+    "./premium": "./src/premium.js"
   },
   "dependencies": {
     "@nichedb/config": "workspace:*",

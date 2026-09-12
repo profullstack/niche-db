@@ -17,6 +17,7 @@ COPY packages/enrichers/package.json packages/enrichers/
 COPY packages/knowledge/package.json packages/knowledge/
 COPY packages/notify/package.json packages/notify/
 COPY packages/payments/package.json packages/payments/
+COPY packages/premium/package.json packages/premium/
 COPY packages/queue/package.json packages/queue/
 RUN bun install --frozen-lockfile || bun install
 
