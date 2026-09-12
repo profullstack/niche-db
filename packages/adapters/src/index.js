@@ -5,6 +5,7 @@ import { firefoxAddons } from './amo.js';
 import { anilistAiring } from './anilist.js';
 import { arxiv } from './arxiv.js';
 import { aviationHazards, aviationMetar } from './aviationweather.js';
+import { bensbargains } from './bensbargains.js';
 import { blsSeries } from './bls.js';
 import { brisk } from './brisk.js';
 import { cfpbComplaints } from './cfpb.js';
@@ -15,6 +16,8 @@ import { courtlistener } from './courtlistener.js';
 import { crates } from './crates.js';
 import { crossref } from './crossref.js';
 import { coingeckoAssets, cryptoPairs } from './crypto.js';
+import { dealcatcher } from './dealcatcher.js';
+import { dealnews } from './dealnews.js';
 import { droughtMonitor } from './droughtmonitor.js';
 import { ecbFxRates } from './ecb.js';
 import { edgar } from './edgar.js';
@@ -60,9 +63,11 @@ import { openlibrary } from './openlibrary.js';
 import { buildingPermits } from './permits.js';
 import { podcasts } from './podcasts.js';
 import { pypi } from './pypi.js';
+import { redditDeals } from './redditdeals.js';
 import { rogueIncidents, rogueResearch } from './rogueaitracker.js';
 import { rssamplifier } from './rssamplifier.js';
 import { scryfallCards, scryfallSets } from './scryfall.js';
+import { slickdeals } from './slickdeals.js';
 import { socrataCrime } from './socratacrime.js';
 import { sportsdbTv } from './sportsdb.js';
 import { statuspage } from './statuspage.js';
@@ -138,6 +143,12 @@ export const ADAPTERS = [
   cfpbComplaints,
   fdicInstitutions,
   fdicStructureChanges,
+  // Deals: what is on sale and which codes work, from the communities and desks that publish feeds.
+  slickdeals,
+  dealnews,
+  dealcatcher,
+  bensbargains,
+  redditDeals,
   statuspage,
   firefoxAddons,
   vscodeExtensions,

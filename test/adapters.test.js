@@ -61,6 +61,7 @@ describe('registry', () => {
         'aviation',
         'water',
         'consumer-finance',
+        'deals',
         'sports',
         'screen',
         'channels',
