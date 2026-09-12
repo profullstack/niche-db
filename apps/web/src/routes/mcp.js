@@ -2,6 +2,7 @@ import { render } from '../lib/http.js';
 import { ERRORS, fail } from '../lib/mcp/protocol.js';
 import { handle } from '../lib/mcp/server.js';
 import { describe, TOOLS } from '../lib/mcp/tools.js';
+import { config } from '@nichedb/config';
 import { McpDocs } from '../views/admin.jsx';
 
 const CORS = {
@@ -21,6 +22,8 @@ const json = (status, body, extra = {}) =>
   });
 
 /** The MCP endpoint at /mcp (and /api/mcp): stateless Streamable HTTP, POST only. */
+const KEY_TOOLS = new Set(['create_feed', 'follow_feed', 'add_source', 'run_source']);
+
 export function registerMcp(app) {
   for (const path of ['/mcp', '/api/mcp']) {
     app.post(path, async (c) => {
@@ -57,6 +60,29 @@ export function registerMcp(app) {
       allow: 'POST, OPTIONS',
     });
   });
+  // The tools that answer with no key. Everything else calls needUser and
+  // says so; this list is kept by hand so a new tool has to say which it is.
+  const OPEN_TOOLS = TOOLS.map((t) => t.name).filter((n) => !KEY_TOOLS.has(n));
+
+  // NicheDB as an OpenMCP relay (logicsrc.com/openmcp): where the MCP
+  // endpoint is, how a caller authenticates, which tools are open, what it
+  // is for. A catalog that fetches this from our own origin lists NicheDB as
+  // verified rather than as an endpoint that happened to answer.
+  app.get('/.well-known/openmcp.json', (c) =>
+    json(200, {
+      openmcp: '0.1',
+      mcp: `${config.siteUrl}/mcp`,
+      name: 'NicheDB',
+      description:
+        'An open, ever-growing database of real-time public data: collections, sources, feeds and items, searchable and followable, over MCP.',
+      url: config.siteUrl,
+      auth: { kind: 'api-key', url: `${config.siteUrl}/settings`, open: OPEN_TOOLS },
+      tags: ['data', 'feeds', 'search', 'public-data', 'nichedb'],
+      tools: TOOLS.map((t) => t.name),
+      catalogs: ['https://openmcp.logicsrc.com'],
+    }, { 'cache-control': 'public, max-age=300' }),
+  );
+
   app.get('/docs/mcp', async (c) =>
     c.html(await render(<McpDocs user={c.get('user')} tools={TOOLS.map(describe)} />)),
   );
