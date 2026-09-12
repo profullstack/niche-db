@@ -19,6 +19,7 @@ import { registerPages } from './routes/pages.js';
 import { registerPremium } from './routes/premium.js';
 import { registerRevenue } from './routes/revenue.js';
 import { registerStatic } from './routes/static.js';
+import { registerSubmit } from './routes/submit.js';
 import { NotFound } from './views/pages.jsx';
 
 export const app = new Hono();
@@ -116,6 +117,7 @@ registerStatic(app, gateway);
 registerAuth(app);
 registerPages(app);
 registerManage(app);
+registerSubmit(app);
 registerApi(app);
 registerPremium(app);
 registerAutomotive(app);

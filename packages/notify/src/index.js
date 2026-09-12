@@ -102,6 +102,75 @@ export async function sendEmail(target, { feed, items }) {
   });
 }
 
+/**
+ * A feed was suggested: tell every admin the deployment lists, one mail each,
+ * with the URL and the queue to decide it in. Best effort -- a lost mail loses
+ * nothing, the row is in the queue regardless -- and never thrown at the
+ * submitter, who is the last person who should see a Resend error.
+ */
+export async function sendSubmissionNotice({ feedUrl, collection, note, probe, queueUrl }) {
+  const admins = config.adminEmails ?? [];
+  if (!admins.length || !config.mail.enabled) return 0;
+  const what = probe?.title ? `${probe.title} — ${feedUrl}` : feedUrl;
+  const looks = probe?.looksLikeFeed ? 'looks like a feed' : 'did not parse as a feed';
+  const text = [
+    `Someone suggested a feed for ${config.siteName}:`,
+    '',
+    what,
+    collection ? `Collection: ${collection}` : null,
+    note ? `Note: ${note}` : null,
+    probe ? `Probe: HTTP ${probe.status ?? '?'}, ${looks}` : null,
+    '',
+    `Decide it here: ${queueUrl}`,
+  ]
+    .filter((l) => l !== null)
+    .join('\n');
+  const html = `<p>Someone suggested a feed for ${esc(config.siteName)}:</p><p><a href="${esc(feedUrl)}">${esc(what)}</a></p>${collection ? `<p>Collection: ${esc(collection)}</p>` : ''}${note ? `<p>Note: ${esc(note)}</p>` : ''}${probe ? `<p>Probe: HTTP ${esc(probe.status ?? '?')}, ${looks}</p>` : ''}<p><a href="${esc(queueUrl)}">Decide it in the queue</a></p>`;
+  let sent = 0;
+  for (const to of admins) {
+    try {
+      await deliverMail({
+        to,
+        subject: `[${config.siteName}] feed suggested: ${feedUrl}`,
+        text,
+        html,
+      });
+      sent += 1;
+    } catch (err) {
+      console.error('[notify] submission notice failed:', err.message);
+    }
+  }
+  return sent;
+}
+
+/** Tell a submitter what became of their suggestion, when they left an address. */
+export async function sendSubmissionDecision({ email, feedUrl, approved, note, resultUrl }) {
+  if (!email || !config.mail.enabled) return false;
+  const verdict = approved ? 'is now live' : 'was not added';
+  const text = [
+    `Your feed suggestion for ${config.siteName} ${verdict}:`,
+    '',
+    feedUrl,
+    note ? `\n${note}` : null,
+    resultUrl ? `\n${resultUrl}` : null,
+  ]
+    .filter((l) => l !== null)
+    .join('\n');
+  const html = `<p>Your feed suggestion for ${esc(config.siteName)} ${verdict}:</p><p>${esc(feedUrl)}</p>${note ? `<p>${esc(note)}</p>` : ''}${resultUrl ? `<p><a href="${esc(resultUrl)}">${esc(resultUrl)}</a></p>` : ''}`;
+  try {
+    await deliverMail({
+      to: email,
+      subject: `[${config.siteName}] your feed suggestion ${verdict}`,
+      text,
+      html,
+    });
+    return true;
+  } catch (err) {
+    console.error('[notify] submission decision mail failed:', err.message);
+    return false;
+  }
+}
+
 export async function sendLoginLink({ email, url }) {
   return deliverMail({
     to: email,

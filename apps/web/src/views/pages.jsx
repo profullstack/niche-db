@@ -89,6 +89,8 @@ export const CollectionPage = ({
       · {stats.feeds} feeds
       {' · '}
       <a href={`/feeds/new?collection=${collection.slug}`}>make a feed</a>
+      {' · '}
+      <a href={`/submit?collection=${collection.slug}`}>suggest a feed</a>
     </p>
 
     <div class="cols">

@@ -37,6 +37,12 @@ export const COMMANDS = [
     options: ['--collection <slug>', '--json'],
   },
   {
+    name: 'submit',
+    usage: 'submit <url> [--collection <slug>] [--note …] [--email …]',
+    summary: 'Suggest a feed for the index. No key needed; an admin reviews it.',
+    options: ['--collection <slug>', '--note <text>', '--email <address>', '--json'],
+  },
+  {
     name: 'source',
     usage: 'source <slug>',
     summary: 'One source, its recent runs and config.',
@@ -396,6 +402,29 @@ export async function run(
           );
         if (a.needsEnv?.length) out(`    needs on the server: ${a.needsEnv.join(', ')}`);
       }
+      return 0;
+    }
+    case 'submit': {
+      const [url] = rest;
+      if (!url) {
+        process.stderr.write(
+          'usage: nichedb submit <url> [--collection <slug>] [--note …] [--email …]\n',
+        );
+        return 2;
+      }
+      const { submission, duplicate } = await client.post('/api/v1/submissions', {
+        url,
+        collection: flags.collection,
+        note: flags.note,
+        email: flags.email,
+      });
+      out(
+        json
+          ? JSON.stringify({ submission, duplicate }, null, 2)
+          : duplicate
+            ? `Already suggested and waiting for review: ${submission.feed_url}`
+            : `Suggested ${submission.feed_url}. An admin will review it.`,
+      );
       return 0;
     }
     case 'sources': {

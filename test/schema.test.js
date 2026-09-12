@@ -47,6 +47,7 @@ describe('migrations', () => {
       'items',
       'feeds',
       'follows',
+      'source_submissions',
       'deliveries',
       'payments',
       'memberships',
