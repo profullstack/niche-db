@@ -1,0 +1,29 @@
+{
+  "openaccess": "0.1",
+  "name": "nichedb",
+  "url": "https://nichedb.dev",
+  "operator": "https://logicsrc.com/.well-known/openprofile.md",
+  "redirect_uris": [
+    "https://nichedb.dev/api/v1/openaccess/callback"
+  ],
+  "jwks": {
+    "keys": [
+      {
+        "kty": "OKP",
+        "crv": "Ed25519",
+        "kid": "Tthpod2GtsEl",
+        "x": "JUP7xq28pxv_G4AfzqG24ye9kXyRj1vp9H3DogOltGc",
+        "alg": "EdDSA",
+        "use": "sig"
+      }
+    ]
+  },
+  "scopes": {},
+  "honours": [
+    "profullstack.com/all-access"
+  ],
+  "webhooks": "https://nichedb.dev/api/v1/openaccess/events",
+  "hubs": [
+    "https://openaccess.logicsrc.com"
+  ]
+}

@@ -133,6 +133,25 @@ export function registerStatic(app, gateway) {
     return c.body(await llmsTxt());
   });
 
+  /**
+   * The OpenAccess descriptor (logicsrc.com/openaccess): what this site is,
+   * where its OAuth 2.1 endpoints are and which scopes it grants, so a catalog
+   * that fetches it from our own origin can list NicheDB and link an account.
+   *
+   * Checked in under public/, but STATIC_FILES is an allowlist rather than a
+   * directory: a file dropped there is a 404 until a route names it, and this
+   * is that route. Static bytes, so no version hash -- five minutes, like
+   * llms.txt above.
+   */
+  app.get('/.well-known/openaccess.json', async (c) => {
+    const f = Bun.file(
+      new URL('../../public/.well-known/openaccess.json', import.meta.url).pathname,
+    );
+    c.header('content-type', 'application/json');
+    c.header('cache-control', 'public, max-age=300');
+    return c.body(await f.arrayBuffer());
+  });
+
   const xmlEsc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
   const urlset = (urls) =>
     `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls
