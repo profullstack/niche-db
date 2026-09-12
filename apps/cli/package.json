@@ -1,6 +1,6 @@
 {
   "name": "@profullstack/nichedb",
-  "version": "0.8.2",
+  "version": "0.9.0",
   "description": "CLI and MCP bridge for NicheDB: browse collections, manage sources and feeds, search items, from any deployment",
   "type": "module",
   "main": "src/index.js",
