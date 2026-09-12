@@ -178,6 +178,12 @@ export const COLLECTIONS = [
       'What Americans say their banks, lenders, credit bureaus and debt collectors are doing to them, and who those companies actually are. Around ten thousand complaints a day from the Consumer Financial Protection Bureau, a third of them carrying the consumer’s own account; every FDIC-insured institution with its charter, regulator and assets; and every merger, failure, conversion and branch opening or closing on the FDIC register — which is the only public record of which bank a complaint about a vanished bank now belongs to.',
   },
   {
+    slug: 'deals',
+    name: 'Deals',
+    description:
+      'What is on sale and which coupon codes work right now, from the deal communities and editorial deal desks that publish keyless feeds: the Slickdeals front page, popular list and coupon-code search, DealNews with the retailer, price and expiry as fields, Dealcatcher, Ben’s Bargains, and r/deals and r/coupons. Every row names its store under the same key across sources, and a code written in the post is lifted into a field, so a coupon site can list it without reading the thread.',
+  },
+  {
     slug: 'sports',
     name: 'Sports',
     description:
@@ -1127,6 +1133,35 @@ export const DEFAULT_FEEDS = [
     slug: 'branch-closings',
     name: 'Branches opening and closing',
     query: { kinds: ['structure-change'], tags: ['branch-closing', 'branch-opening'] },
+  },
+  {
+    collection: 'deals',
+    slug: 'coupon-codes',
+    name: 'Coupon codes',
+    description: 'Every deal across the sources that names a code a shopper can type at checkout.',
+    query: { tags: ['coupon-code'] },
+  },
+  {
+    collection: 'deals',
+    slug: 'editors-picks',
+    name: 'Editors’ picks',
+    description:
+      'The Slickdeals front page and the DealNews staff picks, which is what the deal desks themselves rate.',
+    query: { tags: ['editors-pick'] },
+  },
+  {
+    collection: 'deals',
+    slug: 'amazon-deals',
+    name: 'Amazon deals',
+    query: { tags: ['amazon'] },
+  },
+  {
+    collection: 'deals',
+    slug: 'all-deals',
+    name: 'All deals',
+    description:
+      'Every deal, sale, product and coupon across the five sources; Reddit posts are excluded unless they carry a code.',
+    query: { kinds: ['deal', 'sale', 'product', 'coupon'] },
   },
   {
     collection: 'consumer-finance',

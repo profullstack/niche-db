@@ -1,8 +1,8 @@
+import { config } from '@nichedb/config';
 import { render } from '../lib/http.js';
 import { ERRORS, fail } from '../lib/mcp/protocol.js';
 import { handle } from '../lib/mcp/server.js';
 import { describe, TOOLS } from '../lib/mcp/tools.js';
-import { config } from '@nichedb/config';
 import { McpDocs } from '../views/admin.jsx';
 
 const CORS = {
@@ -69,18 +69,22 @@ export function registerMcp(app) {
   // is for. A catalog that fetches this from our own origin lists NicheDB as
   // verified rather than as an endpoint that happened to answer.
   app.get('/.well-known/openmcp.json', (c) =>
-    json(200, {
-      openmcp: '0.1',
-      mcp: `${config.siteUrl}/mcp`,
-      name: 'NicheDB',
-      description:
-        'An open, ever-growing database of real-time public data: collections, sources, feeds and items, searchable and followable, over MCP.',
-      url: config.siteUrl,
-      auth: { kind: 'api-key', url: `${config.siteUrl}/settings`, open: OPEN_TOOLS },
-      tags: ['data', 'feeds', 'search', 'public-data', 'nichedb'],
-      tools: TOOLS.map((t) => t.name),
-      catalogs: ['https://openmcp.logicsrc.com'],
-    }, { 'cache-control': 'public, max-age=300' }),
+    json(
+      200,
+      {
+        openmcp: '0.1',
+        mcp: `${config.siteUrl}/mcp`,
+        name: 'NicheDB',
+        description:
+          'An open, ever-growing database of real-time public data: collections, sources, feeds and items, searchable and followable, over MCP.',
+        url: config.siteUrl,
+        auth: { kind: 'api-key', url: `${config.siteUrl}/settings`, open: OPEN_TOOLS },
+        tags: ['data', 'feeds', 'search', 'public-data', 'nichedb'],
+        tools: TOOLS.map((t) => t.name),
+        catalogs: ['https://openmcp.logicsrc.com'],
+      },
+      { 'cache-control': 'public, max-age=300' },
+    ),
   );
 
   app.get('/docs/mcp', async (c) =>

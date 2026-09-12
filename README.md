@@ -45,6 +45,7 @@ Adapters are one file each in `packages/adapters/src`. Seventy-nine ship today a
 | aviation | `faa-nas-status`, `aviation-hazards`, `aviation-metar`, `ntsb-accidents`, `adsb-flights` | no (NTSB needs mdbtools + unzip, in the Dockerfile) |
 | water | `nwps-river-gauges`, `coops-water-levels`, `drought-monitor`, `ndbc-buoys`, `nws-surf-zone` | no |
 | consumer-finance | `cfpb-complaints`, `fdic-institutions`, `fdic-structure-changes` | no |
+| deals | `slickdeals`, `dealnews`, `dealcatcher`, `bensbargains`, `reddit-deals` | no |
 | sports | `espn-catalogue`, `espn-schedule`, `espn-live`, `espn-plays`, `livetennis`, `sportsdb-tv` | Live Tennis; TheSportsDB (`SPORTSDB_API_KEY`, the shared key `3` returns one row per query); ESPN is keyless (`SPORTS_PROXY_URL` for cloud egress) |
 | screen | `tmdb-releases`, `tvmaze-schedule`, `anilist-airing`, `imdb-ratings` | TMDB only |
 | channels | `iptv-org-channels` | no |
