@@ -91,6 +91,7 @@ import { p0dcasters } from './p0dcasters.js';
 import { buildingPermits } from './permits.js';
 import { podcastindexCatalog } from './podcastindex-catalog.js';
 import { podcasts } from './podcasts.js';
+import { policeUpdates } from './police-updates.js';
 import { proscanDirectory } from './proscan.js';
 import { pypi } from './pypi.js';
 import { redditDeals } from './redditdeals.js';
@@ -163,6 +164,7 @@ export const ADAPTERS = [
   nasdaqHalts,
   ecbFxRates,
   socrataCrime,
+  policeUpdates,
   scannerDirectory,
   proscanDirectory,
   ukPoliceCrime,
@@ -305,3 +307,5 @@ const byName = new Map(ADAPTERS.map((a) => [a.name, a]));
 export function adapterByName(name) {
   return byName.get(String(name)) ?? null;
 }
+
+export { POLICE_CITIES, POLICE_SCOPE } from './police-updates.js';

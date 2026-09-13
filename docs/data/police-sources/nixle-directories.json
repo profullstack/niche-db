@@ -1,0 +1,1442 @@
+[
+  {
+    "id": "162:0600562",
+    "directory": "https://local.nixle.com/city/ca/alameda/",
+    "checked_at": "2026-09-13T19:16:09.027020+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0600884",
+    "directory": "https://local.nixle.com/city/ca/alhambra/",
+    "checked_at": "2026-09-13T19:16:09.027881+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0602000",
+    "directory": "https://local.nixle.com/city/ca/anaheim/",
+    "checked_at": "2026-09-13T19:16:09.028116+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0602252",
+    "directory": "https://local.nixle.com/city/ca/antioch/",
+    "checked_at": "2026-09-13T19:16:09.028306+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0602364",
+    "directory": "https://local.nixle.com/city/ca/apple-valley/",
+    "checked_at": "2026-09-13T19:16:09.962465+00:00",
+    "channels": [
+      {
+        "kind": "nixle",
+        "url": "https://local.nixle.com/sbsd---apple-valley-police-department/",
+        "title": "SBSD - Apple Valley Police Department",
+        "evidence_url": "https://local.nixle.com/city/ca/apple-valley/",
+        "verification": "certified-publisher-in-city-directory; jurisdiction-review-required",
+        "access": "not-tested"
+      }
+    ]
+  },
+  {
+    "id": "162:0602462",
+    "directory": "https://local.nixle.com/city/ca/arcadia/",
+    "checked_at": "2026-09-13T19:16:10.726996+00:00",
+    "channels": [
+      {
+        "kind": "nixle",
+        "url": "https://local.nixle.com/arcadia-police-department/",
+        "title": "Arcadia Police Department",
+        "evidence_url": "https://local.nixle.com/city/ca/arcadia/",
+        "verification": "certified-publisher-in-city-directory; jurisdiction-review-required",
+        "access": "not-tested"
+      }
+    ]
+  },
+  {
+    "id": "162:0603526",
+    "directory": "https://local.nixle.com/city/ca/bakersfield/",
+    "checked_at": "2026-09-13T19:16:11.551535+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0603666",
+    "directory": "https://local.nixle.com/city/ca/baldwin-park/",
+    "checked_at": "2026-09-13T19:16:12.302207+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0604758",
+    "directory": "https://local.nixle.com/city/ca/beaumont/",
+    "checked_at": "2026-09-13T19:16:13.040591+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0604982",
+    "directory": "https://local.nixle.com/city/ca/bellflower/",
+    "checked_at": "2026-09-13T19:16:13.743925+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0606000",
+    "directory": "https://local.nixle.com/city/ca/berkeley/",
+    "checked_at": "2026-09-13T19:16:14.558109+00:00",
+    "channels": [
+      {
+        "kind": "nixle",
+        "url": "https://local.nixle.com/berkeley-police-department/",
+        "title": "Berkeley Police Department",
+        "evidence_url": "https://local.nixle.com/city/ca/berkeley/",
+        "verification": "certified-publisher-in-city-directory; jurisdiction-review-required",
+        "access": "not-tested"
+      }
+    ]
+  },
+  {
+    "id": "162:0608142",
+    "directory": "https://local.nixle.com/city/ca/brentwood/",
+    "checked_at": "2026-09-13T19:16:15.287125+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0608786",
+    "directory": "https://local.nixle.com/city/ca/buena-park/",
+    "checked_at": "2026-09-13T19:16:16.046165+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0608954",
+    "directory": "https://local.nixle.com/city/ca/burbank/",
+    "checked_at": "2026-09-13T19:16:16.748595+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0610046",
+    "directory": "https://local.nixle.com/city/ca/camarillo/",
+    "checked_at": "2026-09-13T19:16:17.497698+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0611194",
+    "directory": "https://local.nixle.com/city/ca/carlsbad/",
+    "checked_at": "2026-09-13T19:16:18.181450+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0611530",
+    "directory": "https://local.nixle.com/city/ca/carson/",
+    "checked_at": "2026-09-13T19:16:18.919857+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0612048",
+    "directory": "https://local.nixle.com/city/ca/cathedral-city/",
+    "checked_at": "2026-09-13T19:16:19.652117+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0613014",
+    "directory": "https://local.nixle.com/city/ca/chico/",
+    "checked_at": "2026-09-13T19:16:20.402049+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0613210",
+    "directory": "https://local.nixle.com/city/ca/chino/",
+    "checked_at": "2026-09-13T19:16:21.132326+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0613214",
+    "directory": "https://local.nixle.com/city/ca/chino-hills/",
+    "checked_at": "2026-09-13T19:16:21.891638+00:00",
+    "channels": [
+      {
+        "kind": "nixle",
+        "url": "https://local.nixle.com/sbsd---chino-hills-police-department/",
+        "title": "SBSD - Chino Hills Police Department",
+        "evidence_url": "https://local.nixle.com/city/ca/chino-hills/",
+        "verification": "certified-publisher-in-city-directory; jurisdiction-review-required",
+        "access": "not-tested"
+      }
+    ]
+  },
+  {
+    "id": "162:0613392",
+    "directory": "https://local.nixle.com/city/ca/chula-vista/",
+    "checked_at": "2026-09-13T19:16:22.640542+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0613588",
+    "directory": "https://local.nixle.com/city/ca/citrus-heights/",
+    "checked_at": "2026-09-13T19:16:23.341305+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0614218",
+    "directory": "https://local.nixle.com/city/ca/clovis/",
+    "checked_at": "2026-09-13T19:16:24.083355+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0614890",
+    "directory": "https://local.nixle.com/city/ca/colton/",
+    "checked_at": "2026-09-13T19:16:24.808761+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0615044",
+    "directory": "https://local.nixle.com/city/ca/compton/",
+    "checked_at": "2026-09-13T19:16:25.573338+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0616000",
+    "directory": "https://local.nixle.com/city/ca/concord/",
+    "checked_at": "2026-09-13T19:16:26.242044+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0616350",
+    "directory": "https://local.nixle.com/city/ca/corona/",
+    "checked_at": "2026-09-13T19:16:27.019187+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0616532",
+    "directory": "https://local.nixle.com/city/ca/costa-mesa/",
+    "checked_at": "2026-09-13T19:16:27.812869+00:00",
+    "channels": [
+      {
+        "kind": "nixle",
+        "url": "https://local.nixle.com/costa-mesa-police-department/",
+        "title": "Costa Mesa Police Department",
+        "evidence_url": "https://local.nixle.com/city/ca/costa-mesa/",
+        "verification": "certified-publisher-in-city-directory; jurisdiction-review-required",
+        "access": "not-tested"
+      }
+    ]
+  },
+  {
+    "id": "162:0617610",
+    "directory": "https://local.nixle.com/city/ca/cupertino/",
+    "checked_at": "2026-09-13T19:16:28.553817+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0617918",
+    "directory": "https://local.nixle.com/city/ca/daly-city/",
+    "checked_at": "2026-09-13T19:16:29.272757+00:00",
+    "channels": [
+      {
+        "kind": "nixle",
+        "url": "https://local.nixle.com/daly-city-police-department/",
+        "title": "Daly City Police Department",
+        "evidence_url": "https://local.nixle.com/city/ca/daly-city/",
+        "verification": "certified-publisher-in-city-directory; jurisdiction-review-required",
+        "access": "not-tested"
+      }
+    ]
+  },
+  {
+    "id": "162:0618100",
+    "directory": "https://local.nixle.com/city/ca/davis/",
+    "checked_at": "2026-09-13T19:16:30.015473+00:00",
+    "channels": [
+      {
+        "kind": "nixle",
+        "url": "https://local.nixle.com/city-of-davis-police/",
+        "title": "City of Davis Police",
+        "evidence_url": "https://local.nixle.com/city/ca/davis/",
+        "verification": "certified-publisher-in-city-directory; jurisdiction-review-required",
+        "access": "not-tested"
+      }
+    ]
+  },
+  {
+    "id": "162:0618394",
+    "directory": "https://local.nixle.com/city/ca/delano/",
+    "checked_at": "2026-09-13T19:16:30.743093+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0619192",
+    "directory": "https://local.nixle.com/city/ca/diamond-bar/",
+    "checked_at": "2026-09-13T19:16:31.518632+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0619766",
+    "directory": "https://local.nixle.com/city/ca/downey/",
+    "checked_at": "2026-09-13T19:16:32.246367+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0620018",
+    "directory": "https://local.nixle.com/city/ca/dublin/",
+    "checked_at": "2026-09-13T19:16:33.007530+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0621230",
+    "directory": "https://local.nixle.com/city/ca/eastvale/",
+    "checked_at": "2026-09-13T19:16:33.729893+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0621712",
+    "directory": "https://local.nixle.com/city/ca/el-cajon/",
+    "checked_at": "2026-09-13T19:16:34.441585+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0622230",
+    "directory": "https://local.nixle.com/city/ca/el-monte/",
+    "checked_at": "2026-09-13T19:16:35.207424+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0622020",
+    "directory": "https://local.nixle.com/city/ca/elk-grove/",
+    "checked_at": "2026-09-13T19:16:35.908707+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0622678",
+    "directory": "https://local.nixle.com/city/ca/encinitas/",
+    "checked_at": "2026-09-13T19:16:36.627799+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0622804",
+    "directory": "https://local.nixle.com/city/ca/escondido/",
+    "checked_at": "2026-09-13T19:16:37.403569+00:00",
+    "channels": [
+      {
+        "kind": "nixle",
+        "url": "https://local.nixle.com/escondido-police-department/",
+        "title": "Escondido Police Department",
+        "evidence_url": "https://local.nixle.com/city/ca/escondido/",
+        "verification": "certified-publisher-in-city-directory; jurisdiction-review-required",
+        "access": "not-tested"
+      }
+    ]
+  },
+  {
+    "id": "162:0623182",
+    "directory": "https://local.nixle.com/city/ca/fairfield/",
+    "checked_at": "2026-09-13T19:16:38.140415+00:00",
+    "channels": [
+      {
+        "kind": "nixle",
+        "url": "https://local.nixle.com/fairfield-ca-police-department/",
+        "title": "Fairfield, CA Police Department",
+        "evidence_url": "https://local.nixle.com/city/ca/fairfield/",
+        "verification": "certified-publisher-in-city-directory; jurisdiction-review-required",
+        "access": "not-tested"
+      }
+    ]
+  },
+  {
+    "id": "162:0624638",
+    "directory": "https://local.nixle.com/city/ca/folsom/",
+    "checked_at": "2026-09-13T19:16:38.805219+00:00",
+    "channels": [
+      {
+        "kind": "nixle",
+        "url": "https://local.nixle.com/folsom-police-department/",
+        "title": "Folsom Police Department",
+        "evidence_url": "https://local.nixle.com/city/ca/folsom/",
+        "verification": "certified-publisher-in-city-directory; jurisdiction-review-required",
+        "access": "not-tested"
+      }
+    ]
+  },
+  {
+    "id": "162:0624680",
+    "directory": "https://local.nixle.com/city/ca/fontana/",
+    "checked_at": "2026-09-13T19:16:39.563918+00:00",
+    "channels": [
+      {
+        "kind": "nixle",
+        "url": "https://local.nixle.com/sbsd---fontana-sheriffs-department/",
+        "title": "SBSD - Fontana Sheriff's Department",
+        "evidence_url": "https://local.nixle.com/city/ca/fontana/",
+        "verification": "certified-publisher-in-city-directory; jurisdiction-review-required",
+        "access": "not-tested"
+      }
+    ]
+  },
+  {
+    "id": "162:0625380",
+    "directory": "https://local.nixle.com/city/ca/fountain-valley/",
+    "checked_at": "2026-09-13T19:16:40.341872+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0626000",
+    "directory": "https://local.nixle.com/city/ca/fremont/",
+    "checked_at": "2026-09-13T19:16:41.064206+00:00",
+    "channels": [
+      {
+        "kind": "nixle",
+        "url": "https://local.nixle.com/fremont-police-department-ca/",
+        "title": "Fremont Police Department (CA)",
+        "evidence_url": "https://local.nixle.com/city/ca/fremont/",
+        "verification": "certified-publisher-in-city-directory; jurisdiction-review-required",
+        "access": "not-tested"
+      }
+    ]
+  },
+  {
+    "id": "162:0627000",
+    "directory": "https://local.nixle.com/city/ca/fresno/",
+    "checked_at": "2026-09-13T19:16:41.789299+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0628000",
+    "directory": "https://local.nixle.com/city/ca/fullerton/",
+    "checked_at": "2026-09-13T19:16:42.519955+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0629000",
+    "directory": "https://local.nixle.com/city/ca/garden-grove/",
+    "checked_at": "2026-09-13T19:16:43.244168+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0628168",
+    "directory": "https://local.nixle.com/city/ca/gardena/",
+    "checked_at": "2026-09-13T19:16:44.024066+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0629504",
+    "directory": "https://local.nixle.com/city/ca/gilroy/",
+    "checked_at": "2026-09-13T19:16:44.785778+00:00",
+    "channels": [
+      {
+        "kind": "nixle",
+        "url": "https://local.nixle.com/gilroy-police-department/",
+        "title": "Gilroy Police Department",
+        "evidence_url": "https://local.nixle.com/city/ca/gilroy/",
+        "verification": "certified-publisher-in-city-directory; jurisdiction-review-required",
+        "access": "not-tested"
+      }
+    ]
+  },
+  {
+    "id": "162:0630000",
+    "directory": "https://local.nixle.com/city/ca/glendale/",
+    "checked_at": "2026-09-13T19:16:45.509475+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0631960",
+    "directory": "https://local.nixle.com/city/ca/hanford/",
+    "checked_at": "2026-09-13T19:16:46.245421+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0632548",
+    "directory": "https://local.nixle.com/city/ca/hawthorne/",
+    "checked_at": "2026-09-13T19:16:47.069884+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0633000",
+    "directory": "https://local.nixle.com/city/ca/hayward/",
+    "checked_at": "2026-09-13T19:16:47.844272+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0633182",
+    "directory": "https://local.nixle.com/city/ca/hemet/",
+    "checked_at": "2026-09-13T19:16:48.639151+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0633434",
+    "directory": "https://local.nixle.com/city/ca/hesperia/",
+    "checked_at": "2026-09-13T19:16:49.343997+00:00",
+    "channels": [
+      {
+        "kind": "nixle",
+        "url": "https://local.nixle.com/sbsd---hesperia-police-department/",
+        "title": "SBSD - Hesperia Police Department",
+        "evidence_url": "https://local.nixle.com/city/ca/hesperia/",
+        "verification": "certified-publisher-in-city-directory; jurisdiction-review-required",
+        "access": "not-tested"
+      }
+    ]
+  },
+  {
+    "id": "162:0633588",
+    "directory": "https://local.nixle.com/city/ca/highland/",
+    "checked_at": "2026-09-13T19:16:50.066137+00:00",
+    "channels": [
+      {
+        "kind": "nixle",
+        "url": "https://local.nixle.com/sbsd---highland-police-department/",
+        "title": "SBSD - Highland Police Department",
+        "evidence_url": "https://local.nixle.com/city/ca/highland/",
+        "verification": "certified-publisher-in-city-directory; jurisdiction-review-required",
+        "access": "not-tested"
+      }
+    ]
+  },
+  {
+    "id": "162:0636000",
+    "directory": "https://local.nixle.com/city/ca/huntington-beach/",
+    "checked_at": "2026-09-13T19:16:50.891588+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0636056",
+    "directory": "https://local.nixle.com/city/ca/huntington-park/",
+    "checked_at": "2026-09-13T19:16:51.607753+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0636448",
+    "directory": "https://local.nixle.com/city/ca/indio/",
+    "checked_at": "2026-09-13T19:16:52.379763+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0636546",
+    "directory": "https://local.nixle.com/city/ca/inglewood/",
+    "checked_at": "2026-09-13T19:16:53.117204+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0636770",
+    "directory": "https://local.nixle.com/city/ca/irvine/",
+    "checked_at": "2026-09-13T19:16:53.832633+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0637692",
+    "directory": "https://local.nixle.com/city/ca/jurupa-valley/",
+    "checked_at": "2026-09-13T19:16:54.545463+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0639290",
+    "directory": "https://local.nixle.com/city/ca/la-habra/",
+    "checked_at": "2026-09-13T19:16:55.237609+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0640004",
+    "directory": "https://local.nixle.com/city/ca/la-mesa/",
+    "checked_at": "2026-09-13T19:16:56.004793+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0639248",
+    "directory": "https://local.nixle.com/city/ca/laguna-niguel/",
+    "checked_at": "2026-09-13T19:16:56.758981+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0639486",
+    "directory": "https://local.nixle.com/city/ca/lake-elsinore/",
+    "checked_at": "2026-09-13T19:16:57.453990+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0639496",
+    "directory": "https://local.nixle.com/city/ca/lake-forest/",
+    "checked_at": "2026-09-13T19:16:58.229068+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0639892",
+    "directory": "https://local.nixle.com/city/ca/lakewood/",
+    "checked_at": "2026-09-13T19:16:58.980618+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0640130",
+    "directory": "https://local.nixle.com/city/ca/lancaster/",
+    "checked_at": "2026-09-13T19:16:59.717852+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0641474",
+    "directory": "https://local.nixle.com/city/ca/lincoln/",
+    "checked_at": "2026-09-13T19:17:00.417431+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0641992",
+    "directory": "https://local.nixle.com/city/ca/livermore/",
+    "checked_at": "2026-09-13T19:17:01.143148+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0642202",
+    "directory": "https://local.nixle.com/city/ca/lodi/",
+    "checked_at": "2026-09-13T19:17:01.895771+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0643000",
+    "directory": "https://local.nixle.com/city/ca/long-beach/",
+    "checked_at": "2026-09-13T19:17:02.685881+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0644000",
+    "directory": "https://local.nixle.com/city/ca/los-angeles/",
+    "checked_at": "2026-09-13T19:17:03.361751+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0644574",
+    "directory": "https://local.nixle.com/city/ca/lynwood/",
+    "checked_at": "2026-09-13T19:17:04.076060+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0645022",
+    "directory": "https://local.nixle.com/city/ca/madera/",
+    "checked_at": "2026-09-13T19:17:04.781662+00:00",
+    "channels": [
+      {
+        "kind": "nixle",
+        "url": "https://local.nixle.com/madera-police-department/",
+        "title": "Madera Police Department",
+        "evidence_url": "https://local.nixle.com/city/ca/madera/",
+        "verification": "certified-publisher-in-city-directory; jurisdiction-review-required",
+        "access": "not-tested"
+      }
+    ]
+  },
+  {
+    "id": "162:0645484",
+    "directory": "https://local.nixle.com/city/ca/manteca/",
+    "checked_at": "2026-09-13T19:17:05.610373+00:00",
+    "channels": [
+      {
+        "kind": "nixle",
+        "url": "https://local.nixle.com/manteca-police-department/",
+        "title": "Manteca Police Department",
+        "evidence_url": "https://local.nixle.com/city/ca/manteca/",
+        "verification": "certified-publisher-in-city-directory; jurisdiction-review-required",
+        "access": "not-tested"
+      }
+    ]
+  },
+  {
+    "id": "162:0646842",
+    "directory": "https://local.nixle.com/city/ca/menifee/",
+    "checked_at": "2026-09-13T19:17:06.610598+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0646898",
+    "directory": "https://local.nixle.com/city/ca/merced/",
+    "checked_at": "2026-09-13T19:17:07.346221+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0647766",
+    "directory": "https://local.nixle.com/city/ca/milpitas/",
+    "checked_at": "2026-09-13T19:17:08.083123+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0648256",
+    "directory": "https://local.nixle.com/city/ca/mission-viejo/",
+    "checked_at": "2026-09-13T19:17:08.820588+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0648354",
+    "directory": "https://local.nixle.com/city/ca/modesto/",
+    "checked_at": "2026-09-13T19:17:09.497266+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0648816",
+    "directory": "https://local.nixle.com/city/ca/montebello/",
+    "checked_at": "2026-09-13T19:17:10.214611+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0648914",
+    "directory": "https://local.nixle.com/city/ca/monterey-park/",
+    "checked_at": "2026-09-13T19:17:10.970619+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0649270",
+    "directory": "https://local.nixle.com/city/ca/moreno-valley/",
+    "checked_at": "2026-09-13T19:17:11.661237+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0649670",
+    "directory": "https://local.nixle.com/city/ca/mountain-view/",
+    "checked_at": "2026-09-13T19:17:12.399510+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0650076",
+    "directory": "https://local.nixle.com/city/ca/murrieta/",
+    "checked_at": "2026-09-13T19:17:13.105401+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0650258",
+    "directory": "https://local.nixle.com/city/ca/napa/",
+    "checked_at": "2026-09-13T19:17:13.879221+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0650398",
+    "directory": "https://local.nixle.com/city/ca/national-city/",
+    "checked_at": "2026-09-13T19:17:14.564688+00:00",
+    "channels": [
+      {
+        "kind": "nixle",
+        "url": "https://local.nixle.com/national-city-police-department/",
+        "title": "National City Police Department",
+        "evidence_url": "https://local.nixle.com/city/ca/national-city/",
+        "verification": "certified-publisher-in-city-directory; jurisdiction-review-required",
+        "access": "not-tested"
+      }
+    ]
+  },
+  {
+    "id": "162:0651182",
+    "directory": "https://local.nixle.com/city/ca/newport-beach/",
+    "checked_at": "2026-09-13T19:17:15.220919+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0652526",
+    "directory": "https://local.nixle.com/city/ca/norwalk/",
+    "checked_at": "2026-09-13T19:17:15.890005+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0652582",
+    "directory": "https://local.nixle.com/city/ca/novato/",
+    "checked_at": "2026-09-13T19:17:16.622963+00:00",
+    "channels": [
+      {
+        "kind": "nixle",
+        "url": "https://local.nixle.com/novato-police-ca/",
+        "title": "Novato Police, CA",
+        "evidence_url": "https://local.nixle.com/city/ca/novato/",
+        "verification": "certified-publisher-in-city-directory; jurisdiction-review-required",
+        "access": "not-tested"
+      }
+    ]
+  },
+  {
+    "id": "162:0653000",
+    "directory": "https://local.nixle.com/city/ca/oakland/",
+    "checked_at": "2026-09-13T19:17:17.390038+00:00",
+    "channels": [
+      {
+        "kind": "nixle",
+        "url": "https://local.nixle.com/oakland-police-department-ca/",
+        "title": "Oakland Police Department CA",
+        "evidence_url": "https://local.nixle.com/city/ca/oakland/",
+        "verification": "certified-publisher-in-city-directory; jurisdiction-review-required",
+        "access": "not-tested"
+      }
+    ]
+  },
+  {
+    "id": "162:0653322",
+    "directory": "https://local.nixle.com/city/ca/oceanside/",
+    "checked_at": "2026-09-13T19:17:18.154818+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0653896",
+    "directory": "https://local.nixle.com/city/ca/ontario/",
+    "checked_at": "2026-09-13T19:17:18.868825+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0653980",
+    "directory": "https://local.nixle.com/city/ca/orange/",
+    "checked_at": "2026-09-13T19:17:19.612144+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0654652",
+    "directory": "https://local.nixle.com/city/ca/oxnard/",
+    "checked_at": "2026-09-13T19:17:20.377539+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0655184",
+    "directory": "https://local.nixle.com/city/ca/palm-desert/",
+    "checked_at": "2026-09-13T19:17:21.101667+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0655156",
+    "directory": "https://local.nixle.com/city/ca/palmdale/",
+    "checked_at": "2026-09-13T19:17:21.839072+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0655282",
+    "directory": "https://local.nixle.com/city/ca/palo-alto/",
+    "checked_at": "2026-09-13T19:17:22.563162+00:00",
+    "channels": [
+      {
+        "kind": "nixle",
+        "url": "https://local.nixle.com/palo-alto-police-department/",
+        "title": "Palo Alto Police Department",
+        "evidence_url": "https://local.nixle.com/city/ca/palo-alto/",
+        "verification": "certified-publisher-in-city-directory; jurisdiction-review-required",
+        "access": "not-tested"
+      }
+    ]
+  },
+  {
+    "id": "162:0655618",
+    "directory": "https://local.nixle.com/city/ca/paramount/",
+    "checked_at": "2026-09-13T19:17:23.314907+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0656000",
+    "directory": "https://local.nixle.com/city/ca/pasadena/",
+    "checked_at": "2026-09-13T19:17:24.017249+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0656700",
+    "directory": "https://local.nixle.com/city/ca/perris/",
+    "checked_at": "2026-09-13T19:17:24.874751+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0656784",
+    "directory": "https://local.nixle.com/city/ca/petaluma/",
+    "checked_at": "2026-09-13T19:17:25.427450+00:00",
+    "channels": [
+      {
+        "kind": "nixle",
+        "url": "https://local.nixle.com/petaluma-police-department/",
+        "title": "Petaluma Police Department",
+        "evidence_url": "https://local.nixle.com/city/ca/petaluma/",
+        "verification": "certified-publisher-in-city-directory; jurisdiction-review-required",
+        "access": "not-tested"
+      }
+    ]
+  },
+  {
+    "id": "162:0656924",
+    "directory": "https://local.nixle.com/city/ca/pico-rivera/",
+    "checked_at": "2026-09-13T19:17:26.159336+00:00",
+    "channels": [
+      {
+        "kind": "nixle",
+        "url": "https://local.nixle.com/lasd---pico-rivera-station-los-angeles-county-sheriff/",
+        "title": "LASD - Pico Rivera Station, Los Angeles County Sheriff",
+        "evidence_url": "https://local.nixle.com/city/ca/pico-rivera/",
+        "verification": "certified-publisher-in-city-directory; jurisdiction-review-required",
+        "access": "not-tested"
+      }
+    ]
+  },
+  {
+    "id": "162:0657456",
+    "directory": "https://local.nixle.com/city/ca/pittsburg/",
+    "checked_at": "2026-09-13T19:17:26.889205+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0657526",
+    "directory": "https://local.nixle.com/city/ca/placentia/",
+    "checked_at": "2026-09-13T19:17:27.568486+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0657792",
+    "directory": "https://local.nixle.com/city/ca/pleasanton/",
+    "checked_at": "2026-09-13T19:17:28.274818+00:00",
+    "channels": [
+      {
+        "kind": "nixle",
+        "url": "https://local.nixle.com/pleasanton-police-department/",
+        "title": "Pleasanton Police Department",
+        "evidence_url": "https://local.nixle.com/city/ca/pleasanton/",
+        "verification": "certified-publisher-in-city-directory; jurisdiction-review-required",
+        "access": "not-tested"
+      }
+    ]
+  },
+  {
+    "id": "162:0658072",
+    "directory": "https://local.nixle.com/city/ca/pomona/",
+    "checked_at": "2026-09-13T19:17:29.024972+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0658240",
+    "directory": "https://local.nixle.com/city/ca/porterville/",
+    "checked_at": "2026-09-13T19:17:29.741111+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0659444",
+    "directory": "https://local.nixle.com/city/ca/rancho-cordova/",
+    "checked_at": "2026-09-13T19:17:30.479406+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0659451",
+    "directory": "https://local.nixle.com/city/ca/rancho-cucamonga/",
+    "checked_at": "2026-09-13T19:17:31.156393+00:00",
+    "channels": [
+      {
+        "kind": "nixle",
+        "url": "https://local.nixle.com/sbsd---rancho-cucamonga-police-department/",
+        "title": "SBSD - Rancho Cucamonga Police Department",
+        "evidence_url": "https://local.nixle.com/city/ca/rancho-cucamonga/",
+        "verification": "certified-publisher-in-city-directory; jurisdiction-review-required",
+        "access": "not-tested"
+      }
+    ]
+  },
+  {
+    "id": "162:0659920",
+    "directory": "https://local.nixle.com/city/ca/redding/",
+    "checked_at": "2026-09-13T19:17:31.839885+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0659962",
+    "directory": "https://local.nixle.com/city/ca/redlands/",
+    "checked_at": "2026-09-13T19:17:32.559670+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0660018",
+    "directory": "https://local.nixle.com/city/ca/redondo-beach/",
+    "checked_at": "2026-09-13T19:17:33.272533+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0660102",
+    "directory": "https://local.nixle.com/city/ca/redwood-city/",
+    "checked_at": "2026-09-13T19:17:34.051363+00:00",
+    "channels": [
+      {
+        "kind": "nixle",
+        "url": "https://local.nixle.com/redwood-city-police-department/",
+        "title": "Redwood City Police Department",
+        "evidence_url": "https://local.nixle.com/city/ca/redwood-city/",
+        "verification": "certified-publisher-in-city-directory; jurisdiction-review-required",
+        "access": "not-tested"
+      }
+    ]
+  },
+  {
+    "id": "162:0660466",
+    "directory": "https://local.nixle.com/city/ca/rialto/",
+    "checked_at": "2026-09-13T19:17:34.762615+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0660620",
+    "directory": "https://local.nixle.com/city/ca/richmond/",
+    "checked_at": "2026-09-13T19:17:35.512008+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0662000",
+    "directory": "https://local.nixle.com/city/ca/riverside/",
+    "checked_at": "2026-09-13T19:17:36.210714+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0662364",
+    "directory": "https://local.nixle.com/city/ca/rocklin/",
+    "checked_at": "2026-09-13T19:17:36.973435+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0662938",
+    "directory": "https://local.nixle.com/city/ca/roseville/",
+    "checked_at": "2026-09-13T19:17:37.716206+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0664000",
+    "directory": "https://local.nixle.com/city/ca/sacramento/",
+    "checked_at": "2026-09-13T19:17:38.505826+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0664224",
+    "directory": "https://local.nixle.com/city/ca/salinas/",
+    "checked_at": "2026-09-13T19:17:39.292852+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0665000",
+    "directory": "https://local.nixle.com/city/ca/san-bernardino/",
+    "checked_at": "2026-09-13T19:17:39.976121+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0665042",
+    "directory": "https://local.nixle.com/city/ca/ventura/",
+    "checked_at": "2026-09-13T19:17:40.681195+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0665084",
+    "directory": "https://local.nixle.com/city/ca/san-clemente/",
+    "checked_at": "2026-09-13T19:17:41.413854+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0666000",
+    "directory": "https://local.nixle.com/city/ca/san-diego/",
+    "checked_at": "2026-09-13T19:17:42.103296+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0667000",
+    "directory": "https://local.nixle.com/city/ca/san-francisco/",
+    "checked_at": "2026-09-13T19:17:43.002412+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0667112",
+    "directory": "https://local.nixle.com/city/ca/san-jacinto/",
+    "checked_at": "2026-09-13T19:17:43.704346+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0668000",
+    "directory": "https://local.nixle.com/city/ca/san-jose/",
+    "checked_at": "2026-09-13T19:17:44.402611+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0668084",
+    "directory": "https://local.nixle.com/city/ca/san-leandro/",
+    "checked_at": "2026-09-13T19:17:45.211819+00:00",
+    "channels": [
+      {
+        "kind": "nixle",
+        "url": "https://local.nixle.com/san-leandro-police-department/",
+        "title": "San Leandro Police Department",
+        "evidence_url": "https://local.nixle.com/city/ca/san-leandro/",
+        "verification": "certified-publisher-in-city-directory; jurisdiction-review-required",
+        "access": "not-tested"
+      }
+    ]
+  },
+  {
+    "id": "162:0668154",
+    "directory": "https://local.nixle.com/city/ca/san-luis-obispo/",
+    "checked_at": "2026-09-13T19:17:45.986496+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0668196",
+    "directory": "https://local.nixle.com/city/ca/san-marcos/",
+    "checked_at": "2026-09-13T19:17:46.676413+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0668252",
+    "directory": "https://local.nixle.com/city/ca/san-mateo/",
+    "checked_at": "2026-09-13T19:17:47.646730+00:00",
+    "channels": [
+      {
+        "kind": "nixle",
+        "url": "https://local.nixle.com/san-mateo-ca-police-department/",
+        "title": "San Mateo, CA Police Department",
+        "evidence_url": "https://local.nixle.com/city/ca/san-mateo/",
+        "verification": "certified-publisher-in-city-directory; jurisdiction-review-required",
+        "access": "not-tested"
+      }
+    ]
+  },
+  {
+    "id": "162:0668364",
+    "directory": "https://local.nixle.com/city/ca/san-rafael/",
+    "checked_at": "2026-09-13T19:17:48.398216+00:00",
+    "channels": [
+      {
+        "kind": "nixle",
+        "url": "https://local.nixle.com/san-rafael-police-department/",
+        "title": "San Rafael Police Department",
+        "evidence_url": "https://local.nixle.com/city/ca/san-rafael/",
+        "verification": "certified-publisher-in-city-directory; jurisdiction-review-required",
+        "access": "not-tested"
+      }
+    ]
+  },
+  {
+    "id": "162:0668378",
+    "directory": "https://local.nixle.com/city/ca/san-ramon/",
+    "checked_at": "2026-09-13T19:17:49.117812+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0669000",
+    "directory": "https://local.nixle.com/city/ca/santa-ana/",
+    "checked_at": "2026-09-13T19:17:49.848821+00:00",
+    "channels": [
+      {
+        "kind": "nixle",
+        "url": "https://local.nixle.com/santa-ana-police-department/",
+        "title": "Santa Ana Police Department",
+        "evidence_url": "https://local.nixle.com/city/ca/santa-ana/",
+        "verification": "certified-publisher-in-city-directory; jurisdiction-review-required",
+        "access": "not-tested"
+      }
+    ]
+  },
+  {
+    "id": "162:0669070",
+    "directory": "https://local.nixle.com/city/ca/santa-barbara/",
+    "checked_at": "2026-09-13T19:17:50.653342+00:00",
+    "channels": [
+      {
+        "kind": "nixle",
+        "url": "https://local.nixle.com/santa-barbara-police-department/",
+        "title": "Santa Barbara Police Department",
+        "evidence_url": "https://local.nixle.com/city/ca/santa-barbara/",
+        "verification": "certified-publisher-in-city-directory; jurisdiction-review-required",
+        "access": "not-tested"
+      }
+    ]
+  },
+  {
+    "id": "162:0669084",
+    "directory": "https://local.nixle.com/city/ca/santa-clara/",
+    "checked_at": "2026-09-13T19:17:51.325575+00:00",
+    "channels": [
+      {
+        "kind": "nixle",
+        "url": "https://local.nixle.com/santa-clara-police-department/",
+        "title": "Santa Clara Police Department",
+        "evidence_url": "https://local.nixle.com/city/ca/santa-clara/",
+        "verification": "certified-publisher-in-city-directory; jurisdiction-review-required",
+        "access": "not-tested"
+      }
+    ]
+  },
+  {
+    "id": "162:0669088",
+    "directory": "https://local.nixle.com/city/ca/santa-clarita/",
+    "checked_at": "2026-09-13T19:17:51.865194+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0669112",
+    "directory": "https://local.nixle.com/city/ca/santa-cruz/",
+    "checked_at": "2026-09-13T19:17:52.640558+00:00",
+    "channels": [
+      {
+        "kind": "nixle",
+        "url": "https://local.nixle.com/santa-cruz-police-department/",
+        "title": "Santa Cruz Police Department",
+        "evidence_url": "https://local.nixle.com/city/ca/santa-cruz/",
+        "verification": "certified-publisher-in-city-directory; jurisdiction-review-required",
+        "access": "not-tested"
+      }
+    ]
+  },
+  {
+    "id": "162:0669196",
+    "directory": "https://local.nixle.com/city/ca/santa-maria/",
+    "checked_at": "2026-09-13T19:17:53.378254+00:00",
+    "channels": [
+      {
+        "kind": "nixle",
+        "url": "https://local.nixle.com/santa-maria-police-department/",
+        "title": "Santa Maria Police Department",
+        "evidence_url": "https://local.nixle.com/city/ca/santa-maria/",
+        "verification": "certified-publisher-in-city-directory; jurisdiction-review-required",
+        "access": "not-tested"
+      }
+    ]
+  },
+  {
+    "id": "162:0670000",
+    "directory": "https://local.nixle.com/city/ca/santa-monica/",
+    "checked_at": "2026-09-13T19:17:54.090231+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0670098",
+    "directory": "https://local.nixle.com/city/ca/santa-rosa/",
+    "checked_at": "2026-09-13T19:17:54.822736+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0670224",
+    "directory": "https://local.nixle.com/city/ca/santee/",
+    "checked_at": "2026-09-13T19:17:55.540164+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0672016",
+    "directory": "https://local.nixle.com/city/ca/simi-valley/",
+    "checked_at": "2026-09-13T19:17:56.252154+00:00",
+    "channels": [
+      {
+        "kind": "nixle",
+        "url": "https://local.nixle.com/simi-valley-police-department/",
+        "title": "Simi Valley Police Department",
+        "evidence_url": "https://local.nixle.com/city/ca/simi-valley/",
+        "verification": "certified-publisher-in-city-directory; jurisdiction-review-required",
+        "access": "not-tested"
+      }
+    ]
+  },
+  {
+    "id": "162:0673080",
+    "directory": "https://local.nixle.com/city/ca/south-gate/",
+    "checked_at": "2026-09-13T19:17:57.055409+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0673262",
+    "directory": "https://local.nixle.com/city/ca/south-san-francisco/",
+    "checked_at": "2026-09-13T19:17:57.838204+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0675000",
+    "directory": "https://local.nixle.com/city/ca/stockton/",
+    "checked_at": "2026-09-13T19:17:58.521735+00:00",
+    "channels": [
+      {
+        "kind": "nixle",
+        "url": "https://local.nixle.com/stockton-police-department-ca/",
+        "title": "Stockton Police Department, CA",
+        "evidence_url": "https://local.nixle.com/city/ca/stockton/",
+        "verification": "certified-publisher-in-city-directory; jurisdiction-review-required",
+        "access": "not-tested"
+      }
+    ]
+  },
+  {
+    "id": "162:0677000",
+    "directory": "https://local.nixle.com/city/ca/sunnyvale/",
+    "checked_at": "2026-09-13T19:17:59.357602+00:00",
+    "channels": [
+      {
+        "kind": "nixle",
+        "url": "https://local.nixle.com/sunnyvale-department-of-public-safety/",
+        "title": "Sunnyvale Department of Public Safety",
+        "evidence_url": "https://local.nixle.com/city/ca/sunnyvale/",
+        "verification": "certified-publisher-in-city-directory; jurisdiction-review-required",
+        "access": "not-tested"
+      }
+    ]
+  },
+  {
+    "id": "162:0678120",
+    "directory": "https://local.nixle.com/city/ca/temecula/",
+    "checked_at": "2026-09-13T19:18:00.110440+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0678582",
+    "directory": "https://local.nixle.com/city/ca/thousand-oaks/",
+    "checked_at": "2026-09-13T19:18:00.828816+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0680000",
+    "directory": "https://local.nixle.com/city/ca/torrance/",
+    "checked_at": "2026-09-13T19:18:01.650796+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0680238",
+    "directory": "https://local.nixle.com/city/ca/tracy/",
+    "checked_at": "2026-09-13T19:18:02.387860+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0680644",
+    "directory": "https://local.nixle.com/city/ca/tulare/",
+    "checked_at": "2026-09-13T19:18:03.090324+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0680812",
+    "directory": "https://local.nixle.com/city/ca/turlock/",
+    "checked_at": "2026-09-13T19:18:03.781175+00:00",
+    "channels": [
+      {
+        "kind": "nixle",
+        "url": "https://local.nixle.com/turlock-police-department-ca/",
+        "title": "Turlock Police Department, CA",
+        "evidence_url": "https://local.nixle.com/city/ca/turlock/",
+        "verification": "certified-publisher-in-city-directory; jurisdiction-review-required",
+        "access": "not-tested"
+      }
+    ]
+  },
+  {
+    "id": "162:0680854",
+    "directory": "https://local.nixle.com/city/ca/tustin/",
+    "checked_at": "2026-09-13T19:18:04.594147+00:00",
+    "channels": [
+      {
+        "kind": "nixle",
+        "url": "https://local.nixle.com/tustin-ca-police-department/",
+        "title": "Tustin, CA Police Department",
+        "evidence_url": "https://local.nixle.com/city/ca/tustin/",
+        "verification": "certified-publisher-in-city-directory; jurisdiction-review-required",
+        "access": "not-tested"
+      }
+    ]
+  },
+  {
+    "id": "162:0681204",
+    "directory": "https://local.nixle.com/city/ca/union-city/",
+    "checked_at": "2026-09-13T19:18:05.290249+00:00",
+    "channels": [
+      {
+        "kind": "nixle",
+        "url": "https://local.nixle.com/union-city-police-department-ca/",
+        "title": "Union City Police Department, CA",
+        "evidence_url": "https://local.nixle.com/city/ca/union-city/",
+        "verification": "certified-publisher-in-city-directory; jurisdiction-review-required",
+        "access": "not-tested"
+      }
+    ]
+  },
+  {
+    "id": "162:0681344",
+    "directory": "https://local.nixle.com/city/ca/upland/",
+    "checked_at": "2026-09-13T19:18:06.080901+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0681554",
+    "directory": "https://local.nixle.com/city/ca/vacaville/",
+    "checked_at": "2026-09-13T19:18:06.782128+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0681666",
+    "directory": "https://local.nixle.com/city/ca/vallejo/",
+    "checked_at": "2026-09-13T19:18:07.528905+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0682590",
+    "directory": "https://local.nixle.com/city/ca/victorville/",
+    "checked_at": "2026-09-13T19:18:08.284543+00:00",
+    "channels": [
+      {
+        "kind": "nixle",
+        "url": "https://local.nixle.com/sbsd---victorville-police-department/",
+        "title": "SBSD - Victorville Police Department",
+        "evidence_url": "https://local.nixle.com/city/ca/victorville/",
+        "verification": "certified-publisher-in-city-directory; jurisdiction-review-required",
+        "access": "not-tested"
+      }
+    ]
+  },
+  {
+    "id": "162:0682954",
+    "directory": "https://local.nixle.com/city/ca/visalia/",
+    "checked_at": "2026-09-13T19:18:08.991794+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0682996",
+    "directory": "https://local.nixle.com/city/ca/vista/",
+    "checked_at": "2026-09-13T19:18:09.691959+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0683346",
+    "directory": "https://local.nixle.com/city/ca/walnut-creek/",
+    "checked_at": "2026-09-13T19:18:10.403117+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0683668",
+    "directory": "https://local.nixle.com/city/ca/watsonville/",
+    "checked_at": "2026-09-13T19:18:11.129473+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0684200",
+    "directory": "https://local.nixle.com/city/ca/west-covina/",
+    "checked_at": "2026-09-13T19:18:11.922793+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0684816",
+    "directory": "https://local.nixle.com/city/ca/west-sacramento/",
+    "checked_at": "2026-09-13T19:18:12.643578+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0684550",
+    "directory": "https://local.nixle.com/city/ca/westminster/",
+    "checked_at": "2026-09-13T19:18:13.448269+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0685292",
+    "directory": "https://local.nixle.com/city/ca/whittier/",
+    "checked_at": "2026-09-13T19:18:14.272858+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0686328",
+    "directory": "https://local.nixle.com/city/ca/woodland/",
+    "checked_at": "2026-09-13T19:18:15.028630+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0686832",
+    "directory": "https://local.nixle.com/city/ca/yorba-linda/",
+    "checked_at": "2026-09-13T19:18:15.764154+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0686972",
+    "directory": "https://local.nixle.com/city/ca/yuba-city/",
+    "checked_at": "2026-09-13T19:18:16.499408+00:00",
+    "channels": []
+  },
+  {
+    "id": "162:0687042",
+    "directory": "https://local.nixle.com/city/ca/yucaipa/",
+    "checked_at": "2026-09-13T19:18:17.250689+00:00",
+    "channels": [
+      {
+        "kind": "nixle",
+        "url": "https://local.nixle.com/sbsd---yucaipa-police-department/",
+        "title": "SBSD - Yucaipa Police Department",
+        "evidence_url": "https://local.nixle.com/city/ca/yucaipa/",
+        "verification": "certified-publisher-in-city-directory; jurisdiction-review-required",
+        "access": "not-tested"
+      }
+    ]
+  }
+]

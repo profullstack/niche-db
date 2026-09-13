@@ -127,7 +127,16 @@ export const ItemRow = ({ item, showSource = true, enrichers = null, reserveThum
         {' · '}
         <span class="kind">{item.kind}</span>
         {item.distance_m != null ? (
-          <span> · {(Number(item.distance_m) / 1000).toFixed(2)} km from point or coverage</span>
+          <span>
+            {' '}
+            · {(Number(item.distance_m) / 1000).toFixed(2)} km{' '}
+            {item.kind === 'police-update'
+              ? 'to publishing city reference point'
+              : 'from point or coverage'}
+          </span>
+        ) : null}
+        {item.kind === 'police-update' ? (
+          <span> · city-level announcement · publication date</span>
         ) : null}
         {item.url ? (
           <>

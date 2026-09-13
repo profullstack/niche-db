@@ -1,0 +1,602 @@
+{
+  "https://local.nixle.com/burbank-police-department-california/": {
+    "url": "https://local.nixle.com/burbank-police-department-california/",
+    "checked_at": "2026-09-13T19:03:09.455752+00:00",
+    "final_url": "https://local.nixle.com/burbank-police-department-california/",
+    "publisher": "Burbank Police Department, California",
+    "item_count": 20,
+    "newest_label": "Entered: 1 year, 3 months ago",
+    "access": "public-nixle-archive",
+    "ingestion": "HTML adapter required; publication dates are on individual alerts"
+  },
+  "https://hppolice.org/feed/": {
+    "url": "https://hppolice.org/feed/",
+    "checked_at": "2026-09-13T19:03:11.180894+00:00",
+    "final_url": "https://hppolice.org/feed/",
+    "publisher": "Huntington Park Police Department",
+    "item_count": 10,
+    "newest_label": "2023-11-15T07:35:48+00:00",
+    "access": "public-feed-with-items",
+    "ingestion": "RSS/Atom parser; confirm police scope and classify announcements separately"
+  },
+  "https://hppolice.org/comments/feed/": {
+    "url": "https://hppolice.org/comments/feed/",
+    "checked_at": "2026-09-13T19:03:11.519133+00:00",
+    "final_url": "https://hppolice.org/comments/feed/",
+    "publisher": "\n\tComments for Huntington Park Police Department\t",
+    "item_count": 0,
+    "newest_label": null,
+    "access": "empty-public-feed",
+    "ingestion": "RSS/Atom parser; confirm police scope and classify announcements separately"
+  },
+  "https://hppolice.org/category/news/feed/": {
+    "url": "https://hppolice.org/category/news/feed/",
+    "checked_at": "2026-09-13T19:03:11.814319+00:00",
+    "final_url": "https://hppolice.org/category/news/feed/",
+    "publisher": "News Archives - Huntington Park Police Department",
+    "item_count": 10,
+    "newest_label": "2023-11-15T07:35:48+00:00",
+    "access": "public-feed-with-items",
+    "ingestion": "RSS/Atom parser; confirm police scope and classify announcements separately"
+  },
+  "https://local.nixle.com/city-of-la-mesa": {
+    "url": "https://local.nixle.com/city-of-la-mesa",
+    "checked_at": "2026-09-13T19:03:11.913961+00:00",
+    "final_url": "https://local.nixle.com/city-of-la-mesa",
+    "publisher": "City of La Mesa",
+    "item_count": 20,
+    "newest_label": "Entered: 2 days ago",
+    "access": "public-nixle-archive",
+    "ingestion": "HTML adapter required; publication dates are on individual alerts"
+  },
+  "https://newportbeachpolicehq.com/feed/": {
+    "url": "https://newportbeachpolicehq.com/feed/",
+    "checked_at": "2026-09-13T19:03:12.274555+00:00",
+    "final_url": "https://newportbeachpolicehq.com/feed/",
+    "publisher": "Newport Beach",
+    "item_count": 1,
+    "newest_label": "2026-06-29T18:08:49+00:00",
+    "access": "public-feed-with-items",
+    "ingestion": "RSS/Atom parser; confirm police scope and classify announcements separately"
+  },
+  "https://newportbeachpolicehq.com/comments/feed/": {
+    "url": "https://newportbeachpolicehq.com/comments/feed/",
+    "checked_at": "2026-09-13T19:03:12.379602+00:00",
+    "final_url": "https://newportbeachpolicehq.com/comments/feed/",
+    "publisher": "\n\tComments for Newport Beach\t",
+    "item_count": 1,
+    "newest_label": "2026-06-29T18:08:49+00:00",
+    "access": "public-feed-with-items",
+    "ingestion": "RSS/Atom parser; confirm police scope and classify announcements separately"
+  },
+  "https://local.nixle.com/palo-alto-police-department/": {
+    "url": "https://local.nixle.com/palo-alto-police-department/",
+    "checked_at": "2026-09-13T19:03:12.637970+00:00",
+    "final_url": "https://local.nixle.com/palo-alto-police-department/",
+    "publisher": "Palo Alto Police Department",
+    "item_count": 20,
+    "newest_label": "Entered: 1 week, 4 days ago",
+    "access": "public-nixle-archive",
+    "ingestion": "HTML adapter required; publication dates are on individual alerts"
+  },
+  "https://www.cityofpasadena.net/police/feed/": {
+    "url": "https://www.cityofpasadena.net/police/feed/",
+    "checked_at": "2026-09-13T19:03:12.743735+00:00",
+    "final_url": "https://www.cityofpasadena.net/police/feed/",
+    "publisher": "Police Department",
+    "item_count": 10,
+    "newest_label": "2026-09-11T18:59:07+00:00",
+    "access": "public-feed-with-items",
+    "ingestion": "RSS/Atom parser; confirm police scope and classify announcements separately"
+  },
+  "https://www.cityofpasadena.net/police/news/feed/": {
+    "url": "https://www.cityofpasadena.net/police/news/feed/",
+    "checked_at": "2026-09-13T19:03:13.380550+00:00",
+    "final_url": "https://www.cityofpasadena.net/police/news/feed/",
+    "publisher": "News - Police Department",
+    "item_count": 10,
+    "newest_label": "2026-09-11T18:59:07+00:00",
+    "access": "public-feed-with-items",
+    "ingestion": "RSS/Atom parser; confirm police scope and classify announcements separately"
+  },
+  "https://www.redlands.gov/police-appointments/feed/": {
+    "url": "https://www.redlands.gov/police-appointments/feed/",
+    "checked_at": "2026-09-13T19:03:13.404332+00:00",
+    "final_url": "https://www.redlands.gov/police-appointments/feed/",
+    "publisher": "\n\tComments on: Police Appointments\t",
+    "item_count": 0,
+    "newest_label": null,
+    "access": "empty-public-feed",
+    "ingestion": "RSS/Atom parser; confirm police scope and classify announcements separately"
+  },
+  "https://www.redlands.gov/public-safety/feed/": {
+    "url": "https://www.redlands.gov/public-safety/feed/",
+    "checked_at": "2026-09-13T19:03:14.003346+00:00",
+    "final_url": "https://www.redlands.gov/public-safety/feed/",
+    "publisher": "\n\tComments on: Public Safety\t",
+    "item_count": 0,
+    "newest_label": null,
+    "access": "empty-public-feed",
+    "ingestion": "RSS/Atom parser; confirm police scope and classify announcements separately"
+  },
+  "https://police.salinas.gov/feed/": {
+    "url": "https://police.salinas.gov/feed/",
+    "checked_at": "2026-09-13T19:03:14.043058+00:00",
+    "final_url": "https://police.salinas.gov/feed/",
+    "publisher": "Salinas Police Department",
+    "item_count": 10,
+    "newest_label": "2026-09-11T07:14:42+00:00",
+    "access": "public-feed-with-items",
+    "ingestion": "RSS/Atom parser; confirm police scope and classify announcements separately"
+  },
+  "https://police.salinas.gov/comments/feed/": {
+    "url": "https://police.salinas.gov/comments/feed/",
+    "checked_at": "2026-09-13T19:03:14.058619+00:00",
+    "final_url": "https://police.salinas.gov/comments/feed/",
+    "publisher": "\n\tComments for Salinas Police Department\t",
+    "item_count": 0,
+    "newest_label": null,
+    "access": "empty-public-feed",
+    "ingestion": "RSS/Atom parser; confirm police scope and classify announcements separately"
+  },
+  "https://local.nixle.com/san-mateo-ca-police-department/": {
+    "url": "https://local.nixle.com/san-mateo-ca-police-department/",
+    "checked_at": "2026-09-13T19:03:15.256613+00:00",
+    "final_url": "https://local.nixle.com/san-mateo-ca-police-department/",
+    "publisher": "San Mateo, CA Police Department",
+    "item_count": 20,
+    "newest_label": "Entered: 2 days ago",
+    "access": "public-nixle-archive",
+    "ingestion": "HTML adapter required; publication dates are on individual alerts"
+  },
+  "https://southgatepd.com/feed/": {
+    "url": "https://southgatepd.com/feed/",
+    "checked_at": "2026-09-13T19:03:16.038122+00:00",
+    "final_url": "https://southgatepd.com/feed/",
+    "publisher": "South Gate Police Department",
+    "item_count": 3,
+    "newest_label": "2025-12-08T16:32:57+00:00",
+    "access": "public-feed-with-items",
+    "ingestion": "RSS/Atom parser; confirm police scope and classify announcements separately"
+  },
+  "https://southgatepd.com/comments/feed/": {
+    "url": "https://southgatepd.com/comments/feed/",
+    "checked_at": "2026-09-13T19:03:16.442503+00:00",
+    "final_url": "https://southgatepd.com/comments/feed/",
+    "publisher": "\n\tComments for South Gate Police Department\t",
+    "item_count": 0,
+    "newest_label": null,
+    "access": "empty-public-feed",
+    "ingestion": "RSS/Atom parser; confirm police scope and classify announcements separately"
+  },
+  "https://tracypd.com/feed": {
+    "url": "https://tracypd.com/feed",
+    "checked_at": "2026-09-13T19:03:17.149087+00:00",
+    "final_url": "https://tracypd.com/feed",
+    "publisher": "Tracy Police Department",
+    "item_count": 10,
+    "newest_label": "2026-09-12T17:21:04+00:00",
+    "access": "public-feed-with-items",
+    "ingestion": "RSS/Atom parser; confirm police scope and classify announcements separately"
+  },
+  "https://tracypd.com/comments/feed": {
+    "url": "https://tracypd.com/comments/feed",
+    "checked_at": "2026-09-13T19:03:17.284093+00:00",
+    "final_url": "https://tracypd.com/comments/feed",
+    "publisher": "\n\tComments for Tracy Police Department\t",
+    "item_count": 0,
+    "newest_label": null,
+    "access": "empty-public-feed",
+    "ingestion": "RSS/Atom parser; confirm police scope and classify announcements separately"
+  },
+  "https://local.nixle.com/turlock-police-department-ca/": {
+    "url": "https://local.nixle.com/turlock-police-department-ca/",
+    "checked_at": "2026-09-13T19:03:18.782038+00:00",
+    "final_url": "https://local.nixle.com/turlock-police-department-ca/",
+    "publisher": "Turlock Police Department, CA",
+    "item_count": 20,
+    "newest_label": "Entered: 3 days, 19 hours ago",
+    "access": "public-nixle-archive",
+    "ingestion": "HTML adapter required; publication dates are on individual alerts"
+  },
+  "https://local.nixle.com/tustin-ca-police-department/": {
+    "url": "https://local.nixle.com/tustin-ca-police-department/",
+    "checked_at": "2026-09-13T19:03:19.297447+00:00",
+    "final_url": "https://local.nixle.com/tustin-ca-police-department/",
+    "publisher": "Tustin, CA Police Department",
+    "item_count": 20,
+    "newest_label": "Entered: 4 days, 23 hours ago",
+    "access": "public-nixle-archive",
+    "ingestion": "HTML adapter required; publication dates are on individual alerts"
+  },
+  "https://local.nixle.com/sbsd---apple-valley-police-department/": {
+    "url": "https://local.nixle.com/sbsd---apple-valley-police-department/",
+    "checked_at": "2026-09-13T19:19:20.995088+00:00",
+    "final_url": "https://local.nixle.com/sbsd---apple-valley-police-department/",
+    "publisher": "SBSD - Apple Valley Police Department",
+    "item_count": 20,
+    "newest_label": "Entered: 1 day, 15 hours ago",
+    "access": "public-nixle-archive",
+    "ingestion": "HTML adapter required; publication dates are on individual alerts"
+  },
+  "https://local.nixle.com/arcadia-police-department/": {
+    "url": "https://local.nixle.com/arcadia-police-department/",
+    "checked_at": "2026-09-13T19:19:20.996070+00:00",
+    "final_url": "https://local.nixle.com/arcadia-police-department/",
+    "publisher": "Arcadia Police Department",
+    "item_count": 20,
+    "newest_label": "Entered: 1 day, 21 hours ago",
+    "access": "public-nixle-archive",
+    "ingestion": "HTML adapter required; publication dates are on individual alerts"
+  },
+  "https://local.nixle.com/berkeley-police-department/": {
+    "url": "https://local.nixle.com/berkeley-police-department/",
+    "checked_at": "2026-09-13T19:19:20.996292+00:00",
+    "final_url": "https://local.nixle.com/berkeley-police-department/",
+    "publisher": "Berkeley Police Department",
+    "item_count": 20,
+    "newest_label": "Entered: 19 hours, 19 minutes ago",
+    "access": "public-nixle-archive",
+    "ingestion": "HTML adapter required; publication dates are on individual alerts"
+  },
+  "https://local.nixle.com/sbsd---chino-hills-police-department/": {
+    "url": "https://local.nixle.com/sbsd---chino-hills-police-department/",
+    "checked_at": "2026-09-13T19:19:20.996513+00:00",
+    "final_url": "https://local.nixle.com/sbsd---chino-hills-police-department/",
+    "publisher": "SBSD - Chino Hills Police Department",
+    "item_count": 20,
+    "newest_label": "Entered: 5 days, 3 hours ago",
+    "access": "public-nixle-archive",
+    "ingestion": "HTML adapter required; publication dates are on individual alerts"
+  },
+  "https://local.nixle.com/costa-mesa-police-department/": {
+    "url": "https://local.nixle.com/costa-mesa-police-department/",
+    "checked_at": "2026-09-13T19:19:20.996704+00:00",
+    "final_url": "https://local.nixle.com/costa-mesa-police-department/",
+    "publisher": "Costa Mesa Police Department",
+    "item_count": 20,
+    "newest_label": "Entered: 3 weeks, 4 days ago",
+    "access": "public-nixle-archive",
+    "ingestion": "HTML adapter required; publication dates are on individual alerts"
+  },
+  "https://local.nixle.com/daly-city-police-department/": {
+    "url": "https://local.nixle.com/daly-city-police-department/",
+    "checked_at": "2026-09-13T19:19:20.996874+00:00",
+    "final_url": "https://local.nixle.com/daly-city-police-department/",
+    "publisher": "Daly City Police Department",
+    "item_count": 20,
+    "newest_label": "Entered: 3 days, 1 hour ago",
+    "access": "public-nixle-archive",
+    "ingestion": "HTML adapter required; publication dates are on individual alerts"
+  },
+  "https://local.nixle.com/city-of-davis-police/": {
+    "url": "https://local.nixle.com/city-of-davis-police/",
+    "checked_at": "2026-09-13T19:19:20.997032+00:00",
+    "final_url": "https://local.nixle.com/city-of-davis-police/",
+    "publisher": "City of Davis Police",
+    "item_count": 20,
+    "newest_label": "Entered: 3 months ago",
+    "access": "public-nixle-archive",
+    "ingestion": "HTML adapter required; publication dates are on individual alerts"
+  },
+  "https://local.nixle.com/escondido-police-department/": {
+    "url": "https://local.nixle.com/escondido-police-department/",
+    "checked_at": "2026-09-13T19:19:20.997196+00:00",
+    "final_url": "https://local.nixle.com/escondido-police-department/",
+    "publisher": "Escondido Police Department",
+    "item_count": 20,
+    "newest_label": "Entered: 4 days, 23 hours ago",
+    "access": "public-nixle-archive",
+    "ingestion": "HTML adapter required; publication dates are on individual alerts"
+  },
+  "https://local.nixle.com/fairfield-ca-police-department/": {
+    "url": "https://local.nixle.com/fairfield-ca-police-department/",
+    "checked_at": "2026-09-13T19:19:21.834007+00:00",
+    "final_url": "https://local.nixle.com/fairfield-ca-police-department/",
+    "publisher": "Fairfield, CA Police Department",
+    "item_count": 20,
+    "newest_label": "Entered: 2 days, 15 hours ago",
+    "access": "public-nixle-archive",
+    "ingestion": "HTML adapter required; publication dates are on individual alerts"
+  },
+  "https://local.nixle.com/folsom-police-department/": {
+    "url": "https://local.nixle.com/folsom-police-department/",
+    "checked_at": "2026-09-13T19:19:22.532991+00:00",
+    "final_url": "https://local.nixle.com/folsom-police-department/",
+    "publisher": "Folsom Police Department",
+    "item_count": 20,
+    "newest_label": "Entered: 21 hours, 57 minutes ago",
+    "access": "public-nixle-archive",
+    "ingestion": "HTML adapter required; publication dates are on individual alerts"
+  },
+  "https://local.nixle.com/sbsd---fontana-sheriffs-department/": {
+    "url": "https://local.nixle.com/sbsd---fontana-sheriffs-department/",
+    "checked_at": "2026-09-13T19:19:23.248393+00:00",
+    "final_url": "https://local.nixle.com/sbsd---fontana-sheriffs-department/",
+    "publisher": "SBSD - Fontana Sheriff&#39;s Department",
+    "item_count": 20,
+    "newest_label": "Entered: 4 days ago",
+    "access": "public-nixle-archive",
+    "ingestion": "HTML adapter required; publication dates are on individual alerts"
+  },
+  "https://local.nixle.com/fremont-police-department-ca/": {
+    "url": "https://local.nixle.com/fremont-police-department-ca/",
+    "checked_at": "2026-09-13T19:19:23.950956+00:00",
+    "final_url": "https://local.nixle.com/fremont-police-department-ca/",
+    "publisher": "Fremont Police Department (CA)",
+    "item_count": 20,
+    "newest_label": "Entered: 1 day, 23 hours ago",
+    "access": "public-nixle-archive",
+    "ingestion": "HTML adapter required; publication dates are on individual alerts"
+  },
+  "https://local.nixle.com/gilroy-police-department/": {
+    "url": "https://local.nixle.com/gilroy-police-department/",
+    "checked_at": "2026-09-13T19:19:24.727165+00:00",
+    "final_url": "https://local.nixle.com/gilroy-police-department/",
+    "publisher": "Gilroy Police Department",
+    "item_count": 20,
+    "newest_label": "Entered: 1 month ago",
+    "access": "public-nixle-archive",
+    "ingestion": "HTML adapter required; publication dates are on individual alerts"
+  },
+  "https://local.nixle.com/sbsd---hesperia-police-department/": {
+    "url": "https://local.nixle.com/sbsd---hesperia-police-department/",
+    "checked_at": "2026-09-13T19:19:25.523116+00:00",
+    "final_url": "https://local.nixle.com/sbsd---hesperia-police-department/",
+    "publisher": "SBSD - Hesperia Police Department",
+    "item_count": 20,
+    "newest_label": "Entered: 2 days, 23 hours ago",
+    "access": "public-nixle-archive",
+    "ingestion": "HTML adapter required; publication dates are on individual alerts"
+  },
+  "https://local.nixle.com/sbsd---highland-police-department/": {
+    "url": "https://local.nixle.com/sbsd---highland-police-department/",
+    "checked_at": "2026-09-13T19:19:26.069527+00:00",
+    "final_url": "https://local.nixle.com/sbsd---highland-police-department/",
+    "publisher": "SBSD - Highland Police Department",
+    "item_count": 20,
+    "newest_label": "Entered: 1 week ago",
+    "access": "public-nixle-archive",
+    "ingestion": "HTML adapter required; publication dates are on individual alerts"
+  },
+  "https://local.nixle.com/madera-police-department/": {
+    "url": "https://local.nixle.com/madera-police-department/",
+    "checked_at": "2026-09-13T19:19:28.994066+00:00",
+    "final_url": "https://local.nixle.com/madera-police-department/",
+    "publisher": "Madera Police Department",
+    "item_count": 20,
+    "newest_label": "Entered: 2 months, 3 weeks ago",
+    "access": "public-nixle-archive",
+    "ingestion": "HTML adapter required; publication dates are on individual alerts"
+  },
+  "https://local.nixle.com/manteca-police-department/": {
+    "url": "https://local.nixle.com/manteca-police-department/",
+    "checked_at": "2026-09-13T19:19:29.844334+00:00",
+    "final_url": "https://local.nixle.com/manteca-police-department/",
+    "publisher": "Manteca Police Department",
+    "item_count": 20,
+    "newest_label": "Entered: 1 day, 12 hours ago",
+    "access": "public-nixle-archive",
+    "ingestion": "HTML adapter required; publication dates are on individual alerts"
+  },
+  "https://local.nixle.com/national-city-police-department/": {
+    "url": "https://local.nixle.com/national-city-police-department/",
+    "checked_at": "2026-09-13T19:19:30.595688+00:00",
+    "final_url": "https://local.nixle.com/national-city-police-department/",
+    "publisher": "National City Police Department",
+    "item_count": 20,
+    "newest_label": "Entered: 3 weeks ago",
+    "access": "public-nixle-archive",
+    "ingestion": "HTML adapter required; publication dates are on individual alerts"
+  },
+  "https://local.nixle.com/novato-police-ca/": {
+    "url": "https://local.nixle.com/novato-police-ca/",
+    "checked_at": "2026-09-13T19:19:31.345058+00:00",
+    "final_url": "https://local.nixle.com/novato-police-ca/",
+    "publisher": "Novato Police, CA",
+    "item_count": 20,
+    "newest_label": "Entered: 5 days, 1 hour ago",
+    "access": "public-nixle-archive",
+    "ingestion": "HTML adapter required; publication dates are on individual alerts"
+  },
+  "https://local.nixle.com/oakland-police-department-ca/": {
+    "url": "https://local.nixle.com/oakland-police-department-ca/",
+    "checked_at": "2026-09-13T19:19:32.125369+00:00",
+    "final_url": "https://local.nixle.com/oakland-police-department-ca/",
+    "publisher": "Oakland Police Department CA",
+    "item_count": 20,
+    "newest_label": "Entered: 2 days, 20 hours ago",
+    "access": "public-nixle-archive",
+    "ingestion": "HTML adapter required; publication dates are on individual alerts"
+  },
+  "https://local.nixle.com/petaluma-police-department/": {
+    "url": "https://local.nixle.com/petaluma-police-department/",
+    "checked_at": "2026-09-13T19:19:33.043055+00:00",
+    "final_url": "https://local.nixle.com/petaluma-police-department/",
+    "publisher": "Petaluma Police Department",
+    "item_count": 20,
+    "newest_label": "Entered: 1 day, 22 hours ago",
+    "access": "public-nixle-archive",
+    "ingestion": "HTML adapter required; publication dates are on individual alerts"
+  },
+  "https://local.nixle.com/lasd---pico-rivera-station-los-angeles-county-sheriff/": {
+    "url": "https://local.nixle.com/lasd---pico-rivera-station-los-angeles-county-sheriff/",
+    "checked_at": "2026-09-13T19:19:33.756297+00:00",
+    "final_url": "https://local.nixle.com/lasd---pico-rivera-station-los-angeles-county-sheriff/",
+    "publisher": "LASD - Pico Rivera Station, Los Angeles County Sheriff",
+    "item_count": 20,
+    "newest_label": "Entered: 2 days, 16 hours ago",
+    "access": "public-nixle-archive",
+    "ingestion": "HTML adapter required; publication dates are on individual alerts"
+  },
+  "https://local.nixle.com/pleasanton-police-department/": {
+    "url": "https://local.nixle.com/pleasanton-police-department/",
+    "checked_at": "2026-09-13T19:19:34.560058+00:00",
+    "final_url": "https://local.nixle.com/pleasanton-police-department/",
+    "publisher": "Pleasanton Police Department",
+    "item_count": 20,
+    "newest_label": "Entered: 22 hours, 3 minutes ago",
+    "access": "public-nixle-archive",
+    "ingestion": "HTML adapter required; publication dates are on individual alerts"
+  },
+  "https://local.nixle.com/sbsd---rancho-cucamonga-police-department/": {
+    "url": "https://local.nixle.com/sbsd---rancho-cucamonga-police-department/",
+    "checked_at": "2026-09-13T19:19:35.321167+00:00",
+    "final_url": "https://local.nixle.com/sbsd---rancho-cucamonga-police-department/",
+    "publisher": "SBSD - Rancho Cucamonga Police Department",
+    "item_count": 20,
+    "newest_label": "Entered: 3 days, 4 hours ago",
+    "access": "public-nixle-archive",
+    "ingestion": "HTML adapter required; publication dates are on individual alerts"
+  },
+  "https://local.nixle.com/redwood-city-police-department/": {
+    "url": "https://local.nixle.com/redwood-city-police-department/",
+    "checked_at": "2026-09-13T19:19:36.030761+00:00",
+    "final_url": "https://local.nixle.com/redwood-city-police-department/",
+    "publisher": "Redwood City Police Department",
+    "item_count": 20,
+    "newest_label": "Entered: 1 week, 1 day ago",
+    "access": "public-nixle-archive",
+    "ingestion": "HTML adapter required; publication dates are on individual alerts"
+  },
+  "https://local.nixle.com/san-leandro-police-department/": {
+    "url": "https://local.nixle.com/san-leandro-police-department/",
+    "checked_at": "2026-09-13T19:19:38.241109+00:00",
+    "final_url": "https://local.nixle.com/san-leandro-police-department/",
+    "publisher": "San Leandro Police Department",
+    "item_count": 20,
+    "newest_label": "Entered: 1 week, 3 days ago",
+    "access": "public-nixle-archive",
+    "ingestion": "HTML adapter required; publication dates are on individual alerts"
+  },
+  "https://local.nixle.com/san-rafael-police-department/": {
+    "url": "https://local.nixle.com/san-rafael-police-department/",
+    "checked_at": "2026-09-13T19:19:38.997997+00:00",
+    "final_url": "https://local.nixle.com/san-rafael-police-department/",
+    "publisher": "San Rafael Police Department",
+    "item_count": 20,
+    "newest_label": "Entered: 1 week, 5 days ago",
+    "access": "public-nixle-archive",
+    "ingestion": "HTML adapter required; publication dates are on individual alerts"
+  },
+  "https://local.nixle.com/santa-ana-police-department/": {
+    "url": "https://local.nixle.com/santa-ana-police-department/",
+    "checked_at": "2026-09-13T19:19:39.763966+00:00",
+    "final_url": "https://local.nixle.com/santa-ana-police-department/",
+    "publisher": "Santa Ana Police Department",
+    "item_count": 20,
+    "newest_label": "Entered: 10 months, 4 weeks ago",
+    "access": "public-nixle-archive",
+    "ingestion": "HTML adapter required; publication dates are on individual alerts"
+  },
+  "https://local.nixle.com/santa-barbara-police-department/": {
+    "url": "https://local.nixle.com/santa-barbara-police-department/",
+    "checked_at": "2026-09-13T19:19:40.449284+00:00",
+    "final_url": "https://local.nixle.com/santa-barbara-police-department/",
+    "publisher": "Santa Barbara Police Department",
+    "item_count": 20,
+    "newest_label": "Entered: 2 months, 2 weeks ago",
+    "access": "public-nixle-archive",
+    "ingestion": "HTML adapter required; publication dates are on individual alerts"
+  },
+  "https://local.nixle.com/santa-clara-police-department/": {
+    "url": "https://local.nixle.com/santa-clara-police-department/",
+    "checked_at": "2026-09-13T19:19:41.195739+00:00",
+    "final_url": "https://local.nixle.com/santa-clara-police-department/",
+    "publisher": "Santa Clara Police Department",
+    "item_count": 20,
+    "newest_label": "Entered: 4 days, 1 hour ago",
+    "access": "public-nixle-archive",
+    "ingestion": "HTML adapter required; publication dates are on individual alerts"
+  },
+  "https://local.nixle.com/santa-cruz-police-department/": {
+    "url": "https://local.nixle.com/santa-cruz-police-department/",
+    "checked_at": "2026-09-13T19:19:41.946535+00:00",
+    "final_url": "https://local.nixle.com/santa-cruz-police-department/",
+    "publisher": "Santa Cruz Police Department",
+    "item_count": 20,
+    "newest_label": "Entered: 3 years, 7 months ago",
+    "access": "public-nixle-archive",
+    "ingestion": "HTML adapter required; publication dates are on individual alerts"
+  },
+  "https://local.nixle.com/santa-maria-police-department/": {
+    "url": "https://local.nixle.com/santa-maria-police-department/",
+    "checked_at": "2026-09-13T19:19:42.716791+00:00",
+    "final_url": "https://local.nixle.com/santa-maria-police-department/",
+    "publisher": "Santa Maria Police Department",
+    "item_count": 20,
+    "newest_label": "Entered: 1 day, 3 hours ago",
+    "access": "public-nixle-archive",
+    "ingestion": "HTML adapter required; publication dates are on individual alerts"
+  },
+  "https://local.nixle.com/simi-valley-police-department/": {
+    "url": "https://local.nixle.com/simi-valley-police-department/",
+    "checked_at": "2026-09-13T19:19:43.269924+00:00",
+    "final_url": "https://local.nixle.com/simi-valley-police-department/",
+    "publisher": "Simi Valley Police Department",
+    "item_count": 20,
+    "newest_label": "Entered: 5 days, 1 hour ago",
+    "access": "public-nixle-archive",
+    "ingestion": "HTML adapter required; publication dates are on individual alerts"
+  },
+  "https://local.nixle.com/stockton-police-department-ca/": {
+    "url": "https://local.nixle.com/stockton-police-department-ca/",
+    "checked_at": "2026-09-13T19:19:43.978293+00:00",
+    "final_url": "https://local.nixle.com/stockton-police-department-ca/",
+    "publisher": "Stockton Police Department, CA",
+    "item_count": 20,
+    "newest_label": "Entered: 7 hours, 38 minutes ago",
+    "access": "public-nixle-archive",
+    "ingestion": "HTML adapter required; publication dates are on individual alerts"
+  },
+  "https://local.nixle.com/sunnyvale-department-of-public-safety/": {
+    "url": "https://local.nixle.com/sunnyvale-department-of-public-safety/",
+    "checked_at": "2026-09-13T19:19:44.697291+00:00",
+    "final_url": "https://local.nixle.com/sunnyvale-department-of-public-safety/",
+    "publisher": "Sunnyvale Department of Public Safety",
+    "item_count": 20,
+    "newest_label": "Entered: 4 days, 23 hours ago",
+    "access": "public-nixle-archive",
+    "ingestion": "HTML adapter required; publication dates are on individual alerts"
+  },
+  "https://local.nixle.com/union-city-police-department-ca/": {
+    "url": "https://local.nixle.com/union-city-police-department-ca/",
+    "checked_at": "2026-09-13T19:19:45.450035+00:00",
+    "final_url": "https://local.nixle.com/union-city-police-department-ca/",
+    "publisher": "Union City Police Department, CA",
+    "item_count": 20,
+    "newest_label": "Entered: 1 day, 19 hours ago",
+    "access": "public-nixle-archive",
+    "ingestion": "HTML adapter required; publication dates are on individual alerts"
+  },
+  "https://local.nixle.com/sbsd---victorville-police-department/": {
+    "url": "https://local.nixle.com/sbsd---victorville-police-department/",
+    "checked_at": "2026-09-13T19:19:46.154934+00:00",
+    "final_url": "https://local.nixle.com/sbsd---victorville-police-department/",
+    "publisher": "SBSD - Victorville Police Department",
+    "item_count": 20,
+    "newest_label": "Entered: 1 hour, 34 minutes ago",
+    "access": "public-nixle-archive",
+    "ingestion": "HTML adapter required; publication dates are on individual alerts"
+  },
+  "https://local.nixle.com/sbsd---yucaipa-police-department/": {
+    "url": "https://local.nixle.com/sbsd---yucaipa-police-department/",
+    "checked_at": "2026-09-13T19:19:46.908258+00:00",
+    "final_url": "https://local.nixle.com/sbsd---yucaipa-police-department/",
+    "publisher": "SBSD - Yucaipa Police Department",
+    "item_count": 20,
+    "newest_label": "Entered: 2 days, 22 hours ago",
+    "access": "public-nixle-archive",
+    "ingestion": "HTML adapter required; publication dates are on individual alerts"
+  },
+  "https://hemetpd.com/feed/": {
+    "url": "https://hemetpd.com/feed/",
+    "checked_at": "2026-09-13T19:22:30.700425+00:00",
+    "final_url": "https://hemetpd.com/feed",
+    "publisher": "Hemet Police Department",
+    "item_count": 10,
+    "newest_label": "2026-09-12T14:00:00+00:00",
+    "access": "public-feed-with-items",
+    "ingestion": "RSS/Atom parser; confirm police scope and classify announcements separately"
+  }
+}

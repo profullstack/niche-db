@@ -1,0 +1,14 @@
+{
+  "channels-found": 126,
+  "department-found": 51,
+  "unresolved": 0,
+  "pending": 0,
+  "places": 177,
+  "channels": 1715,
+  "reviewed_ingestion_cities": 39,
+  "state": "CA",
+  "population_min_exclusive": 50000,
+  "unique_channel_urls": 1702,
+  "local_governments_within_100km": 37,
+  "public_archives_or_feeds_with_items": 54
+}

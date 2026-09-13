@@ -1,0 +1,3090 @@
+[
+  {
+    "id": "162:0655184",
+    "name": "Palm Desert",
+    "state": "CA",
+    "query": "\"Palm Desert\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Public Safety | City of Palm Desert",
+        "url": "https://www.palmdesert.gov/community/public-safety",
+        "evidence_url": "https://www.palmdesert.gov/community/public-safety",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0636448",
+    "name": "Indio",
+    "state": "CA",
+    "query": "\"Indio\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "DOJ CJSC CRIMES Context",
+        "url": "https://data-openjustice.doj.ca.gov/sites/default/files/dataset/2025-07/Crimes-Clear-Arson%20Context_06162025.pdf",
+        "evidence_url": "https://data-openjustice.doj.ca.gov/sites/default/files/dataset/2025-07/Crimes-Clear-Arson%20Context_06162025.pdf",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0670224",
+    "name": "Santee",
+    "state": "CA",
+    "query": "\"Santee\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "newsroom",
+        "title": "News List | San Diego County Sheriff",
+        "url": "https://www.sdsheriff.gov/bureaus/media-relations/news-list",
+        "evidence_url": "https://www.sdsheriff.gov/bureaus/media-relations/news-list",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "newsroom",
+        "title": "News List | San Diego County Sheriff",
+        "url": "https://www.sdsheriff.gov/bureaus/media-relations/news-list/-selcat-36/-npage-2",
+        "evidence_url": "https://www.sdsheriff.gov/bureaus/media-relations/news-list/-selcat-36/-npage-2",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "newsroom",
+        "title": "News List | San Diego County Sheriff",
+        "url": "https://www.sdsheriff.gov/bureaus/media-relations/news-list/-selectview-1/-arch-1",
+        "evidence_url": "https://www.sdsheriff.gov/bureaus/media-relations/news-list/-selectview-1/-arch-1",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0621712",
+    "name": "El Cajon",
+    "state": "CA",
+    "query": "\"El Cajon\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "newsroom",
+        "title": "Happening Now | El Cajon, CA",
+        "url": "https://www.elcajon.gov/your-government/departments/police-department/information-you-may-need/police-department-news/happening-now",
+        "evidence_url": "https://www.elcajon.gov/your-government/departments/police-department/information-you-may-need/police-department-news/happening-now",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "newsroom",
+        "title": "Happening Now | El Cajon, CA",
+        "url": "https://www.elcajon.gov/your-government/departments/police-department/information-you-may-need/police-department-news/happening-now/-arch-1",
+        "evidence_url": "https://www.elcajon.gov/your-government/departments/police-department/information-you-may-need/police-department-news/happening-now/-arch-1",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Welcome to the El Cajon Police Department | El Cajon, CA",
+        "url": "https://www.elcajon.gov/your-government/departments/police",
+        "evidence_url": "https://www.elcajon.gov/your-government/departments/police",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0650398",
+    "name": "National City",
+    "state": "CA",
+    "query": "\"National City\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "newsroom",
+        "title": "Press Releases | National City, CA",
+        "url": "https://www.nationalcityca.gov/government/police/press-releases",
+        "evidence_url": "https://www.nationalcityca.gov/government/police/press-releases",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Directory | National City, CA",
+        "url": "https://www.nationalcityca.gov/government/police/directory",
+        "evidence_url": "https://www.nationalcityca.gov/government/police/directory",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Police | National City, CA",
+        "url": "https://www.nationalcityca.gov/government/police",
+        "evidence_url": "https://www.nationalcityca.gov/government/police",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0613392",
+    "name": "Chula Vista",
+    "state": "CA",
+    "query": "\"Chula Vista\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "newsroom",
+        "title": "News Center | City of Chula Vista",
+        "url": "https://www.chulavistaca.gov/departments/police-department/about-us/transparency-and-accountability/press-log",
+        "evidence_url": "https://www.chulavistaca.gov/departments/police-department/about-us/transparency-and-accountability/press-log",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Police Department | City of Chula Vista",
+        "url": "https://www.chulavistaca.gov/departments/police-department",
+        "evidence_url": "https://www.chulavistaca.gov/departments/police-department",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Police Services | City of Chula Vista",
+        "url": "https://www.chulavistaca.gov/departments/police-department/services",
+        "evidence_url": "https://www.chulavistaca.gov/departments/police-department/services",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0639496",
+    "name": "Lake Forest",
+    "state": "CA",
+    "query": "\"Lake Forest\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Lake Forest | Orange County California - Sheriff's Department",
+        "url": "https://ocsheriff.gov/patrol-areas/lake-forest",
+        "evidence_url": "https://ocsheriff.gov/patrol-areas/lake-forest",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "| Orange County California - Sheriff's Department",
+        "url": "https://www.ocsheriff.gov/node",
+        "evidence_url": "https://www.ocsheriff.gov/node",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Police Services | Lake Forest, CA - Official Website",
+        "url": "https://city-lakeforest.com/298/Police-Services.html",
+        "evidence_url": "https://city-lakeforest.com/298/Police-Services.html",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0648256",
+    "name": "Mission Viejo",
+    "state": "CA",
+    "query": "\"Mission Viejo\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Crime Alerts | City of Mission Viejo",
+        "url": "https://www.missionviejo.gov/category/crime-alerts",
+        "evidence_url": "https://www.missionviejo.gov/category/crime-alerts",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "incident-log",
+        "title": "Crime Alerts/News | City of Mission Viejo",
+        "url": "https://www.missionviejo.gov/departments/police-services/alert-bulletin-resources/crime-alertsnews",
+        "evidence_url": "https://www.missionviejo.gov/departments/police-services/alert-bulletin-resources/crime-alertsnews",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Police Services | City of Mission Viejo",
+        "url": "https://www.missionviejo.gov/departments/police-services",
+        "evidence_url": "https://www.missionviejo.gov/departments/police-services",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0639248",
+    "name": "Laguna Niguel",
+    "state": "CA",
+    "query": "\"Laguna Niguel\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Laguna Niguel | Orange County California - Sheriff's Department",
+        "url": "https://www.ocsheriff.gov/patrol-areas/laguna-niguel",
+        "evidence_url": "https://www.ocsheriff.gov/patrol-areas/laguna-niguel",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Patrol Areas | Orange County California - Sheriff's Department",
+        "url": "https://www.ocsheriff.gov/patrol-areas",
+        "evidence_url": "https://www.ocsheriff.gov/patrol-areas",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Laguna Niguel Police Services | Orange County California - Sheriff's Department",
+        "url": "https://www.ocsheriff.gov/location/laguna-niguel-police-services",
+        "evidence_url": "https://www.ocsheriff.gov/location/laguna-niguel-police-services",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0687042",
+    "name": "Yucaipa",
+    "state": "CA",
+    "query": "\"Yucaipa\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Yucaipa \u2013 San Bernardino County Sheriff's Department",
+        "url": "https://wp.sbcounty.gov/sheriff/patrol-stations/yucaipa/",
+        "evidence_url": "https://wp.sbcounty.gov/sheriff/patrol-stations/yucaipa/",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "2024 ANNUAL CRIME REPORT",
+        "url": "https://wp.sbcounty.gov/sheriff/wp-content/uploads/sites/17/2024-Annual-Crime-Report.pdf",
+        "evidence_url": "https://wp.sbcounty.gov/sheriff/wp-content/uploads/sites/17/2024-Annual-Crime-Report.pdf",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Yucaipa Police Department \u2013 Dawn Rowe Third District Supervisor",
+        "url": "https://bosd3.sbcounty.gov/venue/yucaipa-police-department/",
+        "evidence_url": "https://bosd3.sbcounty.gov/venue/yucaipa-police-department/",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0656700",
+    "name": "Perris",
+    "state": "CA",
+    "query": "\"Perris\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Police | City of Perris, CA",
+        "url": "https://www.cityofperris.org/departments/public-safety/police",
+        "evidence_url": "https://www.cityofperris.org/departments/public-safety/police",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Public Safety | City of Perris, CA",
+        "url": "https://www.cityofperris.org/departments/public-safety",
+        "evidence_url": "https://www.cityofperris.org/departments/public-safety",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0665084",
+    "name": "San Clemente",
+    "state": "CA",
+    "query": "\"San Clemente\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Public Safety Services | San Clemente, CA",
+        "url": "https://www.sanclemente.gov/239/Public-Safety-Services",
+        "evidence_url": "https://www.sanclemente.gov/239/Public-Safety-Services",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Police Services (OCSD) | San Clemente, CA",
+        "url": "https://www.sanclemente.gov/301/Police-Services-OCSD",
+        "evidence_url": "https://www.sanclemente.gov/301/Police-Services-OCSD",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "San Clemente | Orange County California - Sheriff's Department",
+        "url": "https://ocsheriff.gov/patrol-areas/san-clemente",
+        "evidence_url": "https://ocsheriff.gov/patrol-areas/san-clemente",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0646842",
+    "name": "Menifee",
+    "state": "CA",
+    "query": "\"Menifee\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "MENIFEE POLICE DEPARTMENT",
+        "url": "https://www.cityofmenifee.us/Archive/ViewFile/Item/2998",
+        "evidence_url": "https://www.cityofmenifee.us/Archive/ViewFile/Item/2998",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0650076",
+    "name": "Murrieta",
+    "state": "CA",
+    "query": "\"Murrieta\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Police Activity Reports | Murrieta, CA",
+        "url": "https://www.murrietaca.gov/759/Police-Activity-Reports",
+        "evidence_url": "https://www.murrietaca.gov/759/Police-Activity-Reports",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "newsroom",
+        "title": "Murrieta Police Press Releases | Murrieta, CA",
+        "url": "https://www.murrietaca.gov/557/Murrieta-Police-Press-Releases",
+        "evidence_url": "https://www.murrietaca.gov/557/Murrieta-Police-Press-Releases",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Police | Murrieta, CA",
+        "url": "https://mainstreet.murrietaca.gov/1409/Police",
+        "evidence_url": "https://mainstreet.murrietaca.gov/1409/Police",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0633182",
+    "name": "Hemet",
+    "state": "CA",
+    "query": "\"Hemet\" California police department official crime reports news alerts",
+    "channels": [],
+    "search_note": "Stay Up To Date - Hemet Police Department (https://hemetpd.com/stay-up-to-date)\n\ue200cite\ue202turn373search0\ue201 [wordlim: 200] Crawled: 2 months ago; Sign up wi"
+  },
+  {
+    "id": "162:0678120",
+    "name": "Temecula",
+    "state": "CA",
+    "query": "\"Temecula\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Temecula Police Department | Temecula CA",
+        "url": "https://www.temeculaca.gov/196/Police",
+        "evidence_url": "https://www.temeculaca.gov/196/Police",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Public Safety | Temecula CA",
+        "url": "https://temeculaca.gov/publicsafety",
+        "evidence_url": "https://temeculaca.gov/publicsafety",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Temecula Police Stations | Temecula CA",
+        "url": "https://temeculaca.gov/228/Temecula-Police-Stations",
+        "evidence_url": "https://temeculaca.gov/228/Temecula-Police-Stations",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0653322",
+    "name": "Oceanside",
+    "state": "CA",
+    "query": "\"Oceanside\" California police department official crime reports news alerts",
+    "channels": [],
+    "search_note": "Press Releases | Oceanside, CA - Police (https://www.oceansidepolice.com/about-opd/press-releases)\n\ue200cite\ue202turn377search0\ue201 [wordlim: 200] Crawled: 2 day"
+  },
+  {
+    "id": "162:0682996",
+    "name": "Vista",
+    "state": "CA",
+    "query": "\"Vista\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "newsroom",
+        "title": "News List | San Diego County Sheriff",
+        "url": "https://www.sdsheriff.gov/bureaus/media-relations/news-list/-selectview-1/-arch-1",
+        "evidence_url": "https://www.sdsheriff.gov/bureaus/media-relations/news-list/-selectview-1/-arch-1",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "newsroom",
+        "title": "News List | San Diego County Sheriff",
+        "url": "https://www.sdsheriff.gov/bureaus/media-relations/news-list/-npage-3/-arch-1",
+        "evidence_url": "https://www.sdsheriff.gov/bureaus/media-relations/news-list/-npage-3/-arch-1",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Vista Station | Patrol Stations | San Diego County Sheriff",
+        "url": "https://www.sdsheriff.gov/Home/Components/FacilityDirectory/FacilityDirectory/46/61",
+        "evidence_url": "https://www.sdsheriff.gov/Home/Components/FacilityDirectory/FacilityDirectory/46/61",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0611194",
+    "name": "Carlsbad",
+    "state": "CA",
+    "query": "\"Carlsbad\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Police Department | Carlsbad, CA",
+        "url": "https://www.carlsbadca.gov/Departments/police",
+        "evidence_url": "https://www.carlsbadca.gov/Departments/police",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Police Department | Carlsbad, CA",
+        "url": "https://www.carlsbadca.gov/departments/police/-npage-3",
+        "evidence_url": "https://www.carlsbadca.gov/departments/police/-npage-3",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Police Department | Carlsbad, CA",
+        "url": "https://www.carlsbadca.gov/departments/police/-npage-2",
+        "evidence_url": "https://www.carlsbadca.gov/departments/police/-npage-2",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0612048",
+    "name": "Cathedral City",
+    "state": "CA",
+    "query": "\"Cathedral City\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Online Services & Reporting | City of Cathedral City",
+        "url": "https://www.cathedralcity.gov/departments/police-department/online-services-reporting",
+        "evidence_url": "https://www.cathedralcity.gov/departments/police-department/online-services-reporting",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Services & Operations | City of Cathedral City",
+        "url": "https://www.cathedralcity.gov/departments/police-department/services-operations",
+        "evidence_url": "https://www.cathedralcity.gov/departments/police-department/services-operations",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Police Department | City of Cathedral City",
+        "url": "https://www.cathedralcity.gov/departments/police-department",
+        "evidence_url": "https://www.cathedralcity.gov/departments/police-department",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0622678",
+    "name": "Encinitas",
+    "state": "CA",
+    "query": "\"Encinitas\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Sheriff Quarterly Presentation | City of Encinitas",
+        "url": "https://www.encinitasca.gov/government/departments/public-safety/sheriff-quarterly-presentation",
+        "evidence_url": "https://www.encinitasca.gov/government/departments/public-safety/sheriff-quarterly-presentation",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "newsroom",
+        "title": "News List | San Diego County Sheriff",
+        "url": "https://www.sdsheriff.gov/bureaus/media-relations/news-list/-npage-4",
+        "evidence_url": "https://www.sdsheriff.gov/bureaus/media-relations/news-list/-npage-4",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "newsroom",
+        "title": "News List | San Diego County Sheriff",
+        "url": "https://www.sdsheriff.gov/bureaus/media-relations/news-list/-npage-3/-arch-1",
+        "evidence_url": "https://www.sdsheriff.gov/bureaus/media-relations/news-list/-npage-3/-arch-1",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0658072",
+    "name": "Pomona",
+    "state": "CA",
+    "query": "\"Pomona\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Police Department | City of Pomona, CA",
+        "url": "https://www.pomonaca.gov/government/departments/police-department?locale=en",
+        "evidence_url": "https://www.pomonaca.gov/government/departments/police-department?locale=en",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Police Department | City of Pomona, CA",
+        "url": "https://www.pomonaca.gov/government/departments/police-department?locale=en&quot=",
+        "evidence_url": "https://www.pomonaca.gov/government/departments/police-department?locale=en&quot=",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "City Of Pomona Police Department",
+        "url": "https://locator.lacounty.gov/lac/Location/3175457/city-of-pomona-police-department",
+        "evidence_url": "https://locator.lacounty.gov/lac/Location/3175457/city-of-pomona-police-department",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0608786",
+    "name": "Buena Park",
+    "state": "CA",
+    "query": "\"Buena Park\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "OC Crime Stoppers | Orange County California - Sheriff's Department",
+        "url": "https://www.ocsheriff.gov/occrimestoppers",
+        "evidence_url": "https://www.ocsheriff.gov/occrimestoppers",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Buena Park Police Department | State of California - Department of Justice - Office of the Attorney General",
+        "url": "https://oag.ca.gov/fingerprints/locations/buena-park-police-department",
+        "evidence_url": "https://oag.ca.gov/fingerprints/locations/buena-park-police-department",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "newsroom",
+        "title": "California Department of Justice Investigating Buena Park Police Department Officer-Involved Shooting Under AB 1506 | State of California - Department of Justice - Office of the Attorney General",
+        "url": "https://www.oag.ca.gov/news/press-releases/california-department-justice-investigating-buena-park-police-department-officer",
+        "evidence_url": "https://www.oag.ca.gov/news/press-releases/california-department-justice-investigating-buena-park-police-department-officer",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0619192",
+    "name": "Diamond Bar",
+    "state": "CA",
+    "query": "\"Diamond Bar\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Public Safety | Diamond Bar, CA",
+        "url": "https://www.diamondbarca.gov/189/Public-Safety",
+        "evidence_url": "https://www.diamondbarca.gov/189/Public-Safety",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "newsroom",
+        "title": "<table id=\"e1\">",
+        "url": "https://oag.ca.gov/system/files/attachments/press-docs/AB%201191%20Crime%20Gun%20Report.pdf",
+        "evidence_url": "https://oag.ca.gov/system/files/attachments/press-docs/AB%201191%20Crime%20Gun%20Report.pdf",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0628000",
+    "name": "Fullerton",
+    "state": "CA",
+    "query": "\"Fullerton\" California police department official crime reports news alerts",
+    "channels": [],
+    "search_note": "Police | Fullerton, CA (https://www.cityoffullerton.com/government/departments/police)\n\ue200cite\ue202turn338search0\ue201 [wordlim: 200] Crawled: last month;     *"
+  },
+  {
+    "id": "162:0653896",
+    "name": "Ontario",
+    "state": "CA",
+    "query": "\"Ontario\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Contact Us | City of Ontario, California",
+        "url": "https://www.ontarioca.gov/government/police/about-us/contact-us",
+        "evidence_url": "https://www.ontarioca.gov/government/police/about-us/contact-us",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Police | City of Ontario, California",
+        "url": "https://www.ontarioca.gov/government/police",
+        "evidence_url": "https://www.ontarioca.gov/government/police",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Online Police Reporting | City of Ontario, California",
+        "url": "https://www.ontarioca.gov/government/police/online-police-reporting",
+        "evidence_url": "https://www.ontarioca.gov/government/police/online-police-reporting",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0684550",
+    "name": "Westminster",
+    "state": "CA",
+    "query": "\"Westminster\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "newsroom",
+        "title": "Press Releases | Westminster, CA",
+        "url": "https://www.westminster-ca.gov/departments/police/our-department/press-releases",
+        "evidence_url": "https://www.westminster-ca.gov/departments/police/our-department/press-releases",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Police | Westminster, CA",
+        "url": "https://www.westminster-ca.gov/departments/police",
+        "evidence_url": "https://www.westminster-ca.gov/departments/police",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "newsroom",
+        "title": "Press Releases | Westminster, CA",
+        "url": "https://www.westminster-ca.gov/departments/police/our-department/press-releases/-arch-1",
+        "evidence_url": "https://www.westminster-ca.gov/departments/police/our-department/press-releases/-arch-1",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0686832",
+    "name": "Yorba Linda",
+    "state": "CA",
+    "query": "\"Yorba Linda\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Police | Yorba Linda, CA",
+        "url": "https://www.yorbalindaca.gov/275/Police",
+        "evidence_url": "https://www.yorbalindaca.gov/275/Police",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Crime Statistics | Yorba Linda, CA",
+        "url": "https://www.yorbalindaca.gov/411/Crime-Statistics",
+        "evidence_url": "https://www.yorbalindaca.gov/411/Crime-Statistics",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Yorba Linda | Orange County California - Sheriff's Department",
+        "url": "https://www.ocsheriff.gov/patrol-areas/yorba-linda",
+        "evidence_url": "https://www.ocsheriff.gov/patrol-areas/yorba-linda",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0633434",
+    "name": "Hesperia",
+    "state": "CA",
+    "query": "\"Hesperia\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Staff Directory \u2022 Police Department",
+        "url": "https://hesperiaca.gov/directory.aspx?did=7",
+        "evidence_url": "https://hesperiaca.gov/directory.aspx?did=7",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Crime Map | City of Hesperia - Official Website",
+        "url": "https://www.hesperiaca.gov/325/Crime-Map",
+        "evidence_url": "https://www.hesperiaca.gov/325/Crime-Map",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Police | City of Hesperia - Official Website",
+        "url": "https://www.hesperiaca.gov/306/Police",
+        "evidence_url": "https://www.hesperiaca.gov/306/Police",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0625380",
+    "name": "Fountain Valley",
+    "state": "CA",
+    "query": "\"Fountain Valley\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Police Department | The City of Fountain Valley",
+        "url": "https://www.fountainvalley.gov/1471/Police-Department",
+        "evidence_url": "https://www.fountainvalley.gov/1471/Police-Department",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "My Police Department | The City of Fountain Valley",
+        "url": "https://www.fountainvalley.gov/430/My-Police-Department",
+        "evidence_url": "https://www.fountainvalley.gov/430/My-Police-Department",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Crime Prevention | The City of Fountain Valley",
+        "url": "https://fountainvalley.gov/709/Crime-Prevention",
+        "evidence_url": "https://fountainvalley.gov/709/Crime-Prevention",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0636000",
+    "name": "Huntington Beach",
+    "state": "CA",
+    "query": "\"Huntington Beach\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "OC Crime Stoppers | Orange County California - Sheriff's Department",
+        "url": "https://www.ocsheriff.gov/occrimestoppers",
+        "evidence_url": "https://www.ocsheriff.gov/occrimestoppers",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "WebPolice (MapServer)",
+        "url": "https://gis.huntingtonbeachca.gov/arcgis/rest/services/WebPolice/MapServer",
+        "evidence_url": "https://gis.huntingtonbeachca.gov/arcgis/rest/services/WebPolice/MapServer",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Residential Burglary Crew Arrested - Irvine Police Department",
+        "url": "https://irvinepd.gov/2026/06/25/residential-burglary-crew-arrested-2/",
+        "evidence_url": "https://irvinepd.gov/2026/06/25/residential-burglary-crew-arrested-2/",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0602000",
+    "name": "Anaheim",
+    "state": "CA",
+    "query": "\"Anaheim\" California police department official crime reports news alerts",
+    "channels": [],
+    "search_note": "Anaheim Police, CA | Official Website (https://pd.anaheim.net/)\n\ue200cite\ue202turn346search0\ue201 [wordlim: 200] Crawled: 2 days ago;   * File a ReportFile a repo"
+  },
+  {
+    "id": "162:0653980",
+    "name": "Orange",
+    "state": "CA",
+    "query": "\"Orange\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Public Information | City of Orange, CA",
+        "url": "https://www.cityoforange.org/our-city/departments/police/public-information",
+        "evidence_url": "https://www.cityoforange.org/our-city/departments/police/public-information",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Records Bureau | City of Orange, CA",
+        "url": "https://www.cityoforange.org/our-city/departments/police/records-bureau",
+        "evidence_url": "https://www.cityoforange.org/our-city/departments/police/records-bureau",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "File an Online Police Report | City of Orange, CA",
+        "url": "https://www.cityoforange.org/our-city/departments/police/file-an-online-police-report",
+        "evidence_url": "https://www.cityoforange.org/our-city/departments/police/file-an-online-police-report",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0660466",
+    "name": "Rialto",
+    "state": "CA",
+    "query": "\"Rialto\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Staff Directory \u2022 Police Department",
+        "url": "https://www.rialtoca.gov/m/directory/department?did=53",
+        "evidence_url": "https://www.rialtoca.gov/m/directory/department?did=53",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0621230",
+    "name": "Eastvale",
+    "state": "CA",
+    "query": "\"Eastvale\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Crime Statistics | City of Eastvale, CA",
+        "url": "https://www.eastvaleca.gov/services/law-enforcement-services/crime-statistics",
+        "evidence_url": "https://www.eastvaleca.gov/services/law-enforcement-services/crime-statistics",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Police Services | City of Eastvale, CA",
+        "url": "https://www.eastvaleca.gov/government/police-services",
+        "evidence_url": "https://www.eastvaleca.gov/government/police-services",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0602364",
+    "name": "Apple Valley",
+    "state": "CA",
+    "query": "\"Apple Valley\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "newsroom",
+        "title": "Police News | Town of Apple Valley",
+        "url": "https://www.applevalley.org/services/police-department/police-news",
+        "evidence_url": "https://www.applevalley.org/services/police-department/police-news",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Police Department | Apple Valley, MN - Official Website",
+        "url": "https://www.applevalleymn.gov/114/Police-Department",
+        "evidence_url": "https://www.applevalleymn.gov/114/Police-Department",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Police Department | Apple Valley, MN - Official Website",
+        "url": "https://applevalleymn.gov/114/Police-Department",
+        "evidence_url": "https://applevalleymn.gov/114/Police-Department",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0637692",
+    "name": "Jurupa Valley",
+    "state": "CA",
+    "query": "\"Jurupa Valley\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "City of Jurupa Valley",
+        "url": "https://www.bscc.ca.gov/wp-content/uploads/78-Riverside-County-Jurupa-Valley-Sheriff-Station.pdf",
+        "evidence_url": "https://www.bscc.ca.gov/wp-content/uploads/78-Riverside-County-Jurupa-Valley-Sheriff-Station.pdf",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0616532",
+    "name": "Costa Mesa",
+    "state": "CA",
+    "query": "\"Costa Mesa\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Media & Public Affairs | City of Costa Mesa",
+        "url": "https://www.costamesaca.gov/government/departments-and-divisions/police/department-divisions/administration/media-public-affairs",
+        "evidence_url": "https://www.costamesaca.gov/government/departments-and-divisions/police/department-divisions/administration/media-public-affairs",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Police Information | City of Costa Mesa",
+        "url": "https://www.costamesaca.gov/government/departments-and-divisions/police/police-information",
+        "evidence_url": "https://www.costamesaca.gov/government/departments-and-divisions/police/police-information",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Crime Statistics | City of Costa Mesa",
+        "url": "https://www.costamesaca.gov/government/departments-and-divisions/police/police-information/crime-statistics",
+        "evidence_url": "https://www.costamesaca.gov/government/departments-and-divisions/police/police-information/crime-statistics",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0665000",
+    "name": "San Bernardino",
+    "state": "CA",
+    "query": "\"San Bernardino\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Police Department | San Bernardino, CA",
+        "url": "https://www.sanbernardino.gov/police",
+        "evidence_url": "https://www.sanbernardino.gov/police",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Form Center \u2022 Police Department",
+        "url": "https://sanbernardino.gov/FormCenter/Police-Department-10",
+        "evidence_url": "https://sanbernardino.gov/FormCenter/Police-Department-10",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Crime Statistics | San Bernardino, CA",
+        "url": "https://www.sanbernardino.gov/600/Crime-Statistics",
+        "evidence_url": "https://www.sanbernardino.gov/600/Crime-Statistics",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0662000",
+    "name": "Riverside",
+    "state": "CA",
+    "query": "\"Riverside\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Home | Riverside Police Department",
+        "url": "https://riversideca.gov/rpd/rpd/rpd/",
+        "evidence_url": "https://riversideca.gov/rpd/rpd/rpd/",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "About & Contact | Riverside Police Department",
+        "url": "https://www.riversideca.gov/rpd/about-contact",
+        "evidence_url": "https://www.riversideca.gov/rpd/about-contact",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "RIVERSIDE POLICE DEPARTMENT",
+        "url": "https://riversideca.gov/Explore/2018/Explore_WinSpr_DIGITAL_Linked.pdf",
+        "evidence_url": "https://riversideca.gov/Explore/2018/Explore_WinSpr_DIGITAL_Linked.pdf",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0614890",
+    "name": "Colton",
+    "state": "CA",
+    "query": "\"Colton\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Colton Police Department | Protecting Our Community Since 1887",
+        "url": "https://police.coltonca.gov/",
+        "evidence_url": "https://police.coltonca.gov/",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "newsroom",
+        "title": "News Releases | Colton Police Department",
+        "url": "https://police.coltonca.gov/news-releases/",
+        "evidence_url": "https://police.coltonca.gov/news-releases/",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Records | Colton Police Department",
+        "url": "https://police.coltonca.gov/records/",
+        "evidence_url": "https://police.coltonca.gov/records/",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0633588",
+    "name": "Highland",
+    "state": "CA",
+    "query": "\"Highland\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Staff Directory \u2022 Police / Sheriff's Department",
+        "url": "https://www.highlandca.gov/m/directory/department?did=24",
+        "evidence_url": "https://www.highlandca.gov/m/directory/department?did=24",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "2024 ANNUAL CRIME REPORT",
+        "url": "https://wp.sbcounty.gov/sheriff/wp-content/uploads/sites/17/2024-Annual-Crime-Report.pdf",
+        "evidence_url": "https://wp.sbcounty.gov/sheriff/wp-content/uploads/sites/17/2024-Annual-Crime-Report.pdf",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "AB 1191 Crime Gun Report 2025",
+        "url": "https://oag.ca.gov/system/files/media/ab1191-crime-gun-report-2025.pdf",
+        "evidence_url": "https://oag.ca.gov/system/files/media/ab1191-crime-gun-report-2025.pdf",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0632548",
+    "name": "Hawthorne",
+    "state": "CA",
+    "query": "\"Hawthorne\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Police Department | Hawthorne, CA",
+        "url": "https://www.cityofhawthorne.org/departments/police-department",
+        "evidence_url": "https://www.cityofhawthorne.org/departments/police-department",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "City Of Hawthorne Police Department",
+        "url": "https://locator.lacounty.gov/lac/Location/3068923/city-of-hawthorne-police-department",
+        "evidence_url": "https://locator.lacounty.gov/lac/Location/3068923/city-of-hawthorne-police-department",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "nextdoor",
+        "title": "Hawthorne Police Department - 472 updates",
+        "url": "https://nextdoor.com/agency-detail/ca/hawthorne/hawthorne-police/",
+        "evidence_url": "https://nextdoor.com/agency-detail/ca/hawthorne/hawthorne-police/",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0602462",
+    "name": "Arcadia",
+    "state": "CA",
+    "query": "\"Arcadia\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Arcadia, CA - Police",
+        "url": "https://www.arcadiacapolice.gov/services/request_a_police_record.php",
+        "evidence_url": "https://www.arcadiacapolice.gov/services/request_a_police_record.php",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Arcadia, CA - Police",
+        "url": "https://www.arcadiacapolice.gov/about_us/contact_us.php",
+        "evidence_url": "https://www.arcadiacapolice.gov/about_us/contact_us.php",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Arcadia, CA - Police",
+        "url": "https://www.arcadiaca.gov/government/police/services/index.php",
+        "evidence_url": "https://www.arcadiaca.gov/government/police/services/index.php",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0660018",
+    "name": "Redondo Beach",
+    "state": "CA",
+    "query": "\"Redondo Beach\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Redondo Beach Police Department",
+        "url": "https://www.redondo.org/Police%20Pictures/PD%20PDF/Transparency/RBPD%20Policy%20Manual%20September%202024.pdf",
+        "evidence_url": "https://www.redondo.org/Police%20Pictures/PD%20PDF/Transparency/RBPD%20Policy%20Manual%20September%202024.pdf",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "City Of Redondo Beach Police Department",
+        "url": "https://locator.lacounty.gov/lac/Location/3068962/city-of-redondo-beach-police-department",
+        "evidence_url": "https://locator.lacounty.gov/lac/Location/3068962/city-of-redondo-beach-police-department",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0622230",
+    "name": "El Monte",
+    "state": "CA",
+    "query": "\"El Monte\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Police | El Monte, CA",
+        "url": "https://www.elmonteca.gov/209/Police",
+        "evidence_url": "https://www.elmonteca.gov/209/Police",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Staff Directory \u2022 Police",
+        "url": "https://www.elmonteca.gov/m/directory/department?did=13",
+        "evidence_url": "https://www.elmonteca.gov/m/directory/department?did=13",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Staff Directory \u2022 Police",
+        "url": "https://www.ci.el-monte.ca.us/m/directory/department?did=13",
+        "evidence_url": "https://www.ci.el-monte.ca.us/m/directory/department?did=13",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0619766",
+    "name": "Downey",
+    "state": "CA",
+    "query": "\"Downey\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "newsroom",
+        "title": "Department News | City of Downey, CA",
+        "url": "https://www.downeyca.org/our-city/departments/police/department-news",
+        "evidence_url": "https://www.downeyca.org/our-city/departments/police/department-news",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "File Online Report | City of Downey, CA",
+        "url": "https://www.downeyca.org/our-city/departments/police/file-online-report",
+        "evidence_url": "https://www.downeyca.org/our-city/departments/police/file-online-report",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Crime Prevention and Safety | City of Downey, CA",
+        "url": "https://www.downeyca.org/our-city/departments/police/crime-prevention-and-safety",
+        "evidence_url": "https://www.downeyca.org/our-city/departments/police/crime-prevention-and-safety",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0656924",
+    "name": "Pico Rivera",
+    "state": "CA",
+    "query": "\"Pico Rivera\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "newsroom",
+        "title": "*UPDATE* LOCATED AT-RISK MISSING - MCGIFFERT",
+        "url": "https://origin.www.longbeach.gov/police/press-releases/at-risk-missing---mcgiffert/",
+        "evidence_url": "https://origin.www.longbeach.gov/police/press-releases/at-risk-missing---mcgiffert/",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0611530",
+    "name": "Carson",
+    "state": "CA",
+    "query": "\"Carson\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Public Safety and Emergency Management Services",
+        "url": "https://ci.carson.ca.us/CityManager/PublicSafety.aspx",
+        "evidence_url": "https://ci.carson.ca.us/CityManager/PublicSafety.aspx",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Public Safety and Emergency Management Services",
+        "url": "https://ci.carson.ca.us/citymanager/PublicSafety.aspx",
+        "evidence_url": "https://ci.carson.ca.us/citymanager/PublicSafety.aspx",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Crime in our Area | Carson City",
+        "url": "https://www.carsoncity.gov/government/departments-g-z/sheriff-s-office/crime-in-our-area",
+        "evidence_url": "https://www.carsoncity.gov/government/departments-g-z/sheriff-s-office/crime-in-our-area",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0615044",
+    "name": "Compton",
+    "state": "CA",
+    "query": "\"Compton\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "newsroom",
+        "title": "Sheriff\u2019s Department Continues Compton Homicide Investigations | City News | Compton, CA",
+        "url": "https://www.comptoncity.org/Home/Components/News/News/152/16",
+        "evidence_url": "https://www.comptoncity.org/Home/Components/News/News/152/16",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "newsroom",
+        "title": "*Update* Located At-Risk Missing Person - Charles Garner III",
+        "url": "https://www.longbeach.gov/police/press-releases/at-risk-missing-person---charles-garner-iii/",
+        "evidence_url": "https://www.longbeach.gov/police/press-releases/at-risk-missing-person---charles-garner-iii/",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Police Services | Compton, CA",
+        "url": "https://www.comptoncity.org/services/police-services",
+        "evidence_url": "https://www.comptoncity.org/services/police-services",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0604982",
+    "name": "Bellflower",
+    "state": "CA",
+    "query": "\"Bellflower\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Residential Burglary Crew Arrested - Irvine Police Department",
+        "url": "https://irvinepd.gov/2026/06/25/residential-burglary-crew-arrested-2/",
+        "evidence_url": "https://irvinepd.gov/2026/06/25/residential-burglary-crew-arrested-2/",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "newsroom",
+        "title": "*UPDATE* LOCATED AT-RISK MISSING PERSON - JUAN MUNOZ",
+        "url": "https://origin.www.longbeach.gov/police/press-releases/at-risk-missing-person---juan-munoz/",
+        "evidence_url": "https://origin.www.longbeach.gov/police/press-releases/at-risk-missing-person---juan-munoz/",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "newsroom",
+        "title": "*UPDATE* TRAFFIC FATALITY ARREST \u2013 2200 BLOCK OF BELLFLOWER BOULEVARD",
+        "url": "https://www.longbeach.gov/police/press-releases/traffic-fatality--2200-block-of-bellflower-boulevard/",
+        "evidence_url": "https://www.longbeach.gov/police/press-releases/traffic-fatality--2200-block-of-bellflower-boulevard/",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0685292",
+    "name": "Whittier",
+    "state": "CA",
+    "query": "\"Whittier\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "City Of Whittier Police Department",
+        "url": "https://locator.lacounty.gov/lac/Location/3175447/city-of-whittier-police-department",
+        "evidence_url": "https://locator.lacounty.gov/lac/Location/3175447/city-of-whittier-police-department",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0652526",
+    "name": "Norwalk",
+    "state": "CA",
+    "query": "\"Norwalk\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Police Department | Norwalk, CT - Official Website",
+        "url": "https://www.norwalkct.gov/139/Police-Department",
+        "evidence_url": "https://www.norwalkct.gov/139/Police-Department",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "newsroom",
+        "title": "Police",
+        "url": "https://source.www.longbeach.gov/press-release-archive/?cid=6697",
+        "evidence_url": "https://source.www.longbeach.gov/press-release-archive/?cid=6697",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "newsroom",
+        "title": "Police",
+        "url": "https://longbeach.gov/press-release-archive/?cid=6697",
+        "evidence_url": "https://longbeach.gov/press-release-archive/?cid=6697",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0655618",
+    "name": "Paramount",
+    "state": "CA",
+    "query": "\"Paramount\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Public Safety Department - City of Paramount",
+        "url": "https://www.paramountcity.gov/government/departments/public-safety/",
+        "evidence_url": "https://www.paramountcity.gov/government/departments/public-safety/",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "newsroom",
+        "title": "TRAFFIC FATALITY - PARAMOUNT BOULEVARD AND 56TH STREET",
+        "url": "https://longbeach.gov/police/press-releases/traffic-fatality---paramount-boulevard-and-56th-street/",
+        "evidence_url": "https://longbeach.gov/police/press-releases/traffic-fatality---paramount-boulevard-and-56th-street/",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "incident-log",
+        "title": "LBPD Blotter - June 19, 2026",
+        "url": "https://www.longbeach.gov/police/news/lbpd-blotter-june-19-2026/",
+        "evidence_url": "https://www.longbeach.gov/police/news/lbpd-blotter-june-19-2026/",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0603526",
+    "name": "Bakersfield",
+    "state": "CA",
+    "query": "\"Bakersfield\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Protecting the Central Valley: Results Show Initial Success in CHP\u2019s Operations to Take Down Crime | Governor of California",
+        "url": "https://www.gov.ca.gov/2024/04/30/chp-bakersfield-public-safety-2/",
+        "evidence_url": "https://www.gov.ca.gov/2024/04/30/chp-bakersfield-public-safety-2/",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0659920",
+    "name": "Redding",
+    "state": "CA",
+    "query": "\"Redding\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Police Department",
+        "url": "https://files.cityofredding.gov/government/departments/police/index.php",
+        "evidence_url": "https://files.cityofredding.gov/government/departments/police/index.php",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Redding Police Department",
+        "url": "https://files.cityofredding.gov/Document%20Center/Departments/Police/Policies%20%26%20Reference%20Library/Policy%20Manual/General%20Operations/316_Public_Alerts.pdf",
+        "evidence_url": "https://files.cityofredding.gov/Document%20Center/Departments/Police/Policies%20%26%20Reference%20Library/Policy%20Manual/General%20Operations/316_Public_Alerts.pdf",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Crime Statistics",
+        "url": "https://files.cityofredding.gov/government/departments/police/crime_info/crime_statistics.php",
+        "evidence_url": "https://files.cityofredding.gov/government/departments/police/crime_info/crime_statistics.php",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0654652",
+    "name": "Oxnard",
+    "state": "CA",
+    "query": "\"Oxnard\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "newsroom",
+        "title": "Police Department News | City of Oxnard",
+        "url": "https://www.oxnard.gov/police-department/pd-news",
+        "evidence_url": "https://www.oxnard.gov/police-department/pd-news",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Police Department | City of Oxnard",
+        "url": "https://www.oxnard.gov/police-department",
+        "evidence_url": "https://www.oxnard.gov/police-department",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "newsroom",
+        "title": "Police Department News | City of Oxnard",
+        "url": "https://www.oxnard.gov/police-department/pd-news/",
+        "evidence_url": "https://www.oxnard.gov/police-department/pd-news/",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0672016",
+    "name": "Simi Valley",
+    "state": "CA",
+    "query": "\"Simi Valley\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Police Department | City of Simi Valley, CA",
+        "url": "https://www.simivalley.org/departments/police-department",
+        "evidence_url": "https://www.simivalley.org/departments/police-department",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "newsroom",
+        "title": "California Department of Justice Investigating Simi Valley Police Department Officer-Involved Shooting Under AB 1506 | State of California - Department of Justice - Office of the Attorney General",
+        "url": "https://www.oag.ca.gov/news/press-releases/california-department-justice-investigating-simi-valley-police-department",
+        "evidence_url": "https://www.oag.ca.gov/news/press-releases/california-department-justice-investigating-simi-valley-police-department",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Resources | City of Simi Valley, CA",
+        "url": "https://www.simivalley.org/departments/police-department/resources",
+        "evidence_url": "https://www.simivalley.org/departments/police-department/resources",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0610046",
+    "name": "Camarillo",
+    "state": "CA",
+    "query": "\"Camarillo\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Camarillo Police Department | State of California - Department of Justice - Office of the Attorney General",
+        "url": "https://oag.ca.gov/fingerprints/locations/camarillo-police-department",
+        "evidence_url": "https://oag.ca.gov/fingerprints/locations/camarillo-police-department",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "newsroom",
+        "title": "Camarillo \u2013 News Story-Kid Print & Person at Risk Prints conducted at the Camarillo Police Department \u2013 Ventura Sheriff Official Website",
+        "url": "https://sheriff.venturacounty.gov/?p=9065",
+        "evidence_url": "https://sheriff.venturacounty.gov/?p=9065",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "newsroom",
+        "title": "INITIAL REPORTS",
+        "url": "https://sheriff.venturacounty.gov/wp-content/uploads/2023/10/20030826OIS200324690_report_finalcompressed.pdf",
+        "evidence_url": "https://sheriff.venturacounty.gov/wp-content/uploads/2023/10/20030826OIS200324690_report_finalcompressed.pdf",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0669088",
+    "name": "Santa Clarita",
+    "state": "CA",
+    "query": "\"Santa Clarita\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "New Virtual Deputy Services Enhances Public Safety in Santa Clarita - City of Santa Clarita",
+        "url": "https://santaclarita.gov/blog/2025/09/20/new-virtual-deputy-services-enhances-public-safety-in-santa-clarita/",
+        "evidence_url": "https://santaclarita.gov/blog/2025/09/20/new-virtual-deputy-services-enhances-public-safety-in-santa-clarita/",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "City of Santa Clarita Announces Brandon Barclay as New Chief of Police - City of Santa Clarita",
+        "url": "https://santaclarita.gov/blog/2025/08/14/city-of-santa-clarita-announces-brandon-barclay-as-new-chief-of-police/",
+        "evidence_url": "https://santaclarita.gov/blog/2025/08/14/city-of-santa-clarita-announces-brandon-barclay-as-new-chief-of-police/",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0655156",
+    "name": "Palmdale",
+    "state": "CA",
+    "query": "\"Palmdale\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "newsroom",
+        "title": "Proactively Safe: Palmdale\u2019s Robust Public Safety Initiatives Yield Results",
+        "url": "https://www.cityofpalmdaleca.gov/m/newsflash/home/detail/1859",
+        "evidence_url": "https://www.cityofpalmdaleca.gov/m/newsflash/home/detail/1859",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Los Angeles Police Department",
+        "url": "https://file.lacounty.gov/lasd/cms1_154628.pdf",
+        "evidence_url": "https://file.lacounty.gov/lasd/cms1_154628.pdf",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0665042",
+    "name": "San Buenaventura (Ventura)",
+    "state": "CA",
+    "query": "\"San Buenaventura (Ventura)\" California police department official crime reports news alerts",
+    "channels": [],
+    "search_note": "Quick Links \u2022 Ventura, CA \u2022 CivicEngage (https://www.cityofventura.ca.gov/QuickLinks.aspx)\n\ue200cite\ue202turn289search0\ue201 [wordlim: 200] Crawled: 2 days ago; S"
+  },
+  {
+    "id": "162:0640130",
+    "name": "Lancaster",
+    "state": "CA",
+    "query": "\"Lancaster\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Lancaster Police Department | City of Lancaster",
+        "url": "https://www.cityoflancasterca.org/our-city/departments-services/public-safety",
+        "evidence_url": "https://www.cityoflancasterca.org/our-city/departments-services/public-safety",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "newsroom",
+        "title": "News - Lancaster City Bureau of Police",
+        "url": "https://police.cityoflancasterpa.gov/news/",
+        "evidence_url": "https://police.cityoflancasterpa.gov/news/",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "newsroom",
+        "title": "Lancaster Police Department | City of Lancaster",
+        "url": "https://www.cityoflancasterca.org/Home/Components/News/News/10422/2541",
+        "evidence_url": "https://www.cityoflancasterca.org/Home/Components/News/News/10422/2541",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0630000",
+    "name": "Glendale",
+    "state": "CA",
+    "query": "\"Glendale\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "newsroom",
+        "title": "Glendale Police News & Media Relations | City of Glendale, CA",
+        "url": "https://www.glendaleca.gov/government/departments/police-department/news-media-relations",
+        "evidence_url": "https://www.glendaleca.gov/government/departments/police-department/news-media-relations",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Glendale Police Department, California | City of Glendale, CA",
+        "url": "https://www.glendaleca.gov/government/departments/police-department",
+        "evidence_url": "https://www.glendaleca.gov/government/departments/police-department",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Transparency | City of Glendale, CA",
+        "url": "https://www.glendaleca.gov/government/departments/police-department/transparency",
+        "evidence_url": "https://www.glendaleca.gov/government/departments/police-department/transparency",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0636546",
+    "name": "Inglewood",
+    "state": "CA",
+    "query": "\"Inglewood\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Crime Statistics | Inglewood, CA",
+        "url": "https://www.cityofinglewood.org/659/Crime-Statistics",
+        "evidence_url": "https://www.cityofinglewood.org/659/Crime-Statistics",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Police | Inglewood, CA",
+        "url": "https://www.cityofinglewood.org/1649/Police",
+        "evidence_url": "https://www.cityofinglewood.org/1649/Police",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Inglewood Police Department",
+        "url": "https://locator.lacounty.gov/lac/Location/3052997/inglewood-police-department",
+        "evidence_url": "https://locator.lacounty.gov/lac/Location/3052997/inglewood-police-department",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0644000",
+    "name": "Los Angeles",
+    "state": "CA",
+    "query": "\"Los Angeles\" California police department official crime reports news alerts",
+    "channels": [],
+    "search_note": "Newsroom - LAPD Online (https://www.lapdonline.org/lapd-newsroom/)\n\ue200cite\ue202turn305search0\ue201 [wordlim: 200] Crawled: 3 days ago; Silver Alert Issued for M"
+  },
+  {
+    "id": "162:0600884",
+    "name": "Alhambra",
+    "state": "CA",
+    "query": "\"Alhambra\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Crime Statistics | Alhambra, CA",
+        "url": "https://alhambraca.gov/271/Crime-Statistics",
+        "evidence_url": "https://alhambraca.gov/271/Crime-Statistics",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Police | Alhambra, CA",
+        "url": "https://www.alhambraca.gov/834/Police",
+        "evidence_url": "https://www.alhambraca.gov/834/Police",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Police - 2025 | Alhambra, CA",
+        "url": "https://www.cityofalhambra.org/834",
+        "evidence_url": "https://www.cityofalhambra.org/834",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0622020",
+    "name": "Elk Grove",
+    "state": "CA",
+    "query": "\"Elk Grove\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Police Department",
+        "url": "https://elkgrove.gov/departments-and-divisions/police-department",
+        "evidence_url": "https://elkgrove.gov/departments-and-divisions/police-department",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Safety Dashboard",
+        "url": "https://elkgrove.gov/police/safety-dashboard",
+        "evidence_url": "https://elkgrove.gov/police/safety-dashboard",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Emergencies and Non-emergencies",
+        "url": "https://elkgrove.gov/police/emergencies-and-non-emergencies",
+        "evidence_url": "https://elkgrove.gov/police/emergencies-and-non-emergencies",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0618100",
+    "name": "Davis",
+    "state": "CA",
+    "query": "\"Davis\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Online Crime Reporting | City of Davis, CA",
+        "url": "https://www.cityofdavis.org/city-hall/police-department/online-crime-reporting",
+        "evidence_url": "https://www.cityofdavis.org/city-hall/police-department/online-crime-reporting",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Contact Us | City of Davis, CA",
+        "url": "https://www.cityofdavis.org/city-hall/police-department/contact-us-6030",
+        "evidence_url": "https://www.cityofdavis.org/city-hall/police-department/contact-us-6030",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Davis Police Department | City of Davis, CA",
+        "url": "https://www.cityofdavis.org/city-hall/police-department/",
+        "evidence_url": "https://www.cityofdavis.org/city-hall/police-department/",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0670098",
+    "name": "Santa Rosa",
+    "state": "CA",
+    "query": "\"Santa Rosa\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Police Reports | Santa Rosa, CA",
+        "url": "https://www.srcity.org/3328/Police-Reports",
+        "evidence_url": "https://www.srcity.org/3328/Police-Reports",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Santa Rosa Police Department",
+        "url": "https://www.bscc.ca.gov/wp-content/uploads/97-Santa-Rosa-Police.pdf",
+        "evidence_url": "https://www.bscc.ca.gov/wp-content/uploads/97-Santa-Rosa-Police.pdf",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Police | Santa Rosa, CA",
+        "url": "https://www.srcity.org/3929/Police",
+        "evidence_url": "https://www.srcity.org/3929/Police",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0684816",
+    "name": "West Sacramento",
+    "state": "CA",
+    "query": "\"West Sacramento\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Contact Us | City of West Sacramento",
+        "url": "https://www.cityofwestsacramento.org/government/departments/police/contact-us",
+        "evidence_url": "https://www.cityofwestsacramento.org/government/departments/police/contact-us",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Records Section | City of West Sacramento",
+        "url": "https://www.cityofwestsacramento.org/government/departments/police/police-divisions-and-units/office-of-operations/records-section",
+        "evidence_url": "https://www.cityofwestsacramento.org/government/departments/police/police-divisions-and-units/office-of-operations/records-section",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "WEST SACRAMENTO POLICE DEPARTMENT | City of West Sacramento",
+        "url": "https://www.cityofwestsacramento.org/government/departments/police?from=AppAgg.com",
+        "evidence_url": "https://www.cityofwestsacramento.org/government/departments/police?from=AppAgg.com",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0662364",
+    "name": "Rocklin",
+    "state": "CA",
+    "query": "\"Rocklin\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "newsroom",
+        "title": "pd-news - City of Rocklin",
+        "url": "https://www.rocklin.ca.us/overview/pd-news-and-crime-reports",
+        "evidence_url": "https://www.rocklin.ca.us/overview/pd-news-and-crime-reports",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "newsroom",
+        "title": "Police Department News - City of Rocklin",
+        "url": "https://www.rocklin.ca.us/news/police-department-news",
+        "evidence_url": "https://www.rocklin.ca.us/news/police-department-news",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Police - City of Rocklin",
+        "url": "https://www.rocklin.ca.us/locations-link/police-department",
+        "evidence_url": "https://www.rocklin.ca.us/locations-link/police-department",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0659444",
+    "name": "Rancho Cordova",
+    "state": "CA",
+    "query": "\"Rancho Cordova\" California police department official crime reports news alerts",
+    "channels": [],
+    "search_note": "Rancho Cordova Police Department | Home (https://www.ranchocordovapd.com/)\n\ue200cite\ue202turn266search0\ue201 [wordlim: 200] Crawled: 2 days ago; # Rancho Cordova "
+  },
+  {
+    "id": "162:0627000",
+    "name": "Fresno",
+    "state": "CA",
+    "query": "\"Fresno\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Police Department \u2013 City of Fresno",
+        "url": "https://www.fresno.gov/police/",
+        "evidence_url": "https://www.fresno.gov/police/",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Records and Reports \u2013 City of Fresno",
+        "url": "https://www.fresno.gov/police/records-and-reports/",
+        "evidence_url": "https://www.fresno.gov/police/records-and-reports/",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Police Contacts \u2013 City of Fresno",
+        "url": "https://www.fresno.gov/police/police-contacts/",
+        "evidence_url": "https://www.fresno.gov/police/police-contacts/",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0624638",
+    "name": "Folsom",
+    "state": "CA",
+    "query": "\"Folsom\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Police | Folsom, CA",
+        "url": "https://www.folsom.ca.us/government/police",
+        "evidence_url": "https://www.folsom.ca.us/government/police",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "incident-log",
+        "title": "Police Log | Folsom, CA",
+        "url": "https://www.folsom.ca.us/government/police/crime-information/police-log",
+        "evidence_url": "https://www.folsom.ca.us/government/police/crime-information/police-log",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Connect with Us | Folsom, CA",
+        "url": "https://www.folsom.ca.us/government/police/connect-with-us",
+        "evidence_url": "https://www.folsom.ca.us/government/police/connect-with-us",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0686972",
+    "name": "Yuba City",
+    "state": "CA",
+    "query": "\"Yuba City\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Yuba City Police Department | State of California - Department of Justice - Office of the Attorney General",
+        "url": "https://www.oag.ca.gov/fingerprints/locations/yuba-city-police-department",
+        "evidence_url": "https://www.oag.ca.gov/fingerprints/locations/yuba-city-police-department",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Sutter County Sheriff, CA | Home Sheriff",
+        "url": "https://www.suttersheriff.gov/",
+        "evidence_url": "https://www.suttersheriff.gov/",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Yuba County, CA",
+        "url": "https://yuba.gov/departments/sheriff_coroner/divisions/dispatch_communications.php",
+        "evidence_url": "https://yuba.gov/departments/sheriff_coroner/divisions/dispatch_communications.php",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0614218",
+    "name": "Clovis",
+    "state": "CA",
+    "query": "\"Clovis\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "nextdoor",
+        "title": "June 2026 Spotlight-",
+        "url": "https://nextdoor.com/agency-post/ca/clovis/clovis-police-department/june-2026-spotlight-497232963/",
+        "evidence_url": "https://nextdoor.com/agency-post/ca/clovis/clovis-police-department/june-2026-spotlight-497232963/",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "nextdoor",
+        "title": "Clovis Police Department - 1042 updates",
+        "url": "https://nextdoor.com/agency-detail/ca/clovis/clovis-police-department/",
+        "evidence_url": "https://nextdoor.com/agency-detail/ca/clovis/clovis-police-department/",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "x",
+        "title": "Posts with replies by Clovis Police (CA) (@ClovisPolice_CA) / X",
+        "url": "https://x.com/ClovisPolice_CA/with_replies",
+        "evidence_url": "https://x.com/ClovisPolice_CA/with_replies",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0631960",
+    "name": "Hanford",
+    "state": "CA",
+    "query": "\"Hanford\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Police | Hanford, CA",
+        "url": "https://www.ci.hanford.ca.us/1198/Police",
+        "evidence_url": "https://www.ci.hanford.ca.us/1198/Police",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Police | Hanford, CA",
+        "url": "https://ci.hanford.ca.us/1198/Police",
+        "evidence_url": "https://ci.hanford.ca.us/1198/Police",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Staff Directory \u2022 Police Department",
+        "url": "https://www.ci.hanford.ca.us/m/directory/department?did=51",
+        "evidence_url": "https://www.ci.hanford.ca.us/m/directory/department?did=51",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0686328",
+    "name": "Woodland",
+    "state": "CA",
+    "query": "\"Woodland\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Woodland Police Department | Woodland, CA",
+        "url": "https://www.cityofwoodland.gov/394/Woodland-Police-Department",
+        "evidence_url": "https://www.cityofwoodland.gov/394/Woodland-Police-Department",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Crime Mapping | Woodland, CA",
+        "url": "https://cityofwoodland.gov/521/Crime-Mapping",
+        "evidence_url": "https://cityofwoodland.gov/521/Crime-Mapping",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Woodland Police Department - Case Log",
+        "url": "https://caselog.cityofwoodland.gov/",
+        "evidence_url": "https://caselog.cityofwoodland.gov/",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0668154",
+    "name": "San Luis Obispo",
+    "state": "CA",
+    "query": "\"San Luis Obispo\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Public Information - County of San Luis Obispo",
+        "url": "https://www.slocounty.ca.gov/departments/sheriff-coroner/public-information",
+        "evidence_url": "https://www.slocounty.ca.gov/departments/sheriff-coroner/public-information",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Services - County of San Luis Obispo",
+        "url": "https://www.slocounty.ca.gov/departments/sheriff-coroner/public-information/services",
+        "evidence_url": "https://www.slocounty.ca.gov/departments/sheriff-coroner/public-information/services",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0682954",
+    "name": "Visalia",
+    "state": "CA",
+    "query": "\"Visalia\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Police | Visalia, CA",
+        "url": "https://www.visalia.gov/depts/police/contact_information/contact_numbers/default.asp",
+        "evidence_url": "https://www.visalia.gov/depts/police/contact_information/contact_numbers/default.asp",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Crime Maps | Visalia, CA",
+        "url": "https://www.visalia.gov/446/Crime-Maps",
+        "evidence_url": "https://www.visalia.gov/446/Crime-Maps",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "VISALIA POLICE DEPARTMENT",
+        "url": "https://www.visalia.city/civicax/filebank/blobdload.aspx?BlobID=16179",
+        "evidence_url": "https://www.visalia.city/civicax/filebank/blobdload.aspx?BlobID=16179",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0680644",
+    "name": "Tulare",
+    "state": "CA",
+    "query": "\"Tulare\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Police | City of Tulare",
+        "url": "https://www.tulare.ca.gov/government/departments/police",
+        "evidence_url": "https://www.tulare.ca.gov/government/departments/police",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Crime Tips | City of Tulare",
+        "url": "https://www.tulare.ca.gov/government/departments/police/crime-tips",
+        "evidence_url": "https://www.tulare.ca.gov/government/departments/police/crime-tips",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "newsroom",
+        "title": "California Department of Justice Investigating Tulare County Sheriff\u2019s Department Officer-Involved Shooting Under AB 1506 | State of California - Department of Justice - Office of the Attorney General",
+        "url": "https://oag.ca.gov/news/press-releases/california-department-justice-investigating-tulare-county-sheriff%E2%80%99s-department",
+        "evidence_url": "https://oag.ca.gov/news/press-releases/california-department-justice-investigating-tulare-county-sheriff%E2%80%99s-department",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0669196",
+    "name": "Santa Maria",
+    "state": "CA",
+    "query": "\"Santa Maria\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Santa Maria Police Department | State of California - Department of Justice - Office of the Attorney General",
+        "url": "https://www.oag.ca.gov/fingerprints/locations/santa-maria-police-department",
+        "evidence_url": "https://www.oag.ca.gov/fingerprints/locations/santa-maria-police-department",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0618394",
+    "name": "Delano",
+    "state": "CA",
+    "query": "\"Delano\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Police Department | Delano, CA - Official Website",
+        "url": "https://www.cityofdelano.org/105/Police-Department",
+        "evidence_url": "https://www.cityofdelano.org/105/Police-Department",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Office of the Chief of Police | Delano, CA - Official Website",
+        "url": "https://www.cityofdelano.org/708/Office-of-the-Chief-of-Police",
+        "evidence_url": "https://www.cityofdelano.org/708/Office-of-the-Chief-of-Police",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0602252",
+    "name": "Antioch",
+    "state": "CA",
+    "query": "\"Antioch\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Contact Information \u2013 City of Antioch, California",
+        "url": "https://www.antiochca.gov/police/contact-information/",
+        "evidence_url": "https://www.antiochca.gov/police/contact-information/",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Police Department | Antioch, CA",
+        "url": "https://www.antiochca.gov/186/Police-Department",
+        "evidence_url": "https://www.antiochca.gov/186/Police-Department",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Crime Statistics | Antioch, CA",
+        "url": "https://www.antiochca.gov/446/Crime-Statistics",
+        "evidence_url": "https://www.antiochca.gov/446/Crime-Statistics",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0657456",
+    "name": "Pittsburg",
+    "state": "CA",
+    "query": "\"Pittsburg\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "newsroom",
+        "title": "Contact Police / News & Events | City of Pittsburg",
+        "url": "https://www.pittsburgca.gov/services/police/contact-police-news-events",
+        "evidence_url": "https://www.pittsburgca.gov/services/police/contact-police-news-events",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Online Crime Reporting | City of Pittsburg",
+        "url": "https://www.pittsburgca.gov/services/police/online-crime-reporting",
+        "evidence_url": "https://www.pittsburgca.gov/services/police/online-crime-reporting",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Records Division | City of Pittsburg",
+        "url": "https://www.pittsburgca.gov/services/police/support-services-bureau/records-division",
+        "evidence_url": "https://www.pittsburgca.gov/services/police/support-services-bureau/records-division",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0645484",
+    "name": "Manteca",
+    "state": "CA",
+    "query": "\"Manteca\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Crime Information | Manteca, CA",
+        "url": "https://www.manteca.gov/627/Crime-Information",
+        "evidence_url": "https://www.manteca.gov/627/Crime-Information",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Manteca Police Department | State of California - Department of Justice - Office of the Attorney General",
+        "url": "https://oag.ca.gov/fingerprints/locations/manteca-police-department",
+        "evidence_url": "https://oag.ca.gov/fingerprints/locations/manteca-police-department",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0648354",
+    "name": "Modesto",
+    "state": "CA",
+    "query": "\"Modesto\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Crime Map | Modesto, CA",
+        "url": "https://www.modestogov.com/229/Crime-Map",
+        "evidence_url": "https://www.modestogov.com/229/Crime-Map",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Police Department | Modesto, CA",
+        "url": "https://permits.modestogov.com/223/Police-Department",
+        "evidence_url": "https://permits.modestogov.com/223/Police-Department",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "File an Online Police Report | Modesto, CA",
+        "url": "https://www.modestogov.com/1169/File-a-Non-Emergency-Police-Report",
+        "evidence_url": "https://www.modestogov.com/1169/File-a-Non-Emergency-Police-Report",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0675000",
+    "name": "Stockton",
+    "state": "CA",
+    "query": "\"Stockton\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "newsroom",
+        "title": "Attorney General Bonta and Stockton Police Department Announce 34 Arrests, Seizes 20 Firearms in Stockton | State of California - Department of Justice - Office of the Attorney General",
+        "url": "https://oag.ca.gov/news/press-releases/attorney-general-bonta-and-stockton-police-department-announce-34-arrests-seizes",
+        "evidence_url": "https://oag.ca.gov/news/press-releases/attorney-general-bonta-and-stockton-police-department-announce-34-arrests-seizes",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0681666",
+    "name": "Vallejo",
+    "state": "CA",
+    "query": "\"Vallejo\" California police department official crime reports news alerts",
+    "channels": [],
+    "search_note": "News & Media - City of Vallejo Police Department (https://www.vallejopd.net/public_information/news)\n\ue200cite\ue202turn246search0\ue201 [wordlim: 200] Crawled: yes"
+  },
+  {
+    "id": "162:0652582",
+    "name": "Novato",
+    "state": "CA",
+    "query": "\"Novato\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Novato Police Department | City of Novato, CA",
+        "url": "https://www.novato.gov/government/police-department",
+        "evidence_url": "https://www.novato.gov/government/police-department",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Novato Police Department | City of Novato, CA",
+        "url": "https://www.novato.gov/government/police-department?locale=es",
+        "evidence_url": "https://www.novato.gov/government/police-department?locale=es",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Crime Map | City of Novato, CA",
+        "url": "https://www.novato.gov/government/police-department/crime-map",
+        "evidence_url": "https://www.novato.gov/government/police-department/crime-map",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0667000",
+    "name": "San Francisco",
+    "state": "CA",
+    "query": "\"San Francisco\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Services - City of South San Francisco",
+        "url": "https://www.ssfca.gov/Departments/Police-Department/Divisions/Services",
+        "evidence_url": "https://www.ssfca.gov/Departments/Police-Department/Divisions/Services",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "SAN FRANCISCO POLICE DEPARTMENT",
+        "url": "https://media.api.sf.gov/documents/PoliceCommission101624-_Commission_Crime_Trends_Notes_10.16.24.pdf",
+        "evidence_url": "https://media.api.sf.gov/documents/PoliceCommission101624-_Commission_Crime_Trends_Notes_10.16.24.pdf",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "SAN FRANCISCO POLICE DEPARTMENT",
+        "url": "https://media.api.sf.gov/documents/Commission_Crime_Trends_Notes_09.11.24.pdf",
+        "evidence_url": "https://media.api.sf.gov/documents/Commission_Crime_Trends_Notes_09.11.24.pdf",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0642202",
+    "name": "Lodi",
+    "state": "CA",
+    "query": "\"Lodi\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Lodi Police Department | Lodi, CA",
+        "url": "https://www.lodi.gov/215/Police",
+        "evidence_url": "https://www.lodi.gov/215/Police",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Chief of Police | Lodi, CA",
+        "url": "https://www.lodi.gov/886/Chief-of-Police",
+        "evidence_url": "https://www.lodi.gov/886/Chief-of-Police",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Lodi Police Department | Lodi, CA",
+        "url": "https://www.lodi.gov/215/Police?from=AppAgg.com",
+        "evidence_url": "https://www.lodi.gov/215/Police?from=AppAgg.com",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0623182",
+    "name": "Fairfield",
+    "state": "CA",
+    "query": "\"Fairfield\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Police Department | Fairfield, CA",
+        "url": "https://www.fairfield.ca.gov/government/city-departments/police",
+        "evidence_url": "https://www.fairfield.ca.gov/government/city-departments/police",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Daily Activity Logs | Fairfield, CA",
+        "url": "https://www.fairfield.ca.gov/government/city-departments/police/operations-bureau/daily-activity-logs",
+        "evidence_url": "https://www.fairfield.ca.gov/government/city-departments/police/operations-bureau/daily-activity-logs",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Records & Reports | Fairfield, CA",
+        "url": "https://www.fairfield.ca.gov/government/city-departments/police/support-services-bureau/police-records-reports",
+        "evidence_url": "https://www.fairfield.ca.gov/government/city-departments/police/support-services-bureau/police-records-reports",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0650258",
+    "name": "Napa",
+    "state": "CA",
+    "query": "\"Napa\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Public Safety | Napa County, CA",
+        "url": "https://www.napacounty.gov/1579/Public-Safety",
+        "evidence_url": "https://www.napacounty.gov/1579/Public-Safety",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Office of the Chief of Police | Napa, CA",
+        "url": "https://www.cityofnapa.org/472/Office-of-the-Chief-of-Police",
+        "evidence_url": "https://www.cityofnapa.org/472/Office-of-the-Chief-of-Police",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Sheriff | Napa County, CA",
+        "url": "https://www.napacounty.gov/1292/Sheriff",
+        "evidence_url": "https://www.napacounty.gov/1292/Sheriff",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0681554",
+    "name": "Vacaville",
+    "state": "CA",
+    "query": "\"Vacaville\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Police Department | Vacaville, CA",
+        "url": "https://www.cityofvacaville.gov/government/police-department?locale=en_us",
+        "evidence_url": "https://www.cityofvacaville.gov/government/police-department?locale=en_us",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Crime Reports & Prevention | Vacaville, CA",
+        "url": "https://www.cityofvacaville.gov/government/police-department/crime-reports-prevention",
+        "evidence_url": "https://www.cityofvacaville.gov/government/police-department/crime-reports-prevention",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Police Department | Vacaville, CA",
+        "url": "https://www.cityofvacaville.gov/government/police-department?locale=en",
+        "evidence_url": "https://www.cityofvacaville.gov/government/police-department?locale=en",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0656784",
+    "name": "Petaluma",
+    "state": "CA",
+    "query": "\"Petaluma\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "nextdoor",
+        "title": "Petaluma Police Department - 1435 updates",
+        "url": "https://nextdoor.com/agency-detail/ca/petaluma/petaluma-police-department/",
+        "evidence_url": "https://nextdoor.com/agency-detail/ca/petaluma/petaluma-police-department/",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "nextdoor",
+        "title": "Petaluma Police Department - 1431 updates",
+        "url": "https://api.us.nextdoor.com/agency-detail/ca/petaluma/petaluma-police-department/",
+        "evidence_url": "https://api.us.nextdoor.com/agency-detail/ca/petaluma/petaluma-police-department/",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0646898",
+    "name": "Merced",
+    "state": "CA",
+    "query": "\"Merced\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Police Department | City of Merced, CA",
+        "url": "https://www.cityofmerced.gov/public-safety/police",
+        "evidence_url": "https://www.cityofmerced.gov/public-safety/police",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Transparency Hub | City of Merced, CA",
+        "url": "https://www.cityofmerced.gov/public-safety/police/transparency-hub",
+        "evidence_url": "https://www.cityofmerced.gov/public-safety/police/transparency-hub",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Online Crime Mapping | City of Merced, CA",
+        "url": "https://www.cityofmerced.gov/public-safety/police/crimemapping-com",
+        "evidence_url": "https://www.cityofmerced.gov/public-safety/police/crimemapping-com",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0649670",
+    "name": "Mountain View",
+    "state": "CA",
+    "query": "\"Mountain View\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "newsroom",
+        "title": "News | Mountain View, CA",
+        "url": "https://www.mountainview.gov/our-city/departments/police/news?locale=en",
+        "evidence_url": "https://www.mountainview.gov/our-city/departments/police/news?locale=en",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "newsroom",
+        "title": "News | Mountain View, CA",
+        "url": "https://www.mountainview.gov/our-city/departments/police/news/-arch-1/-fsiteid-1/-locale-en",
+        "evidence_url": "https://www.mountainview.gov/our-city/departments/police/news/-arch-1/-fsiteid-1/-locale-en",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Police | Mountain View, CA",
+        "url": "https://www.mountainview.gov/our-city/departments/police?locale=en",
+        "evidence_url": "https://www.mountainview.gov/our-city/departments/police?locale=en",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0677000",
+    "name": "Sunnyvale",
+    "state": "CA",
+    "query": "\"Sunnyvale\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Crime Statistics | Sunnyvale, CA",
+        "url": "https://www.sunnyvale.ca.gov/your-government/departments/public-safety/public-safety-services/crime-statistics",
+        "evidence_url": "https://www.sunnyvale.ca.gov/your-government/departments/public-safety/public-safety-services/crime-statistics",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Public Safety | Sunnyvale, CA",
+        "url": "https://www.sunnyvale.ca.gov/your-government/departments/public-safety",
+        "evidence_url": "https://www.sunnyvale.ca.gov/your-government/departments/public-safety",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Public Safety Services | Sunnyvale, CA",
+        "url": "https://www.sunnyvale.ca.gov/your-government/departments/public-safety/public-safety-services",
+        "evidence_url": "https://www.sunnyvale.ca.gov/your-government/departments/public-safety/public-safety-services",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0626000",
+    "name": "Fremont",
+    "state": "CA",
+    "query": "\"Fremont\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Fremont Police Department, CA | Home",
+        "url": "https://www.fremontpolice.gov/",
+        "evidence_url": "https://www.fremontpolice.gov/",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "newsroom",
+        "title": "News List | Fremont Police Department, CA",
+        "url": "https://www.fremontpolice.gov/about-us/about-fremont-police/spotlight-and-news/news-list",
+        "evidence_url": "https://www.fremontpolice.gov/about-us/about-fremont-police/spotlight-and-news/news-list",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "newsroom",
+        "title": "Fremont Police Department News and Spotlight | Fremont Police Department, CA",
+        "url": "https://www.fremontpolice.gov/about-us/about-fremont-police/spotlight-and-news",
+        "evidence_url": "https://www.fremontpolice.gov/about-us/about-fremont-police/spotlight-and-news",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0660102",
+    "name": "Redwood City",
+    "state": "CA",
+    "query": "\"Redwood City\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Redwood City Police Department | City of Redwood City",
+        "url": "https://www.redwoodcity.org/departments/police-department",
+        "evidence_url": "https://www.redwoodcity.org/departments/police-department",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Welcome to the Redwood City Police Department | City of Redwood City",
+        "url": "https://www.redwoodcity.org/departments/police-department/about-us/community-policing",
+        "evidence_url": "https://www.redwoodcity.org/departments/police-department/about-us/community-policing",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Connect With Us | City of Redwood City",
+        "url": "https://www.redwoodcity.org/departments/police-department/connect-with-us",
+        "evidence_url": "https://www.redwoodcity.org/departments/police-department/connect-with-us",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0681204",
+    "name": "Union City",
+    "state": "CA",
+    "query": "\"Union City\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "incident-log",
+        "title": "The Blotter | Union City, CA",
+        "url": "https://www.unioncityca.gov/625/Crime-Blotter",
+        "evidence_url": "https://www.unioncityca.gov/625/Crime-Blotter",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Crime in My Neighborhood | Union City, CA",
+        "url": "https://www.unioncityca.gov/545/Crime-in-My-Neighborhood",
+        "evidence_url": "https://www.unioncityca.gov/545/Crime-in-My-Neighborhood",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Police | Union City, CA",
+        "url": "https://www.unioncityca.gov/677/Police",
+        "evidence_url": "https://www.unioncityca.gov/677/Police",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0620018",
+    "name": "Dublin",
+    "state": "CA",
+    "query": "\"Dublin\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Police Services | Dublin, CA - Official Website",
+        "url": "https://www.dublin.ca.gov/2294/Police-Services",
+        "evidence_url": "https://www.dublin.ca.gov/2294/Police-Services",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Police Services | Dublin, CA - Official Website",
+        "url": "https://dublin.ca.gov/2294/Police-Services",
+        "evidence_url": "https://dublin.ca.gov/2294/Police-Services",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Police Events | Dublin, CA - Official Website",
+        "url": "https://dublin.ca.gov/130/Police-Events",
+        "evidence_url": "https://dublin.ca.gov/130/Police-Events",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0669084",
+    "name": "Santa Clara",
+    "state": "CA",
+    "query": "\"Santa Clara\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "incident-log",
+        "title": "Arrest Log | City of Santa Clara",
+        "url": "https://www.santaclaraca.gov/our-city/departments-g-z/police-department/crime/arrest-log",
+        "evidence_url": "https://www.santaclaraca.gov/our-city/departments-g-z/police-department/crime/arrest-log",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Police Department | City of Santa Clara",
+        "url": "https://www.santaclaraca.gov/our-city/departments-g-z/police-department",
+        "evidence_url": "https://www.santaclaraca.gov/our-city/departments-g-z/police-department",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Crime | City of Santa Clara",
+        "url": "https://www.santaclaraca.gov/Home/Components/RFP/RFP/1687/",
+        "evidence_url": "https://www.santaclaraca.gov/Home/Components/RFP/RFP/1687/",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0668084",
+    "name": "San Leandro",
+    "state": "CA",
+    "query": "\"San Leandro\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Police | San Leandro, CA",
+        "url": "https://www.sanleandro.org/police",
+        "evidence_url": "https://www.sanleandro.org/police",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Crime Stats | San Leandro, CA",
+        "url": "https://www.sanleandro.org/448/Crime-Stats",
+        "evidence_url": "https://www.sanleandro.org/448/Crime-Stats",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Crime Stats | San Leandro, CA",
+        "url": "https://www.sanleandro.org/449/Crime-Stats",
+        "evidence_url": "https://www.sanleandro.org/449/Crime-Stats",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0641992",
+    "name": "Livermore",
+    "state": "CA",
+    "query": "\"Livermore\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "City of Livermore website | Home Police",
+        "url": "https://police.livermoreca.gov/",
+        "evidence_url": "https://police.livermoreca.gov/",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "ABOUT US | City of Livermore website",
+        "url": "https://police.livermoreca.gov/about-us",
+        "evidence_url": "https://police.livermoreca.gov/about-us",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "CONTACT | City of Livermore website",
+        "url": "https://police.livermoreca.gov/contact",
+        "evidence_url": "https://police.livermoreca.gov/contact",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0683346",
+    "name": "Walnut Creek",
+    "state": "CA",
+    "query": "\"Walnut Creek\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "newsroom",
+        "title": "News Releases | Walnut Creek Police Department",
+        "url": "https://www.walnutcreekpdca.gov/data-and-transparency/transparency/news-releases",
+        "evidence_url": "https://www.walnutcreekpdca.gov/data-and-transparency/transparency/news-releases",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Contact | Walnut Creek Police Department",
+        "url": "https://www.walnutcreekpdca.gov/i-want-to/contact-wcpd",
+        "evidence_url": "https://www.walnutcreekpdca.gov/i-want-to/contact-wcpd",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Walnut Creek Police Department | Home",
+        "url": "https://www.walnutcreekpdca.gov/home-policenew",
+        "evidence_url": "https://www.walnutcreekpdca.gov/home-policenew",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0608142",
+    "name": "Brentwood",
+    "state": "CA",
+    "query": "\"Brentwood\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Contact Us | Brentwood, CA",
+        "url": "https://www.brentwoodca.gov/government/police/contact-us",
+        "evidence_url": "https://www.brentwoodca.gov/government/police/contact-us",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "newsroom",
+        "title": "Brentwood Police News Releases | Brentwood, CA",
+        "url": "https://www.brentwoodca.gov/government/police/news",
+        "evidence_url": "https://www.brentwoodca.gov/government/police/news",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Welcome to the Brentwood Police Department Website | Brentwood, CA",
+        "url": "https://www.brentwoodca.gov/government/police",
+        "evidence_url": "https://www.brentwoodca.gov/government/police",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  {
+    "id": "162:0616000",
+    "name": "Concord",
+    "state": "CA",
+    "query": "\"Concord\" California police department official crime reports news alerts",
+    "channels": [
+      {
+        "kind": "department-page",
+        "title": "Police | Concord, CA",
+        "url": "https://www.cityofconcord.org/police",
+        "evidence_url": "https://www.cityofconcord.org/police",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Crime and Incident Data | Concord, CA",
+        "url": "https://www.cityofconcord.org/1063/Crime-and-Incident-Data",
+        "evidence_url": "https://www.cityofconcord.org/1063/Crime-and-Incident-Data",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "title": "Police | Concord, CA",
+        "url": "https://cityofconcord.org/183/Police",
+        "evidence_url": "https://cityofconcord.org/183/Police",
+        "verification": "search-discovered-primary-source; review-jurisdiction",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  }
+]

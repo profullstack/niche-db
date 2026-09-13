@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@logicsrc/openaccess": "^0.3.0",
+    "@nichedb/adapters": "workspace:*",
     "@nichedb/auth": "workspace:*",
     "@nichedb/config": "workspace:*",
     "@nichedb/core": "workspace:*",

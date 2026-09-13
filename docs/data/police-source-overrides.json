@@ -1,0 +1,289 @@
+{
+  "CA:San Jose": {
+    "department_urls": ["https://www.sjpd.org/about-us/inside-sjpd/press-releases"],
+    "channels": [
+      {
+        "kind": "newsroom",
+        "url": "https://www.sjpd.org/about-us/inside-sjpd/press-releases",
+        "evidence_url": "https://www.sjpd.org/about-us/organization/office-of-the-chief-of-police/media-relations-pio",
+        "verification": "reviewed-official-page",
+        "access": "search-readable; direct-http-403"
+      },
+      {
+        "kind": "x",
+        "url": "https://x.com/SJPD_PIO",
+        "evidence_url": "https://info.sjpd.org/records/pc-13650_library/Unit%20Guidelines/Media%20Relations%20Unit%20Guidelines%20UPDATE%201-4-2024_Redacted.pdf",
+        "verification": "official-department-publication",
+        "access": "not-tested"
+      }
+    ]
+  },
+  "CA:Cupertino": {
+    "department_urls": ["https://www.cupertino.gov/Your-City/Divisions/Public-Safety/SCC-Sheriff"],
+    "channels": [
+      {
+        "kind": "newsroom",
+        "url": "https://sheriff.santaclaracounty.gov/about-us/newsroom-press-releases",
+        "evidence_url": "https://www.cupertino.gov/Your-City/Divisions/Public-Safety/SCC-Sheriff",
+        "verification": "reviewed-contract-agency",
+        "access": "public-html",
+        "coverage_note": "County sheriff; filter releases to Cupertino. Do not assign every county incident to this city."
+      }
+    ]
+  },
+  "CA:Palo Alto": {
+    "department_urls": [
+      "https://www.paloalto.gov/Departments/Police/Public-Information-Portal/Social-Media-Connections",
+      "https://www.paloalto.gov/Departments/Police/Public-Information-Portal/News-Releases"
+    ]
+  },
+  "CA:Mountain View": {
+    "department_urls": [
+      "https://www.mountainview.gov/our-city/departments/police/news/-arch-1/-fsiteid-1/-locale-en"
+    ],
+    "channels": [
+      {
+        "kind": "newsroom",
+        "url": "https://www.mountainview.gov/our-city/departments/police/news/-arch-1/-fsiteid-1/-locale-en",
+        "evidence_url": "https://www.mountainview.gov/our-city/departments/police/news/-arch-1/-fsiteid-1/-locale-en",
+        "verification": "reviewed-primary-web-source",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  "CA:Milpitas": {
+    "department_urls": ["https://www.milpitas.gov/1101/Police"]
+  },
+  "CA:Santa Clara": {
+    "department_urls": [
+      "https://www.santaclaraca.gov/our-city/departments-g-z/police-department",
+      "https://www.santaclaraca.gov/our-city/departments-g-z/police-department/crime/arrest-log"
+    ],
+    "channels": [
+      {
+        "kind": "incident-log",
+        "url": "https://www.santaclaraca.gov/our-city/departments-g-z/police-department/crime/arrest-log",
+        "evidence_url": "https://www.santaclaraca.gov/our-city/departments-g-z/police-department/crime/arrest-log",
+        "verification": "reviewed-primary-web-source",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "x",
+        "url": "https://x.com/SantaClaraPD",
+        "evidence_url": "https://www.santaclaraca.gov/home/showpublisheddocument/88189/639080556114870000",
+        "verification": "official-department-reference",
+        "access": "not-tested"
+      }
+    ]
+  },
+  "CA:Sunnyvale": {
+    "department_urls": ["https://www.sunnyvale.ca.gov/your-government/about/social-media-center"],
+    "channels": [
+      {
+        "kind": "social-directory",
+        "url": "https://www.sunnyvale.ca.gov/your-government/about/social-media-center",
+        "evidence_url": "https://www.sunnyvale.ca.gov/your-government/about/social-media-center",
+        "verification": "reviewed-primary-web-source",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  "CA:Antioch": {
+    "department_urls": [],
+    "channels": [
+      {
+        "kind": "department-page",
+        "url": "https://www.antiochca.gov/186/Police-Department",
+        "evidence_url": "https://www.antiochca.gov/186/Police-Department",
+        "verification": "reviewed-primary-web-source",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  "CA:Brentwood": {
+    "department_urls": [],
+    "channels": [
+      {
+        "kind": "department-page",
+        "url": "https://www.brentwoodca.gov/government/police",
+        "evidence_url": "https://www.brentwoodca.gov/government/police",
+        "verification": "reviewed-primary-web-source",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  "CA:Dublin": {
+    "department_urls": [],
+    "channels": [
+      {
+        "kind": "alerts",
+        "url": "https://dublin.ca.gov/alertcenter.aspx?CID=1",
+        "evidence_url": "https://dublin.ca.gov/alertcenter.aspx?CID=1",
+        "verification": "reviewed-primary-web-source",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  "CA:Fremont": {
+    "department_urls": [],
+    "channels": [
+      {
+        "kind": "department-page",
+        "url": "https://www.fremontpolice.gov/",
+        "evidence_url": "https://www.fremontpolice.gov/",
+        "verification": "reviewed-primary-web-source",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "x",
+        "url": "https://x.com/FremontPD",
+        "evidence_url": "https://www.fremont.gov/about/news-media/social-media-center",
+        "verification": "official-department-reference",
+        "access": "not-tested"
+      }
+    ]
+  },
+  "CA:Livermore": {
+    "channels": [
+      {
+        "kind": "newsroom",
+        "url": "https://police.livermoreca.gov/community/news-press-releases",
+        "evidence_url": "https://police.livermoreca.gov/community/news-press-releases",
+        "verification": "reviewed-primary-web-source",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  "CA:Manteca": {
+    "channels": [
+      {
+        "kind": "crime-map-directory",
+        "url": "https://www.manteca.gov/627/Crime-Information",
+        "evidence_url": "https://www.manteca.gov/627/Crime-Information",
+        "verification": "reviewed-primary-web-source",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  "CA:Anaheim": {
+    "channels": [
+      {
+        "kind": "department-page",
+        "url": "https://pd.anaheim.net/",
+        "evidence_url": "https://pd.anaheim.net/",
+        "verification": "reviewed-primary-web-source",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  "CA:Fullerton": {
+    "channels": [
+      {
+        "kind": "social-directory",
+        "url": "https://linktr.ee/fullertonpd",
+        "evidence_url": "https://linktr.ee/fullertonpd",
+        "verification": "reviewed-primary-web-source",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "department-page",
+        "url": "https://www.cityoffullerton.com/government/departments/police",
+        "evidence_url": "https://www.cityoffullerton.com/government/departments/police",
+        "verification": "reviewed-primary-web-source",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "newsroom",
+        "url": "https://www.cityoffullerton.com/government/departments/police/crime-trends/latest-news",
+        "evidence_url": "https://linktr.ee/fullertonpd",
+        "verification": "reviewed-primary-web-source",
+        "access": "HTTP-403; reference-only"
+      }
+    ]
+  },
+  "CA:Hemet": {
+    "channels": [
+      {
+        "kind": "newsroom",
+        "url": "https://hemetpd.com/",
+        "evidence_url": "https://hemetpd.com/",
+        "verification": "reviewed-primary-web-source",
+        "access": "search-readable; automation-unverified"
+      },
+      {
+        "kind": "feed-candidate",
+        "url": "https://hemetpd.com/feed/",
+        "evidence_url": "https://hemetpd.com/",
+        "verification": "reviewed-police-publisher-feed",
+        "access": "not-tested",
+        "link_text": "Hemet Police Department RSS"
+      }
+    ]
+  },
+  "CA:Los Angeles": {
+    "channels": [
+      {
+        "kind": "newsroom",
+        "url": "https://www.lapdonline.org/newsroom/",
+        "evidence_url": "https://www.lapdonline.org/newsroom/",
+        "verification": "reviewed-primary-web-source",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  "CA:Oceanside": {
+    "channels": [
+      {
+        "kind": "newsroom",
+        "url": "https://www.oceansidepolice.com/about-opd/press-releases",
+        "evidence_url": "https://www.oceansidepolice.com/about-opd/press-releases",
+        "verification": "reviewed-primary-web-source",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  "CA:Rancho Cordova": {
+    "channels": [
+      {
+        "kind": "department-page",
+        "url": "https://www.ranchocordovapd.com/",
+        "evidence_url": "https://www.ranchocordovapd.com/",
+        "verification": "reviewed-primary-web-source",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  "CA:San Buenaventura (Ventura)": {
+    "channels": [
+      {
+        "kind": "newsroom",
+        "url": "https://www.cityofventura.ca.gov/Blog.aspx?CID=5",
+        "evidence_url": "https://www.cityofventura.ca.gov/Blog.aspx?CID=5",
+        "verification": "reviewed-primary-web-source",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  "CA:Vallejo": {
+    "channels": [
+      {
+        "kind": "newsroom",
+        "url": "https://www.vallejopd.net/public_information/news/press_releases",
+        "evidence_url": "https://www.vallejopd.net/public_information/news/press_releases",
+        "verification": "reviewed-primary-web-source",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  },
+  "CA:Newport Beach": {
+    "channels": [
+      {
+        "kind": "newsroom",
+        "url": "https://www.nbpd.org/what-s-new/press-releases",
+        "evidence_url": "https://www.nbpd.org/what-s-new/press-releases",
+        "verification": "reviewed-primary-web-source",
+        "access": "search-readable; automation-unverified"
+      }
+    ]
+  }
+}
