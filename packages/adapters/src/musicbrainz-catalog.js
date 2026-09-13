@@ -39,7 +39,9 @@ import { dumpDir, xzLines } from '@nichedb/core/dump';
  * three times and a run in which every request failed throws; a download that
  * fails three times in a row ends the run with the place kept (the partial
  * file stays on disk for the next resume). A line that is not JSON, or not an
- * entity, is counted and skipped, never thrown.
+ * entity, is counted and skipped, never thrown. An archive on disk that tar
+ * cannot read is removed and fetched once more in the same run, from the last
+ * batch yielded; a second unreadable copy throws.
  */
 
 export const BASE = 'https://data.metabrainz.org/pub/musicbrainz/data/json-dumps';
@@ -76,6 +78,9 @@ export const RETRY_PAUSE_MS = 5_000;
 const FAILURE_STOP = 3;
 
 const UA_HEADERS = { 'user-agent': USER_AGENT };
+
+/** The reader's own failure: tar could not read the archive on disk. Anything else is not the file's fault. */
+const unreadable = (err) => /^(?:tar|xz) exited \d+/.test(String(err?.message ?? ''));
 
 const sleep = (ms) => (ms > 0 ? new Promise((r) => setTimeout(r, ms)) : Promise.resolve());
 
@@ -308,6 +313,7 @@ export async function* walk(
   let line = state.line;
   let seen = 0;
   let bad = 0;
+  const reread = new Set();
   const at = () => ({ dir, entity, line });
   const progress = () => `${seen} rows${bad ? `, ${bad} bad` : ''}`;
 
@@ -367,26 +373,46 @@ export async function* walk(
 
     // ── Stream the member from the cursor's line ──────────────────────────
     let batch = [];
-    for await (const text of xzLines(file, { member: memberOf(entity), skip: line })) {
-      line += 1;
-      const item = toItem(entity, parseRow(text));
-      if (!item) {
-        if (text.trim()) bad += 1;
-        continue;
-      }
-      batch.push(item);
-      if (batch.length >= batchSize) {
-        seen += batch.length;
-        yield { items: batch, cursor: at() };
-        batch = [];
-        if (near()) {
-          return {
-            cursor: at(),
-            note: `${progress()}; stopped on the run deadline at ${entity} line ${line} of ${dir}, resuming in ${stopIn} min`,
-            nextInMinutes: stopIn,
-          };
+    let yielded = line;
+    try {
+      for await (const text of xzLines(file, { member: memberOf(entity), skip: line })) {
+        line += 1;
+        const item = toItem(entity, parseRow(text));
+        if (!item) {
+          if (text.trim()) bad += 1;
+          continue;
+        }
+        batch.push(item);
+        if (batch.length >= batchSize) {
+          seen += batch.length;
+          yield { items: batch, cursor: at() };
+          yielded = line;
+          batch = [];
+          if (near()) {
+            return {
+              cursor: at(),
+              note: `${progress()}; stopped on the run deadline at ${entity} line ${line} of ${dir}, resuming in ${stopIn} min`,
+              nextInMinutes: stopIn,
+            };
+          }
         }
       }
+    } catch (err) {
+      if (!unreadable(err)) throw err;
+      // The file on disk is not one tar can read (a bad write, a volume that
+      // outlived a different build of the archive). Left there it would fail
+      // every run, since http.download sees a whole file and fetches nothing.
+      // Drop it and fetch it once more, resuming from the last batch yielded.
+      await unlink(file).catch(() => {});
+      log(`${entity}: archive of ${dir} removed, ${err.message}`);
+      if (reread.has(entity)) {
+        throw new Error(
+          `musicbrainz: ${entity} archive of ${dir} unreadable twice (${err.message})`,
+        );
+      }
+      reread.add(entity);
+      line = yielded;
+      continue;
     }
     if (batch.length) {
       seen += batch.length;

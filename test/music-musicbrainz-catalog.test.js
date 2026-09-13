@@ -544,6 +544,62 @@ describe('failures', () => {
     expect(p.calls.download).toHaveLength(3);
   });
 
+  test('an archive tar cannot read is removed and fetched once more, from the last batch yielded, with no row lost or repeated', async () => {
+    const d = await mkdtemp(join(tmp, 'unreadable-'));
+    // The real artist archive cut at 400 KB: xz hands tar some rows, then fails.
+    const cut = join(d, 'cut.tar.xz');
+    await writeFile(cut, (await readFile(fixture('artist'))).subarray(0, 400_000));
+    // The archive lives outside the dump directory, which the walk prunes.
+    await mkdir(join(d, 'data'));
+    let tries = 0;
+    const p = provider({
+      files: {
+        artist: async (filePath) => {
+          tries += 1;
+          await copyFile(tries === 1 ? cut : fixture('artist'), filePath);
+          return { path: filePath, bytes: 1, complete: true };
+        },
+      },
+    });
+    const logs = [];
+    const { batches, outcome } = await drain(
+      walk(
+        { ...ctx(p, { batchSize: 37 }), log: (m) => logs.push(m) },
+        { dataDir: join(d, 'data'), pauseMs: 0 },
+      ),
+    );
+    expect(tries).toBe(2);
+    expect(logs.some((m) => /artist: archive of .* removed, tar exited/.test(m))).toBe(true);
+    // Two batches came out of the cut archive before tar failed; the fetch repeated
+    // from line 74, so the rows the cut stopped inside are read once from the whole file.
+    expect(batches.slice(0, 3).map((b) => [b.cursor.entity, b.cursor.line])).toEqual([
+      ['artist', 37],
+      ['artist', 74],
+      ['artist', 111],
+    ]);
+    const artists = batches.flatMap((b) => b.items).filter((i) => i.kind === 'artist');
+    const all = await collect(xzLines(fixture('artist'), { member: memberOf('artist') }));
+    expect(artists.map((i) => i.data.mbid)).toEqual(all.map((l) => JSON.parse(l).id));
+    expect(outcome.cursor).toEqual({ dir: DIR, entity: 'release-group', line: 200, done: true });
+  });
+
+  test('an archive unreadable twice throws, with the file gone so the next run fetches it fresh', async () => {
+    const d = await mkdtemp(join(tmp, 'unreadable2-'));
+    const p = provider({
+      files: {
+        artist: async (filePath) => {
+          await writeFile(filePath, Buffer.alloc(50_000, 0x41));
+          return { path: filePath, bytes: 50_000, complete: true };
+        },
+      },
+    });
+    await expect(run(p, {}, { dataDir: d })).rejects.toThrow(
+      /artist archive of .* unreadable twice/,
+    );
+    expect(p.calls.download).toHaveLength(2);
+    await expect(readFile(localFile(d, DIR, 'artist'))).rejects.toThrow();
+  });
+
   test('a download that fails twice and then lands resets the streak and the walk goes on', async () => {
     const d = await mkdtemp(join(tmp, 'dl2-'));
     let tries = 0;
