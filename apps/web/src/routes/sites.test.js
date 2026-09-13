@@ -50,6 +50,8 @@ const ITEM = {
 
 const store = {
   upserts: [],
+  // The array literal helper other modules import from the same file.
+  pgArray: (values) => `{${(values ?? []).map((v) => JSON.stringify(String(v))).join(',')}}`,
   async getCollection(slug) {
     return slug === 'sites' ? { id: 1, slug } : null;
   },

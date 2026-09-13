@@ -1,3 +1,4 @@
+import { config } from '@nichedb/config';
 import { cached, render, respond } from '../lib/http.js';
 import { Denied } from '../lib/service.js';
 import { findByPath, listForHost, pathOf, readAndKeep, recordFor, siteOut } from '../lib/sites.js';
@@ -101,7 +102,7 @@ export function registerSites(app) {
       record: {
         ...record,
         path: pathOf(record),
-        page: `${new URL(c.req.url).origin}${pathOf(record)}`,
+        page: `${config.siteUrl}${pathOf(record)}`,
         id: item?.id ?? null,
       },
       fresh,
@@ -119,7 +120,7 @@ export function registerSites(app) {
           record: {
             ...record,
             path,
-            page: `${new URL(c.req.url).origin}${path}`,
+            page: `${config.siteUrl}${path}`,
             id: item?.id ?? null,
           },
           fresh: false,
