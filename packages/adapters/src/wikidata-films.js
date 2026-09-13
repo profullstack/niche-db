@@ -177,13 +177,27 @@ export function genreName(label) {
     .trim();
 }
 
-/** `1972-03-13T00:00:00Z` -> `1972-03-13`, or null for a date this catalogue cannot store. */
+/**
+ * `1972-03-13T00:00:00Z` -> `1972-03-13`, a date on 1 January -> its bare year,
+ * or null for a date this catalogue cannot store.
+ *
+ * `wdt:P577` hands back the date with its precision thrown away, and a
+ * year-precision date comes through as 1 January: in one live window 515 of
+ * 697 dated films sat on 1 January, and of 36 checked against the statement's
+ * own precision all 36 were year precision while none of the 24 day-precision
+ * dates fell on that day. Asking the statement itself (p:/psv:) for the
+ * precision costs the window its whole time budget, a 3 s window timing out at
+ * 60 s, so 1 January is read as the year and looseDate stores it as one. A
+ * month-precision date comes through as the 1st of its month the same way, but
+ * a real release on the 1st is common enough that those are left as days.
+ */
 export function ymdOf(v) {
   const m = String(v ?? '').match(/^(\d{4})-(\d{2})-(\d{2})T/);
   if (!m) return null;
   const [, y, mo, d] = m;
   if (Number(y) < 1 || Number(mo) < 1 || Number(mo) > 12 || Number(d) < 1 || Number(d) > 31)
     return null;
+  if (mo === '01' && d === '01') return y;
   return `${y}-${mo}-${d}`;
 }
 
@@ -212,6 +226,7 @@ export function filmItem(row) {
   const label = value(row, 'itemLabel');
   if (!qid || !label || isBareQid(label)) return null;
   const ymd = ymdOf(value(row, 'firstDate'));
+  // A bare year here is a year-precision date, which looseDate stores at year precision.
   const when = looseDate(ymd ?? '');
   const genres = splitList(value(row, 'genres')).map(genreName).filter(Boolean);
   const countries = splitList(value(row, 'countries'));
@@ -300,7 +315,7 @@ export const wikidataFilms = defineAdapter({
   title: 'Wikidata: every film',
   collection: 'screen',
   description:
-    'Every film on Wikidata, about 349,000, as title rows in the same shape as the TMDB and TVmaze sources: title, release date, directors, genres, countries, runtime, poster from Commons, and the IMDb and TMDB ids that join it to the other two. Keyless; the data is CC0, so it can be used for anything with no credit required, and every row still says where it came from. Walks the numeric Q id space one window at a time through the SPARQL endpoint, shrinking a window that times out and resuming where it stopped; a pass is a few hundred windows and starts over once it passes the newest id.',
+    'Every film on Wikidata, about 349,000, as title rows in the same shape as the TMDB and TVmaze sources: title, release date, directors, genres, countries, runtime, poster from Commons, and the IMDb and TMDB ids that join it to the other two. Keyless; the data is CC0, so it can be used for anything with no credit required, and every row still says where it came from. The poster is a Commons file and keeps whatever licence Commons gives it, which is not always CC0. Walks the numeric Q id space one window at a time through the SPARQL endpoint, shrinking a window that times out and resuming where it stopped; a pass is a few hundred windows and starts over once it passes the newest id.',
   docs: 'https://www.wikidata.org/wiki/Wikidata:SPARQL_query_service',
   kinds: ['title'],
   cadenceMinutes: 1440,

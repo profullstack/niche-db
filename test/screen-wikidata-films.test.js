@@ -166,6 +166,18 @@ describe('filmItem', () => {
     expect(fr.data.genres).toEqual(['silent']);
   });
 
+  test('a date on 1 January is the year Wikidata truncated, stored at year precision', () => {
+    const fr = normaliseItem(filmItem(rowOf(mid, 'Q20004162')));
+    expect(fr.precision).toBe('year');
+    expect(fr.publishedAt.toISOString()).toBe('1928-07-01T12:00:00.000Z');
+    expect(fr.data.releaseDate).toBe('1928');
+    expect(fr.data.year).toBe(1928);
+    expect(fr.summary).toMatch(/^1928 film/);
+    const day = normaliseItem(filmItem(rowOf(mid, 'Q20004204')));
+    expect(day.precision).toBe('day');
+    expect(day.data.releaseDate).toBe('2013-11-01');
+  });
+
   test('the helpers', () => {
     expect(qidOf('http://www.wikidata.org/entity/Q26060')).toBe('Q26060');
     expect(qidOf('http://www.wikidata.org/entity/P31')).toBeNull();
@@ -184,6 +196,8 @@ describe('filmItem', () => {
     expect(genreName('comedy film')).toBe('comedy');
     expect(genreName('film based on literature')).toBe('film based on literature');
     expect(ymdOf('1972-03-13T00:00:00Z')).toBe('1972-03-13');
+    expect(ymdOf('2014-01-01T00:00:00Z')).toBe('2014');
+    expect(ymdOf('2013-11-01T00:00:00Z')).toBe('2013-11-01');
     expect(ymdOf('-0500-01-01T00:00:00Z')).toBeNull();
     expect(ymdOf('1972-13-01T00:00:00Z')).toBeNull();
     expect(runtimeOf('136')).toBe(136);
