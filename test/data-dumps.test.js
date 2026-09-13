@@ -114,6 +114,13 @@ describe('Data plan and dump boundaries', () => {
 });
 
 describe('compressed snapshots', () => {
+  test('the database rejects double-encoded and incomplete manifests', async () => {
+    for (const manifest of [JSON.stringify({ parts: [] }), {}])
+      await expect(
+        execute`insert into data_dumps (id, snapshot_at, manifest)
+          values ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', now(), ${JSON.stringify(manifest)}::text::jsonb)`,
+      ).rejects.toThrow();
+  });
   test('every part decompresses to complete records and has a matching count and checksum', async () => {
     const store = storage();
     const input = Array.from({ length: 12 }, (_, id) => ({ id, title: 'A Unicode record é' }));

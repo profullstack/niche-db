@@ -198,7 +198,7 @@ export async function generateDump({ db = sql, storage = dumpStorage(), log = co
         parts,
       };
       await tx`insert into data_dumps (id, snapshot_at, completed_at, manifest)
-        values (${id}::uuid, ${manifest.snapshot_at}::timestamptz, ${manifest.completed_at}::timestamptz, ${JSON.stringify(manifest)}::jsonb)`;
+        values (${id}::uuid, ${manifest.snapshot_at}::timestamptz, ${manifest.completed_at}::timestamptz, ${JSON.stringify(manifest)}::text::jsonb)`;
       return manifest;
     });
     published = Boolean(result.id);
