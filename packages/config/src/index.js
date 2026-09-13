@@ -113,6 +113,8 @@ export const config = {
   adapters: {
     /** TMDB, for the screen collection's film calendar. Free, but a key. */
     tmdbApiKey: opt('TMDB_API_KEY'),
+    /** TheTVDB v4, for the screen collection's series catalogue. Free below $50k a year; attribution required. */
+    thetvdbApiKey: opt('THETVDB_API_KEY'),
     /**
      * ESPN answers a datacenter with 403, so on cloud egress the sports
      * sources go through a residential proxy. Optional: unset means direct.

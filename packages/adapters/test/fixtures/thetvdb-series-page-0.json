@@ -1,0 +1,190 @@
+{
+  "status": "success",
+  "data": [
+    {
+      "id": 70327,
+      "name": "Buffy the Vampire Slayer",
+      "slug": "buffy-the-vampire-slayer",
+      "image": "/banners/posters/70327-1.jpg",
+      "nameTranslations": [
+        "ces",
+        "dan",
+        "deu",
+        "eng",
+        "fin",
+        "fra",
+        "heb",
+        "hun",
+        "ita",
+        "por",
+        "rus",
+        "spa",
+        "tur",
+        "pt",
+        "ara",
+        "nld",
+        "ukr"
+      ],
+      "overviewTranslations": [
+        "ces",
+        "deu",
+        "eng",
+        "fin",
+        "fra",
+        "heb",
+        "hun",
+        "ita",
+        "por",
+        "rus",
+        "spa",
+        "swe",
+        "tur",
+        "pt",
+        "ara",
+        "nld",
+        "ukr"
+      ],
+      "aliases": [
+        {
+          "language": "deu",
+          "name": "Buffy - Im Bann der Dämonen"
+        },
+        {
+          "language": "spa",
+          "name": "Buffy, cazavampiros"
+        }
+      ],
+      "firstAired": "1997-03-10",
+      "lastAired": "2003-05-20",
+      "nextAired": "",
+      "score": 517993,
+      "status": {
+        "id": null,
+        "name": null,
+        "recordType": "",
+        "keepUpdated": false
+      },
+      "originalCountry": "usa",
+      "originalLanguage": "eng",
+      "defaultSeasonType": 1,
+      "isOrderRandomized": false,
+      "lastUpdated": "2026-08-30 17:44:29",
+      "averageRuntime": 44,
+      "episodes": null,
+      "overview": "In every generation there is a Chosen One. She alone will stand against the vampires, the demons and the forces of darkness. She is the Slayer.\r\n\r\nBuffy Summers is The Chosen One, the one girl in all the world with the strength and skill to fight the vampires. With the help of her close friends, Willow, Xander, and her Watcher Giles she balances slaying, family, friendships, and relationships.",
+      "year": "1997"
+    },
+    {
+      "id": 70328,
+      "name": "The Young and the Restless",
+      "slug": "the-young-and-the-restless",
+      "image": "/banners/v4/series/70328/posters/62996ec6e5ab4.jpg",
+      "nameTranslations": [
+        "eng",
+        "fin",
+        "fra",
+        "heb",
+        "deu",
+        "ita",
+        "spa",
+        "rus"
+      ],
+      "overviewTranslations": [
+        "eng",
+        "fin",
+        "fra",
+        "deu",
+        "ita",
+        "spa",
+        "rus"
+      ],
+      "aliases": [],
+      "firstAired": "1973-03-26",
+      "lastAired": "2026-10-08",
+      "nextAired": "",
+      "score": 36079,
+      "status": {
+        "id": null,
+        "name": null,
+        "recordType": "",
+        "keepUpdated": false
+      },
+      "originalCountry": "usa",
+      "originalLanguage": "eng",
+      "defaultSeasonType": 1,
+      "isOrderRandomized": false,
+      "lastUpdated": "2026-09-11 20:36:16",
+      "averageRuntime": 44,
+      "episodes": null,
+      "overview": "Set in Genoa City, Y&R is the long-running soap that tells the story of the struggle behind the business- and sex-savvy Abbott and Newman clans.",
+      "year": "1973"
+    },
+    {
+      "id": 70333,
+      "name": "The Jack Paar Tonight Show",
+      "slug": "the-jack-paar-tonight-show",
+      "image": null,
+      "nameTranslations": [
+        "eng"
+      ],
+      "overviewTranslations": [],
+      "aliases": [],
+      "firstAired": "1957-07-29",
+      "lastAired": "1962-09-18",
+      "nextAired": "",
+      "score": 20,
+      "status": {
+        "id": null,
+        "name": null,
+        "recordType": "",
+        "keepUpdated": false
+      },
+      "originalCountry": "usa",
+      "originalLanguage": "eng",
+      "defaultSeasonType": 1,
+      "isOrderRandomized": false,
+      "lastUpdated": "2024-10-22 12:27:50",
+      "averageRuntime": 100,
+      "episodes": null,
+      "overview": "",
+      "year": "1957"
+    },
+    {
+      "id": 70330,
+      "name": "The Summer Smothers Brothers Show",
+      "slug": "the-summer-smothers-brothers-show",
+      "image": "/banners/posters/70330-1.jpg",
+      "nameTranslations": [
+        "eng"
+      ],
+      "overviewTranslations": [],
+      "aliases": [],
+      "firstAired": "1968-06-23",
+      "lastAired": "1968-08-25",
+      "nextAired": "",
+      "score": 28,
+      "status": {
+        "id": null,
+        "name": null,
+        "recordType": "",
+        "keepUpdated": false
+      },
+      "originalCountry": "usa",
+      "originalLanguage": "eng",
+      "defaultSeasonType": 1,
+      "isOrderRandomized": false,
+      "lastUpdated": "2022-05-04 15:26:31",
+      "averageRuntime": 45,
+      "episodes": null,
+      "overview": "",
+      "year": "1968"
+    }
+  ],
+  "links": {
+    "prev": null,
+    "self": "https://api4.thetvdb.com/v4/series?page=0",
+    "next": "https://api4.thetvdb.com/v4/series?page=1",
+    "total_items": 173448,
+    "page_size": 500
+  }
+}

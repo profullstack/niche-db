@@ -105,6 +105,7 @@ import { storefront } from './storefront.js';
 import { nwsSurfZone } from './surfzone.js';
 import { swpcSpaceWeather } from './swpc.js';
 import { tedNotices } from './ted.js';
+import { thetvdbCatalog } from './thetvdb-catalog.js';
 import { tmdbReleases } from './tmdb.js';
 import { tsbb } from './tsbb.js';
 import { tvmazeSchedule } from './tvmaze.js';
@@ -233,6 +234,7 @@ export const ADAPTERS = [
   tmdbReleases,
   tvmazeSchedule,
   tvmazeCatalog,
+  thetvdbCatalog,
   anilistAiring,
   imdbRatings,
   // Channels: the whole iptv-org directory, for matching a playlist by name.
