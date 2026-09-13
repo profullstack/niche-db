@@ -1,0 +1,18 @@
+{
+  "prices": {
+    "zone": [
+      {
+        "name": "fi-hel1",
+        "firewall": { "amount": 1, "price": 0.5 },
+        "server_plan_1xCPU-1GB": { "amount": 1, "price": 1.488 },
+        "server_plan_2xCPU-4GB": { "amount": 1, "price": 3.72 },
+        "server_plan_HICPU-8xCPU-16GB": { "amount": 1, "price": 25.0 }
+      },
+      {
+        "name": "us-chi1",
+        "server_plan_1xCPU-1GB": { "amount": 1, "price": 1.6 },
+        "server_plan_2xCPU-4GB": { "amount": 1, "price": 3.9 }
+      }
+    ]
+  }
+}

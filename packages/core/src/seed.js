@@ -205,7 +205,7 @@ export const COLLECTIONS = [
     slug: 'hosting',
     name: 'Hosting',
     description:
-      'Who sells servers and at what price: the FindHost register of 185 web hosts described by attribute rather than score (data CC BY 4.0, credit FindHost, findhost.app), every VPS and bare metal plan Vultr, Linode, Scaleway and OVHcloud publish with vCPU, RAM, disk and monthly price in one shape, and the deals and industry news LowEndBox files daily. Plans are stored as OpenServer offers, and a provider serving its own /.well-known/openserver.json is read in its own words. Every source is keyless and permits the reading.',
+      'Who sells servers and at what price: the FindHost register of 185 web hosts described by attribute rather than score (data CC BY 4.0, credit FindHost, findhost.app), every VPS and bare metal plan Vultr, Linode, Scaleway and OVHcloud publish with vCPU, RAM, disk and monthly price in one shape, the catalogues of the small hosts read off the WHMCS, Blesta and WooCommerce order forms they run, and the deals and industry news LowEndBox files daily. Hetzner, DigitalOcean and UpCloud join when their read-only credential is set. Plans are stored as OpenServer offers, and a provider serving its own /.well-known/openserver.json is read in its own words. Every source permits the reading: an API, a licence, a feed, or a shop page visited once a day with robots.txt honoured.',
   },
   {
     slug: 'saas',
