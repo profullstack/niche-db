@@ -1,5 +1,6 @@
 import { config } from '@nichedb/config';
 import { describeAdapters, describeEnrichers } from '@nichedb/core';
+import { geoQueryFields, geoSchema } from '@nichedb/core/geo';
 import { cleanChannelName, parseName } from '@nichedb/core/names';
 import * as profiles from '@nichedb/db/profiles';
 import * as q from '@nichedb/db/queries';
@@ -86,16 +87,20 @@ export const TOOLS = [
     inputSchema: {
       type: 'object',
       properties: {
+        ...geoSchema,
         feed: str('Feed slug'),
         limit: int('Default 30, max 200'),
-        before_id: int('Keyset cursor'),
+        before_id: int('Keyset cursor; cannot combine with distance sorting'),
+        offset: int('Distance pagination offset'),
       },
       required: ['feed'],
     },
-    run: async ({ feed, limit, before_id }) => {
+    run: async ({ feed, limit, before_id, offset, ...location }) => {
       const f = await q.getFeed(String(feed));
       if (!f) throw toolError(`No feed named ${feed}`);
       const items = await q.feedItems(f, {
+        ...geoQueryFields(location),
+        offset,
         limit: Math.min(Number(limit) || 30, 200),
         beforeId: before_id ?? null,
       });
@@ -111,19 +116,23 @@ export const TOOLS = [
     inputSchema: {
       type: 'object',
       properties: {
+        ...geoSchema,
         collection: str('Collection slug'),
         source: str('Source slug'),
         kind: str('Item kind'),
         limit: int('Default 30, max 200'),
-        before_id: int('Keyset cursor'),
+        before_id: int('Keyset cursor; cannot combine with distance sorting'),
+        offset: int('Distance pagination offset'),
       },
     },
-    run: async ({ collection, source, kind, limit, before_id }) => {
+    run: async ({ collection, source, kind, limit, before_id, offset, ...location }) => {
       const col = collection ? await q.getCollection(collection) : null;
       if (collection && !col) throw toolError(`No collection named ${collection}`);
       const src = source ? await q.getSource(source) : null;
       if (source && !src) throw toolError(`No source named ${source}`);
       const items = await q.recentItems({
+        offset,
+        ...geoQueryFields(location),
         collectionId: col?.id ?? null,
         sourceId: src?.id ?? null,
         kind: kind ?? null,
@@ -139,15 +148,17 @@ export const TOOLS = [
     inputSchema: {
       type: 'object',
       properties: {
+        ...geoSchema,
         collection: str('Collection slug'),
         days: int('Horizon, default 30'),
         limit: int('Default 50'),
       },
     },
-    run: async ({ collection, days, limit }) => {
+    run: async ({ collection, days, limit, ...location }) => {
       const col = collection ? await q.getCollection(collection) : null;
       if (collection && !col) throw toolError(`No collection named ${collection}`);
       const items = await q.upcomingItems({
+        ...geoQueryFields(location),
         collectionId: col?.id ?? null,
         days: Number(days) || 30,
         limit: Math.min(Number(limit) || 50, 200),
@@ -162,6 +173,7 @@ export const TOOLS = [
     inputSchema: {
       type: 'object',
       properties: {
+        ...geoSchema,
         q: str('Query'),
         collection: str('Collection slug'),
         kind: str('Item kind'),
@@ -169,10 +181,11 @@ export const TOOLS = [
       },
       required: ['q'],
     },
-    run: async ({ q: term, collection, kind, limit }) => {
+    run: async ({ q: term, collection, kind, limit, ...location }) => {
       const col = collection ? await q.getCollection(collection) : null;
       if (collection && !col) throw toolError(`No collection named ${collection}`);
       const items = await q.searchItems(String(term), {
+        ...geoQueryFields(location),
         collectionId: col?.id ?? null,
         kind: kind ?? null,
         limit: Math.min(Number(limit) || 20, 100),
@@ -187,6 +200,7 @@ export const TOOLS = [
     inputSchema: {
       type: 'object',
       properties: {
+        ...geoSchema,
         q: str('The name as written'),
         collection: str('Collection slug: screen, channels or sports'),
         kind: str('Item kind: title, channel, fixture'),
@@ -196,12 +210,13 @@ export const TOOLS = [
       },
       required: ['q'],
     },
-    run: async ({ q: term, collection, kind, year, date, limit }) => {
+    run: async ({ q: term, collection, kind, year, date, limit, ...location }) => {
       const col = collection ? await q.getCollection(collection) : null;
       if (collection && !col) throw toolError(`No collection named ${collection}`);
       const parsed = parseName(String(term));
       const sports = !col || col.slug === 'sports' || kind === 'fixture';
       const items = await q.matchItems(parsed.name, {
+        ...geoQueryFields(location),
         collectionId: col?.id ?? null,
         kind: kind ?? null,
         year: Number(year) || parsed.year || null,
@@ -234,6 +249,7 @@ export const TOOLS = [
     inputSchema: {
       type: 'object',
       properties: {
+        ...geoSchema,
         collection: str('Collection slug'),
         name: str('Feed name'),
         description: str('Optional'),
@@ -254,6 +270,7 @@ export const TOOLS = [
         name: args.name,
         description: args.description,
         query: {
+          ...geoQueryFields(args),
           sources: args.sources,
           kinds: args.kinds,
           tags: args.tags,

@@ -1,5 +1,6 @@
 import { config } from '@nichedb/config';
 import { describeAdapters, describeEnrichers } from '@nichedb/core';
+import { geoQueryFields } from '@nichedb/core/geo';
 import { cleanChannelName, parseName } from '@nichedb/core/names';
 import * as q from '@nichedb/db/queries';
 import { enqueueRun } from '@nichedb/queue';
@@ -8,6 +9,7 @@ import { mintPass } from '@profullstack/x402-gateway';
 import { callerAddress } from '../lib/auth-throttle.js';
 import { isProUser, render, requireUser } from '../lib/http.js';
 import { apiLimitFor, planOf } from '../lib/premium.js';
+import { SCANNER_CONTEXT_NOTE, scannerContextOptions } from '../lib/scanner-context.js';
 import { allowedEnrichers, collectionOut, feedOut, itemOut, sourceOut } from '../lib/serialize.js';
 import {
   addSource,
@@ -232,8 +234,10 @@ export function registerApi(app) {
     if (!f || (!f.public && f.owner_id !== c.get('user')?.id))
       return c.json({ error: 'not found' }, 404);
     const items = await q.feedItems(f, {
+      ...geoQueryFields(c.req.query()),
       limit: lim(c.req.query('limit'), 50, 200),
       beforeId: Number(c.req.query('before')) || null,
+      offset: Math.max(0, Math.floor(Number(c.req.query('offset')) || 0)),
     });
     c.header('cache-control', 'public, max-age=60');
     return c.json({
@@ -249,7 +253,7 @@ export function registerApi(app) {
       collection: body.collection,
       name: body.name,
       description: body.description,
-      query: body,
+      query: body.query ?? body,
       isPublic: body.public,
     });
     return c.json({ feed: feedOut(await q.getFeed(feed.slug), site()) }, 201);
@@ -268,7 +272,8 @@ export function registerApi(app) {
         body.kinds ||
         body.tags ||
         body.q !== undefined ||
-        body.upcoming !== undefined
+        body.upcoming !== undefined ||
+        ['lat', 'long', 'radius', 'unit', 'bbox', 'sort'].some((key) => body[key] !== undefined)
           ? body
           : undefined),
       isPublic: body.public,
@@ -323,10 +328,11 @@ export function registerApi(app) {
       const d = new Date(v);
       return Number.isNaN(d.getTime()) ? null : d.toISOString();
     };
-    const sort = ['id', 'published', 'updated'].includes(c.req.query('sort'))
+    const sort = ['id', 'published', 'updated', 'distance'].includes(c.req.query('sort'))
       ? c.req.query('sort')
       : 'id';
     const items = await q.recentItems({
+      ...geoQueryFields(c.req.query()),
       collectionId: col?.id ?? null,
       sourceId: src?.id ?? null,
       kind: c.req.query('kind') ?? null,
@@ -340,6 +346,7 @@ export function registerApi(app) {
       order: c.req.query('order') === 'asc' ? 'asc' : 'desc',
       limit: lim(c.req.query('limit'), 50, 200),
       beforeId: Number(c.req.query('before')) || null,
+      offset: Math.max(0, Math.floor(Number(c.req.query('offset')) || 0)),
       afterId: Number(c.req.query('after')) || null,
     });
     // A mirror asking "what changed since" must not be handed a stale page.
@@ -361,6 +368,7 @@ export function registerApi(app) {
     const date = /^\d{4}-\d{2}-\d{2}$/.test(c.req.query('date') ?? '') ? c.req.query('date') : null;
     const sports = col === null || col.slug === 'sports' || kind === 'fixture';
     const items = await q.matchItems(parsed.name, {
+      ...geoQueryFields(c.req.query()),
       collectionId: col?.id ?? null,
       kind,
       tags: (c.req.query('tags') ?? '').split(',').filter(Boolean),
@@ -384,12 +392,32 @@ export function registerApi(app) {
   app.get('/api/v1/items/upcoming', async (c) => {
     const col = await collectionOrNull(c.req.query('collection'));
     const items = await q.upcomingItems({
+      ...geoQueryFields(c.req.query()),
       collectionId: col?.id ?? null,
       days: lim(c.req.query('days'), 30, 365),
       limit: lim(c.req.query('limit'), 100, 200),
     });
     c.header('cache-control', 'public, max-age=300');
     return c.json({ count: items.length, items: items.map((i) => itemOut(i, site())) });
+  });
+  app.get('/api/v1/items/:id/nearby-crime', async (c) => {
+    const scanner = await q.getItem(Number(c.req.param('id')));
+    if (scanner?.kind !== 'scanner-stream') return c.json({ error: 'scanner not found' }, 404);
+    const options = scannerContextOptions(c.req.query());
+    const items = await q.nearbyCrime(scanner, {
+      ...options,
+      limit: lim(c.req.query('limit'), 20, 100),
+    });
+    return c.json({
+      scanner_id: Number(scanner.id),
+      relationship: 'within-coverage',
+      note: SCANNER_CONTEXT_NOTE,
+      coverage_basis: scanner.data?.coverage_basis ?? 'unknown',
+      from: options.from,
+      to: options.to,
+      count: items.length,
+      items: items.map((i) => itemOut(i, site())),
+    });
   });
   app.get('/api/v1/items/:id', async (c) => {
     const item = await q.getItem(Number(c.req.param('id')));
@@ -402,6 +430,7 @@ export function registerApi(app) {
     if (!term) return c.json({ error: 'q is required' }, 400);
     const col = await collectionOrNull(c.req.query('collection'));
     const items = await q.searchItems(term, {
+      ...geoQueryFields(c.req.query()),
       collectionId: col?.id ?? null,
       kind: c.req.query('kind') ?? null,
       limit: lim(c.req.query('limit'), 30, 100),

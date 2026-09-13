@@ -499,6 +499,16 @@ export const FeedForm = ({
             </select>
           </label>
         ) : null}
+        {['lat', 'long', 'radius', 'unit', 'bbox', 'sort']
+          .filter((key) => values[key] !== undefined && values[key] !== null)
+          .map((key) => (
+            <input
+              key={key}
+              type="hidden"
+              name={key}
+              value={Array.isArray(values[key]) ? values[key].join(',') : String(values[key])}
+            />
+          ))}
         <label>
           Name
           <input
@@ -647,7 +657,7 @@ export const ApiDocs = ({ user, stats }) => (
           ],
           [
             'GET /api/v1/items?collection=&source=&kind=&tags=&from=&to=&since=&sort=&order=&limit=&before=&after=',
-            'Newest items, keyset paged. tags= is every tag the item must carry (state:in,league:nba); from=/to= bound published_at; since= is what changed on updated_at, for a site keeping its own copy; sort=id|published|updated.',
+            'Newest items, keyset paged. tags= is every tag the item must carry (state:in,league:nba); from=/to= bound published_at; since= is what changed on updated_at, for a site keeping its own copy; sort=id|published|updated|distance. Geographic filters: lat/long with radius (default 10) and unit=km|mi, or bbox=west,south,east,north. Distance is nearest first and uses offset instead of before/after. Coordinates are optional across all collections.',
           ],
           [
             'GET /api/v1/match?q=&collection=&kind=&year=&date=&tags=',
@@ -656,6 +666,10 @@ export const ApiDocs = ({ user, stats }) => (
           [
             'GET /api/v1/items/upcoming?collection=games&days=30',
             'Items dated in the future, soonest first.',
+          ],
+          [
+            'GET /api/v1/items/:id/nearby-crime?from=&to=&lat=&long=&radius=',
+            'Reported incidents in scanner coverage, optionally narrowed by date and GPS. Geographic context, not verified links to radio transmissions.',
           ],
           ['GET /api/v1/items/:id', 'One item with its full data payload.'],
           ['GET /api/v1/search?q=mcp&collection=packages', 'Full-text search.'],
@@ -675,7 +689,7 @@ export const ApiDocs = ({ user, stats }) => (
           ['GET /api/v1/me', 'Who the key belongs to, tier, limits.'],
           [
             'POST /api/v1/feeds',
-            '{ collection, name, description?, sources?, kinds?, tags?, q?, upcoming?, public? }',
+            '{ collection, name, description?, sources?, kinds?, tags?, q?, upcoming?, lat?, long?, radius?, unit?, bbox?, sort?, public? }',
           ],
           ['PATCH /api/v1/feeds/:slug · DELETE /api/v1/feeds/:slug', 'Edit or remove your feed.'],
           [

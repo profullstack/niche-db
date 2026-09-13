@@ -1,4 +1,5 @@
 import { config } from '@nichedb/config';
+import { geoQueryFields } from '@nichedb/core/geo';
 import { profilePath } from '@nichedb/core/profiles';
 import * as premiumDb from '@nichedb/db/premium';
 import * as profiles from '@nichedb/db/profiles';
@@ -9,6 +10,7 @@ import { cached, isProUser, render, requireUser, wantsJson } from '../lib/http.j
 import { currentModules } from '../lib/modules.js';
 import { entitlementsOf, planOf } from '../lib/premium.js';
 import { buildJsonFeed, buildRss } from '../lib/rss.js';
+import { scannerContextOptions } from '../lib/scanner-context.js';
 import { allowedEnrichers } from '../lib/serialize.js';
 import { canEditFeed } from '../lib/service.js';
 import {
@@ -69,6 +71,12 @@ export function registerPages(app) {
 
   // The address people say out loud for the webrings directory. The collection
   // itself lives under /c like every other one, so this only ever forwards.
+  app.get('/crimes', (c) => c.redirect(`/c/crime${new URL(c.req.url).search}`, 302));
+  app.get('/scanners', (c) => {
+    const params = new URL(c.req.url).searchParams;
+    params.set('kind', 'scanner-stream');
+    return c.redirect(`/c/crime?${params}`, 302);
+  });
   app.get('/rings', (c) => c.redirect('/c/webrings', 301));
 
   app.get('/c/:slug', async (c) => {
@@ -78,21 +86,23 @@ export function registerPages(app) {
     // readable by members and by nobody else until it is opened.
     if (collection.early_access && entitlementsOf(c).plan === 'free')
       return earlyAccessWall(c, collection);
+    const geo = geoQueryFields(c.req.query());
+    const offset = Math.min(10000, Math.max(0, Math.floor(Number(c.req.query('offset')) || 0)));
     const tag = c.req.query('tag') ?? null;
     const kind = c.req.query('kind') ?? null;
     const before = Number(c.req.query('before')) || null;
-    const key = `c:${collection.slug}:${tag ?? ''}:${kind ?? ''}:${before ?? ''}`;
+    const key = `c:${collection.slug}:${tag ?? ''}:${kind ?? ''}:${before ?? ''}:${JSON.stringify(geo)}:${offset}`;
     return cached(c, key, async () => {
       const pseudo = {
         collection_id: collection.id,
-        query: { tags: tag ? [tag] : [], kinds: kind ? [kind] : [] },
+        query: { ...geo, tags: tag ? [tag] : [], kinds: kind ? [kind] : [] },
       };
       const [stats, sources, feeds, latest, upcoming, kinds, tags] = await Promise.all([
         q.collectionStats(collection.id),
         q.listSources({ collectionId: collection.id }),
         q.listFeeds({ collectionId: collection.id }),
-        q.feedItems(pseudo, { limit: 50, beforeId: before }),
-        before || tag || kind
+        q.feedItems(pseudo, { limit: 50, beforeId: before, offset }),
+        before || tag || kind || Object.keys(geo).length
           ? []
           : q.upcomingItems({ collectionId: collection.id, days: 14, limit: 8 }),
         q.kindsForCollection(collection.id),
@@ -109,6 +119,8 @@ export function registerPages(app) {
           upcoming={upcoming}
           kinds={kinds}
           tags={tags}
+          geo={geo}
+          offset={offset}
           tag={tag}
           kind={kind}
         />,
@@ -136,11 +148,13 @@ export function registerPages(app) {
     if (!feed) return c.notFound();
     const user = c.get('user');
     if (!feed.public && !canEditFeed(user, feed)) return c.notFound();
+    const geo = geoQueryFields(c.req.query());
+    const offset = Math.min(10000, Math.max(0, Math.floor(Number(c.req.query('offset')) || 0)));
     const before = Number(c.req.query('before')) || null;
     const items =
       feed.id === 0
-        ? await q.recentItems({ limit: 100, beforeId: before })
-        : await q.feedItems(feed, { limit: m ? 100 : 50, beforeId: before });
+        ? await q.recentItems({ ...geo, limit: 100, beforeId: before, offset })
+        : await q.feedItems(feed, { ...geo, limit: m ? 100 : 50, beforeId: before, offset });
 
     if (m) {
       // A free feed carries one sponsored item at the top; Pro and paid
@@ -150,7 +164,7 @@ export function registerPages(app) {
         title: feed.name,
         link: `${config.siteUrl}/f/${feed.slug}`,
         description: feed.description,
-        selfUrl: `${config.siteUrl}/f/${feed.slug}.${m[2]}`,
+        selfUrl: `${config.siteUrl}/f/${feed.slug}.${m[2]}${new URL(c.req.url).search}`,
         items: ad ? [ad, ...items] : items,
         siteUrl: config.siteUrl,
       };
@@ -164,7 +178,7 @@ export function registerPages(app) {
     }
     if (feed.id === 0) return c.redirect('/', 303);
 
-    const key = `f:${feed.slug}:${before ?? ''}`;
+    const key = `f:${feed.slug}:${before ?? ''}:${JSON.stringify(geo)}:${offset}`;
     return cached(c, key, async () => {
       const following = user ? await q.isFollowing({ userId: user.id, feedId: feed.id }) : false;
       const follow = following ? await q.getFollow({ userId: user.id, feedId: feed.id }) : null;
@@ -172,6 +186,8 @@ export function registerPages(app) {
         <FeedPage
           user={user}
           feed={feed}
+          geo={geo}
+          offset={offset}
           items={items}
           following={following}
           follow={follow}
@@ -198,18 +214,26 @@ export function registerPages(app) {
     }
     if (item.early_access && entitlementsOf(c).plan === 'free') return earlyAccessWall(c, item);
     const user = c.get('user');
+    const contextOptions =
+      item.kind === 'scanner-stream' ? scannerContextOptions(c.req.query()) : {};
+    const nearby =
+      item.kind === 'scanner-stream'
+        ? await q.nearbyCrime(item, { ...contextOptions, limit: 10 })
+        : null;
     const [counts, balance] = await Promise.all([
       premiumDb.awardCounts({ targetType: 'item', targetId: id }).catch(() => []),
       user ? premiumDb.creditBalance(user.id).catch(() => 0) : Promise.resolve(0),
     ]);
     return cached(
       c,
-      `i:${id}`,
+      `i:${id}:${JSON.stringify(contextOptions)}`,
       () =>
         render(
           <ItemPage
             user={user}
             item={item}
+            nearby={nearby}
+            contextOptions={contextOptions}
             plan={planOf(c)}
             awardCounts={counts}
             awards={awardKinds()}
@@ -227,7 +251,11 @@ export function registerPages(app) {
     const collections = await q.listCollections();
     const col = collectionSlug ? collections.find((x) => x.slug === collectionSlug) : null;
     const results = term
-      ? await q.searchItems(term, { collectionId: col?.id ?? null, limit: 50 })
+      ? await q.searchItems(term, {
+          ...geoQueryFields(c.req.query()),
+          collectionId: col?.id ?? null,
+          limit: 50,
+        })
       : [];
     return c.html(
       await render(

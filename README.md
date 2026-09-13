@@ -295,3 +295,7 @@ The rules:
 ## License
 
 MIT
+
+### Geographic filtering and scanner context
+
+Use `?lat=41.88&long=-87.62&radius=10` across located collections, searches and feeds. [Geographic queries](docs/geographic-queries.md) documents the API, CLI/MCP flags, permissioned scanner catalogs, coverage semantics and migration.

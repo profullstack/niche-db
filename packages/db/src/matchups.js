@@ -1,3 +1,4 @@
+import { geoSql } from './geo.js';
 import { sql as defaultSql } from './index.js';
 
 /**
@@ -227,9 +228,17 @@ export function fixtureWindow({ date = null, now = new Date() } = {}) {
  */
 export async function matchFixtures(
   teams,
-  { league = null, collectionId = null, date = null, now = new Date(), limit = 5 } = {},
+  {
+    league = null,
+    collectionId = null,
+    date = null,
+    now = new Date(),
+    limit = 5,
+    ...location
+  } = {},
   { sql = defaultSql } = {},
 ) {
+  const geo = geoSql(sql, location);
   const sides = (teams ?? []).map((t) => String(t ?? '').trim()).filter(Boolean);
   if (sides.length !== 2) return [];
   const { from, to, reference } = fixtureWindow({ date, now });
@@ -239,7 +248,7 @@ export async function matchFixtures(
   const [a2, b2] = sides.map(expandSide);
   const rows = await sql`
     select i.*, s.slug as source_slug, s.name as source_name, s.adapter,
-      c.slug as collection_slug, c.name as collection_name
+      c.slug as collection_slug, c.name as collection_name, ${geo.distance} as distance_m
     from items i join sources s on s.id = i.source_id join collections c on c.id = i.collection_id
     where i.kind = 'fixture'
       and (${collectionId === null} or i.collection_id = ${collectionId})
@@ -255,7 +264,8 @@ export async function matchFixtures(
         or lower(coalesce(i.data->'home'->>'name', '')) in (${a1}, ${b1}, ${a2}, ${b2})
         or lower(coalesce(i.data->'away'->>'name', '')) in (${a1}, ${b1}, ${a2}, ${b2})
       )
-    order by i.published_at asc
+      and ${geo.where}
+    order by case when ${location.sort === 'distance'} then ${geo.distance} end asc, i.published_at asc
     limit 200
   `;
   const scored = [];
@@ -265,7 +275,10 @@ export async function matchFixtures(
   }
   scored.sort(
     (x, y) =>
-      y.score - x.score || x.distance_hours - y.distance_hours || Number(y.id) - Number(x.id),
+      (location.sort === 'distance' ? x.distance_m - y.distance_m : 0) ||
+      y.score - x.score ||
+      x.distance_hours - y.distance_hours ||
+      Number(y.id) - Number(x.id),
   );
   return scored.slice(0, Math.min(Math.max(1, limit), 50));
 }

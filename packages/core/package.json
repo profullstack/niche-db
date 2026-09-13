@@ -11,7 +11,8 @@
     "./opensite": "./src/opensite.js",
     "./profiles": "./src/profiles.js",
     "./dump": "./src/dump.js",
-    "./data-dumps": "./src/data-dumps.js"
+    "./data-dumps": "./src/data-dumps.js",
+    "./geo": "./src/geo.js"
   },
   "dependencies": {
     "@nichedb/adapters": "workspace:*",

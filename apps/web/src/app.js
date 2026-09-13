@@ -104,6 +104,10 @@ app.use('*', async (c, next) => {
 
 app.onError((err, c) => {
   if (err.redirect) return c.redirect(err.redirect, 303);
+  if (err.status === 400) {
+    if (wantsJson(c)) return c.json({ error: err.message }, 400);
+    return c.text(err.message, 400);
+  }
   if (err instanceof Denied) {
     if (wantsJson(c)) return c.json({ error: err.message }, err.status);
     const back = new URL(c.req.header('referer') ?? '/', config.siteUrl);

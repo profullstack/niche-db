@@ -1,3 +1,5 @@
+import { GeoQueryError, geoQueryFields } from '@nichedb/core/geo';
+import { geoSql } from './geo.js';
 import { sql } from './index.js';
 import { matchFixtures } from './matchups.js';
 
@@ -676,10 +678,12 @@ export async function previousItemData({ sourceId, externalIds }) {
   return out;
 }
 
-const itemColumns = sql`
+const itemSelection = (db) => db`
   i.*, s.slug as source_slug, s.name as source_name, s.adapter,
   c.slug as collection_slug, c.name as collection_name, c.early_access
 `;
+
+const itemColumns = itemSelection(sql);
 
 export async function getItem(id) {
   const [row] = await sql`
@@ -713,13 +717,20 @@ export async function recentItems({
   beforeId = null,
   afterId = null,
   limit = 50,
+  offset = 0,
+  db = sql,
+  ...location
 } = {}) {
+  const geo = geoSql(db, { ...location, sort });
+  const byDistance = sort === 'distance';
+  if (byDistance && (beforeId !== null || afterId !== null))
+    throw new GeoQueryError('sort=distance uses offset, not before/after');
   const wantedTags = (tags ?? []).map((t) => String(t).trim().toLowerCase()).filter(Boolean);
   const byPublished = sort === 'published';
   const byUpdated = sort === 'updated';
   const asc = order === 'asc';
-  return sql`
-    select ${itemColumns}
+  return db`
+    select ${itemSelection(db)}, ${geo.distance} as distance_m
     from items i join sources s on s.id = i.source_id join collections c on c.id = i.collection_id
     where (${collectionId === null} or i.collection_id = ${collectionId})
       and (${sourceId === null} or i.source_id = ${sourceId})
@@ -730,14 +741,17 @@ export async function recentItems({
       and (${since === null} or i.updated_at >= ${since})
       and (${beforeId === null} or i.id < ${beforeId ?? 0})
       and (${afterId === null} or i.id > ${afterId ?? 0})
+      and ${geo.where}
     order by
+      case when ${byDistance} then ${geo.distance} end asc,
       case when ${byPublished && asc} then i.published_at end asc nulls last,
       case when ${byPublished && !asc} then i.published_at end desc nulls last,
       case when ${byUpdated && asc} then i.updated_at end asc,
       case when ${byUpdated && !asc} then i.updated_at end desc,
-      case when ${!byPublished && !byUpdated && asc} then i.id end asc,
+      case when ${!byDistance && !byPublished && !byUpdated && asc} then i.id end asc,
       i.id desc
     limit ${Math.min(Math.max(1, limit), 500)}
+    offset ${byDistance ? Math.min(Math.max(0, Math.floor(Number(offset) || 0)), 10000) : 0}
   `;
 }
 
@@ -771,18 +785,25 @@ export async function matchItems(
     date = null,
     fallback = null,
     now = new Date(),
+    db = sql,
+    ...location
   } = {},
 ) {
+  const geo = geoSql(db, location);
   let t = String(term ?? '').trim();
   if (!t) return [];
   if (teams?.length === 2 && (kind === null || kind === 'fixture')) {
-    const fixtures = await matchFixtures(teams, { league, collectionId, date, now, limit });
+    const fixtures = await matchFixtures(
+      teams,
+      { league, collectionId, date, now, limit, ...location },
+      { sql: db },
+    );
     if (fixtures.length || kind === 'fixture') return fixtures;
     t = String(fallback ?? '').trim() || t;
   }
   const wantedTags = (tags ?? []).map((x) => String(x).trim().toLowerCase()).filter(Boolean);
-  return sql`
-    select ${itemColumns},
+  return db`
+    select ${itemSelection(db)}, ${geo.distance} as distance_m,
       similarity(i.title, ${t}) as score
     from items i join sources s on s.id = i.source_id join collections c on c.id = i.collection_id
     where (${collectionId === null} or i.collection_id = ${collectionId})
@@ -790,7 +811,9 @@ export async function matchItems(
       and (${wantedTags.length === 0} or i.tags @> ${pgArray(wantedTags)}::text[])
       and (${year === null} or (i.data->>'year')::int between ${(year ?? 0) - 1} and ${(year ?? 0) + 1})
       and (i.title % ${t} or i.title ilike ${`%${t}%`})
+      and ${geo.where}
     order by
+      case when ${location.sort === 'distance'} then ${geo.distance} end asc,
       (case when lower(i.title) = lower(${t}) then 1 else 0 end) desc,
       (case when ${year !== null} and (i.data->>'year')::int = ${year ?? 0} then 1 else 0 end) desc,
       score desc,
@@ -804,14 +827,22 @@ export async function matchItems(
 }
 
 /** What is coming: items dated in the future, soonest first. */
-export async function upcomingItems({ collectionId = null, days = 30, limit = 100 } = {}) {
-  return sql`
-    select ${itemColumns}
+export async function upcomingItems({
+  collectionId = null,
+  days = 30,
+  limit = 100,
+  db = sql,
+  ...location
+} = {}) {
+  const geo = geoSql(db, location);
+  return db`
+    select ${itemSelection(db)}, ${geo.distance} as distance_m
     from items i join sources s on s.id = i.source_id join collections c on c.id = i.collection_id
     where (${collectionId === null} or i.collection_id = ${collectionId})
       and i.published_at > now()
       and i.published_at < now() + (${`${days} days`})::interval
-    order by i.published_at asc
+      and ${geo.where}
+    order by case when ${location.sort === 'distance'} then ${geo.distance} end asc, i.published_at asc
     limit ${Math.min(Math.max(1, limit), 500)}
   `;
 }
@@ -820,17 +851,22 @@ export async function upcomingItems({ collectionId = null, days = 30, limit = 10
  * Full-text over title, summary and tags, with a trigram fallback so a query for
  * a fragment of a package name still lands.
  */
-export async function searchItems(term, { collectionId = null, kind = null, limit = 30 } = {}) {
+export async function searchItems(
+  term,
+  { collectionId = null, kind = null, limit = 30, db = sql, ...location } = {},
+) {
+  const geo = geoSql(db, location);
   const t = String(term ?? '').trim();
   if (!t) return [];
-  return sql`
-    select ${itemColumns},
+  return db`
+    select ${itemSelection(db)}, ${geo.distance} as distance_m,
       ts_rank(i.search, websearch_to_tsquery('simple', ${t})) as rank
     from items i join sources s on s.id = i.source_id join collections c on c.id = i.collection_id
     where (${collectionId === null} or i.collection_id = ${collectionId})
       and (${kind === null} or i.kind = ${kind})
       and (i.search @@ websearch_to_tsquery('simple', ${t}) or i.title ilike ${`%${t}%`})
-    order by rank desc, i.id desc
+      and ${geo.where}
+    order by case when ${location.sort === 'distance'} then ${geo.distance} end asc, rank desc, i.id desc
     limit ${Math.min(Math.max(1, limit), 200)}
   `;
 }
@@ -940,6 +976,7 @@ export function feedQuery(feed) {
       .map((s) => String(s).trim())
       .filter(Boolean);
   return {
+    ...geoQueryFields(q),
     sources: arr(q.sources),
     kinds: arr(q.kinds),
     tags: arr(q.tags),
@@ -956,10 +993,21 @@ export function feedQuery(feed) {
  * `afterId` is the delivery scanner's cursor (ascending); `beforeId` is the
  * page's (descending). Upcoming feeds order by date rather than arrival.
  */
-export async function feedItems(feed, { afterId = null, beforeId = null, limit = 50 } = {}) {
+export async function feedItems(
+  feed,
+  { afterId = null, beforeId = null, limit = 50, offset = 0, db = sql, ...location } = {},
+) {
   const fq = feedQuery(feed);
-  return sql`
-    select ${itemColumns}
+  const savedGeo = geoSql(db, fq);
+  const requestGeo = geoSql(db, location);
+  // URL filters narrow a saved feed; they cannot replace its geographic scope.
+  const geo = requestGeo.geo && !requestGeo.geo.bbox ? requestGeo : savedGeo;
+  // The delivery scanner always walks id order, even for a distance-sorted feed.
+  const byDistance = afterId === null && (location.sort ?? fq.sort) === 'distance';
+  if (byDistance && beforeId !== null)
+    throw new GeoQueryError('sort=distance uses offset, not before');
+  return db`
+    select ${itemSelection(db)}, ${geo.distance} as distance_m
     from items i join sources s on s.id = i.source_id join collections c on c.id = i.collection_id
     where i.collection_id = ${feed.collection_id}
       and (${fq.sources.length === 0} or s.slug = any(${pgArray(fq.sources)}::text[]))
@@ -970,11 +1018,14 @@ export async function feedItems(feed, { afterId = null, beforeId = null, limit =
       and (${!fq.upcoming} or i.published_at > now())
       and (${afterId === null} or i.id > ${afterId ?? 0})
       and (${beforeId === null} or i.id < ${beforeId ?? 0})
+      and ${savedGeo.where} and ${requestGeo.where}
     order by
-      case when ${fq.upcoming} then i.published_at end asc,
+      case when ${byDistance} then ${geo.distance} end asc,
+      case when ${fq.upcoming && afterId === null} then i.published_at end asc,
       case when ${afterId !== null} then i.id end asc,
       i.id desc
     limit ${Math.min(Math.max(1, limit), 500)}
+    offset ${byDistance ? Math.min(Math.max(0, Math.floor(Number(offset) || 0)), 10000) : 0}
   `;
 }
 
@@ -1295,5 +1346,30 @@ export async function itemsForHost({ collectionId, host, limit = 50 }) {
            or i.url = ${`https://${h}`} or i.url = ${`http://${h}`})
     order by i.updated_at desc
     limit ${Math.max(1, Math.min(Number(limit) || 50, 200))}
+  `;
+}
+
+/** Reported incidents within scanner coverage (or an explicit GPS search). */
+export async function nearbyCrime(
+  scanner,
+  { from = null, to = null, limit = 20, db = sql, ...location } = {},
+) {
+  const geo = geoSql(db, location);
+  const coverage = JSON.stringify(scanner.data ?? {});
+  return db`
+    select ${itemSelection(db)}, ${geo.distance} as distance_m
+    from items i join sources s on s.id = i.source_id join collections c on c.id = i.collection_id
+    where c.slug = 'crime' and not c.early_access and i.kind = 'crime-report'
+      and (${from === null} or i.published_at >= ${from})
+      and (${to === null} or i.published_at < ${to})
+      and ndb_geo_shape(i.data)->>'type' = 'Point'
+      and ndb_geo_box(i.data) && ndb_geo_box(${coverage}::jsonb)
+      and ndb_geo_distance(${coverage}::jsonb,
+        (ndb_geo_shape(i.data)#>>'{coordinates,0}')::double precision,
+        (ndb_geo_shape(i.data)#>>'{coordinates,1}')::double precision) = 0
+      and ${geo.where}
+    order by case when ${location.sort === 'distance'} then ${geo.distance} end asc,
+      i.published_at desc nulls last, i.id desc
+    limit ${Math.min(Math.max(1, limit), 100)}
   `;
 }

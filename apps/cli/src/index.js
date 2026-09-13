@@ -16,6 +16,7 @@ import { join } from 'node:path';
 import { createInterface } from 'node:readline';
 
 export const VERSION = '0.26.0';
+const GEO_FLAGS = ['lat', 'long', 'radius', 'unit', 'bbox', 'sort', 'offset'];
 const DEFAULT_API = process.env.NICHEDB_API ?? 'https://nichedb.dev';
 const CONFIG_DIR = join(process.env.XDG_CONFIG_HOME ?? join(homedir(), '.config'), 'nichedb');
 const CONFIG_FILE = join(CONFIG_DIR, 'config.json');
@@ -94,7 +95,7 @@ export const COMMANDS = [
   {
     name: 'recent',
     usage:
-      'recent [--collection …] [--source …] [--kind …] [--tags a,b] [--from …] [--to …] [--since …] [--sort id|published|updated]',
+      'recent [--collection …] [--source …] [--kind …] [--tags a,b] [--from …] [--to …] [--since …] [--sort id|published|updated|distance]',
     summary:
       'Newest items across a collection or source, or a window of them, or what changed since.',
     options: [
@@ -104,8 +105,11 @@ export const COMMANDS = [
       '--tags a,b (every one must be on the item)',
       '--from / --to (ISO, on published_at)',
       '--since (ISO, on updated_at)',
-      '--sort id|published|updated',
+      '--sort id|published|updated|distance',
       '--order asc|desc',
+      '--lat / --long / --radius / --unit km|mi',
+      '--bbox west,south,east,north',
+      '--offset (distance pagination)',
       '--limit',
       '--json',
       '--urls',
@@ -597,6 +601,9 @@ export async function run(
           tags: csv(flags.tags),
           q: flags.q,
           upcoming: Boolean(flags.upcoming),
+          ...Object.fromEntries(
+            GEO_FLAGS.filter((k) => flags[k] !== undefined).map((k) => [k, flags[k]]),
+          ),
           public: !flags.private,
         });
         out(
@@ -618,6 +625,7 @@ export async function run(
       const [slug] = rest;
       if (!slug) throw new Error('items <feed>');
       const qs = new URLSearchParams();
+      for (const k of GEO_FLAGS) if (flags[k] !== undefined) qs.set(k, flags[k]);
       if (flags.limit) qs.set('limit', flags.limit);
       if (flags.before) qs.set('before', flags.before);
       const { items } = await client.get(`/api/v1/feeds/${slug}/items?${qs}`);
@@ -626,6 +634,7 @@ export async function run(
     }
     case 'recent': {
       const qs = new URLSearchParams();
+      for (const k of GEO_FLAGS) if (flags[k] !== undefined) qs.set(k, flags[k]);
       for (const k of [
         'collection',
         'source',
@@ -649,6 +658,7 @@ export async function run(
       const name = rest.join(' ');
       if (!name) throw new Error('match <name>');
       const qs = new URLSearchParams({ q: name });
+      for (const k of GEO_FLAGS) if (flags[k] !== undefined) qs.set(k, flags[k]);
       for (const k of ['collection', 'kind', 'year', 'date', 'tags', 'limit'])
         if (flags[k]) qs.set(k, flags[k]);
       const answer = await client.get(`/api/v1/match?${qs}`);
@@ -668,6 +678,7 @@ export async function run(
     }
     case 'upcoming': {
       const qs = new URLSearchParams();
+      for (const k of GEO_FLAGS) if (flags[k] !== undefined) qs.set(k, flags[k]);
       for (const k of ['collection', 'days', 'limit']) if (flags[k]) qs.set(k, flags[k]);
       const { items } = await client.get(`/api/v1/items/upcoming?${qs}`);
       printItems(items, { json, urls: flags.urls });
@@ -677,6 +688,7 @@ export async function run(
       const term = rest.join(' ');
       if (!term) throw new Error('search <query>');
       const qs = new URLSearchParams({ q: term });
+      for (const k of GEO_FLAGS) if (flags[k] !== undefined) qs.set(k, flags[k]);
       for (const k of ['collection', 'kind', 'limit']) if (flags[k]) qs.set(k, flags[k]);
       const { items } = await client.get(`/api/v1/search?${qs}`);
       printItems(items, { json, urls: flags.urls });
