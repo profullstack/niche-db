@@ -481,13 +481,26 @@ export async function listRuns(sourceId, { limit = 20 } = {}) {
   `;
 }
 
-/** Runs that never finished: a container that died mid-fetch. Marked so the UI is honest. */
+/**
+ * Runs that never finished: a container that died mid-fetch. Marked so the
+ * UI is honest, and the source asked to run again now: startRun had pushed
+ * its next run a whole cadence out, which for a bulk list of ten thousand
+ * pages read a month apart meant a redeploy in the wrong minute parked the
+ * list for a month with nothing to show. A killed run is not a run.
+ */
 export async function reapStaleRuns({ minutes = 30 } = {}) {
   const rows = await sql`
     update runs set status = 'error', finished_at = now(), error = 'abandoned (process exited)'
     where status = 'running' and started_at < now() - (${`${minutes} minutes`})::interval
-    returning id
+    returning id, source_id
   `;
+  const sources = [...new Set(rows.map((r) => r.source_id))];
+  if (sources.length > 0) {
+    await sql`
+      update sources set next_run_at = now(), updated_at = now()
+      where id = any(${pgArray(sources)}::int[]) and enabled
+    `;
+  }
   return rows.length;
 }
 
