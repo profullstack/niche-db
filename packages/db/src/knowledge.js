@@ -243,10 +243,13 @@ export async function upsertOpportunity({ nicheId, score, dimensions = {}, ratio
 
 /* ---------------------------------------------------------------- claims -- */
 
-export async function createClaim({ nicheId, userId, answers = {} }) {
+export const CLAIM_ROLES = ['operator', 'moderator'];
+
+export async function createClaim({ nicheId, userId, answers = {}, role = 'operator' }) {
+  const asked = CLAIM_ROLES.includes(role) ? role : 'operator';
   const [row] = await sql`
-    insert into niche_claims (niche_id, user_id, answers)
-    values (${Number(nicheId)}, ${userId}::uuid, ${JSON.stringify(answers)}::text::jsonb)
+    insert into niche_claims (niche_id, user_id, answers, role)
+    values (${Number(nicheId)}, ${userId}::uuid, ${JSON.stringify(answers)}::text::jsonb, ${asked})
     on conflict (niche_id, user_id) where status = 'pending' do nothing
     returning *
   `;
@@ -267,7 +270,8 @@ export async function getClaim(id) {
 
 export async function listClaims({ status = 'pending', userId = null, limit = 100 } = {}) {
   return sql`
-    select c.id, c.niche_id, c.user_id, c.status, c.created_at, c.decided_at, c.decision_note,
+    select c.id, c.niche_id, c.user_id, c.role, c.status, c.created_at, c.decided_at,
+           c.decision_note,
            n.slug as niche_slug, n.name as niche_name,
            u.handle::text as handle, u.display_name, u.email::text as email
     from niche_claims c
@@ -284,10 +288,15 @@ export async function listClaims({ status = 'pending', userId = null, limit = 10
  * Approving a claim is what makes someone an operator, and it is one
  * transaction: a membership without the decision that created it is a person
  * earning a share nobody can point at a reason for.
+ *
+ * A claim for the moderator role makes a moderator instead: a member with a
+ * share cap of zero and no score row, because moderating earns nothing and
+ * is not a rung on the ladder. A niche is not "operated" by its moderators.
  */
 export async function decideClaim({ claimId, approve, actorId, note = null }) {
   const claim = await getClaim(claimId);
   if (claim?.status !== 'pending') return null;
+  const role = claim.role === 'moderator' ? 'moderator' : 'operator';
 
   await sql.begin(async (tx) => {
     await tx`
@@ -296,7 +305,15 @@ export async function decideClaim({ claimId, approve, actorId, note = null }) {
           decided_at = now(), decided_by = ${actorId}::uuid, decision_note = ${note}
       where id = ${Number(claimId)}
     `;
-    if (approve) {
+    if (approve && role === 'moderator') {
+      await tx`
+        insert into niche_members (niche_id, user_id, role, status, share_cap_bps)
+        values (${claim.niche_id}, ${claim.user_id}::uuid, 'moderator', 'active', 0)
+        on conflict (niche_id, user_id) do update
+          set status = 'active', role = 'moderator', share_cap_bps = 0, updated_at = now()
+      `;
+    }
+    if (approve && role === 'operator') {
       await tx`
         insert into niche_members (niche_id, user_id, role, status)
         values (${claim.niche_id}, ${claim.user_id}::uuid, 'operator', 'active')
@@ -329,9 +346,36 @@ export async function decideClaim({ claimId, approve, actorId, note = null }) {
     subjectType: 'niche_claim',
     subjectId: String(claimId),
     nicheId: claim.niche_id,
-    detail: { note, userId: claim.user_id },
+    detail: { note, userId: claim.user_id, role },
   });
   return getClaim(claimId);
+}
+
+/* -------------------------------------------------------------- moderators -- */
+
+/** The niches one person moderates, with the collection each one feeds. */
+export async function moderatedNiches(userId) {
+  if (!userId) return [];
+  return sql`
+    select n.id, n.slug, n.name, c.slug as collection_slug
+    from niche_members m
+    join niches n on n.id = m.niche_id
+    left join collections c on c.id = n.collection_id
+    where m.user_id = ${userId}::uuid and m.role = 'moderator' and m.status = 'active'
+    order by n.name
+  `;
+}
+
+/** Whether a person moderates anything at all: one indexed lookup, asked per request. */
+export async function moderatesAny(userId) {
+  if (!userId) return false;
+  const [row] = await sql`
+    select exists(
+      select 1 from niche_members
+      where user_id = ${userId}::uuid and role = 'moderator' and status = 'active'
+    ) as yes
+  `;
+  return row?.yes === true;
 }
 
 /* --------------------------------------------------- contribution events -- */

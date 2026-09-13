@@ -175,7 +175,7 @@ export async function answerQuestion({
     return { ok: false, reason: 'that question is already settled' };
 
   const member = await memberOf({ nicheId: question.niche_id, userId: influencerId });
-  if (member?.status !== 'active' || member.role === 'observer')
+  if (member?.status !== 'active' || !['operator', 'specialist'].includes(member.role))
     return { ok: false, reason: 'you do not operate this niche' };
 
   const shape = ['answered', 'insufficient_context', 'needs_research'].includes(kind)
@@ -260,7 +260,7 @@ export async function dismissQuestion({ questionId, influencerId }) {
   const question = await getQuestion(questionId);
   if (!question) return null;
   const member = await memberOf({ nicheId: question.niche_id, userId: influencerId });
-  if (member?.status !== 'active' || member.role === 'observer') return null;
+  if (member?.status !== 'active' || !['operator', 'specialist'].includes(member.role)) return null;
   const [row] = await sql`
     update agent_questions set status = 'dismissed'
     where id = ${Number(questionId)} and status in ('open', 'researching')

@@ -3,7 +3,7 @@ import * as r from '@nichedb/db/revenue';
 import { REVENUE_SOURCE_TYPES } from '@nichedb/knowledge';
 import { verifyInternalRequest } from '../lib/chovy.js';
 import { render, requireUser, respond } from '../lib/http.js';
-import { Denied, isAdmin } from '../lib/service.js';
+import { Denied, isAdmin, operatesNiche } from '../lib/service.js';
 import { NicheRevenue, PayoutsAdmin, PayoutsPage } from '../views/revenue.jsx';
 
 /**
@@ -135,7 +135,7 @@ export function registerRevenue(app) {
     const niche = await k.getNiche(c.req.param('slug'));
     if (!niche) return c.notFound();
     const member = await k.memberOf({ nicheId: niche.id, userId: user.id });
-    if (member?.status !== 'active' && !isAdmin(user)) return c.notFound();
+    if (!operatesNiche(member) && !isAdmin(user)) return c.notFound();
 
     const [totals, events, members, mine] = await Promise.all([
       r.nicheRevenueTotals(niche.id),

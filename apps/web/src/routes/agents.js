@@ -2,7 +2,7 @@ import * as a from '@nichedb/db/agents';
 import * as k from '@nichedb/db/knowledge';
 import { chovyConfigured, notifyChovy, verifyInternalRequest } from '../lib/chovy.js';
 import { render, requireUser, respond } from '../lib/http.js';
-import { isAdmin } from '../lib/service.js';
+import { isAdmin, operatesNiche } from '../lib/service.js';
 import { NicheQuestions } from '../views/knowledge.jsx';
 
 /**
@@ -67,7 +67,7 @@ export function registerAgents(app) {
     const user = requireUser(c);
     const member = await k.memberOf({ nicheId: niche.id, userId: user.id });
     // A question carries the agent's raw research, which is not public.
-    if (member?.status !== 'active' && !isAdmin(user))
+    if (!operatesNiche(member) && !isAdmin(user))
       return c.json({ error: 'you do not operate this niche' }, 403);
     return c.json({
       questions: await a.listQuestions({
@@ -98,7 +98,7 @@ export function registerAgents(app) {
     const niche = await k.getNiche(c.req.param('slug'));
     if (!niche) return c.notFound();
     const member = await k.memberOf({ nicheId: niche.id, userId: user.id });
-    if (member?.status !== 'active' && !isAdmin(user)) return c.notFound();
+    if (!operatesNiche(member) && !isAdmin(user)) return c.notFound();
 
     const [open, settled] = await Promise.all([
       a.listQuestions({ nicheId: niche.id, status: 'waiting' }),
