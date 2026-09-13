@@ -87,6 +87,7 @@ import { scryfallCards, scryfallSets } from './scryfall.js';
 import { slickdeals } from './slickdeals.js';
 import { socrataCrime } from './socratacrime.js';
 import { sportsdbTv } from './sportsdb.js';
+import { sportsdbLeagues } from './sportsdb-leagues.js';
 import { statuspage } from './statuspage.js';
 import { steam, steamNews } from './steam.js';
 import { storefront } from './storefront.js';
@@ -203,6 +204,7 @@ export const ADAPTERS = [
   espnPlays,
   livetennis,
   sportsdbTv,
+  sportsdbLeagues,
   // Screen: films, TV and anime, and the IMDb ratings behind 400k titles.
   tmdbReleases,
   tvmazeSchedule,

@@ -82,6 +82,7 @@ is US-only, so this is where "7 Queensland" for an AFL game comes from.
 | kind | externalId | title | publishedAt | tags |
 |---|---|---|---|---|
 | broadcast | `sportsdb:tv:<eventId>:<channel>:<country>:<date>` | Home vs Away on Channel | listing time | `broadcast`, `<sport>`, `date:YYYY-MM-DD`, `country:<slug>`, `channel:<slug>` |
+| league | `sportsdb:league:<id>` | the league name | none | `league`, `<sport>`, `country:<slug>`, `gender:<slug>`, `season:<season>`, `division:<n>` |
 
 ```
 { provider:'thesportsdb', sport, sportName, league, home, away, event, channel,
