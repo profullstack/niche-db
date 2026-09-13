@@ -1,0 +1,23 @@
+{
+  "openprofiles": [
+    {
+      "id": "per_01ada",
+      "name": "Ada Lovelace",
+      "url": "https://outreachgraph.com/people/per_01ada/openprofile.md",
+      "page": "https://outreachgraph.com/people/per_01ada",
+      "updatedAt": "2026-09-13T03:00:00.000Z",
+      "accounts": ["https://bsky.app/profile/ada.example", "https://github.com/ada"],
+      "web": "https://ada.example/"
+    },
+    {
+      "id": "per_02ada",
+      "name": "Ada Lovelace",
+      "url": "https://outreachgraph.com/people/per_02ada/openprofile.md",
+      "page": "https://outreachgraph.com/people/per_02ada",
+      "updatedAt": "2026-09-13T03:01:00.000Z",
+      "accounts": [],
+      "web": "https://another-ada.example/"
+    }
+  ],
+  "next": null
+}

@@ -12,15 +12,16 @@
     },
     "apps/cli": {
       "name": "@profullstack/nichedb",
-      "version": "0.9.0",
+      "version": "0.12.0",
       "bin": {
         "nichedb": "./bin/nichedb.js",
       },
     },
     "apps/web": {
       "name": "@nichedb/web",
-      "version": "0.9.0",
+      "version": "0.12.0",
       "dependencies": {
+        "@logicsrc/openaccess": "^0.3.0",
         "@nichedb/auth": "workspace:*",
         "@nichedb/config": "workspace:*",
         "@nichedb/core": "workspace:*",
@@ -33,6 +34,7 @@
         "@nichedb/queue": "workspace:*",
         "@profullstack/leaderboard": "^0.3.0",
         "@profullstack/nichedb": "workspace:*",
+        "@profullstack/openprofile": "^0.1.0",
         "@profullstack/partners": "0.2.0",
         "@profullstack/throttle": "^0.2.2",
         "@profullstack/x402-gateway": "^0.6.0",
@@ -42,7 +44,7 @@
     },
     "apps/worker": {
       "name": "@nichedb/worker",
-      "version": "0.9.0",
+      "version": "0.12.0",
       "dependencies": {
         "@nichedb/config": "workspace:*",
         "@nichedb/core": "workspace:*",
@@ -53,14 +55,15 @@
     },
     "packages/adapters": {
       "name": "@nichedb/adapters",
-      "version": "0.9.0",
+      "version": "0.12.0",
       "dependencies": {
         "@nichedb/core": "workspace:*",
+        "@profullstack/openprofile": "^0.1.0",
       },
     },
     "packages/auth": {
       "name": "@nichedb/auth",
-      "version": "0.9.0",
+      "version": "0.12.0",
       "dependencies": {
         "@nichedb/config": "workspace:*",
         "@nichedb/db": "workspace:*",
@@ -70,40 +73,43 @@
     },
     "packages/config": {
       "name": "@nichedb/config",
-      "version": "0.9.0",
+      "version": "0.12.0",
     },
     "packages/core": {
       "name": "@nichedb/core",
-      "version": "0.9.0",
+      "version": "0.12.0",
       "dependencies": {
         "@nichedb/adapters": "workspace:*",
         "@nichedb/config": "workspace:*",
         "@nichedb/db": "workspace:*",
         "@nichedb/enrichers": "workspace:*",
+        "@profullstack/openprofile": "^0.1.0",
       },
     },
     "packages/db": {
       "name": "@nichedb/db",
-      "version": "0.9.0",
+      "version": "0.12.0",
       "dependencies": {
         "@nichedb/config": "workspace:*",
+        "@nichedb/core": "workspace:*",
         "@nichedb/knowledge": "workspace:*",
+        "@profullstack/openprofile": "^0.1.0",
       },
     },
     "packages/enrichers": {
       "name": "@nichedb/enrichers",
-      "version": "0.9.0",
+      "version": "0.12.0",
       "dependencies": {
         "@nichedb/core": "workspace:*",
       },
     },
     "packages/knowledge": {
       "name": "@nichedb/knowledge",
-      "version": "0.9.0",
+      "version": "0.12.0",
     },
     "packages/notify": {
       "name": "@nichedb/notify",
-      "version": "0.9.0",
+      "version": "0.12.0",
       "dependencies": {
         "@nichedb/config": "workspace:*",
         "@nichedb/db": "workspace:*",
@@ -113,7 +119,7 @@
     },
     "packages/payments": {
       "name": "@nichedb/payments",
-      "version": "0.9.0",
+      "version": "0.12.0",
       "dependencies": {
         "@profullstack/coinpay": "^0.8.0",
         "@profullstack/referrals": "^0.1.0",
@@ -121,11 +127,11 @@
     },
     "packages/premium": {
       "name": "@nichedb/premium",
-      "version": "0.9.0",
+      "version": "0.12.0",
     },
     "packages/queue": {
       "name": "@nichedb/queue",
-      "version": "0.9.0",
+      "version": "0.12.0",
       "dependencies": {
         "@nichedb/config": "workspace:*",
         "@nichedb/core": "workspace:*",
@@ -161,6 +167,8 @@
     "@emnapi/runtime": ["@emnapi/runtime@1.11.3", "", { "dependencies": { "tslib": "^2.4.0" } }, "sha512-Xz4Tpyki7XyrpbUK1jR1AhdAdaXyhhY4lZ3neLodmhpuWfy2PAQN5B46sAiU4liOXGLkHypn/qU+jvfWSCYYLA=="],
 
     "@hexagon/base64": ["@hexagon/base64@1.1.28", "", {}, "sha512-lhqDEAvWixy3bZ+UOYbPwUbBkwBq5C1LAJ/xPC8Oi+lL54oyakv/npbA0aU2hgCsx/1NUd4IBvV03+aUBWxerw=="],
+
+    "@hono/node-server": ["@hono/node-server@2.1.1", "", { "peerDependencies": { "hono": "^4" } }, "sha512-ELuehkj5VCBdgEw9zs+ivkKwyzzUCSQuE96YmiPvn1ECBoZCczbFXJLeEGMTYjphP6gydh4pHMqEYPVMYUVgQg=="],
 
     "@img/sharp-darwin-arm64": ["@img/sharp-darwin-arm64@0.33.5", "", { "optionalDependencies": { "@img/sharp-libvips-darwin-arm64": "1.0.4" }, "os": "darwin", "cpu": "arm64" }, "sha512-UT4p+iz/2H4twwAoLCqfA9UH5pI6DggwKEGuaPy7nCVQ8ZsiY5PIcrRvD1DzuY3qYL07NtIQcWnBSY/heikIFQ=="],
 
@@ -235,6 +243,8 @@
     "@ioredis/commands": ["@ioredis/commands@1.10.0", "", {}, "sha512-UmeW7z4LfctwoQ5wkhVzgq8tXkreED2xZGpX+Bg+zA+WJFZCT6c062AfCK/Dfk81xZnnwdhJCUMkitihRaoC2Q=="],
 
     "@levischuck/tiny-cbor": ["@levischuck/tiny-cbor@0.2.11", "", {}, "sha512-llBRm4dT4Z89aRsm6u2oEZ8tfwL/2l6BwpZ7JcyieouniDECM5AqNgr/y08zalEIvW3RSK4upYyybDcmjXqAow=="],
+
+    "@logicsrc/openaccess": ["@logicsrc/openaccess@0.3.0", "", { "dependencies": { "@hono/node-server": "^2.1.1", "hono": "^4.13.7" }, "bin": { "openaccess": "bin/openaccess.mjs" } }, "sha512-zGhn/IJSiFXSc0TJqfXYxRo2Od+LF5zCWILeksurf0hVGGleo0N7WEfk6M0lipts6pm46z7JFN5JPO4qJQZsJQ=="],
 
     "@msgpackr-extract/msgpackr-extract-darwin-arm64": ["@msgpackr-extract/msgpackr-extract-darwin-arm64@3.0.4", "", { "os": "darwin", "cpu": "arm64" }, "sha512-LCkGo6JDfaBhgST7UpPWgNgLINpcpabaHfyz5OBx75nUYxBsaEPxjnyNjWpeb/xBup/682QnBfRBy2/LvPutZQ=="],
 
@@ -317,6 +327,8 @@
     "@profullstack/leaderboard": ["@profullstack/leaderboard@0.3.1", "", {}, "sha512-LbxLwy+RvT/Qez0mfWCk4o9hvcq0kzwBZ0vF+CYp+oGvyqJWUaSTLhCHWGtKKAI3c0ZUXj6ll0iuRjbuZUE2Sg=="],
 
     "@profullstack/nichedb": ["@profullstack/nichedb@workspace:apps/cli"],
+
+    "@profullstack/openprofile": ["@profullstack/openprofile@0.1.0", "", {}, "sha512-3Gj5fQJW8wYAJ8iiYNIC0r/bnvbf+9piRhjJ8cktfgE2UFlfcv6A1nfABTK3wcoEGTbAs1x8SLVoIc0RjBQvJw=="],
 
     "@profullstack/partners": ["@profullstack/partners@0.2.0", "", { "dependencies": { "@profullstack/leaderboard": "^0.3.1" } }, "sha512-h8Fal+ZMqpR2xixo8OC/Xb/OXfLXmt2BdBIgohC3tK6U3AkAsDrkUyrlf+DEF8Ut8mptDEjCWDz5EV/dIXBRHw=="],
 

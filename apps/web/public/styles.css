@@ -1270,3 +1270,33 @@ td.evidence {
 .price {
   white-space: nowrap;
 }
+
+/* People: a profile page reads as the file it serves. */
+.profile .avatar {
+  width: 160px;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+.profile dl.kv {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.25rem 1rem;
+  margin: 1rem 0;
+}
+.profile dl.kv > div {
+  display: contents;
+}
+.profile dl.kv dt {
+  color: var(--muted, #8a93a6);
+}
+.profile dl.kv dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.profile .show + .show {
+  margin-top: 1rem;
+}
+.profile .accounts li {
+  margin: 0.25rem 0;
+}

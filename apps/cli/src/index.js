@@ -9,12 +9,13 @@
  * `bin/` shim executes it.
  */
 
+import { spawnSync } from 'node:child_process';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
-import { homedir } from 'node:os';
+import { homedir, tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createInterface } from 'node:readline';
 
-export const VERSION = '0.11.0';
+export const VERSION = '0.12.0';
 const DEFAULT_API = process.env.NICHEDB_API ?? 'https://nichedb.dev';
 const CONFIG_DIR = join(process.env.XDG_CONFIG_HOME ?? join(homedir(), '.config'), 'nichedb');
 const CONFIG_FILE = join(CONFIG_DIR, 'config.json');
@@ -178,6 +179,38 @@ export const COMMANDS = [
     options: ['--fetch'],
   },
   {
+    name: 'profiles',
+    usage: 'profiles [<query>] [--since <iso>] [--mine]',
+    summary: 'People with an OpenProfile.md: search them, or list the ones your key owns.',
+    options: ['--since <iso>', '--mine', '--limit', '--json', '--urls'],
+  },
+  {
+    name: 'profile',
+    usage: 'profile <id|slug-id|handle>',
+    summary: 'One person’s OpenProfile.md, as served. --json for the parsed view.',
+    options: ['--json'],
+  },
+  {
+    name: 'profile claim',
+    usage: 'profile claim <ref> [--email <address>]',
+    summary:
+      'Claim a profile as yours (key required): proven by your email or a link back from your site.',
+    options: ['--email (admins: claim it for someone)'],
+  },
+  {
+    name: 'profile edit',
+    usage: 'profile edit <ref> [--file openprofile.md] [--handle …] [--public|--private]',
+    summary:
+      'Edit a profile you own (key required). Opens $EDITOR on the file when no --file is given.',
+    options: ['--file <path>', '--handle <handle>', '--public', '--private', '--json'],
+  },
+  {
+    name: 'profile handle',
+    usage: 'profile handle <ref> <handle>',
+    summary: 'Take a handle: your URL becomes /c/profiles/<handle> (key required).',
+    options: [],
+  },
+  {
     name: 'login',
     usage: 'login [--api <url>] [--key <ndb_…>]',
     summary: 'Store an API key for a deployment.',
@@ -265,13 +298,51 @@ export function makeClient({ api, key, fetchImpl = fetch }) {
     if (!res.ok) throw new Error(data?.error ?? `${res.status} from ${path}`);
     return data;
   }
+  /** A body that is not JSON: a whole file, sent as its own media type. */
+  async function send(method, path, text, contentType) {
+    const res = await fetchImpl(`${base}${path}`, {
+      method,
+      headers: {
+        accept: 'application/json',
+        'user-agent': `nichedb-cli/${VERSION}`,
+        'content-type': contentType,
+        ...(key ? { authorization: `Bearer ${key}` } : {}),
+      },
+      body: text,
+    });
+    const raw = await res.text();
+    let data;
+    try {
+      data = JSON.parse(raw);
+    } catch {
+      data = { raw };
+    }
+    if (!res.ok) throw new Error(data?.error ?? `${res.status} from ${path}`);
+    return data;
+  }
+  /** A document, not JSON: an openprofile.md as served. */
+  async function text(path) {
+    const res = await fetchImpl(`${base}${path}`, {
+      headers: {
+        accept: 'text/markdown, text/plain',
+        'user-agent': `nichedb-cli/${VERSION}`,
+        ...(key ? { authorization: `Bearer ${key}` } : {}),
+      },
+    });
+    const body = await res.text();
+    if (!res.ok) throw new Error(`${res.status} from ${path}`);
+    return body;
+  }
   return {
     base,
     key,
     get: (p) => call('GET', p),
     post: (p, b) => call('POST', p, b ?? {}),
     patch: (p, b) => call('PATCH', p, b),
+    put: (p, b) => call('PUT', p, b),
     del: (p) => call('DELETE', p),
+    send,
+    text,
   };
 }
 
@@ -655,6 +726,101 @@ export async function run(
       }
       const res = await fetchImpl(url);
       out(await res.text());
+      return 0;
+    }
+    case 'profiles': {
+      const term = rest.join(' ');
+      const qs = new URLSearchParams();
+      if (term) qs.set('q', term);
+      if (flags.since) qs.set('since', flags.since);
+      if (flags.limit) qs.set('limit', flags.limit);
+      if (flags.mine) qs.set('mine', '1');
+      const { profiles } = await client.get(`/api/v1/profiles?${qs}`);
+      if (json) {
+        out(JSON.stringify(profiles, null, 2));
+        return 0;
+      }
+      for (const p of profiles) {
+        if (flags.urls) {
+          out(p.page);
+          continue;
+        }
+        out(`${pad(p.ref, 34)} ${pad(p.kind ?? '', 12)} ${p.name}${p.claimed ? ' (claimed)' : ''}`);
+        if (p.headline) out(`      ${p.headline}`);
+      }
+      if (profiles.length === 0) out('(nobody yet)');
+      return 0;
+    }
+    case 'profile': {
+      const [sub, arg, extra] = rest;
+      if (sub === 'claim') {
+        if (!arg) throw new Error('profile claim <ref> [--email …]');
+        const r = await client.post(`/api/v1/profiles/${encodeURIComponent(arg)}/claim`, {
+          email: flags.email,
+        });
+        out(
+          json
+            ? JSON.stringify(r, null, 2)
+            : r.already
+              ? `Already yours: ${r.profile.page}`
+              : `Claimed by ${r.method}: ${r.profile.page}`,
+        );
+        return 0;
+      }
+      if (sub === 'handle') {
+        if (!arg || !extra) throw new Error('profile handle <ref> <handle>');
+        const { profile } = await client.put(`/api/v1/profiles/${encodeURIComponent(arg)}`, {
+          handle: extra,
+        });
+        out(json ? JSON.stringify(profile, null, 2) : `Now at ${profile.page}`);
+        return 0;
+      }
+      if (sub === 'edit') {
+        if (!arg)
+          throw new Error('profile edit <ref> [--file …] [--handle …] [--public|--private]');
+        const ref = encodeURIComponent(arg);
+        let markdown = null;
+        if (flags.file) markdown = await readFile(String(flags.file), 'utf8');
+        else if (!flags.handle && !flags.public && !flags.private) {
+          // No file and nothing else to set: the editor, on the file as served.
+          const current = await client.text(`/api/v1/profiles/${ref}/openprofile.md`);
+          const path = join(tmpdir(), `nichedb-profile-${Date.now()}.md`);
+          await writeFile(path, current, { mode: 0o600 });
+          const editor = process.env.VISUAL ?? process.env.EDITOR ?? 'vi';
+          const r = spawnSync(editor, [path], {
+            stdio: 'inherit',
+            shell: process.platform === 'win32',
+          });
+          if (r.status !== 0) throw new Error(`${editor} exited ${r.status}; nothing saved.`);
+          markdown = await readFile(path, 'utf8');
+          if (markdown === current) {
+            out('No change.');
+            return 0;
+          }
+        }
+        let answer = null;
+        if (markdown !== null)
+          answer = await client.send(
+            'PUT',
+            `/api/v1/profiles/${ref}`,
+            markdown,
+            'text/markdown; charset=utf-8',
+          );
+        const patch = {};
+        if (flags.handle) patch.handle = String(flags.handle);
+        if (flags.public) patch.public = true;
+        if (flags.private) patch.public = false;
+        if (Object.keys(patch).length) answer = await client.put(`/api/v1/profiles/${ref}`, patch);
+        out(json ? JSON.stringify(answer.profile, null, 2) : `Saved: ${answer.profile.page}`);
+        return 0;
+      }
+      if (!sub) throw new Error('profile <ref>, or profile claim|edit|handle');
+      if (json) {
+        const r = await client.get(`/api/v1/profiles/${encodeURIComponent(sub)}`);
+        out(JSON.stringify(r.profile, null, 2));
+        return 0;
+      }
+      out(await client.text(`/api/v1/profiles/${encodeURIComponent(sub)}/openprofile.md`));
       return 0;
     }
     case 'mcp':

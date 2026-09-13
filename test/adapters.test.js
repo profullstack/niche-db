@@ -71,6 +71,7 @@ describe('registry', () => {
         'forums',
         'hosting',
         'threats',
+        'profiles',
         'directory',
       ]).toContain(a.collection);
     }

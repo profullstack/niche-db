@@ -17,6 +17,7 @@ import { registerManage } from './routes/manage.js';
 import { registerMcp } from './routes/mcp.js';
 import { registerPages } from './routes/pages.js';
 import { registerPremium } from './routes/premium.js';
+import { registerProfiles } from './routes/profiles.js';
 import { registerRevenue } from './routes/revenue.js';
 import { registerStatic } from './routes/static.js';
 import { registerSubmit } from './routes/submit.js';
@@ -119,6 +120,8 @@ registerPages(app);
 registerManage(app);
 registerSubmit(app);
 registerApi(app);
+/** People: /c/profiles/<slug>-<id>, the file next to it, claim and edit; after the API middleware so /api/v1/profiles is metered like the rest. */
+registerProfiles(app);
 registerPremium(app);
 registerAutomotive(app);
 registerMcp(app);

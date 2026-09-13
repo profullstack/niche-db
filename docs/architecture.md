@@ -41,6 +41,17 @@ contribution is worth or what share a score earns, and it has neither a database
 nor a request in it. That is what makes a payout reproducible: the events are
 still there and replaying them gives the same number.
 
+## People
+
+`packages/core/src/profiles.js` is the pure half of `/c/profiles` (parse, merge, the
+owner's overlay, the item row) over `@profullstack/openprofile`; `packages/db/src/profiles.js`
+stores it (`profiles`, `profile_identities`, `profile_sources`, migration 0018) and
+`absorb` is the whole pull path: match a fetched document by identity key, keep it as a
+source, re-render under the owner's overrides, write one `person` item per profile. The
+`openprofiles` adapter only fetches; `runSource` hands its documents to `absorb` because
+an adapter never sees the database. Routes, the claim rules and the OpenAccess bearer live
+in `apps/web/src/{routes,lib}/profiles.js` and `apps/web/src/lib/openaccess.js`.
+
 ## Migrations
 
 Forward-only, numbered, one file each, one transaction each, applied on boot by
