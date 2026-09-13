@@ -97,7 +97,7 @@ function ctx(table, over = {}) {
         text: answer,
       },
       ...over,
-      config: { ...openprofiles.defaults, paceMs: 0, ...(over.config ?? {}) },
+      config: { ...openprofiles.defaults, ...(over.config ?? {}) },
     },
   };
 }
@@ -112,7 +112,6 @@ describe('the openprofiles adapter', () => {
       'podcasters',
       'guests',
     ]);
-    expect(openprofiles.defaultSources[0].config.urls).toEqual([P0D, OG]);
   });
 
   test('names the app after the listing host and believes a document only from that host', () => {
@@ -136,19 +135,21 @@ describe('the openprofiles adapter', () => {
     expect(parseListing({}).entries).toEqual([]);
   });
 
-  test('one pull: every document from both apps, the off-origin one dropped, the cursor advanced', async () => {
+  test('one pull: every document from both apps, the off-origin one dropped, since set to the pass start', async () => {
+    const before = new Date().toISOString();
     const t = ctx(await routes(), { config: { urls: [P0D, OG] } });
     const { items, cursor, note } = await openprofiles.pull(t.ctx);
-    expect(items.map((i) => i.title)).toEqual([
+    expect(items.map((i) => i.title).sort()).toEqual([
+      'Ada Lovelace',
+      'Ada Lovelace',
+      'Ada Lovelace',
       'Pigweed and Crowhill',
-      'Ada Lovelace',
-      'Ada Lovelace',
-      'Ada Lovelace',
     ]);
     expect(t.seen.some((u) => u.includes('evil.example'))).toBe(false);
-    expect(note).toContain('1 off-origin dropped');
-    expect(cursor.since[P0D]).toBe('2026-09-13T04:05:00.000Z');
-    expect(cursor.since[OG]).toBe('2026-09-13T03:01:00.000Z');
+    expect(note).toContain('p0dcasters: 2 fetched, 1 skipped');
+    expect(note).toContain('pass complete');
+    expect(cursor.since[P0D] >= before).toBe(true);
+    expect(cursor.since[OG] >= before).toBe(true);
     expect(cursor.complete).toEqual({ [P0D]: true, [OG]: true });
     expect(cursor.resume).toEqual({});
     for (const it of items) {
@@ -156,14 +157,14 @@ describe('the openprofiles adapter', () => {
       expect(it.data.doc).toContain('# ');
       expect(normaliseItem(it)).not.toBeNull();
     }
-    // The next run asks each listing for what changed since.
+    // The next run asks each listing for what changed since that pass began.
     const again = ctx(await routes(), { config: { urls: [P0D] }, cursor });
     await openprofiles.pull(again.ctx);
-    expect(again.seen[0]).toContain('since=2026-09-13T04%3A05%3A00.000Z');
+    expect(again.seen[0]).toContain(`since=${encodeURIComponent(cursor.since[P0D])}`);
   });
 
-  test('a walk the clock cuts resumes where it stopped, soon, and only a finished walk sets since', async () => {
-    // A listing of two pages; the first run's deadline passes after the first document.
+  /** The p0dcasters fixture as two pages behind a cursor. */
+  async function twoPages() {
     const table = await routes();
     const page1 = JSON.parse(table[P0D]);
     const page2 = { openprofiles: page1.openprofiles.slice(2), next: null };
@@ -171,42 +172,58 @@ describe('the openprofiles adapter', () => {
     page1.next = 'p2';
     table[P0D] = JSON.stringify(page1);
     table[`${P0D}?cursor=p2`] = JSON.stringify(page2);
-    // The deadline is read once when pull starts, so it is set just ahead and the
-    // first document fetch takes longer than that.
-    const cut = ctx(table, { config: { urls: [P0D] } });
-    cut.ctx.deadline = Date.now() + 30;
+    return table;
+  }
+
+  test('a walk the budget cuts resumes from the page it was on, soon, and only a finished walk sets since', async () => {
+    const table = await twoPages();
+    const cut = ctx(table, { config: { urls: [P0D], budgetMs: 500, concurrency: 1 } });
     const realText = cut.ctx.http.text;
     let docs = 0;
     cut.ctx.http.text = async (u) => {
       docs += 1;
-      if (docs === 1) await Bun.sleep(50);
+      if (docs === 1) await Bun.sleep(600);
       return realText(u);
     };
     const first = await openprofiles.pull(cut.ctx);
     expect(first.items.length).toBe(1);
     expect(first.nextInMinutes).toBe(2);
+    expect(first.note).toContain('cut by budget');
     expect(first.cursor.since[P0D]).toBeUndefined();
     expect(first.cursor.complete[P0D]).toBeUndefined();
-    expect(first.cursor.resume[P0D]).toEqual({ at: '', newest: '2026-09-13T04:00:00.000Z' });
+    expect(first.cursor.resume[P0D].at).toBe('');
+    const startedAt = first.cursor.resume[P0D].startedAt;
+    expect(typeof startedAt).toBe('string');
 
-    // The second run carries on: first page again (a document twice is a no-op), then page two.
+    // The second run carries on: the first page again (a document twice is a no-op), then page two.
     const second = ctx(table, { config: { urls: [P0D] }, cursor: first.cursor });
     const done = await openprofiles.pull(second.ctx);
     expect(second.seen[0]).not.toContain('since=');
-    expect(done.items.map((i) => i.title)).toEqual(['Pigweed and Crowhill', 'Ada Lovelace']);
+    expect(done.items.map((i) => i.title).sort()).toEqual(['Ada Lovelace', 'Pigweed and Crowhill']);
     expect(done.nextInMinutes).toBeUndefined();
     expect(done.cursor.resume).toEqual({});
     expect(done.cursor.complete[P0D]).toBe(true);
-    expect(done.cursor.since[P0D]).toBe('2026-09-13T04:05:00.000Z');
+    // Since is when the pass BEGAN, on the first run, not when it finished.
+    expect(done.cursor.since[P0D]).toBe(startedAt);
     expect(second.seen.some((u) => u.includes('cursor=p2'))).toBe(true);
   });
 
+  test('a listing whose entries all carry one timestamp is walked once, page by page, never in a loop', async () => {
+    const table = await twoPages();
+    for (const key of [P0D, `${P0D}?cursor=p2`]) {
+      const page = JSON.parse(table[key]);
+      for (const e of page.openprofiles) e.updatedAt = '2026-09-12T23:00:01.000Z';
+      table[key] = JSON.stringify(page);
+    }
+    const t = ctx(table, { config: { urls: [P0D] } });
+    const out = await openprofiles.pull(t.ctx);
+    expect(out.cursor.complete[P0D]).toBe(true);
+    expect(out.note).toContain('2 pages, pass complete');
+    expect(t.seen.filter((u) => u.startsWith(P0D)).length).toBe(2);
+  });
+
   test('a listing that stops answering mid-walk (402 past its allowance) is a cut, not a failure', async () => {
-    const table = await routes();
-    const page1 = JSON.parse(table[P0D]);
-    page1.openprofiles = page1.openprofiles.slice(0, 2);
-    page1.next = 'p2';
-    table[P0D] = JSON.stringify(page1);
+    const table = await twoPages();
     const t = ctx(table, { config: { urls: [P0D] } });
     const realJson = t.ctx.http.jsonOrNull;
     t.ctx.http.jsonOrNull = async (u) => {
@@ -217,13 +234,25 @@ describe('the openprofiles adapter', () => {
     const out = await openprofiles.pull(t.ctx);
     expect(out.items.length).toBe(2);
     expect(out.nextInMinutes).toBe(2);
-    expect(out.cursor.resume[P0D]).toEqual({ at: 'p2', newest: '2026-09-13T04:05:00.000Z' });
+    expect(out.cursor.resume[P0D].at).toBe('p2');
     expect(out.cursor.complete[P0D]).toBeUndefined();
     expect(out.note).toContain('402');
     // The next run asks for page two straight away, not page one again.
     const again = ctx(table, { config: { urls: [P0D] }, cursor: out.cursor });
     await openprofiles.pull(again.ctx).catch(() => {});
     expect(again.seen[0]).toContain('cursor=p2');
+  });
+
+  test('a page whose documents are refused (402) is kept, and the walk backs off', async () => {
+    const t = ctx(await twoPages(), { config: { urls: [P0D] } });
+    t.ctx.http.text = async (u) => {
+      throw new Error(`402 from ${u}`);
+    };
+    const out = await openprofiles.pull(t.ctx);
+    expect(out.items).toEqual([]);
+    expect(out.nextInMinutes).toBe(2);
+    expect(out.note).toContain('throttled');
+    expect(out.cursor.resume[P0D].at).toBe('');
   });
 
   test('a since recorded before any walk finished is not trusted: the next run walks everything', async () => {
@@ -233,6 +262,14 @@ describe('the openprofiles adapter', () => {
     });
     await openprofiles.pull(t.ctx);
     expect(t.seen[0]).not.toContain('since=');
+  });
+
+  test('the seeded source lists all three house apps every 15 minutes and refreshes from the seed', () => {
+    const [seed] = openprofiles.defaultSources;
+    expect(seed.config.urls).toEqual([P0D, OG, 'https://rssamplifier.com/api/openprofiles']);
+    expect(seed.cadenceMinutes).toBe(15);
+    expect(seed.refresh).toBe(true);
+    expect(openprofiles.budgetMs).toBe(20 * 60_000);
   });
 
   test('a listing that is not there yet is an empty page, not a failure', async () => {
