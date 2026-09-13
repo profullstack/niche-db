@@ -184,6 +184,12 @@ export const COLLECTIONS = [
       'What is on sale and which coupon codes work right now, from the deal communities and editorial deal desks that publish keyless feeds: the Slickdeals front page, popular list and coupon-code search, DealNews with the retailer, price and expiry as fields, Dealcatcher, Ben’s Bargains, and r/deals and r/coupons. Every row names its store under the same key across sources, and a code written in the post is lifted into a field, so a coupon site can list it without reading the thread.',
   },
   {
+    slug: 'coupons',
+    name: 'Coupons',
+    description:
+      'The coupons c0upons.com took in on its own: codes people submitted on the site and the listings it reads from r/couponcodes every five minutes, each under its store key with the code, discount and expiry as fields and a link to the coupon page. What c0upons copied from the deals collection stays in deals and is not repeated here.',
+  },
+  {
     slug: 'sports',
     name: 'Sports',
     description:
@@ -1547,6 +1553,20 @@ export const DEFAULT_FEEDS = [
     slug: 'ai-media-videos',
     name: 'Videos to judge',
     query: { kinds: ['submission'], tags: ['video'] },
+  },
+  {
+    collection: 'coupons',
+    slug: 'coupons-latest',
+    name: 'Newest coupons',
+    description: 'Every coupon c0upons.com took in on its own, newest first.',
+    query: { kinds: ['coupon'] },
+  },
+  {
+    collection: 'coupons',
+    slug: 'coupons-with-codes',
+    name: 'Coupons with a code',
+    description: 'Only the coupons that carry a code to type at checkout.',
+    query: { kinds: ['coupon'], tags: ['coupon-code'] },
   },
   { collection: 'forums', slug: 'forum-posts', name: 'Forum posts', query: { kinds: ['post'] } },
   {
