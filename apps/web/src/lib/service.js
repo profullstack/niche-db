@@ -1,5 +1,6 @@
 import { config } from '@nichedb/config';
 import { adapterByName, slugify } from '@nichedb/core';
+import * as knowledge from '@nichedb/db/knowledge';
 import * as premiumDb from '@nichedb/db/premium';
 import * as q from '@nichedb/db/queries';
 import { enricherByName } from '@nichedb/enrichers';
@@ -18,6 +19,30 @@ export class Denied extends Error {
 }
 
 export const isAdmin = (user) => user?.role === 'admin';
+
+/**
+ * Who may review the suggestion queue: an admin, or a moderator of a niche
+ * whose collection the suggestion is for. A moderator reviews their own
+ * niche's queue and nothing else; only an admin decides who moderates.
+ */
+export async function moderatedCollectionSlugs(user) {
+  if (!user) return [];
+  const rows = await knowledge.moderatedNiches(user.id).catch(() => []);
+  return [...new Set(rows.map((n) => n.collection_slug).filter(Boolean))];
+}
+
+export async function isReviewer(user) {
+  if (!user) return false;
+  if (isAdmin(user)) return true;
+  return (await moderatedCollectionSlugs(user)).length > 0;
+}
+
+export async function canReview(user, collectionSlug) {
+  if (!user) return false;
+  if (isAdmin(user)) return true;
+  if (!collectionSlug) return false;
+  return (await moderatedCollectionSlugs(user)).includes(String(collectionSlug));
+}
 
 /**
  * The plan a user holds, asked straight from the database.
@@ -84,11 +109,22 @@ export function coerceConfig(adapter, raw = {}) {
   return out;
 }
 
+/** Whether a member operates a niche: on the ladder, not a moderator or an observer. */
+export const operatesNiche = (member) =>
+  member?.status === 'active' && ['operator', 'specialist'].includes(member.role);
+
+/**
+ * Add a source. `reviewed` is the queue's path: a reviewer approving a
+ * suggestion is not adding a source of their own, so the plan gate does not
+ * apply and the source belongs to the site (an admin's stays theirs), never
+ * to a moderator who could then edit, repoint or delete it.
+ */
 export async function addSource(
   user,
   { adapter: adapterName, collection, name, config: rawConfig, cadenceMinutes },
+  { reviewed = false } = {},
 ) {
-  if (!(await canAddSources(user))) {
+  if (!reviewed && !(await canAddSources(user))) {
     throw new Denied('Adding a source needs an admin or Pro account on this deployment.');
   }
   const adapter = adapterByName(adapterName);
@@ -109,7 +145,7 @@ export async function addSource(
     description: adapter.description,
     config: cfg,
     cadenceMinutes: cadence,
-    ownerId: user.id,
+    ownerId: reviewed && !isAdmin(user) ? null : user.id,
   });
 }
 

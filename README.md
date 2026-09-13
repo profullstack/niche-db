@@ -69,6 +69,10 @@ A person claims their entry with **This is me** (proven by the email the profile
 | directory | `outreachgraph` | no |
 | sites | `opensite` | no |
 
+### Moderators
+
+A niche can have moderators: people who review what is suggested for its collection without operating it. Anyone signed in applies at `/<niche>/moderate` (three questions); the application is a claim marked with the role, listed on `/admin/knowledge` with every other claim, and only an admin decides it. An approved moderator is a niche member with a share cap of zero and no score row: moderating earns nothing and is not a rung on the ladder. More than one person may moderate a niche. Moderators see the suggestion queue at `/admin/submissions` filtered to the collections their niches feed, approve into that collection only, and get the Queue link in the nav.
+
 ### Sites (`/c/sites`)
 
 One record per page, read the way [OpenSite](https://logicsrc.com/opensite) says: the title, the line, the picture and the kind a card is drawn from, the canonical address it is keyed by, the author, the feeds, and the `og:`, `twitter:` and JSON-LD tags verbatim. The `opensite` adapter walks each house site from its front page and sitemap, a hundred pages a run, honouring robots.txt and a site's own `/.well-known/opensite.json`. Any other address is read the moment somebody pastes it at `/c/sites/add`, which then shows every tag and the card as X, Slack, iMessage, Discord, LinkedIn and WhatsApp would draw it; the same read is `POST /api/v1/sites { "url" }`, and `GET /api/v1/sites?url=` answers the kept record or reads the page when it is older than an hour. A whole list, up to ten thousand addresses pasted or uploaded on the same page (or `POST /api/v1/sites/bulk` with JSON `urls` or a text body), becomes a source of the submitter's: the worker walks it 250 pages a run, a minute apart, and `/s/<slug>` shows the progress; a signed-in account is needed, since a list makes the deployment fetch on a schedule. The page is `/c/sites/<host>/<path>`, query string and all, because a page's identity can be in its query.

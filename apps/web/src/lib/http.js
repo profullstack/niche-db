@@ -1,5 +1,6 @@
 import * as auth from '@nichedb/auth';
 import { config } from '@nichedb/config';
+import * as knowledge from '@nichedb/db/knowledge';
 import * as q from '@nichedb/db/queries';
 import { connection } from '@nichedb/queue';
 import { getCookie } from 'hono/cookie';
@@ -59,6 +60,10 @@ export async function loadUser(c, next) {
       viaKey = Boolean(user);
     }
   }
+  // Whether they moderate a niche, so the nav can show the queue. One
+  // indexed lookup, skipped for admins, who see it anyway.
+  if (user && user.role !== 'admin')
+    user.moderates = await knowledge.moderatesAny(user.id).catch(() => false);
   c.set('user', user);
   c.set('viaKey', viaKey);
   await next();

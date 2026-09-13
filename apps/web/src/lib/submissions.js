@@ -4,7 +4,7 @@ import * as subs from '@nichedb/db/submissions';
 import { sendSubmissionDecision, sendSubmissionNotice } from '@nichedb/notify';
 import { enqueueRun } from '@nichedb/queue';
 import { cleanEmail, looksLikeFeed, normaliseFeedUrl, titleOf } from './feed-url.js';
-import { addSource, Denied, isAdmin } from './service.js';
+import { addSource, canReview, Denied, isAdmin } from './service.js';
 
 /**
  * Suggesting a feed, and deciding one. Shared by the form, the API, and the
@@ -139,12 +139,16 @@ export async function approveSubmission(
   id,
   { collection, section = 'world', note = null } = {},
 ) {
-  if (!isAdmin(admin)) throw new Denied('Admins only.', 403);
   const sub = await subs.getSubmission(id);
   if (!sub) throw new Denied('No such suggestion.', 404);
+  if (!(await canReview(admin, sub.collection_slug)))
+    throw new Denied('Admins, or a moderator of this collection.', 403);
   if (sub.status !== 'pending') throw new Denied('That suggestion was already decided.', 409);
 
   const slug = String(collection ?? sub.collection_slug ?? 'news');
+  // A moderator files a suggestion into the collection they moderate, never elsewhere.
+  if (!isAdmin(admin) && slug !== String(sub.collection_slug ?? ''))
+    throw new Denied('A moderator approves into their own collection only.', 403);
   const col = await q.getCollection(slug);
   if (!col) throw new Denied(`No collection named ${slug}`, 400);
 
@@ -174,12 +178,16 @@ export async function approveSubmission(
     try {
       host = new URL(sub.feed_url).hostname;
     } catch {}
-    const source = await addSource(admin, {
-      adapter: 'newsfeed',
-      collection: col.slug,
-      name: sub.probe?.title ? String(sub.probe.title).slice(0, 120) : host,
-      config: { feeds: [`${sec}=${sub.feed_url}`] },
-    });
+    const source = await addSource(
+      admin,
+      {
+        adapter: 'newsfeed',
+        collection: col.slug,
+        name: sub.probe?.title ? String(sub.probe.title).slice(0, 120) : host,
+        config: { feeds: [`${sec}=${sub.feed_url}`] },
+      },
+      { reviewed: true },
+    );
     await enqueueRun(source.id).catch(() => {});
     sourceId = source.id;
     resultUrl = `${config.siteUrl}/s/${source.slug}`;
@@ -207,9 +215,10 @@ export async function approveSubmission(
 }
 
 export async function rejectSubmission(admin, id, { note = null } = {}) {
-  if (!isAdmin(admin)) throw new Denied('Admins only.', 403);
   const sub = await subs.getSubmission(id);
   if (!sub) throw new Denied('No such suggestion.', 404);
+  if (!(await canReview(admin, sub.collection_slug)))
+    throw new Denied('Admins, or a moderator of this collection.', 403);
   const decided = await subs.decideSubmission({
     id: sub.id,
     approve: false,

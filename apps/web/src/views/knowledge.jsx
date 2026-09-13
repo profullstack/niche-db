@@ -1,3 +1,4 @@
+import { config } from '@nichedb/config';
 import { asJson, asJsonArray, formatBps, nextTierFor } from '@nichedb/knowledge';
 import { Notice, Num, Relative } from './components.jsx';
 import { Layout } from './Layout.jsx';
@@ -40,7 +41,11 @@ const OperatorCard = ({ member, plan = 'free' }) => (
     </a>{' '}
     <PlanBadge plan={plan} />
     <p class="card-desc muted">
-      {member.role === 'operator' ? 'Knowledge Influencer' : member.role}
+      {member.role === 'operator'
+        ? 'Knowledge Influencer'
+        : member.role === 'moderator'
+          ? 'Moderator'
+          : member.role}
     </p>
     <p class="small">
       {member.tier_slug.replace(/-/g, ' ')} · share {formatBps(member.share_bps)} ·{' '}
@@ -53,100 +58,134 @@ const OperatorCard = ({ member, plan = 'free' }) => (
  * A niche's public page: what the industry is, who runs it, what has been
  * built for it, and — when nobody runs it — the offer to.
  */
-export const NichePage = ({ user, niche, members, tiers, contributions, plans = {} }) => (
-  <Layout
-    user={user}
-    title={niche.name}
-    canonical={`/${niche.slug}`}
-    description={
-      niche.description ?? `Structured knowledge, software, data and tools for ${niche.name}.`
-    }
-  >
-    <section class="hero">
-      <h1>The {niche.name} Database</h1>
-      <p class="lede">
-        {niche.description ??
-          `Structured knowledge, software, data, feeds and tools for the ${niche.name.toLowerCase()} industry.`}
-      </p>
-      <p class="stats">
-        {niche.collection_slug ? (
-          <>
-            <a href={`/c/${niche.collection_slug}`}>Explore the data</a> ·{' '}
-            <a href={`/f/${niche.collection_slug}.rss`}>RSS</a> ·{' '}
-          </>
-        ) : null}
-        <a href="/docs/api">API</a> · <a href={`/${niche.slug}/skill.md`}>skill.md</a> ·{' '}
-        <a href={`/${niche.slug}/manifest.json`}>manifest</a>
-      </p>
-    </section>
+/** A moderator on the niche page: a name and a link, no tier, no share. */
+const ModeratorCard = ({ member, plan = 'free' }) => (
+  <li class="card" key={member.user_id}>
+    <a class="card-title" href={`/@${member.handle ?? ''}`}>
+      {member.display_name ?? member.handle ?? 'A moderator'}
+    </a>{' '}
+    <PlanBadge plan={plan} />
+    <p class="card-desc muted">Moderator · keeps the queue clean</p>
+  </li>
+);
 
-    {members.length ? (
-      <section>
-        <h2>
-          {members.length === 1
-            ? 'Expert on this niche'
-            : `Experts on this niche (${members.length})`}
-        </h2>
-        <ul class="cards">
-          {members.map((m) => (
-            <OperatorCard key={m.user_id} member={m} plan={plans[m.user_id] ?? 'free'} />
-          ))}
-        </ul>
+export const NichePage = ({ user, niche, members: everyone, tiers, contributions, plans = {} }) => {
+  // Experts are on the ladder; moderators are not, and are shown apart.
+  const members = everyone.filter((m) => m.role !== 'moderator');
+  const moderators = everyone.filter((m) => m.role === 'moderator');
+  return (
+    <Layout
+      user={user}
+      title={niche.name}
+      canonical={`/${niche.slug}`}
+      description={
+        niche.description ?? `Structured knowledge, software, data and tools for ${niche.name}.`
+      }
+    >
+      <section class="hero">
+        <h1>The {niche.name} Database</h1>
+        <p class="lede">
+          {niche.description ??
+            `Structured knowledge, software, data, feeds and tools for the ${niche.name.toLowerCase()} industry.`}
+        </p>
+        <p class="stats">
+          {niche.collection_slug ? (
+            <>
+              <a href={`/c/${niche.collection_slug}`}>Explore the data</a> ·{' '}
+              <a href={`/f/${niche.collection_slug}.rss`}>RSS</a> ·{' '}
+            </>
+          ) : null}
+          <a href="/docs/api">API</a> · <a href={`/${niche.slug}/skill.md`}>skill.md</a> ·{' '}
+          <a href={`/${niche.slug}/manifest.json`}>manifest</a>
+        </p>
       </section>
-    ) : null}
 
-    {/* Always offered, however many people are already here. A niche is a
+      {members.length ? (
+        <section>
+          <h2>
+            {members.length === 1
+              ? 'Expert on this niche'
+              : `Experts on this niche (${members.length})`}
+          </h2>
+          <ul class="cards">
+            {members.map((m) => (
+              <OperatorCard key={m.user_id} member={m} plan={plans[m.user_id] ?? 'free'} />
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      {moderators.length ? (
+        <section>
+          <h2>{moderators.length === 1 ? 'Moderator' : `Moderators (${moderators.length})`}</h2>
+          <ul class="cards">
+            {moderators.map((m) => (
+              <ModeratorCard key={m.user_id} member={m} plan={plans[m.user_id] ?? 'free'} />
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      {/* Always offered, however many people are already here. A niche is a
         subject you can be expert in, not a plot somebody has taken: the
         second person who actually knows the trade is worth as much as the
         first, and their share follows what they contribute. */}
-    <section class="cta-block">
-      <h2>{members.length ? 'Know this industry too?' : 'Know this industry?'}</h2>
-      <p>
-        Help supervise the agents building software, data and promotion for {niche.name}. You bring
-        what you know about how the business actually works; they do the engineering.
-        {members.length
-          ? ' Several people can be expert on one niche, and each earns from what they themselves contribute.'
-          : ''}
-      </p>
-      <p class="lede">
-        <strong>Start at 20%. Earn up to 80%.</strong>
-      </p>
-      <p>
-        <a class="cta button" href={`/opportunities/${niche.slug}`}>
-          {members.length ? 'Add your expertise' : 'Claim this niche'}
-        </a>
-      </p>
-    </section>
+      <section class="cta-block">
+        <h2>{members.length ? 'Know this industry too?' : 'Know this industry?'}</h2>
+        <p>
+          Help supervise the agents building software, data and promotion for {niche.name}. You
+          bring what you know about how the business actually works; they do the engineering.
+          {members.length
+            ? ' Several people can be expert on one niche, and each earns from what they themselves contribute.'
+            : ''}
+        </p>
+        <p class="lede">
+          <strong>Start at 20%. Earn up to 80%.</strong>
+        </p>
+        <p>
+          <a class="cta button" href={`/opportunities/${niche.slug}`}>
+            {members.length ? 'Add your expertise' : 'Claim this niche'}
+          </a>{' '}
+          <a class="button ghost" href={`/${niche.slug}/moderate`}>
+            Apply to moderate
+          </a>
+        </p>
+        <p class="small muted">
+          Moderators keep the niche's suggestion queue clean. They earn no share; several may
+          moderate one niche; an admin decides every application.
+        </p>
+      </section>
 
-    {contributions?.length ? (
-      <section>
-        <h2>Latest knowledge</h2>
-        <ul class="items">
-          {/* A member's contribution is lifted rather than decorated: the
+      {contributions?.length ? (
+        <section>
+          <h2>Latest knowledge</h2>
+          <ul class="items">
+            {/* A member's contribution is lifted rather than decorated: the
               highlight is a class on the row, so it reads as the list
               treating their work differently, which is what was sold. */}
-          {contributions.map((e) => (
-            <li class={`item${plans[e.influencer_id] ? ' highlighted' : ''}`} key={e.id}>
-              <div class="item-body">
-                <p class="item-title">{e.event_type.replace(/_/g, ' ')}</p>
-                <p class="item-meta">
-                  <a href={`/@${e.handle ?? ''}`}>{e.display_name ?? e.handle ?? 'operator'}</a>{' '}
-                  <PlanBadge plan={plans[e.influencer_id] ?? 'free'} /> ·{' '}
-                  <Relative at={e.verified_at ?? e.created_at} />
-                </p>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </section>
-    ) : null}
+            {contributions.map((e) => (
+              <li class={`item${plans[e.influencer_id] ? ' highlighted' : ''}`} key={e.id}>
+                <div class="item-body">
+                  <p class="item-title">{e.event_type.replace(/_/g, ' ')}</p>
+                  <p class="item-meta">
+                    <a href={`/@${e.handle ?? ''}`}>{e.display_name ?? e.handle ?? 'operator'}</a>{' '}
+                    <PlanBadge plan={plans[e.influencer_id] ?? 'free'} /> ·{' '}
+                    <Relative at={e.verified_at ?? e.created_at} />
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
 
-    <section>
-      <h2>How the share works</h2>
-      <TierTable tiers={tiers} />
-    </section>
-  </Layout>
-);
+      <section>
+        <h2>How the share works</h2>
+        <TierTable tiers={tiers} />
+      </section>
+    </Layout>
+  );
+};
 
 /** Every niche looking for someone who knows it. */
 export const OpportunitiesPage = ({ user, opportunities, tiers }) => (
@@ -481,6 +520,82 @@ export const InfluencerDashboard = ({
  * The admin's queue. Verifying is what moves money, so every button here
  * writes an audit row.
  */
+const MODERATE_QUESTIONS = [
+  ['why', 'Why do you want to moderate this niche?'],
+  ['experience', 'What is your experience with it?'],
+  ['time', 'How much time can you give it each week?'],
+];
+
+/**
+ * Applying to moderate a niche. Three questions, an admin's decision, and
+ * the moderators already there. The same person cannot hold two open
+ * applications for one niche, and a member of any role is told they are in.
+ */
+export const ModeratePage = ({ user, niche, member, claim, moderators, notice, error }) => (
+  <Layout
+    user={user}
+    title={`Moderate ${niche.name}`}
+    canonical={`/${niche.slug}/moderate`}
+    description={`Apply to moderate the ${niche.name} niche on ${config.siteName}: keep its suggestion queue clean. An admin decides every application.`}
+  >
+    <p class="crumb">
+      <a href={`/${niche.slug}`}>{niche.name}</a> › moderate
+    </p>
+    <h1>Moderate {niche.name}</h1>
+    <p class="lede">
+      A moderator reviews what people suggest for this niche's collection: approves what belongs,
+      turns away what does not. It earns no share and takes no niche from anyone; several people may
+      moderate one niche. Only an admin decides who does.
+    </p>
+    <Notice notice={notice} error={error} />
+    {moderators.length ? (
+      <section>
+        <h2>
+          {moderators.length === 1
+            ? 'Already moderating'
+            : `Already moderating (${moderators.length})`}
+        </h2>
+        <ul class="cards">
+          {moderators.map((m) => (
+            <ModeratorCard key={m.user_id} member={m} />
+          ))}
+        </ul>
+      </section>
+    ) : null}
+    <section>
+      {member ? (
+        <p class="feedback ok" role="status">
+          You already {member.role === 'moderator' ? 'moderate' : 'belong to'} this niche.
+        </p>
+      ) : claim ? (
+        <p class="feedback ok" role="status">
+          Your application is {claim.status}. {claim.decision_note ?? ''}
+        </p>
+      ) : !user ? (
+        <p>
+          <a class="cta button" rel="nofollow" href={`/login?next=/${niche.slug}/moderate`}>
+            Sign in to apply
+          </a>
+        </p>
+      ) : (
+        <form method="post" action={`/${niche.slug}/moderate`} class="stack">
+          {MODERATE_QUESTIONS.map(([key, label]) => (
+            <p key={key}>
+              <label for={`m-${key}`}>{label}</label>
+              <textarea id={`m-${key}`} name={`answers.${key}`} rows="2" maxlength="2000" />
+            </p>
+          ))}
+          <p>
+            <button type="submit" class="cta">
+              Apply to moderate
+            </button>
+          </p>
+        </form>
+      )}
+    </section>
+  </Layout>
+);
+
 export const KnowledgeAdmin = ({ user, claims, pending, audit, notice, error }) => (
   <Layout user={user} title="Knowledge admin" wide>
     <Notice notice={notice} error={error} />
@@ -496,6 +611,7 @@ export const KnowledgeAdmin = ({ user, claims, pending, audit, notice, error }) 
             <tr>
               <th>Niche</th>
               <th>Who</th>
+              <th>For</th>
               <th>Applied</th>
               <th>Decide</th>
             </tr>
@@ -507,6 +623,7 @@ export const KnowledgeAdmin = ({ user, claims, pending, audit, notice, error }) 
                   <a href={`/${c.niche_slug}`}>{c.niche_name}</a>
                 </td>
                 <td>{c.display_name ?? c.handle ?? c.email}</td>
+                <td>{c.role === 'moderator' ? 'moderator' : 'operator'}</td>
                 <td>
                   <Relative at={c.created_at} />
                 </td>

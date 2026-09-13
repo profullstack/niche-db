@@ -8,11 +8,12 @@ import {
   isReservedNicheSlug,
 } from '@nichedb/knowledge';
 import { cached, render, requireUser, respond } from '../lib/http.js';
-import { Denied, isAdmin } from '../lib/service.js';
+import { Denied, isAdmin, operatesNiche } from '../lib/service.js';
 import {
   InfluencerDashboard,
   InfluencerPage,
   KnowledgeAdmin,
+  ModeratePage,
   NichePage,
   OpportunitiesPage,
   OpportunityPage,
@@ -113,6 +114,68 @@ export function registerKnowledge(app) {
       notice: claim
         ? 'Your application is in. We will be in touch.'
         : 'You have already applied for this niche.',
+    });
+  });
+
+  /* ------------------------------------------------------- moderating -- */
+
+  /**
+   * Applying to moderate a niche: a claim marked with the role, decided by
+   * an admin on the same page as every other claim. Anyone signed in may
+   * apply; a person already in the niche in any role is told so.
+   */
+  app.get('/:slug/moderate', async (c) => {
+    const slug = c.req.param('slug');
+    if (isReservedNicheSlug(slug)) return c.notFound();
+    const niche = await k.getNiche(slug);
+    if (!niche || niche.status === 'draft' || niche.status === 'archived') return c.notFound();
+    const user = c.get('user');
+    const [member, claims, moderators] = await Promise.all([
+      k.memberOf({ nicheId: niche.id, userId: user?.id }),
+      user ? k.listClaims({ status: 'pending', userId: user.id }) : Promise.resolve([]),
+      k.nicheMembers(niche.id),
+    ]);
+    const claim = claims.find((x) => x.niche_id === niche.id) ?? null;
+    return c.html(
+      await render(
+        <ModeratePage
+          user={user}
+          niche={niche}
+          member={member?.status === 'active' ? member : null}
+          claim={claim}
+          moderators={moderators.filter((m) => m.role === 'moderator')}
+          notice={c.req.query('notice')}
+          error={c.req.query('error')}
+        />,
+      ),
+    );
+  });
+
+  app.post('/:slug/moderate', async (c) => {
+    const user = requireUser(c);
+    const niche = await k.getNiche(c.req.param('slug'));
+    if (!niche || niche.status === 'draft' || niche.status === 'archived') return c.notFound();
+    const member = await k.memberOf({ nicheId: niche.id, userId: user.id });
+    if (member?.status === 'active')
+      return respond(c, {
+        redirectTo: `/${niche.slug}/moderate`,
+        error:
+          member.role === 'moderator'
+            ? 'You already moderate this niche.'
+            : 'You already belong to this niche.',
+      });
+    const claim = await k.createClaim({
+      nicheId: niche.id,
+      userId: user.id,
+      answers: answersFromForm(await c.req.parseBody()),
+      role: 'moderator',
+    });
+    return respond(c, {
+      json: { claim },
+      redirectTo: `/${niche.slug}/moderate`,
+      notice: claim
+        ? 'Your application to moderate is in. An admin decides it.'
+        : 'You already have an application waiting for this niche.',
     });
   });
 
@@ -296,8 +359,7 @@ export function registerKnowledge(app) {
     if (!niche) return c.json({ error: 'not found' }, 404);
 
     const member = await k.memberOf({ nicheId: niche.id, userId: user.id });
-    if (member?.status !== 'active')
-      return c.json({ error: 'You do not operate this niche.' }, 403);
+    if (!operatesNiche(member)) return c.json({ error: 'You do not operate this niche.' }, 403);
 
     const body = await c.req.json().catch(() => ({}));
     if (!isKnownEventType(body.type))
@@ -343,12 +405,14 @@ export function registerKnowledge(app) {
       slug: niche.slug,
       homepage: `${config.siteUrl}/${niche.slug}`,
       description: niche.description,
-      operators: members.map((m) => ({
-        handle: m.handle,
-        name: m.display_name,
-        tier: m.tier_slug,
-        profile: m.handle ? `${config.siteUrl}/@${m.handle}` : null,
-      })),
+      operators: members
+        .filter((m) => m.role !== 'moderator')
+        .map((m) => ({
+          handle: m.handle,
+          name: m.display_name,
+          tier: m.tier_slug,
+          profile: m.handle ? `${config.siteUrl}/@${m.handle}` : null,
+        })),
       feeds: niche.collection_slug ? [`${config.siteUrl}/f/${niche.collection_slug}.rss`] : [],
       apis: [`${config.siteUrl}/api/v1/niches/${niche.slug}`],
       datasets: niche.collection_slug ? [`${config.siteUrl}/c/${niche.collection_slug}`] : [],
@@ -367,7 +431,7 @@ export function registerKnowledge(app) {
   app.get('/:slug/skill.md', async (c) => {
     const niche = await k.getNiche(c.req.param('slug'));
     if (!niche) return c.notFound();
-    const members = await k.nicheMembers(niche.id);
+    const members = (await k.nicheMembers(niche.id)).filter((m) => m.role !== 'moderator');
     const operators = members.length
       ? members.map((m) => `- ${m.display_name ?? m.handle} (${m.tier_slug})`).join('\n')
       : '- Not yet operated by a Knowledge Influencer.';

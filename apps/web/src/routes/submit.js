@@ -1,7 +1,7 @@
 import * as q from '@nichedb/db/queries';
 import * as subs from '@nichedb/db/submissions';
 import { render, requireUser, respond } from '../lib/http.js';
-import { Denied, isAdmin } from '../lib/service.js';
+import { Denied, isAdmin, isReviewer, moderatedCollectionSlugs } from '../lib/service.js';
 import {
   approveSubmission,
   rejectSubmission,
@@ -20,11 +20,20 @@ import { SubmissionsAdmin, SubmitPage } from '../views/submit.jsx';
  * `/:slug`.
  */
 
-const requireAdmin = (c) => {
+/** An admin, or a moderator of at least one niche: the people who may read the queue. */
+const requireReviewer = async (c) => {
   const user = requireUser(c);
-  if (!isAdmin(user)) throw new Denied('Admins only.', 403);
+  if (!(await isReviewer(user))) throw new Denied('Admins and moderators only.', 403);
   return user;
 };
+
+/** The queue as one reviewer sees it: everything for an admin, their collections for a moderator. */
+async function visibleSubmissions(user, opts) {
+  const rows = await subs.listSubmissions(opts);
+  if (isAdmin(user)) return rows;
+  const mine = new Set(await moderatedCollectionSlugs(user));
+  return rows.filter((r) => mine.has(String(r.collection_slug ?? '')));
+}
 
 async function handleSubmit(c, body) {
   // The honeypot. A person never sees the field; a form-filler fills it.
@@ -93,9 +102,9 @@ export function registerSubmit(app) {
   });
 
   app.get('/api/v1/submissions', async (c) => {
-    requireAdmin(c);
+    const reviewer = await requireReviewer(c);
     const status = c.req.query('status') ?? 'pending';
-    const rows = await subs.listSubmissions({
+    const rows = await visibleSubmissions(reviewer, {
       status: status === 'all' ? null : status,
       limit: c.req.query('limit'),
     });
@@ -103,7 +112,7 @@ export function registerSubmit(app) {
   });
 
   app.post('/api/v1/submissions/:id', async (c) => {
-    const admin = requireAdmin(c);
+    const admin = await requireReviewer(c);
     const body = await c.req.json().catch(() => ({}));
     if (body.decision === 'reject') {
       const s = await rejectSubmission(admin, c.req.param('id'), { note: body.note ?? null });
@@ -123,10 +132,10 @@ export function registerSubmit(app) {
   /* ---------------------------------------------------------------- admin -- */
 
   app.get('/admin/submissions', async (c) => {
-    const user = requireAdmin(c);
+    const user = await requireReviewer(c);
     const [pending, decided, collections] = await Promise.all([
-      subs.listSubmissions({ status: 'pending', limit: 200 }),
-      subs.listSubmissions({ status: null, limit: 60 }),
+      visibleSubmissions(user, { status: 'pending', limit: 200 }),
+      visibleSubmissions(user, { status: null, limit: 60 }),
       q.listCollections(),
     ]);
     return c.html(
@@ -144,7 +153,7 @@ export function registerSubmit(app) {
   });
 
   app.post('/admin/submissions/:id', async (c) => {
-    const admin = requireAdmin(c);
+    const admin = await requireReviewer(c);
     const body = await c.req.parseBody();
     const note = body.note ? String(body.note).slice(0, 500) : null;
     if (String(body.decision ?? '') === 'reject') {

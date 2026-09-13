@@ -136,7 +136,9 @@ export const Layout = (props) => (
           <a href="/feeds">Feeds</a>
           <a href="/submit">Submit a feed</a>
           <a href="/vin">VIN</a>
-          {props.user?.role === 'admin' ? <a href="/admin/submissions">Queue</a> : null}
+          {props.user?.role === 'admin' || props.user?.moderates ? (
+            <a href="/admin/submissions">Queue</a>
+          ) : null}
           {props.user ? <a href="/following">Following</a> : null}
           <a href="/docs/api">API</a>
           {currentModules().premium ? (
