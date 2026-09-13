@@ -1393,3 +1393,27 @@ table.kv td {
   padding: 0.3rem 0;
   word-break: break-word;
 }
+
+/* A source's config: lists folded under a count, never one line of JSON. */
+.source-config details {
+  margin: 0.4rem 0;
+}
+.source-config summary {
+  cursor: pointer;
+}
+.source-config .config-list {
+  margin: 0.4rem 0 0 1rem;
+  padding: 0;
+  list-style: none;
+  max-height: 24rem;
+  overflow: auto;
+}
+.source-config .config-list li {
+  word-break: break-all;
+  line-height: 1.5;
+}
+.source-config pre.data,
+.source-config code.mono {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
