@@ -1,0 +1,305 @@
+{
+ "head": {
+  "vars": [
+   "item",
+   "itemLabel",
+   "firstDate",
+   "imdbId",
+   "tmdbId",
+   "imageFile",
+   "runtime",
+   "genres",
+   "countries",
+   "directors"
+  ]
+ },
+ "results": {
+  "bindings": [
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q20001052"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Adventures of Casanova"
+    },
+    "firstDate": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "1948-02-07T00:00:00Z"
+    },
+    "imdbId": {
+     "type": "literal",
+     "value": "tt0040075"
+    },
+    "tmdbId": {
+     "type": "literal",
+     "value": "279267"
+    },
+    "genres": {
+     "type": "literal",
+     "value": "adventure film"
+    },
+    "countries": {
+     "type": "literal",
+     "value": "United States"
+    },
+    "directors": {
+     "type": "literal",
+     "value": "Roberto Gavaldón"
+    },
+    "imageFile": {
+     "type": "uri",
+     "value": "http://commons.wikimedia.org/wiki/Special:FilePath/Arturo%20de%20C%C3%B3rdova%20and%20Miroslava%20Stern%20in%20Adventures%20of%20Casanova%20%281948%29.jpg"
+    },
+    "runtime": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#decimal",
+     "type": "literal",
+     "value": "83"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q20001943"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Les messagers"
+    },
+    "firstDate": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "2014-01-01T00:00:00Z"
+    },
+    "imdbId": {
+     "type": "literal",
+     "value": "tt3596324"
+    },
+    "tmdbId": {
+     "type": "literal",
+     "value": "314478"
+    },
+    "genres": {
+     "type": "literal",
+     "value": "documentary film"
+    },
+    "countries": {
+     "type": "literal",
+     "value": "France"
+    },
+    "directors": {
+     "type": "literal",
+     "value": "Helene Crouzillat|Lætitia Tura"
+    },
+    "imageFile": {
+     "type": "uri",
+     "value": "http://commons.wikimedia.org/wiki/Special:FilePath/Verjamelilla.jpg"
+    },
+    "runtime": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#decimal",
+     "type": "literal",
+     "value": "70"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q20002642"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Transrating"
+    },
+    "genres": {
+     "type": "literal",
+     "value": ""
+    },
+    "countries": {
+     "type": "literal",
+     "value": ""
+    },
+    "directors": {
+     "type": "literal",
+     "value": ""
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q20002673"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Unforgettable Blast"
+    },
+    "firstDate": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "2015-01-01T00:00:00Z"
+    },
+    "genres": {
+     "type": "literal",
+     "value": "comedy film"
+    },
+    "countries": {
+     "type": "literal",
+     "value": "People's Republic of China"
+    },
+    "directors": {
+     "type": "literal",
+     "value": ""
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q20004162"
+    },
+    "itemLabel": {
+     "xml:lang": "fr",
+     "type": "literal",
+     "value": "Âmes d'enfants"
+    },
+    "firstDate": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "1928-01-01T00:00:00Z"
+    },
+    "imdbId": {
+     "type": "literal",
+     "value": "tt0020618"
+    },
+    "tmdbId": {
+     "type": "literal",
+     "value": "679239"
+    },
+    "genres": {
+     "type": "literal",
+     "value": "silent film"
+    },
+    "countries": {
+     "type": "literal",
+     "value": "France"
+    },
+    "directors": {
+     "type": "literal",
+     "value": "Jean Benoit-Lévy"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q20004180"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "We Have Our Moments"
+    },
+    "firstDate": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "1937-01-01T00:00:00Z"
+    },
+    "imdbId": {
+     "type": "literal",
+     "value": "tt0029749"
+    },
+    "tmdbId": {
+     "type": "literal",
+     "value": "256752"
+    },
+    "genres": {
+     "type": "literal",
+     "value": "mystery film"
+    },
+    "countries": {
+     "type": "literal",
+     "value": "United States"
+    },
+    "directors": {
+     "type": "literal",
+     "value": "Alfred L. Werker"
+    },
+    "imageFile": {
+     "type": "uri",
+     "value": "http://commons.wikimedia.org/wiki/Special:FilePath/We%20Have%20Our%20Moments%20%281937%29%201.jpg"
+    },
+    "runtime": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#decimal",
+     "type": "literal",
+     "value": "65"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q20004204"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Québékoisie"
+    },
+    "firstDate": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "2013-11-01T00:00:00Z"
+    },
+    "imdbId": {
+     "type": "literal",
+     "value": "tt3575910"
+    },
+    "tmdbId": {
+     "type": "literal",
+     "value": "485300"
+    },
+    "genres": {
+     "type": "literal",
+     "value": "documentary film"
+    },
+    "countries": {
+     "type": "literal",
+     "value": "Canada"
+    },
+    "directors": {
+     "type": "literal",
+     "value": "Mélanie Carrier|Olivier Higgins"
+    },
+    "runtime": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#decimal",
+     "type": "literal",
+     "value": "80"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q20094866"
+    },
+    "itemLabel": {
+     "type": "literal",
+     "value": "Q20094866"
+    },
+    "genres": {
+     "type": "literal",
+     "value": ""
+    },
+    "countries": {
+     "type": "literal",
+     "value": ""
+    },
+    "directors": {
+     "type": "literal",
+     "value": ""
+    }
+   }
+  ]
+ }
+}

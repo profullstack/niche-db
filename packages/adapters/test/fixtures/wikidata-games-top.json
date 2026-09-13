@@ -1,0 +1,24 @@
+{
+  "head": {
+    "vars": [
+      "top",
+      "total"
+    ]
+  },
+  "results": {
+    "bindings": [
+      {
+        "top": {
+          "datatype": "http://www.w3.org/2001/XMLSchema#integer",
+          "type": "literal",
+          "value": "141442831"
+        },
+        "total": {
+          "datatype": "http://www.w3.org/2001/XMLSchema#integer",
+          "type": "literal",
+          "value": "175986"
+        }
+      }
+    ]
+  }
+}

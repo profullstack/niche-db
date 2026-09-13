@@ -10,6 +10,10 @@ import { Hono } from 'hono';
 process.env.DATABASE_URL ??= 'postgres://test:test@localhost:5432/test';
 process.env.SITE_URL ??= 'https://nichedb.test';
 
+const { config } = await import('@nichedb/config');
+// The site URL the process actually configured: another test file may have
+// loaded the config first with SITE_URL unset, so the literal cannot be trusted.
+const SITE = config.siteUrl;
 const { descriptor, actor, SCOPES } = await import('../lib/opensaas.js');
 const { registerOpenSaaS } = await import('./opensaas.js');
 const { Denied } = await import('../lib/service.js');
@@ -85,13 +89,13 @@ describe('the descriptor', () => {
     const doc = await res.json();
     expect(doc.opensaas).toBe('0.1');
     expect(doc.service.name).toBeTruthy();
-    expect(doc.service.openaccess).toBe('https://nichedb.test/.well-known/openaccess.json');
+    expect(doc.service.openaccess).toBe(`${SITE}/.well-known/openaccess.json`);
     for (const [name, act] of Object.entries(doc.actions)) {
-      expect(act.page, name).toMatch(/^https:\/\/nichedb\.test\//);
+      expect(act.page.startsWith(`${SITE}/`), name).toBe(true);
       if (act.api) expect(act.scope, name).toMatch(/^[a-z]+:[a-z]+$/);
     }
     // Export and delete are always real; the mail action is a page only.
-    expect(doc.actions.export.api.url).toBe('https://nichedb.test/api/v1/account/export');
+    expect(doc.actions.export.api.url).toBe(`${SITE}/api/v1/account/export`);
     expect(doc.actions.delete.confirm).toBe('email');
     expect(doc.actions.delete.retention).toBe('P0D');
     if (doc.actions.unsubscribe) expect(doc.actions.unsubscribe.api).toBeUndefined();
@@ -170,7 +174,7 @@ describe('the way out', () => {
     expect(body.confirm).toBe('email');
     expect(calls[0]).toEqual(['token', ALICE.id, 'delete-account']);
     expect(calls[1][0]).toBe('mail');
-    expect(calls[1][2]).toBe('https://nichedb.test/account/delete/confirm?t=tok-1');
+    expect(calls[1][2]).toBe(`${SITE}/account/delete/confirm?t=tok-1`);
     expect(calls.some((c) => c[0] === 'delete')).toBe(false);
     const bad = await app.request('/account/delete/confirm?t=nope');
     expect(bad.status).toBe(400);

@@ -43,13 +43,16 @@ import { gdacs } from './gdacs.js';
 import { gdelt } from './gdelt.js';
 import { githubReleases } from './github.js';
 import { goModules } from './golang.js';
+import { gutenbergCatalog } from './gutenberg-catalog.js';
 import { hetznerPlans } from './hetzner.js';
 import { huggingface } from './huggingface.js';
 import { igdb } from './igdb.js';
 import { igdbCatalog } from './igdb-catalog.js';
 import { imdbRatings } from './imdb.js';
+import { kitsuAnime } from './kitsu-anime.js';
 import { landRegistrySales } from './landregistry.js';
 import { launchLibrary } from './launchlibrary.js';
+import { librivoxCatalog } from './librivox-catalog.js';
 import { lichessBroadcasts } from './lichess.js';
 import { linodeTypes } from './linode.js';
 import { livetennis } from './livetennis.js';
@@ -93,8 +96,11 @@ import { socrataCrime } from './socratacrime.js';
 import { sportarrPersons } from './sportarr-persons.js';
 import { sportsdbTv } from './sportsdb.js';
 import { sportsdbLeagues } from './sportsdb-leagues.js';
+import { sportsdbPlayers } from './sportsdb-players.js';
+import { sportsdbTeams } from './sportsdb-teams.js';
 import { statuspage } from './statuspage.js';
 import { steam, steamNews } from './steam.js';
+import { steamCatalog } from './steam-catalog.js';
 import { storefront } from './storefront.js';
 import { nwsSurfZone } from './surfzone.js';
 import { swpcSpaceWeather } from './swpc.js';
@@ -110,6 +116,8 @@ import { usgs } from './usgs.js';
 import { vscodeExtensions } from './vscode.js';
 import { vultrPlans } from './vultr.js';
 import { warnLayoffs } from './warn.js';
+import { wikidataFilms } from './wikidata-films.js';
+import { wikidataGames } from './wikidata-games.js';
 
 /** Every adapter this deployment knows, in the order the add-source page lists them. */
 export const ADAPTERS = [
@@ -117,6 +125,14 @@ export const ADAPTERS = [
   steamNews,
   igdb,
   igdbCatalog,
+  wikidataFilms,
+  wikidataGames,
+  sportsdbTeams,
+  sportsdbPlayers,
+  kitsuAnime,
+  gutenbergCatalog,
+  librivoxCatalog,
+  steamCatalog,
   npm,
   pypi,
   crates,
