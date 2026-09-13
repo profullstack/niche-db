@@ -46,7 +46,13 @@ function provider(known = new Set([4328, 4329, 4331]), fail = () => false) {
 
 const run = (overrides = {}, cursor = {}, p = provider()) =>
   sportsdbLeagues.pull({
-    config: { startId: START_ID, requestCap: REQUEST_CAP, tailMisses: TAIL_MISSES, ...overrides },
+    config: {
+      startId: START_ID,
+      requestCap: REQUEST_CAP,
+      tailMisses: TAIL_MISSES,
+      pauseMs: 0,
+      ...overrides,
+    },
     cursor,
     env: {},
     http: p.http,
