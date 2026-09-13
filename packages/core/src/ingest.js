@@ -16,6 +16,7 @@ export function envFor() {
     sportsProxyUrl: config.adapters.sportsProxyUrl,
     livetennisApiKey: config.adapters.livetennisApiKey,
     sportsdbApiKey: config.adapters.sportsdbApiKey,
+    thetvdbApiKey: config.adapters.thetvdbApiKey,
     igdbClientId: config.adapters.igdbClientId,
     igdbClientSecret: config.adapters.igdbClientSecret,
     githubToken: config.adapters.githubToken,

@@ -1,0 +1,11 @@
+{
+  "status": "success",
+  "data": [],
+  "links": {
+    "prev": "https://api4.thetvdb.com/v4/updates?since=1789200923&type=series&page=0",
+    "self": "https://api4.thetvdb.com/v4/updates?since=1789200923&type=series&page=1",
+    "next": null,
+    "total_items": 1874,
+    "page_size": 500
+  }
+}

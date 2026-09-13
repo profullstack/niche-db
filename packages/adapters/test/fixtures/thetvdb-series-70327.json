@@ -1,0 +1,76 @@
+{
+  "status": "success",
+  "data": {
+    "id": 70327,
+    "name": "Buffy the Vampire Slayer",
+    "slug": "buffy-the-vampire-slayer",
+    "image": "https://artworks.thetvdb.com/banners/posters/70327-1.jpg",
+    "nameTranslations": [
+      "ces",
+      "dan",
+      "deu",
+      "eng",
+      "fin",
+      "fra",
+      "heb",
+      "hun",
+      "ita",
+      "por",
+      "rus",
+      "spa",
+      "tur",
+      "pt",
+      "ara",
+      "nld",
+      "ukr"
+    ],
+    "overviewTranslations": [
+      "ces",
+      "deu",
+      "eng",
+      "fin",
+      "fra",
+      "heb",
+      "hun",
+      "ita",
+      "por",
+      "rus",
+      "spa",
+      "swe",
+      "tur",
+      "pt",
+      "ara",
+      "nld",
+      "ukr"
+    ],
+    "aliases": [
+      {
+        "language": "deu",
+        "name": "Buffy - Im Bann der Dämonen"
+      },
+      {
+        "language": "spa",
+        "name": "Buffy, cazavampiros"
+      }
+    ],
+    "firstAired": "1997-03-10",
+    "lastAired": "2003-05-20",
+    "nextAired": "",
+    "score": 517993,
+    "status": {
+      "id": 2,
+      "name": "Ended",
+      "recordType": "series",
+      "keepUpdated": false
+    },
+    "originalCountry": "usa",
+    "originalLanguage": "eng",
+    "defaultSeasonType": 1,
+    "isOrderRandomized": false,
+    "lastUpdated": "2026-08-30 17:44:29",
+    "averageRuntime": 44,
+    "episodes": null,
+    "overview": "In every generation there is a Chosen One. She alone will stand against the vampires, the demons and the forces of darkness. She is the Slayer.\r\n\r\nBuffy Summers is The Chosen One, the one girl in all the world with the strength and skill to fight the vampires. With the help of her close friends, Willow, Xander, and her Watcher Giles she balances slaying, family, friendships, and relationships.",
+    "year": "1997"
+  }
+}
