@@ -1,0 +1,50 @@
+{
+  "openwebring": "0.1",
+  "ring": {
+    "slug": "profullstack",
+    "name": "Profullstack",
+    "url": "https://rssamplifier.com/ring/profullstack",
+    "host": "https://rssamplifier.com/",
+    "description": "The sites Profullstack, Inc. publishes."
+  },
+  "members": [
+    {
+      "url": "https://dev.profullstack.com/~anthony/blog/",
+      "slug": "chovys-blog",
+      "name": "Chovy's Blog",
+      "feed": "https://dev.profullstack.com/~anthony/blog/feed.xml",
+      "lang": "en-us",
+      "made_by": "both",
+      "disclosure": "ai-assisted",
+      "status": "active",
+      "since": "2026-09-13T09:31:17.062Z",
+      "checked": "2026-09-13T09:55:00.000Z"
+    },
+    {
+      "url": "https://logicsrc.com/blog",
+      "slug": "logicsrc-blog",
+      "name": "LogicSRC Blog",
+      "made_by": "Both",
+      "disclosure": "AI-Generated",
+      "status": "active",
+      "checked": "2026-09-13T09:56:00.000Z"
+    },
+    {
+      "url": "https://github.com/profullstack/logicsrc/releases",
+      "slug": "release-notes-from-logicsrc",
+      "name": "Release notes from logicsrc",
+      "status": "pending",
+      "x-note": "kept as given"
+    },
+    {
+      "url": "https://crawlproof.com/blog",
+      "slug": "crawlproof-blog",
+      "name": "CrawlProof blog",
+      "made_by": "person",
+      "status": "inactive",
+      "checked": "2026-09-13T09:57:00.000Z"
+    },
+    { "url": "not a url", "name": "dropped" }
+  ],
+  "updated": "2026-09-13T10:00:00Z"
+}

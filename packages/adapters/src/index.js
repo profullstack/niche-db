@@ -82,6 +82,7 @@ import { opensaas } from './opensaas.js';
 import { openserver } from './openserver.js';
 import { opensite } from './opensite.js';
 import { openthreat } from './openthreat.js';
+import { openwebring } from './openwebring.js';
 import { outreachgraph } from './outreachgraph.js';
 import { ovhVps } from './ovh.js';
 import { p0dcasters } from './p0dcasters.js';
@@ -271,6 +272,8 @@ export const ADAPTERS = [
   openserver,
   // Threats: what OpenThreat reporters found in the open, read off each one's own descriptor.
   openthreat,
+  // Webrings: the rings a host runs and who is in them, read off the host's own descriptor.
+  openwebring,
   // SaaS: the way in and the way out of a service's plans, read off its own OpenSaaS descriptor.
   opensaas,
   // People: one entry per person, read off the apps that serve their OpenProfile.md.
