@@ -75,6 +75,12 @@ export const config = {
     budget: num('INGEST_DETAIL_BUDGET', 150),
     /** Sweep every enabled source on boot regardless of next_run_at. */
     onBoot: bool('INGEST_ON_BOOT', false),
+    /**
+     * Where bulk dumps land on disk (a multi-gigabyte tarball, the file it
+     * inflates to). Empty means the OS temp dir, which is ephemeral; point it at
+     * a mounted volume so a redeploy mid-walk does not re-download everything.
+     */
+    dataDir: opt('INGEST_DATA_DIR', ''),
   },
 
   enrich: {
