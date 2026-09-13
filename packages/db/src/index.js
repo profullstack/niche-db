@@ -6,13 +6,21 @@ import { SQL } from 'bun';
  * runtime and no native addons. `max` and the worker concurrency are chosen
  * together: every BullMQ slot can hold a connection.
  */
-export const sql = new SQL({
-  url: config.databaseUrl,
-  max: Number(process.env.DB_POOL_MAX ?? 12),
-  idleTimeout: 30,
-  connectionTimeout: 15,
-  tls: config.databaseUrl.includes('sslmode=require') ? { rejectUnauthorized: false } : undefined,
-});
+export function connect({
+  url = config.databaseUrl,
+  max = Number(process.env.DB_POOL_MAX ?? 12),
+  idleTimeout = 30,
+} = {}) {
+  return new SQL({
+    url,
+    max,
+    idleTimeout,
+    connectionTimeout: 15,
+    tls: url.includes('sslmode=require') ? { rejectUnauthorized: false } : undefined,
+  });
+}
+
+export const sql = connect();
 
 export async function healthcheck() {
   const [row] = await sql`select 1 as ok`;
