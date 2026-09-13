@@ -1,0 +1,24 @@
+[
+  {
+    "id": "business-starter",
+    "url": "https://client.capconnect.com/index.php/store/google-workspace/business-starter",
+    "name": "Business Starter",
+    "cycle": { "cycle": "annuel", "divisor": 1, "interval": "year" },
+    "group": "google-workspace",
+    "price": { "amount": 864, "currency": "MAD" },
+    "stock": "unknown",
+    "description": "G SUITE by Google Cloud 1 Email Account Upgradable with additional email accounts 30GB Storage per Account Email, Chat, Productivity Apps, Cloud Storage and other Collaboration tools powered by Google Cloud",
+    "startingFrom": false
+  },
+  {
+    "id": "1tb",
+    "url": "https://client.capconnect.com/index.php/store/stockage-en-ligne/1tb",
+    "name": "1TB",
+    "cycle": { "cycle": "mensuel", "divisor": 1, "interval": "month" },
+    "group": "stockage-en-ligne",
+    "price": { "amount": 90, "currency": "MAD" },
+    "stock": "unknown",
+    "description": "Storage 1 TB Unlimited Traffic Supported Access Protocols - HTTPS, FTP, FTPS, SFTP, SCP - WebDAV, Samba/CIFS - BorgBackup rsync via SSH Manage with App 10 Concurrent connections Useable as network drive Upgrade/Downgrade Support Technique",
+    "startingFrom": false
+  }
+]
