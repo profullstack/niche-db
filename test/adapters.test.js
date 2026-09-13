@@ -71,6 +71,7 @@ describe('registry', () => {
         'forums',
         'hosting',
         'threats',
+        'profiles',
       ]).toContain(a.collection);
     }
     expect(adapterByName('steam').title).toContain('Steam');

@@ -69,6 +69,7 @@ import { nws } from './nws.js';
 import { ocdsTenders } from './ocds.js';
 import { openfda } from './openfda.js';
 import { openlibrary } from './openlibrary.js';
+import { openprofiles } from './openprofiles.js';
 import { openserver } from './openserver.js';
 import { openthreat } from './openthreat.js';
 import { ovhVps } from './ovh.js';
@@ -231,6 +232,8 @@ export const ADAPTERS = [
   openserver,
   // Threats: what OpenThreat reporters found in the open, read off each one's own descriptor.
   openthreat,
+  // People: one entry per person, read off the apps that serve their OpenProfile.md.
+  openprofiles,
 ];
 
 export { isPlatformHosted, PLATFORM_HOSTS } from './podcastplatforms.js';

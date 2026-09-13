@@ -1,5 +1,7 @@
 import { config } from '@nichedb/config';
+import { profilePath } from '@nichedb/core/profiles';
 import * as premiumDb from '@nichedb/db/premium';
+import * as profiles from '@nichedb/db/profiles';
 import * as q from '@nichedb/db/queries';
 import { awardKinds } from '@nichedb/premium';
 import { feedAd } from '../lib/ads.js';
@@ -184,6 +186,12 @@ export function registerPages(app) {
     if (!Number.isInteger(id)) return c.notFound();
     const item = await q.getItem(id);
     if (!item) return c.notFound();
+    // A row that stands for a person is read on the person's own page.
+    const personId = profiles.profileIdOfItem(item);
+    if (personId && item.collection_slug === 'profiles') {
+      const p = await profiles.getProfile(personId);
+      if (p) return c.redirect(profilePath(p), 302);
+    }
     if (item.early_access && entitlementsOf(c).plan === 'free') return earlyAccessWall(c, item);
     const user = c.get('user');
     const [counts, balance] = await Promise.all([

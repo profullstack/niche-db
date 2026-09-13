@@ -72,6 +72,7 @@ export const Layout = (props) => (
       {props.canonical ? (
         <link rel="canonical" href={`${config.siteUrl}${props.canonical}`} />
       ) : null}
+      {props.openprofile ? <link rel="openprofile" href={props.openprofile} /> : null}
       <meta property="og:title" content={props.title ?? config.siteName} />
       <meta property="og:type" content="website" />
       <meta property="og:image" content={`${config.siteUrl}/icons/icon-512x512.png`} />

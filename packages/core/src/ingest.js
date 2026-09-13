@@ -1,8 +1,10 @@
 import { ADAPTERS, adapterByName } from '@nichedb/adapters';
 import { config } from '@nichedb/config';
+import * as profiles from '@nichedb/db/profiles';
 import * as q from '@nichedb/db/queries';
 import { normaliseItem } from './adapter.js';
 import { makeHttp } from './http.js';
+import { profileItem } from './profiles.js';
 
 const UA = () =>
   `niche-db/0.1 (+${config.siteUrl}${config.contactEmail ? `; ${config.contactEmail}` : ''})`;
@@ -91,7 +93,19 @@ export async function runSource(sourceId, { log = console.log } = {}) {
       previous: (externalIds) => q.previousItemData({ sourceId: source.id, externalIds }),
     });
 
-    const pulled = (result?.items ?? []).map(normaliseItem).filter(Boolean);
+    let pulled = (result?.items ?? []).map(normaliseItem).filter(Boolean);
+
+    /*
+     * People are not rows an adapter can write on its own. A document the
+     * openprofiles adapter fetched is matched to a profile by its identity
+     * keys, stored as one of that profile's sources, and the profile is
+     * re-rendered under the owner's overrides; what reaches the collection is
+     * one row per person, not one per document. Done here because it needs
+     * the database, which an adapter never sees.
+     */
+    if (adapter.name === 'openprofiles') {
+      pulled = await absorbProfiles({ source, pulled, log: l });
+    }
 
     /*
      * Drop what another source in this collection already carries.
@@ -181,6 +195,40 @@ export async function runSource(sourceId, { log = console.log } = {}) {
     l(`failed: ${message}`);
     return { error: message };
   }
+}
+
+/** The openprofiles adapter's documents into the profiles tables; back come the people. */
+async function absorbProfiles({ source, pulled, log }) {
+  const people = new Map();
+  let created = 0;
+  let merged = 0;
+  let failed = 0;
+  for (const it of pulled) {
+    const d = it.data ?? {};
+    if (it.kind !== 'openprofile' || typeof d.doc !== 'string' || !d.source_url) continue;
+    try {
+      const out = await profiles.absorb({
+        app: d.app ?? 'unknown',
+        sourceUrl: d.source_url,
+        pageUrl: d.page_url ?? null,
+        doc: d.doc,
+        sourceId: source.id,
+        collectionId: source.collection_id,
+        siteUrl: config.siteUrl,
+      });
+      if (out.created) created += 1;
+      if (out.merged) merged += 1;
+      const item = normaliseItem(profileItem(out.profile, config.siteUrl, out.built));
+      if (item) people.set(item.externalId, item);
+    } catch (err) {
+      failed += 1;
+      log(`profile ${d.source_url}: ${String(err?.message ?? err).slice(0, 80)}`);
+    }
+  }
+  log(
+    `${pulled.length} documents: ${created} new people, ${merged} merged into existing${failed ? `, ${failed} failed` : ''}`,
+  );
+  return [...people.values()];
 }
 
 /** Every adapter, for the add-source page and the API. Nothing secret in here. */

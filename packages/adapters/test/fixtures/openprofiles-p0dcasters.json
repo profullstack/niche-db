@@ -1,0 +1,30 @@
+{
+  "openprofiles": [
+    {
+      "id": "beer-and-conversation",
+      "name": "Pigweed and Crowhill",
+      "url": "https://p0dcasters.com/podcast/beer-and-conversation/openprofile.md",
+      "page": "https://p0dcasters.com/podcast/beer-and-conversation",
+      "updatedAt": "2026-09-13T04:00:00.000Z",
+      "accounts": ["https://github.com/pigweed"],
+      "web": "https://pigweedandcrowhill.example"
+    },
+    {
+      "id": "manzanas",
+      "name": "Ada Lovelace",
+      "url": "https://p0dcasters.com/podcast/the-analytical-engine/openprofile.md",
+      "page": "https://p0dcasters.com/podcast/the-analytical-engine",
+      "updatedAt": "2026-09-13T04:05:00.000Z",
+      "accounts": ["https://bsky.app/profile/ada.example"],
+      "web": "https://ada.example"
+    },
+    {
+      "id": "elsewhere",
+      "name": "Somebody Else",
+      "url": "https://evil.example/openprofile.md",
+      "page": "https://evil.example/",
+      "updatedAt": "2026-09-13T04:06:00.000Z"
+    }
+  ],
+  "next": null
+}

@@ -16,7 +16,9 @@
       }
     ]
   },
-  "scopes": {},
+  "scopes": {
+    "openprofile:edit": "Edit the profile at /c/profiles that is yours: claim it, correct it, set its handle."
+  },
   "honours": ["profullstack.com/all-access"],
   "webhooks": "https://nichedb.dev/api/v1/openaccess/events",
   "hubs": ["https://openaccess.logicsrc.com"]

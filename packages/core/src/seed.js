@@ -237,6 +237,12 @@ export const COLLECTIONS = [
     description:
       'Posts from the house bulletin boards: every topic on tsbb.dev with its opening post, author and the forum it was posted in.',
   },
+  {
+    slug: 'profiles',
+    name: 'People',
+    description:
+      'One entry per person, assembled from every app that serves their OpenProfile.md (logicsrc.com/openprofile): podcasters from p0dcasters, the public profiles from OutreachGraph, and whoever else publishes the file. Two documents that share an account URL are one person; two that share only a name are two. A person who finds their entry claims it, takes a handle, and edits it from here, by API, CLI, MCP or the page, and nothing a pull brings in overwrites what they wrote. The Broadcast and Guest sections are what a host and a guest are matched on.',
+  },
 ];
 
 export const DEFAULT_FEEDS = [
@@ -1345,6 +1351,29 @@ export const DEFAULT_FEEDS = [
     description:
       'Threats not yet fixed, mitigated, blocked or withdrawn. No status reads as open, as the spec says.',
     query: { kinds: ['finding', 'attack', 'indicator', 'advisory'], tags: ['status:open'] },
+  },
+  // People: everyone, the hosts, and the ones who will appear.
+  {
+    collection: 'profiles',
+    slug: 'all-people',
+    name: 'Every person',
+    description: 'Everyone with an OpenProfile.md an app serves, newest change first.',
+    query: { kinds: ['person'] },
+  },
+  {
+    collection: 'profiles',
+    slug: 'podcasters',
+    name: 'Podcasters',
+    description:
+      'People with a Broadcast section: the show they host, its feed and what they are looking for.',
+    query: { kinds: ['person'], tags: ['broadcast'] },
+  },
+  {
+    collection: 'profiles',
+    slug: 'guests',
+    name: 'Guests',
+    description: 'People with a Guest section: available to appear, their expertise, their terms.',
+    query: { kinds: ['person'], tags: ['guest'] },
   },
   // House aggregators: one feed per directory, board and side.
   {

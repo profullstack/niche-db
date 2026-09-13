@@ -22,7 +22,14 @@ const json = (status, body, extra = {}) =>
   });
 
 /** The MCP endpoint at /mcp (and /api/mcp): stateless Streamable HTTP, POST only. */
-const KEY_TOOLS = new Set(['create_feed', 'follow_feed', 'add_source', 'run_source']);
+const KEY_TOOLS = new Set([
+  'create_feed',
+  'follow_feed',
+  'add_source',
+  'run_source',
+  'claim_profile',
+  'update_profile',
+]);
 
 export function registerMcp(app) {
   for (const path of ['/mcp', '/api/mcp']) {

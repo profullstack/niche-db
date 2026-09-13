@@ -1,8 +1,10 @@
 import { config } from '@nichedb/config';
 import { describeAdapters, describeEnrichers } from '@nichedb/core';
 import { cleanChannelName, parseName } from '@nichedb/core/names';
+import * as profiles from '@nichedb/db/profiles';
 import * as q from '@nichedb/db/queries';
 import { enqueueRun } from '@nichedb/queue';
+import { claimProfile, editProfile, profileOut, resolveRef } from '../profiles.js';
 import { allowedEnrichers, collectionOut, feedOut, itemOut, sourceOut } from '../serialize.js';
 import { addSource, createFeed, Denied, editSource } from '../service.js';
 import { submissionOut, submitFeed } from '../submissions.js';
@@ -321,6 +323,105 @@ export const TOOLS = [
           ? 'That feed was already suggested and is waiting for review.'
           : 'Suggested. An admin will review it; approved feeds appear on their collection page.',
       };
+    },
+  },
+  {
+    name: 'search_profiles',
+    description:
+      'People: one entry per person assembled from every app that serves their OpenProfile.md (podcasters from p0dcasters, public profiles from OutreachGraph). Search by name, headline or anything in the document; newest change first. Each answer carries the page, the openprofile.md URL, accounts, topics, Broadcast shows and the Guest section.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        q: str('Text to match against the name, headline and document (optional)'),
+        since: str('ISO time: only profiles changed after it (optional)'),
+        limit: int('Default 30, max 200'),
+      },
+    },
+    run: async ({ q: term, since, limit }) =>
+      (
+        await profiles.listProfiles({
+          q: term ?? null,
+          since: since ?? null,
+          limit: Math.min(Number(limit) || 30, 200),
+        })
+      ).map(profileOut),
+  },
+  {
+    name: 'get_profile',
+    description:
+      'One person by id, `<slug>-<id>` or handle: the parsed view and the OpenProfile.md as served.',
+    inputSchema: {
+      type: 'object',
+      properties: { ref: str('Profile id, slug-id or handle') },
+      required: ['ref'],
+    },
+    run: async ({ ref }) => {
+      const { profile } = await resolveRef(String(ref));
+      if (!profile?.public) throw toolError(`No profile ${ref}`);
+      return { profile: profileOut(profile), markdown: profile.doc };
+    },
+  },
+  {
+    name: 'claim_profile',
+    description:
+      'Claim a profile as the key owner (needs a key). Proven when the key owner’s email is one the profile lists, or when the person’s site or show page links back to the profile’s nichedb page. An admin may claim on behalf of an email.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        ref: str('Profile id, slug-id or handle'),
+        email: str('Admins only: claim it for this email'),
+      },
+      required: ['ref'],
+    },
+    run: async ({ ref, email }, ctx) => {
+      const user = needUser(ctx);
+      const { profile } = await resolveRef(String(ref));
+      if (!profile) throw toolError(`No profile ${ref}`);
+      const out = await claimProfile(user, profile, { email: email ?? null });
+      return { ...out, profile: profileOut(await profiles.getProfile(profile.id)) };
+    },
+  },
+  {
+    name: 'update_profile',
+    description:
+      'Edit a profile you own (needs a key). Send `markdown`, a whole OpenProfile.md that replaces what you wrote before, or any of `name`, `headline`, `identity` (key: value, null removes), `sections` (name: body, `none` removes), `handle`, `public`. What you write wins over every source and survives every re-read.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        ref: str('Profile id, slug-id or handle'),
+        markdown: str('A complete OpenProfile.md'),
+        name: str('The name'),
+        headline: str('One line'),
+        identity: {
+          type: 'object',
+          description: 'Identity keys: Kind, Web, Email, Location, ...; null removes',
+        },
+        sections: {
+          type: 'object',
+          description:
+            'Section bodies by name (accounts, topics, broadcast, guest, ...); the word none removes one',
+        },
+        handle: str('Your URL: /c/profiles/<handle>'),
+        public: { type: 'boolean', description: 'Listed and pulled by other directories' },
+      },
+      required: ['ref'],
+    },
+    run: async (args, ctx) => {
+      const user = needUser(ctx);
+      const { profile } = await resolveRef(String(args.ref));
+      if (!profile) throw toolError(`No profile ${args.ref}`);
+      const updated = await editProfile(user, profile, {
+        markdown: typeof args.markdown === 'string' ? args.markdown : undefined,
+        patch: {
+          name: args.name,
+          headline: args.headline,
+          identity: args.identity,
+          sections: args.sections,
+        },
+        handle: args.handle,
+        isPublic: args.public,
+      });
+      return { profile: profileOut(updated), markdown: updated.doc };
     },
   },
   {
