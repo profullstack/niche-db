@@ -13,7 +13,8 @@
     "./revenue": "./src/revenue.js",
     "./premium": "./src/premium.js",
     "./submissions": "./src/submissions.js",
-    "./profiles": "./src/profiles.js"
+    "./profiles": "./src/profiles.js",
+    "./account": "./src/account.js"
   },
   "dependencies": {
     "@nichedb/config": "workspace:*",

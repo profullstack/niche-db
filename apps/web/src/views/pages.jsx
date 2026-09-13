@@ -348,6 +348,7 @@ export const ItemPage = ({
           Object.entries(item.enrichment ?? {}).filter(([k]) => !enrichers || enrichers.has(k)),
         )}
       />
+      {item.data?.exit ? <WayInOut data={item.data} /> : null}
       <h2>Data</h2>
       <pre class="data">{JSON.stringify(item.data, null, 2)}</pre>
       <p class="small muted">
@@ -357,6 +358,74 @@ export const ItemPage = ({
     </article>
   </Layout>
 );
+
+/**
+ * The way in beside the way out, for a plan read off a service's own OpenSaaS
+ * descriptor (logicsrc.com/opensaas): the numbers the service stated, and
+ * whether an agent can take each door.
+ */
+const FLAGGED = new Set(['chat', 'call', 'mail']);
+const WayInOut = ({ data }) => {
+  const a = data.actions ?? {};
+  const row = (name, act) => (
+    <tr>
+      <th>{name}</th>
+      <td>{act ? (act.steps ?? 'unstated') : 'not stated'}</td>
+      <td>
+        {act?.confirm ? (
+          <span class={FLAGGED.has(act.confirm) ? 'tag warn' : ''}>{act.confirm}</span>
+        ) : act ? (
+          'none stated'
+        ) : (
+          ''
+        )}
+      </td>
+      <td>{act ? (act.api ? 'yes' : 'no, a person only') : ''}</td>
+      <td>{act?.effective ?? act?.within ?? ''}</td>
+      <td>{act?.refund ?? act?.retention ?? ''}</td>
+      <td>
+        {act?.page ? (
+          <a href={act.page} rel="noopener nofollow">
+            page
+          </a>
+        ) : (
+          ''
+        )}
+      </td>
+    </tr>
+  );
+  return (
+    <section class="panel">
+      <h2>Way in, way out</h2>
+      <p class="small muted">
+        As the service wrote it in its own OpenSaaS descriptor. Steps are the service's count; a
+        confirm of chat, call or mail is flagged because it is a door an agent cannot open.
+      </p>
+      <table class="compare">
+        <thead>
+          <tr>
+            <th>action</th>
+            <th>steps</th>
+            <th>confirm</th>
+            <th>agent</th>
+            <th>effective</th>
+            <th>refund</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {row('subscribe', a.subscribe)}
+          {row('cancel', a.cancel)}
+          {a.pause ? row('pause', a.pause) : null}
+          {a.change_plan ? row('change plan', a.change_plan) : null}
+          {a.unsubscribe ? row('unsubscribe (mail)', a.unsubscribe) : null}
+          {a.export ? row('export', a.export) : null}
+          {a.delete ? row('delete', a.delete) : null}
+        </tbody>
+      </table>
+    </section>
+  );
+};
 
 function safeHost(u) {
   try {
@@ -622,9 +691,14 @@ export const Settings = ({
         </p>
       ) : (
         <p class="small">
-          <a href="/lounge">The Lounge</a> · <a href="/premium">manage or extend</a>
+          <a href="/lounge">The Lounge</a> · <a href="/premium">manage or extend</a> ·{' '}
+          <a href="/account/billing">end a plan</a>
         </p>
       )}
+      <p class="small muted">
+        <a href="/account/export">Export your data</a> ·{' '}
+        <a href="/account/delete">Delete the account</a>
+      </p>
     </section>
 
     <section class="panel">

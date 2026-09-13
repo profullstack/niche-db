@@ -70,6 +70,7 @@ import { ocdsTenders } from './ocds.js';
 import { openfda } from './openfda.js';
 import { openlibrary } from './openlibrary.js';
 import { openprofiles } from './openprofiles.js';
+import { opensaas } from './opensaas.js';
 import { openserver } from './openserver.js';
 import { openthreat } from './openthreat.js';
 import { outreachgraph } from './outreachgraph.js';
@@ -239,6 +240,8 @@ export const ADAPTERS = [
   openserver,
   // Threats: what OpenThreat reporters found in the open, read off each one's own descriptor.
   openthreat,
+  // SaaS: the way in and the way out of a service's plans, read off its own OpenSaaS descriptor.
+  opensaas,
   // People: one entry per person, read off the apps that serve their OpenProfile.md.
   openprofiles,
   outreachgraph,

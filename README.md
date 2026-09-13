@@ -49,13 +49,17 @@ Adapters are one file each in `packages/adapters/src`. Ninety-three ship today a
 | sports | `espn-catalogue`, `espn-schedule`, `espn-live`, `espn-plays`, `livetennis`, `sportsdb-tv`, `sportsdb-leagues` | Live Tennis; TheSportsDB (`SPORTSDB_API_KEY`, the shared key `3` returns one row per query); ESPN is keyless (`SPORTS_PROXY_URL` for cloud egress) |
 | screen | `tmdb-releases`, `tvmaze-schedule`, `tvmaze-catalog` (every show TVmaze knows, CC BY-SA, walked once then kept current from /updates/shows), `anilist-airing`, `imdb-ratings` | TMDB only |
 | channels | `iptv-org-channels` | no |
-| saas | `saasrow` | no |
+| saas | `saasrow`, `opensaas` (nichedb.dev first; any service serving `/.well-known/opensaas.json`) | no |
 | marketplace | `d0rz`, `bl0ggers` | no |
 | ai-media | `aiornot` | no |
 | forums | `tsbb` | no |
 | hosting | `findhost`, `vultr-plans`, `linode-types`, `scaleway-instances`, `ovh-vps`, `storefront` (WHMCS, Blesta and WooCommerce order forms), `lowendbox`, `openserver`; `hetzner-plans`, `digitalocean-sizes`, `upcloud-plans` | no for the first eight (FindHost data is CC BY 4.0: credit FindHost, findhost.app; `OBSCURA_MCP_URL` optional for JavaScript-only shops); Hetzner (`HETZNER_API_TOKEN`), DigitalOcean (`DIGITALOCEAN_TOKEN`) and UpCloud (`UPCLOUD_USERNAME`, `UPCLOUD_PASSWORD`) each need a read-only credential and stay paused without one |
 | threats | `openthreat` (ThreatCrush first; any reporter serving `/.well-known/openthreat.json`) | no |
 | profiles | `openprofiles` (p0dcasters and OutreachGraph listings first; any app that lists the OpenProfile.md files it serves), `sportarr-persons` (Sportarr's 111k names, kept only when Wikidata knows the person as a human with a sport, with their socials) | no |
+
+### The way out (OpenSaaS)
+
+nichedb serves its own [OpenSaaS](https://logicsrc.com/opensaas) descriptor at `/.well-known/opensaas.json`: the plans as the checkout sells them (prepaid terms, none renews itself) and the actions that are real here, each as the page a person opens and the endpoint an agent calls with an OpenAccess bearer: `subscribe` (`POST /api/v1/billing/subscribe`, answers `pending` with the checkout page), `cancel` (`POST /api/v1/billing/cancel`, one click, today, nothing refunded), `unsubscribe` (a page: `/settings`, where the follows that send mail are turned off), `export` (`POST /api/v1/account/export`, one JSON document at once), `delete` (`POST /api/v1/account/delete`, confirmed by a link to the account email, immediate, nothing kept). The same doors as pages: `/account/billing`, `/account/export`, `/account/delete`. The `opensaas` adapter reads other services' descriptors into the saas collection, one row per plan with the service's own `steps` and `confirm` for the way in and the way out shown beside each other.
 
 ### People (`/c/profiles`)
 
