@@ -413,78 +413,133 @@ describe('the small helpers', () => {
 });
 
 describe('a walk', () => {
-  test('two runs: artists downloaded, verified and walked; masters need the next run; resume finishes the pass', async () => {
+  /** Drive `pull` until the cursor says done, the way the scheduler would across runs. */
+  async function runs(p, dir, cursor = {}, max = 8) {
+    const out = [];
+    for (let i = 0; i < max; i += 1) {
+      const r = await run(p, { dir, cursor });
+      out.push(r);
+      cursor = r.cursor;
+      if (cursor?.done) break;
+    }
+    return out;
+  }
+
+  test('one request a run: download, checksum list, walk; the second file the same way; then the pass is complete', async () => {
     const dir = freshDir();
     const p = provider();
-    const first = await run(p, { dir });
-    // One download and the checksum list, in that order; the second file waits for the next run.
-    expect(p.requests).toEqual([fileName(MONTH, 'artists'), checksumName(MONTH)]);
+    const [first, second, third, fourth] = await runs(p, dir);
+    // Three requests for the month, one a run, in this order; runs 2 and 3 walk.
+    expect(p.requests).toEqual([
+      fileName(MONTH, 'artists'),
+      checksumName(MONTH),
+      fileName(MONTH, 'masters'),
+    ]);
+    // Run 1 spends its one request on the artists file and stops there.
     expect(p.uas.every((ua) => ua?.includes('discogs-catalog'))).toBe(true);
-    expect(first.batches).toHaveLength(1);
-    expect(first.items.map((i) => i.externalId)).toEqual(
+    expect(first.items).toEqual([]);
+    expect(first.cursor).toMatchObject({ month: MONTH, entity: 'artists', recordIndex: 0 });
+    expect(first.nextInMinutes).toBe(10);
+    expect(first.note).toContain('checksum list');
+    expect(await exists(join(dir, fileName(MONTH, 'artists')))).toBe(true);
+
+    // Run 2: the checksum list, the file verified, walked to the end; masters wait.
+    expect(p.requests[1]).toBe(checksumName(MONTH));
+    expect(second.batches).toHaveLength(1);
+    expect(second.items.map((i) => i.externalId)).toEqual(
       ARTIST_IDS.map((id) => `discogs:artist:${id}`),
     );
-    expect(first.batches[0].cursor).toMatchObject({
+    expect(second.batches[0].cursor).toMatchObject({
       month: MONTH,
       entity: 'artists',
       recordIndex: 40,
     });
-    expect(first.cursor).toMatchObject({
+    expect(second.cursor).toMatchObject({
       month: MONTH,
       entity: 'masters',
       recordIndex: 0,
       verified: ['artists'],
     });
-    expect(first.cursor.checksums[fileName(MONTH, 'artists')]).toBe(
+    expect(second.cursor.checksums[fileName(MONTH, 'artists')]).toBe(
       sha256(p.bodies[fileName(MONTH, 'artists')]),
     );
-    expect(first.nextInMinutes).toBe(10);
-    expect(first.note).toContain('one download a run');
-    expect(await exists(join(dir, fileName(MONTH, 'artists')))).toBe(true);
+    expect(second.nextInMinutes).toBe(10);
+    expect(second.note).toContain('one request a run');
 
-    const second = await run(p, { dir, cursor: first.cursor });
-    // The artists file is on disk and verified: no request for it, no checksum list again.
-    expect(p.requests.slice(2)).toEqual([fileName(MONTH, 'masters')]);
-    expect(second.items.map((i) => i.externalId)).toEqual([
+    // Run 3: the masters file is the one request; the list is already in the
+    // cursor, so the same run verifies it, walks it and completes the pass.
+    expect(p.requests[2]).toBe(fileName(MONTH, 'masters'));
+    expect(p.requests).toHaveLength(3);
+    expect(third.items.map((i) => i.externalId)).toEqual([
       'discogs:master:18500',
       'discogs:master:18512',
       'discogs:master:18520',
     ]);
-    expect(second.cursor).toMatchObject({
+    expect(third.cursor).toMatchObject({
       month: MONTH,
       entity: 'masters',
       recordIndex: 3,
       done: true,
     });
-    expect(second.cursor.verified).toEqual(['artists', 'masters']);
-    expect(second.note).toContain('complete');
-    expect(second.nextInMinutes).toBeGreaterThanOrEqual(60);
+    expect(third.cursor.verified).toEqual(['artists', 'masters']);
+    expect(third.note).toContain('complete');
+    expect(third.nextInMinutes).toBeGreaterThanOrEqual(60);
+    expect(fourth).toBeUndefined();
 
-    // A third run this month asks nothing and waits for the next dump.
-    const third = await run(p, { dir, cursor: second.cursor });
+    // Another run this month asks nothing and waits for the next dump.
+    const again = await run(p, { dir, cursor: third.cursor });
     expect(p.requests).toHaveLength(3);
-    expect(third.items).toEqual([]);
-    expect(third.note).toContain('unchanged');
-    expect(third.cursor.done).toBe(true);
+    expect(again.items).toEqual([]);
+    expect(again.note).toContain('unchanged');
+    expect(again.cursor.done).toBe(true);
   });
 
-  test('the deadline stops a run after a batch and the next run resumes at that record', async () => {
-    const dir = freshDir();
-    const big = bigArtists(30); // 1,200 records: two full batches and a tail
-    const p = provider({ artists: big });
-    // The files are already on disk and verified, so no download stands between the deadline and the walk.
-    const artistsFile = join(dir, fileName(MONTH, 'artists'));
-    await Bun.write(artistsFile, p.bodies[fileName(MONTH, 'artists')]);
+  /** Files on disk and verified, so nothing stands between the deadline and the walk. */
+  async function onDisk(dir, p) {
+    await Bun.write(join(dir, fileName(MONTH, 'artists')), p.bodies[fileName(MONTH, 'artists')]);
     await Bun.write(join(dir, fileName(MONTH, 'masters')), p.bodies[fileName(MONTH, 'masters')]);
-    const verified = {
+    return {
       month: MONTH,
       entity: 'artists',
       recordIndex: 0,
       verified: ['artists', 'masters'],
       checksums: {},
     };
+  }
 
-    const first = await run(p, { dir, cursor: verified, deadline: Date.now() - 1 });
+  test('a deadline already passed yields nothing and asks for ten minutes', async () => {
+    const dir = freshDir();
+    const p = provider({ artists: bigArtists(30) });
+    const verified = await onDisk(dir, p);
+    const out = await run(p, { dir, cursor: verified, deadline: Date.now() - 1 });
+    expect(p.requests).toEqual([]);
+    expect(out.batches).toEqual([]);
+    expect(out.cursor).toMatchObject({ entity: 'artists', recordIndex: 0 });
+    expect(out.nextInMinutes).toBe(10);
+    expect(out.note).toContain('deadline');
+  });
+
+  test('the deadline stops a run after a batch and the next run resumes at that record', async () => {
+    const dir = freshDir();
+    const big = bigArtists(30); // 1,200 records: two full batches and a tail
+    const p = provider({ artists: big });
+    const verified = await onDisk(dir, p);
+
+    // A clock that jumps a minute per reading: the walk starts inside the
+    // deadline and the first batch lands past it.
+    const realNow = Date.now;
+    const base = realNow();
+    let ticks = 0;
+    Date.now = () => {
+      ticks += 1;
+      return base + ticks * 60_000;
+    };
+    let first;
+    try {
+      first = await run(p, { dir, cursor: verified, deadline: base + 90_000 });
+    } finally {
+      Date.now = realNow;
+    }
     expect(p.requests).toEqual([]);
     expect(first.batches).toHaveLength(1);
     expect(first.items).toHaveLength(500);
@@ -537,17 +592,56 @@ describe('a walk', () => {
     });
     expect(out.note).toContain('rate limited');
     expect(p.requests).toHaveLength(1);
+
+    // The checksum list rate limited the same way, with no retry-after: an hour and two.
+    const p2 = provider({
+      modes: {
+        [checksumName(MONTH)]: () => new Response('slow down', { status: 429 }),
+      },
+    });
+    await Bun.write(join(dir, fileName(MONTH, 'masters')), p2.bodies[fileName(MONTH, 'masters')]);
+    const listed = await run(p2, { dir, cursor: { ...cursor, checksums: null } });
+    expect(p2.requests).toEqual([checksumName(MONTH)]);
+    expect(listed.items).toEqual([]);
+    expect(listed.nextInMinutes).toBe(62);
   });
 
-  test('a month whose file is not published yet keeps the old cursor and looks again in six hours', async () => {
+  test('a month whose file is not published yet starts the new month at record 0 and looks again in six hours', async () => {
     const dir = freshDir();
     const p = provider({ modes: { [fileName(MONTH, 'artists')]: '404' } });
     const old = { month: '20250101', entity: 'masters', recordIndex: 9, done: true };
     const out = await run(p, { dir, cursor: old });
     expect(out.items).toEqual([]);
-    expect(out.cursor).toEqual(old);
+    expect(out.cursor).toMatchObject({ month: MONTH, entity: 'artists', recordIndex: 0 });
+    expect(out.cursor.done).toBeFalsy();
     expect(out.nextInMinutes).toBe(360);
     expect(out.note).toContain('not published');
+  });
+
+  test('a 404 on the second file never steps the cursor back behind batches already saved', async () => {
+    const dir = freshDir();
+    const p = provider({
+      artists: bigArtists(3),
+      modes: { [fileName(MONTH, 'masters')]: '404' },
+    });
+    await Bun.write(join(dir, fileName(MONTH, 'artists')), p.bodies[fileName(MONTH, 'artists')]);
+    const prev = {
+      month: MONTH,
+      entity: 'artists',
+      recordIndex: 40,
+      verified: ['artists'],
+      checksums: {},
+    };
+    const out = await run(p, { dir, cursor: prev });
+    expect(out.items).toHaveLength(80);
+    expect(out.batches[0].cursor).toMatchObject({ entity: 'artists', recordIndex: 120 });
+    expect(p.requests).toEqual([fileName(MONTH, 'masters')]);
+    expect(out.cursor).toMatchObject({ month: MONTH, entity: 'masters', recordIndex: 0 });
+    expect(out.nextInMinutes).toBe(360);
+    // And the next run walks nothing of artists again.
+    const next = await run(p, { dir, cursor: out.cursor });
+    expect(next.items).toEqual([]);
+    expect(next.cursor).toMatchObject({ entity: 'masters', recordIndex: 0 });
   });
 
   test('a bad record is skipped and counted; the rest of the file is written', async () => {
@@ -558,17 +652,18 @@ describe('a walk', () => {
     );
     const p = provider({ artists: broken });
     const notes = [];
-    const out = await run(p, { dir, log: (m) => notes.push(m) });
+    const [, out] = await runs(p, dir, {}, 2);
     expect(out.items).toHaveLength(41);
     expect(out.items.at(-1).externalId).toBe('discogs:artist:78');
     expect(out.batches[0].cursor.recordIndex).toBe(43);
     expect(out.note).toContain('2 records skipped');
+    expect(notes).toEqual([]);
   });
 
   test('a checksum that does not match discards the file; the next run downloads it again', async () => {
     const dir = freshDir();
     const p = provider({ checksums: `${'0'.repeat(64)}  ${fileName(MONTH, 'artists')}` });
-    const out = await run(p, { dir });
+    const [, out] = await runs(p, dir, {}, 2);
     expect(out.items).toEqual([]);
     expect(out.nextInMinutes).toBe(10);
     expect(out.note).toContain('checksum');
@@ -614,8 +709,9 @@ describe('a walk', () => {
     await Bun.write(join(dir, 'discogs_20250101_artists.xml.gz'), 'old');
     await Bun.write(join(dir, `${fileName(MONTH, 'masters')}.part`), 'half');
     await writeFile(join(dir, 'unrelated.txt'), 'keep');
-    const out = await run(p, { dir, cursor: { month: '20250101', done: true } });
-    expect(out.items).toHaveLength(40);
+    const [first, second] = await runs(p, dir, { month: '20250101', done: true }, 2);
+    expect(first.cursor).toMatchObject({ month: MONTH, entity: 'artists', recordIndex: 0 });
+    expect(second.items).toHaveLength(40);
     expect(await exists(join(dir, 'discogs_20250101_artists.xml.gz'))).toBe(false);
     expect(await exists(join(dir, `${fileName(MONTH, 'masters')}.part`))).toBe(false);
     expect(await exists(join(dir, 'unrelated.txt'))).toBe(true);

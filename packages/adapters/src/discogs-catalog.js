@@ -24,9 +24,10 @@ import { dumpDir } from '@nichedb/core/dump';
  * ignores `Range`, so a download that drops is a download that starts over.
  * It also rate-limits hard: a handful of requests in an hour bought a 429 with
  * `retry-after: 3359`, and asking again inside that window re-arms it. So a
- * run makes at most one download attempt and one checksum request, never asks
- * for a file whose complete copy is already on disk, and when it is told to
- * wait it schedules the next run past the wait rather than sleeping into it.
+ * run makes at most ONE request (a file, or the checksum list), never asks for
+ * a file whose complete copy is already on disk, and when it is told to wait
+ * it schedules the next run past the wait rather than sleeping into it. A
+ * month costs three requests spread over three runs ten minutes apart.
  * The core's `http.request` retries a 429 after a minute, which is exactly the
  * wrong move here, so the two requests go through `fetch` directly with the
  * deployment's contact address in a descriptive user agent.
@@ -671,7 +672,6 @@ export const discogsCatalog = defineAdapter({
 
     let requests = 0;
     let failures = 0;
-    let downloaded = false;
     let written = 0;
     let bad = 0;
     let batches = 0;
@@ -689,10 +689,10 @@ export const discogsCatalog = defineAdapter({
 
       // ── The file: on disk and whole, or one attempt to make it so ──────────
       if (!(await exists(file))) {
-        if (downloaded) {
+        if (requests >= 1) {
           return {
             cursor: cursorAt(entity, at),
-            note: `${name} needed next; one download a run, resuming in ${RESUME_MINUTES} min (${tally()})`,
+            note: `${name} needed next; one request a run, resuming in ${RESUME_MINUTES} min (${tally()})`,
             nextInMinutes: RESUME_MINUTES,
           };
         }
@@ -722,7 +722,6 @@ export const discogsCatalog = defineAdapter({
           }
           throw new Error(`discogs: every request failed (${requests}): ${err?.message ?? err}`);
         }
-        downloaded = true;
         if (dl.status === 429) {
           const wait = retryAfterMinutes(dl.retryAfter, now.getTime());
           log(`429 for ${name}; retry-after ${dl.retryAfter ?? 'unset'}, next run in ${wait} min`);
@@ -733,8 +732,10 @@ export const discogsCatalog = defineAdapter({
           };
         }
         if (dl.status === 404) {
+          // The place, not `prev`: batches of an earlier file in this run are
+          // already saved and the cursor must never step back behind them.
           return {
-            cursor: prev && Object.keys(prev).length ? prev : cursorAt(entity, at),
+            cursor: cursorAt(entity, at),
             note: `${name} is not published yet; looking again in ${NOT_PUBLISHED_MINUTES / 60} h`,
             nextInMinutes: NOT_PUBLISHED_MINUTES,
           };
@@ -757,10 +758,10 @@ export const discogsCatalog = defineAdapter({
       // ── Verify once against the month's checksum list ────────────────────
       if (!state.verified.includes(entity)) {
         if (!state.checksums) {
-          if (requests >= 2) {
+          if (requests >= 1) {
             return {
               cursor: cursorAt(entity, at),
-              note: `checksum list deferred to the next run (${tally()})`,
+              note: `${name} on disk; checksum list is the next run's one request, in ${RESUME_MINUTES} min (${tally()})`,
               nextInMinutes: RESUME_MINUTES,
             };
           }
@@ -816,6 +817,13 @@ export const discogsCatalog = defineAdapter({
       }
 
       // ── The walk ─────────────────────────────────────────────────────────
+      if (Date.now() > stopAt) {
+        return {
+          cursor: cursorAt(entity, at),
+          note: `deadline reached before walking ${name} (${tally()}); resuming in ${RESUME_MINUTES} min`,
+          nextInMinutes: RESUME_MINUTES,
+        };
+      }
       let n = at;
       let batch = [];
       const tag = RECORD_TAG[entity];
