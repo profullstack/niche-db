@@ -1,9 +1,35 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512" role="img" aria-label="NicheDB">
-  <title>NicheDB</title>
-  <rect width="512" height="512" fill="#12161f"/>
-  <rect x="136" y="150" width="240" height="44" rx="16" fill="#f2a33a"/>
-  <rect x="136" y="234" width="180" height="44" rx="16" fill="#f2a33a" opacity="0.8"/>
-  <rect x="136" y="318" width="120" height="44" rx="16" fill="#f2a33a" opacity="0.6"/>
-  <circle cx="356" cy="340" r="32" fill="#5ee39a"/>
-  <path d="M356 322v36M338 340h36" stroke="#12161f" stroke-width="10" stroke-linecap="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" fill="none" role="img" aria-labelledby="nichedb-title nichedb-desc">
+  <title id="nichedb-title">NicheDB</title>
+  <desc id="nichedb-desc">An N connects two open data nodes. Sources in, feeds out.</desc>
+  <metadata>Design reference: https://w3bs.org/standards/design (coming soon; conformance pending). Editable design brief: brand/prompt.md.</metadata>
+  <defs>
+    <linearGradient id="nichedb-surface" x1="64" y1="0" x2="448" y2="512" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#202735"/>
+      <stop offset="1" stop-color="#12161f"/>
+    </linearGradient>
+    <linearGradient id="nichedb-input" x1="144" y1="144" x2="144" y2="368" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ffda96"/>
+      <stop offset="1" stop-color="#f2a33a"/>
+    </linearGradient>
+    <linearGradient id="nichedb-bridge" x1="156" y1="152" x2="356" y2="360" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ffda96"/>
+      <stop offset="0.45" stop-color="#f2c875"/>
+      <stop offset="1" stop-color="#5ee39a"/>
+    </linearGradient>
+    <linearGradient id="nichedb-output" x1="368" y1="144" x2="368" y2="368" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#a6f5cf"/>
+      <stop offset="1" stop-color="#5ee39a"/>
+    </linearGradient>
+  </defs>
+  <rect id="nichedb-background" width="512" height="512" fill="url(#nichedb-surface)"/>
+  <g id="nichedb-mark" transform="translate(30.72 30.72) scale(0.88)">
+    <!-- Two rails and a shared route form the N; the apertures are open ports. -->
+    <path d="M144 368V160" stroke="url(#nichedb-input)" stroke-width="64" stroke-linecap="round"/>
+    <path d="M368 144V352" stroke="url(#nichedb-output)" stroke-width="64" stroke-linecap="round"/>
+    <path d="M144 160L368 352" stroke="#12161f" stroke-width="88" stroke-linecap="round"/>
+    <path d="M144 160L368 352" stroke="url(#nichedb-bridge)" stroke-width="64" stroke-linecap="round"/>
+    <path d="M174 176L350 327" stroke="#ffffff" stroke-opacity="0.26" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="144" cy="160" r="14" fill="#12161f"/>
+    <circle cx="368" cy="352" r="14" fill="#12161f"/>
+  </g>
 </svg>

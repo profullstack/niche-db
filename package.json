@@ -20,6 +20,7 @@
     "migrate": "bun packages/db/src/migrate-cli.js",
     "ingest": "bun apps/worker/src/ingest-cli.js",
     "build:client": "bun apps/web/build-client.js",
+    "build:brand": "bun scripts/generate-brand.js",
     "test": "bun test",
     "lint": "bun run --bun biome check .",
     "format": "bun run --bun biome format --write .",

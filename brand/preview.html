@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>NicheDB — logo preview</title>
+    <style>
+      :root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, sans-serif; color: #eef1f4; background: #0c1017; }
+      * { box-sizing: border-box; }
+      figure img { display: block; }
+      body { margin: 0; padding: 44px 32px; }
+      main { max-width: 1160px; margin: auto; }
+      header { display: flex; align-items: center; justify-content: space-between; gap: 24px; margin-bottom: 28px; }
+      .brand { display: flex; align-items: center; gap: 10px; font-size: 20px; font-weight: 650; letter-spacing: -.6px; }
+      .brand img { width: 28px; height: 28px; }
+      .eyebrow, figcaption, .status { font: 11px/1.6 ui-monospace, monospace; letter-spacing: .12em; text-transform: uppercase; }
+      .eyebrow, figcaption { color: #b0bac9; }
+      .hero { display: grid; grid-template-columns: 1fr 1fr; align-items: center; min-height: 440px; padding: 48px 60px; border: 1px solid #2a3341; border-radius: 24px; background: #12161f; }
+      h1 { margin: 22px 0; font-size: clamp(38px, 5vw, 66px); line-height: 1.04; letter-spacing: -.055em; font-weight: 600; }
+      h1 span { color: #a6f5cf; }
+      .intro { max-width: 300px; color: #b0bac9; font-size: 15px; line-height: 1.65; }
+      .hero > img { width: min(100%, 340px); height: auto; justify-self: end; }
+      .swatches { display: flex; gap: 7px; margin-top: 28px; }
+      .swatches span { width: 30px; height: 6px; border-radius: 2px; }
+      .grid { display: grid; grid-template-columns: .8fr 1.2fr; gap: 18px; margin-top: 18px; }
+      .panel { padding: 25px 28px; border: 1px solid #2a3341; border-radius: 18px; background: #12161f; min-width: 0; }
+      h2 { margin: 0 0 20px; font: 11px/1.6 ui-monospace, monospace; text-transform: uppercase; letter-spacing: .12em; color: #b0bac9; }
+      .light { background: #f3f1eb; color: #12161f; border-color: #f3f1eb; }
+      .light h2 { color: #586170; }
+      .wordmark { display: flex; align-items: center; justify-content: center; gap: 18px; min-height: 110px; font-size: clamp(28px, 3vw, 42px); font-weight: 650; letter-spacing: -.05em; }
+      .wordmark img { width: 80px; height: 80px; }
+      .sizes, .variants { display: flex; align-items: end; justify-content: space-between; gap: 14px; min-height: 110px; }
+      figure { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+      .variants img { width: 64px; height: 64px; }
+      .mask-preview { border-radius: 50%; }
+      .files { display: flex; flex-wrap: wrap; gap: 12px 24px; margin-top: 22px; font-size: 13px; }
+      a { color: #ffda96; text-underline-offset: 4px; }
+      a:focus-visible { outline: 2px solid #ffda96; outline-offset: 5px; }
+      footer { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px; margin-top: 26px; color: #b0bac9; font-size: 12px; line-height: 1.7; }
+      .status { color: #b0bac9; font-size: 10px; }
+      @media (max-width: 720px) {
+        body { padding: 24px 16px; }
+        .hero { padding: 30px; min-height: auto; gap: 24px; }
+        .hero > img { width: 100%; }
+        .grid { grid-template-columns: 1fr; }
+        h1 { font-size: 38px; }
+        .intro { font-size: 13px; }
+        .variants { flex-wrap: wrap; justify-content: start; gap: 24px; }
+      }
+      @media (max-width: 460px) {
+        .hero { grid-template-columns: 1fr; }
+        .hero > img { width: 210px; justify-self: center; }
+        header > .eyebrow { display: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <div class="brand"><img src="logo.svg" alt="" />NicheDB</div>
+        <span class="eyebrow">Identity / connected N</span>
+      </header>
+      <section class="hero" aria-labelledby="hero-title">
+        <div>
+          <div class="eyebrow">Open data. Connected intelligence.</div>
+          <h1 id="hero-title">Sources in.<br /><span>Feeds out.</span></h1>
+          <p class="intro">A shared route from public data to people, applications, and autonomous agents.</p>
+          <div class="swatches" role="img" aria-label="Amber, warm gold, and mint palette">
+            <span style="background: #f2a33a"></span><span style="background: #ffda96"></span><span style="background: #5ee39a"></span><span style="background: #a6f5cf"></span>
+          </div>
+        </div>
+        <img src="logo.svg" alt="NicheDB: an amber and mint N with two connected data ports" width="340" height="340" />
+      </section>
+      <div class="grid">
+        <section class="panel light" aria-labelledby="light-title">
+          <h2 id="light-title">01 / On light</h2>
+          <div class="wordmark"><img src="logo.svg" width="80" height="80" alt="" />NicheDB</div>
+        </section>
+        <section class="panel" aria-labelledby="sizes-title">
+          <h2 id="sizes-title">02 / Actual pixel sizes</h2>
+          <div class="sizes">
+            <figure><img src="../apps/web/public/icons/favicon-16.png" width="16" height="16" alt="NicheDB at 16 pixels" /><figcaption>16</figcaption></figure>
+            <figure><img src="logo.svg" width="28" height="28" alt="NicheDB at the header size" /><figcaption>28</figcaption></figure>
+            <figure><img src="../apps/web/public/icons/favicon-32.png" width="32" height="32" alt="NicheDB at 32 pixels" /><figcaption>32</figcaption></figure>
+            <figure><img src="../apps/web/public/icons/icon-48x48.png" width="48" height="48" alt="NicheDB at 48 pixels" /><figcaption>48</figcaption></figure>
+            <figure><img src="logo.svg" width="80" height="80" alt="NicheDB at 80 pixels" /><figcaption>80</figcaption></figure>
+          </div>
+        </section>
+        <section class="panel" aria-labelledby="mask-title">
+          <h2 id="mask-title">03 / App masks</h2>
+          <div class="variants">
+            <figure><img src="logo.svg" alt="Rounded NicheDB icon" /><figcaption>Default</figcaption></figure>
+            <figure><img class="mask-preview" src="logo-maskable.svg" alt="NicheDB inside a circular app mask" /><figcaption>Circle</figcaption></figure>
+            <figure><img src="logo-maskable.svg" alt="NicheDB with an opaque square background" /><figcaption>Square</figcaption></figure>
+          </div>
+        </section>
+        <section class="panel" aria-labelledby="variants-title">
+          <h2 id="variants-title">04 / Member icon palettes</h2>
+          <div class="variants">
+            <figure><img src="../apps/web/public/icons/app-mono.svg" alt="Monochrome NicheDB" /><figcaption>Mono</figcaption></figure>
+            <figure><img src="../apps/web/public/icons/app-mint.svg" alt="Mint NicheDB" /><figcaption>Mint</figcaption></figure>
+            <figure><img src="../apps/web/public/icons/app-ember.svg" alt="Ember NicheDB" /><figcaption>Ember</figcaption></figure>
+            <figure><img src="../apps/web/public/icons/app-ultraviolet.svg" alt="Ultraviolet NicheDB" /><figcaption>Ultraviolet</figcaption></figure>
+          </div>
+        </section>
+      </div>
+      <nav class="files" aria-label="Brand files">
+        <a href="logo.svg" download>Download logo.svg</a>
+        <a href="logo-maskable.svg" download>Download maskable SVG</a>
+        <a href="prompt.md">Read the design prompt</a>
+      </nav>
+      <footer>
+        <span>Editable SVG · Self-contained · Static by default</span>
+        <span class="status"><a href="https://w3bs.org/standards/design">W3BS design</a> / Coming soon · Conformance pending</span>
+      </footer>
+    </main>
+  </body>
+</html>
