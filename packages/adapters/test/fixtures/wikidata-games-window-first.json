@@ -1,0 +1,321 @@
+{
+  "head": {
+    "vars": [
+      "item",
+      "id",
+      "title",
+      "titleMul",
+      "description",
+      "published",
+      "steamAppId",
+      "gogId",
+      "igdbId",
+      "imageFile",
+      "officialSite",
+      "platformLabels",
+      "publisherLabels",
+      "developerLabels",
+      "genreLabels",
+      "modeLabels"
+    ]
+  },
+  "results": {
+    "bindings": [
+      {
+        "item": {
+          "type": "uri",
+          "value": "http://www.wikidata.org/entity/Q2374"
+        },
+        "id": {
+          "datatype": "http://www.w3.org/2001/XMLSchema#integer",
+          "type": "literal",
+          "value": "2374"
+        },
+        "titleMul": {
+          "xml:lang": "mul",
+          "type": "literal",
+          "value": "Civilization III"
+        },
+        "description": {
+          "xml:lang": "en",
+          "type": "literal",
+          "value": "2001 turn-based strategy video game"
+        },
+        "published": {
+          "type": "literal",
+          "value": "2001-10-30T00:00:00Z/11"
+        },
+        "igdbId": {
+          "type": "literal",
+          "value": "sid-meier-s-civilization-iii"
+        },
+        "officialSite": {
+          "type": "uri",
+          "value": "http://www.civ3.com/"
+        },
+        "platformLabels": {
+          "type": "literal",
+          "value": "Microsoft Windows|macOS|Classic Mac OS"
+        },
+        "publisherLabels": {
+          "type": "literal",
+          "value": "MacSoft Games|Atari|Aspyr"
+        },
+        "developerLabels": {
+          "type": "literal",
+          "value": "Firaxis Games|MacSoft Games|Aspyr"
+        },
+        "genreLabels": {
+          "type": "literal",
+          "value": "turn-based strategy video game|grand strategy wargame|simulation video game|strategy video game|4X"
+        },
+        "modeLabels": {
+          "type": "literal",
+          "value": "single-player video game|hotseat|multiplayer video game"
+        },
+        "steamAppId": {
+          "type": "literal",
+          "value": "3910"
+        }
+      },
+      {
+        "item": {
+          "type": "uri",
+          "value": "http://www.wikidata.org/entity/Q2377"
+        },
+        "id": {
+          "datatype": "http://www.w3.org/2001/XMLSchema#integer",
+          "type": "literal",
+          "value": "2377"
+        },
+        "titleMul": {
+          "xml:lang": "mul",
+          "type": "literal",
+          "value": "Civilization IV"
+        },
+        "description": {
+          "xml:lang": "en",
+          "type": "literal",
+          "value": "2005 turn-based strategy computer game"
+        },
+        "published": {
+          "type": "literal",
+          "value": "2005-10-25T00:00:00Z/11"
+        },
+        "igdbId": {
+          "type": "literal",
+          "value": "sid-meier-s-civilization-iv"
+        },
+        "officialSite": {
+          "type": "uri",
+          "value": "https://civilization.2k.com/civ-iv/"
+        },
+        "platformLabels": {
+          "type": "literal",
+          "value": "Microsoft Windows|macOS|Classic Mac OS"
+        },
+        "publisherLabels": {
+          "type": "literal",
+          "value": "2K|1C Company|Aspyr"
+        },
+        "developerLabels": {
+          "type": "literal",
+          "value": "Firaxis Games|Soren Johnson"
+        },
+        "genreLabels": {
+          "type": "literal",
+          "value": "turn-based strategy video game|grand strategy wargame|4X"
+        },
+        "modeLabels": {
+          "type": "literal",
+          "value": "single-player video game|multiplayer online game|co-op mode|multiplayer video game"
+        },
+        "steamAppId": {
+          "type": "literal",
+          "value": "3900"
+        },
+        "gogId": {
+          "type": "literal",
+          "value": "game/sid_meiers_civilization_iv_the_complete_edition"
+        }
+      },
+      {
+        "item": {
+          "type": "uri",
+          "value": "http://www.wikidata.org/entity/Q2385"
+        },
+        "id": {
+          "datatype": "http://www.w3.org/2001/XMLSchema#integer",
+          "type": "literal",
+          "value": "2385"
+        },
+        "titleMul": {
+          "xml:lang": "mul",
+          "type": "literal",
+          "value": "Civilization V"
+        },
+        "description": {
+          "xml:lang": "en",
+          "type": "literal",
+          "value": "2010 turn-based strategy video game"
+        },
+        "published": {
+          "type": "literal",
+          "value": "2010-09-21T00:00:00Z/11"
+        },
+        "igdbId": {
+          "type": "literal",
+          "value": "sid-meier-s-civilization-v"
+        },
+        "officialSite": {
+          "type": "uri",
+          "value": "http://www.civilization5.com"
+        },
+        "platformLabels": {
+          "type": "literal",
+          "value": "Microsoft Windows|macOS"
+        },
+        "publisherLabels": {
+          "type": "literal",
+          "value": "2K|Aspyr"
+        },
+        "developerLabels": {
+          "type": "literal",
+          "value": "Firaxis Games"
+        },
+        "genreLabels": {
+          "type": "literal",
+          "value": "turn-based strategy video game|4X"
+        },
+        "modeLabels": {
+          "type": "literal",
+          "value": "single-player video game|co-op mode|multiplayer video game"
+        },
+        "steamAppId": {
+          "type": "literal",
+          "value": "8930"
+        }
+      },
+      {
+        "item": {
+          "type": "uri",
+          "value": "http://www.wikidata.org/entity/Q5766"
+        },
+        "id": {
+          "datatype": "http://www.w3.org/2001/XMLSchema#integer",
+          "type": "literal",
+          "value": "5766"
+        },
+        "titleMul": {
+          "xml:lang": "mul",
+          "type": "literal",
+          "value": "VVVVVV"
+        },
+        "description": {
+          "xml:lang": "en",
+          "type": "literal",
+          "value": "2010 2D puzzle platform video game"
+        },
+        "published": {
+          "type": "literal",
+          "value": "2010-01-11T00:00:00Z/11"
+        },
+        "igdbId": {
+          "type": "literal",
+          "value": "vvvvvv"
+        },
+        "officialSite": {
+          "type": "uri",
+          "value": "https://thelettervsixtim.es"
+        },
+        "platformLabels": {
+          "type": "literal",
+          "value": "Microsoft Windows|macOS|Commodore 64|PlayStation Vita|Nintendo 3DS|Pandora|Ouya"
+        },
+        "publisherLabels": {
+          "type": "literal",
+          "value": "Terry Cavanagh|Nicalis"
+        },
+        "developerLabels": {
+          "type": "literal",
+          "value": "Terry Cavanagh"
+        },
+        "genreLabels": {
+          "type": "literal",
+          "value": "puzzle-platformer"
+        },
+        "modeLabels": {
+          "type": "literal",
+          "value": "single-player video game|co-op mode"
+        },
+        "steamAppId": {
+          "type": "literal",
+          "value": "70300"
+        },
+        "gogId": {
+          "type": "literal",
+          "value": "game/vvvvvv"
+        },
+        "title": {
+          "xml:lang": "en",
+          "type": "literal",
+          "value": "VVVVVV"
+        },
+        "imageFile": {
+          "type": "uri",
+          "value": "http://commons.wikimedia.org/wiki/Special:FilePath/VVVVVV%20-%20The%20Tomb%20of%20Mad%20Carew.png"
+        }
+      },
+      {
+        "item": {
+          "type": "uri",
+          "value": "http://www.wikidata.org/entity/Q31332"
+        },
+        "id": {
+          "datatype": "http://www.w3.org/2001/XMLSchema#integer",
+          "type": "literal",
+          "value": "31332"
+        },
+        "titleMul": {
+          "xml:lang": "mul",
+          "type": "literal",
+          "value": "Wind: A Breath of Heart"
+        },
+        "description": {
+          "xml:lang": "en",
+          "type": "literal",
+          "value": "2002 video game"
+        },
+        "igdbId": {
+          "type": "literal",
+          "value": "wind-a-breath-of-heart"
+        },
+        "platformLabels": {
+          "type": "literal",
+          "value": "Microsoft Windows"
+        },
+        "publisherLabels": {
+          "type": "literal",
+          "value": ""
+        },
+        "developerLabels": {
+          "type": "literal",
+          "value": "Minori"
+        },
+        "genreLabels": {
+          "type": "literal",
+          "value": "eroge|harem|visual novel"
+        },
+        "modeLabels": {
+          "type": "literal",
+          "value": ""
+        },
+        "title": {
+          "xml:lang": "en",
+          "type": "literal",
+          "value": "Wind: A Breath of Heart"
+        }
+      }
+    ]
+  }
+}
