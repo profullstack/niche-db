@@ -195,6 +195,8 @@ export const openprofiles = defineAdapter({
       const incremental = !resuming && complete[listing] === true && Boolean(since[listing]);
       let pageCursor = resuming ? resume[listing].at || null : null;
       const startedAt = resuming ? resume[listing].startedAt : new Date().toISOString();
+      // Where in the resumed page to start: everything before it was fetched last time.
+      let offset = resuming ? Math.max(0, Number(resume[listing].offset) || 0) : 0;
       let pages = 0;
       let fetched = 0;
       let skipped = 0;
@@ -236,12 +238,15 @@ export const openprofiles = defineAdapter({
           });
 
           // The page's documents, `concurrency` at a time, until the budget is spent.
-          let next = 0;
+          let next = offset;
+          offset = 0;
           let pageThrottled = 0;
+          let firstThrottled = entries.length;
           const worker = async () => {
             while (next < entries.length) {
               if (Date.now() > stop) return;
-              const entry = entries[next++];
+              const index = next++;
+              const entry = entries[index];
               try {
                 if (paceMs) await new Promise((r) => setTimeout(r, paceMs));
                 const doc = await http.text(entry.url, {
@@ -263,6 +268,7 @@ export const openprofiles = defineAdapter({
                 if (/^(402|429) /.test(msg)) {
                   throttled += 1;
                   pageThrottled += 1;
+                  if (index < firstThrottled) firstThrottled = index;
                 } else {
                   skipped += 1;
                   log(`${app}: ${entry.url} ${msg.slice(0, 60)}`);
@@ -275,17 +281,21 @@ export const openprofiles = defineAdapter({
           );
 
           if (next < entries.length) {
-            // The budget ran out inside this page: resume from this page, so the
-            // documents after the cut are fetched next time (twice is a no-op).
+            // The budget ran out inside this page: resume from this page at the
+            // first entry nobody took (everything before it was processed).
             cut = true;
             stopped = 'budget';
+            offset = next;
             break;
           }
           if (pageThrottled > 0 && pageThrottled * 4 >= Math.max(1, entries.length)) {
             // A quarter of a page refused: the app is metering us. Keep the
-            // page, come back in two minutes rather than burn the allowance.
+            // page and the first refused entry, so the next run, in two
+            // minutes, carries on from there rather than refetching the ones
+            // that got through.
             cut = true;
             stopped = `throttled (${pageThrottled} of ${entries.length})`;
+            offset = firstThrottled;
             break;
           }
           pages += 1;
@@ -302,9 +312,9 @@ export const openprofiles = defineAdapter({
         stats.throttled += throttled;
         stats.pages += pages;
         if (cut) {
-          resume[listing] = { at: pageCursor ?? '', startedAt };
+          resume[listing] = { at: pageCursor ?? '', startedAt, offset };
           notes.push(
-            `${app}: ${fetched} fetched, ${skipped} skipped, ${throttled} throttled, ${pages} pages, cut by ${stopped}, cursor at ${pageCursor ? pageCursor.slice(0, 24) : 'first page'}, resuming in 2 minutes`,
+            `${app}: ${fetched} fetched, ${skipped} skipped, ${throttled} throttled, ${pages} pages, cut by ${stopped}, cursor at ${pageCursor ? pageCursor.slice(0, 24) : 'first page'}${offset ? ` entry ${offset}` : ''}, resuming in 2 minutes`,
           );
         } else {
           delete resume[listing];
