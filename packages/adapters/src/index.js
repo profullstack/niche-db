@@ -12,6 +12,7 @@ import { bl0ggers } from './bl0ggers.js';
 import { blsSeries } from './bls.js';
 import { brisk } from './brisk.js';
 import { buyvps } from './buyvps.js';
+import { c0upons } from './c0upons.js';
 import { cfpbComplaints } from './cfpb.js';
 import { channels } from './channels.js';
 import { clinicalTrials } from './clinicaltrials.js';
@@ -258,6 +259,7 @@ export const ADAPTERS = [
   aiornot,
   agenticjobs,
   tsbb,
+  c0upons,
   // Hosting: who sells servers, at what price, and the deals the small ones announce.
   findhost,
   vultrPlans,

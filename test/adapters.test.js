@@ -75,6 +75,7 @@ describe('registry', () => {
         'profiles',
         'directory',
         'sites',
+        'coupons',
       ]).toContain(a.collection);
     }
     expect(adapterByName('steam').title).toContain('Steam');

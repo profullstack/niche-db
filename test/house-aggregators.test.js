@@ -2,6 +2,7 @@ import { describe, expect, test } from 'bun:test';
 import { readFile } from 'node:fs/promises';
 import * as agenticjobs from '../packages/adapters/src/agenticjobs.js';
 import * as aiornot from '../packages/adapters/src/aiornot.js';
+import * as c0upons from '../packages/adapters/src/c0upons.js';
 import { ADAPTERS, adapterByName } from '../packages/adapters/src/index.js';
 import * as marketplace from '../packages/adapters/src/marketplacefeeds.js';
 import * as p0dcasters from '../packages/adapters/src/p0dcasters.js';
@@ -59,6 +60,7 @@ const HOUSE = {
   aiornot: { collection: 'ai-media', kinds: ['submission'], source: 'aiornot-media' },
   agenticjobs: { collection: 'jobs', kinds: ['job'], source: 'agenticjobs-postings' },
   tsbb: { collection: 'forums', kinds: ['post'], source: 'tsbb-topics' },
+  c0upons: { collection: 'coupons', kinds: ['coupon'], source: 'c0upons-coupons' },
 };
 
 describe('registration', () => {
@@ -78,8 +80,8 @@ describe('registration', () => {
     });
   }
 
-  test('the four new collections exist and every seeded feed names one that does', () => {
-    for (const slug of ['saas', 'marketplace', 'ai-media', 'forums']) {
+  test('the five house collections exist and every seeded feed names one that does', () => {
+    for (const slug of ['saas', 'marketplace', 'ai-media', 'forums', 'coupons']) {
       expect(COLLECTIONS.some((c) => c.slug === slug)).toBe(true);
     }
     const collections = new Set(COLLECTIONS.map((c) => c.slug));
@@ -428,5 +430,86 @@ describe('tsbb', () => {
     const out = await adapterByName('tsbb').pull(c);
     expect(seen.length).toBe(2);
     expect(out.items.length).toBe(1);
+  });
+});
+
+describe('c0upons', () => {
+  test('a submitted coupon carries its store, code and discount, and links to its page', async () => {
+    const rows = JSON.parse(await fixture('c0upons-coupons.json'));
+    const it = c0upons.toItem(rows[0]);
+    expect(it.kind).toBe('coupon');
+    expect(it.externalId).toBe('647');
+    expect(it.title).toBe(
+      'ChatGPT Business: 2 seats for the price of 1 for 48 months ($25/mo off)',
+    );
+    expect(it.url).toBe('https://c0upons.com/coupons/647');
+    expect(it.tags).toEqual([
+      'c0upons',
+      'openai',
+      'source:submitted',
+      'coupon-code',
+      'discount:fixed',
+    ]);
+    expect(it.data.store).toBe('OpenAI');
+    expect(it.data.storeKey).toBe('openai');
+    expect(it.data.storeDomain).toBeNull();
+    expect(it.data.code).toBe('tdsynnexus');
+    expect(it.data.discountType).toBe('fixed');
+    expect(it.data.discountValue).toBe(25);
+    expect(it.data.dealUrl).toBe('https://chatgpt.com/?promoCode=tdsynnexus');
+    expect(it.data.source).toBe('submitted');
+    expect(it.publishedAt).toBeInstanceOf(Date);
+    expect(normaliseItem(it)).toBeTruthy();
+  });
+
+  test('a row c0upons copied from this database is not read back', async () => {
+    const rows = JSON.parse(await fixture('c0upons-coupons.json'));
+    expect(rows[1].source).toBe('nichedb');
+    expect(c0upons.toItem(rows[1])).toBeNull();
+    expect(c0upons.toItem({ id: 'x', title: 'no id' })).toBeNull();
+    expect(c0upons.toItem({ id: 5, title: '   ' })).toBeNull();
+  });
+
+  test('a reddit listing keeps its source, the deal link and the store domain the favicon names', async () => {
+    const rows = JSON.parse(await fixture('c0upons-coupons.json'));
+    const woolino = c0upons.toItem(rows[2]);
+    expect(woolino.tags).toEqual(['c0upons', 'woolino', 'source:reddit', 'discount:fixed']);
+    expect(woolino.data.code).toBeNull();
+    expect(woolino.data.sourceId).toBe('couponcodes:1wf40lq');
+    expect(woolino.data.dealUrl).toBe('https://prz.io/O5oZ5jeCL');
+    expect(woolino.imageUrl).toBeNull();
+
+    const starlink = c0upons.toItem(rows[3]);
+    expect(starlink.data.storeDomain).toBe('starlink.com');
+    expect(starlink.imageUrl).toBe('https://www.google.com/s2/favicons?domain=starlink.com&sz=128');
+    expect(c0upons.domainFromLogo('https://example.com/logo.png')).toBeNull();
+  });
+
+  test('the walk reads whole pages, keeps what is not ours, and stops at a short page', async () => {
+    const rows = JSON.parse(await fixture('c0upons-coupons.json'));
+    const lines = [];
+    const { ctx: c, seen } = ctx(
+      'c0upons',
+      {
+        'https://c0upons.com/api/coupons?limit=200&offset=0': JSON.stringify(rows),
+      },
+      { log: (m) => lines.push(m) },
+    );
+    const out = await adapterByName('c0upons').pull(c);
+    expect(seen).toEqual(['https://c0upons.com/api/coupons?limit=200&offset=0']);
+    expect(out.items.map((i) => i.externalId)).toEqual(['647', '796', '801']);
+    expect(lines[0]).toBe('3 coupons of 4 read, 1 already ours');
+  });
+
+  test('a full page asks for the next one and a repeat across the boundary counts once', async () => {
+    const rows = JSON.parse(await fixture('c0upons-coupons.json'));
+    const full = Array.from({ length: 200 }, (_, i) => ({ ...rows[2], id: 1000 + i }));
+    const { ctx: c, seen } = ctx('c0upons', {
+      'https://c0upons.com/api/coupons?limit=200&offset=0': JSON.stringify(full),
+      'https://c0upons.com/api/coupons?limit=200&offset=200': JSON.stringify([full[199], rows[0]]),
+    });
+    const out = await adapterByName('c0upons').pull(c);
+    expect(seen.length).toBe(2);
+    expect(out.items.length).toBe(201);
   });
 });
