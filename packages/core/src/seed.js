@@ -214,6 +214,12 @@ export const COLLECTIONS = [
       'What ThreatCrush and other OpenThreat reporters identified in the open: findings in public repositories, attacks observed against the reporter’s own hosts, indicators worth blocking, advisories. Each row is read from the reporter’s own /.well-known/openthreat.json, in the reporter’s words, with the reporter named and the subject linked, and re-read hourly so a threat goes fixed, blocked or withdrawn in place. Never from a private scan: a reporter publishes only what was already visible to anyone who looked, a secret is published unlocated, and a paying user’s scan never appears.',
   },
   {
+    slug: 'directory',
+    name: 'Directory',
+    description:
+      'Companies, sites and self-published people the OutreachGraph crawler has read from the open web: a company by its domain with its industry and stack as topics, a site the crawler read, and a person only when they publish their own OpenProfile.md or a profile and a home page vouch for each other with rel=me. Read from outreachgraph.com’s keyless public directory, which withholds every email, phone, address, score, signal, campaign and workspace; nothing here came from a private table, and a person known only from a scraped handle is not listed.',
+  },
+  {
     slug: 'saas',
     name: 'SaaS',
     description:
@@ -1365,6 +1371,44 @@ export const DEFAULT_FEEDS = [
     slug: 'agent-friendly-jobs',
     name: 'Jobs an AI agent may apply for',
     query: { kinds: ['job'], tags: ['agents:welcome'] },
+  },
+  // Directory: the public half of the OutreachGraph crawl, and the cuts a reader asks for first.
+  {
+    collection: 'directory',
+    slug: 'directory-all',
+    name: 'Everything in the directory',
+    description:
+      'Every company, site and self-published person outreachgraph.com lists, as the directory states them.',
+    query: { kinds: ['company', 'site', 'person'] },
+  },
+  {
+    collection: 'directory',
+    slug: 'directory-companies',
+    name: 'Companies',
+    description: 'Companies the crawler could name, by domain, with industry and stack as topics.',
+    query: { kinds: ['company'] },
+  },
+  {
+    collection: 'directory',
+    slug: 'directory-sites',
+    name: 'Sites',
+    description: 'Domains the crawler read where the page named no organisation.',
+    query: { kinds: ['site'] },
+  },
+  {
+    collection: 'directory',
+    slug: 'directory-people',
+    name: 'People who publish their own profile',
+    description:
+      'People listed only because they publish their own profile: an OpenProfile.md they serve, or a profile and a home page that vouch for each other.',
+    query: { kinds: ['person'] },
+  },
+  {
+    collection: 'directory',
+    slug: 'directory-openprofiles',
+    name: 'Self-served OpenProfile.md files',
+    description: 'People who serve an OpenProfile.md themselves; each row links the file.',
+    query: { kinds: ['person'], tags: ['openprofile'] },
   },
   {
     collection: 'saas',
