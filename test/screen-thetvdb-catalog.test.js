@@ -271,6 +271,7 @@ describe('the first pass', () => {
     ]);
     expect(out.cursor.page).toBeNull();
     expect(out.cursor.walkedAt).toMatch(/^\d{4}-/);
+    expect(out.cursor.startedAt).toBe(out.cursor.refreshedAt);
     expect(out.cursor.token).toBe(TOKEN);
     expect(out.cursor.tokenExpires).toBe(1791915321000);
     expect(out.nextInMinutes).toBeUndefined();
@@ -315,14 +316,20 @@ describe('the first pass', () => {
     const first = await run({ pagesPerRun: 1 }, {}, p);
     expect(first.items).toHaveLength(4);
     expect(first.cursor).toMatchObject({ page: 1, walkedAt: null, token: TOKEN });
+    expect(first.cursor.startedAt).toMatch(/^\d{4}-/);
     expect(first.nextInMinutes).toBe(10);
     expect(first.note).toContain('at the cap');
+    await new Promise((r) => setTimeout(r, 5));
     const second = await run({ pagesPerRun: 5 }, first.cursor, p);
     expect(second.items.map((i) => i.externalId)).toEqual([
       'thetvdb:series:70909',
       'thetvdb:series:70910',
     ]);
     expect(second.cursor.walkedAt).toMatch(/^\d{4}-/);
+    // the first delta listing reaches back to when the walk began, not when it ended
+    expect(second.cursor.startedAt).toBe(first.cursor.startedAt);
+    expect(second.cursor.refreshedAt).toBe(first.cursor.startedAt);
+    expect(second.cursor.walkedAt > second.cursor.refreshedAt).toBe(true);
     expect(p.calls.filter((c) => c.method === 'POST')).toHaveLength(1);
   });
 
@@ -424,5 +431,21 @@ describe('the delta path', () => {
     expect(out.cursor.pending).toEqual([]);
     const q = provider({ failing: (path) => path.startsWith('/v4/updates') });
     await expect(run({}, walked, q)).rejects.toThrow(/could not list updates/);
+  });
+
+  test('a run whose deadline has already passed lists nothing and keeps the old mark', async () => {
+    const p = provider();
+    const out = await thetvdbCatalog.pull({
+      config: { pauseMs: 0 },
+      cursor: walked,
+      env: { thetvdbApiKey: KEY },
+      http: p.http,
+      log: () => {},
+      deadline: 0,
+    });
+    expect(p.calls).toHaveLength(0);
+    expect(out.items).toEqual([]);
+    expect(out.cursor.refreshedAt).toBe(walked.refreshedAt);
+    expect(out.cursor.pending).toEqual([]);
   });
 });
