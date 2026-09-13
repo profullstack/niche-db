@@ -1,7 +1,9 @@
 -- Geographic reads without a PostGIS dependency. Expression index also covers
 -- existing rows; no re-ingestion or stored-column table rewrite is required.
+-- CREATE INDEX restricts search_path while evaluating existing rows. Capture
+-- the installation path so nested geographic helpers still resolve there.
 create function ndb_coord(v text, lim double precision) returns double precision
-language plpgsql immutable parallel safe as $$
+language plpgsql immutable parallel safe set search_path from current as $$
 declare n double precision;
 begin
   if v is null or btrim(v) = '' then return null; end if;
@@ -14,7 +16,7 @@ end $$;
 -- Coverage takes precedence over a receiver/site point. Unknown or malformed
 -- coverage must not silently fall back to a receiver's physical location.
 create function ndb_geo_shape(d jsonb) returns jsonb
-language plpgsql immutable parallel safe as $$
+language plpgsql immutable parallel safe set search_path from current as $$
 declare p jsonb; x double precision; y double precision;
 begin
   if d ? 'coverage' and d->'coverage' <> 'null'::jsonb then return d->'coverage'; end if;
@@ -30,7 +32,7 @@ begin
 end $$;
 
 create function ndb_distance(x1 double precision, y1 double precision, x2 double precision, y2 double precision)
-returns double precision language sql immutable strict parallel safe as $$
+returns double precision language sql immutable strict parallel safe set search_path from current as $$
   select 12742017.6 * asin(sqrt(least(1.0, greatest(0.0,
     power(sin(radians(y2-y1)/2),2) + cos(radians(y1))*cos(radians(y2))*power(sin(radians(x2-x1)/2),2)))));
 $$;
@@ -38,7 +40,7 @@ $$;
 -- A conservative longitude/latitude envelope. A crossing or polar envelope is
 -- widened to the full longitude range so the index never loses a match.
 create function ndb_radius_box(x double precision, y double precision, radius_m double precision)
-returns box language plpgsql immutable strict parallel safe as $$
+returns box language plpgsql immutable strict parallel safe set search_path from current as $$
 declare dy double precision := degrees(radius_m / 6371008.8); dx double precision;
 begin
   if abs(y) + dy >= 90 then dx := 180;
@@ -48,7 +50,7 @@ begin
 end $$;
 
 create function ndb_geo_box(d jsonb) returns box
-language plpgsql immutable parallel safe as $$
+language plpgsql immutable parallel safe set search_path from current as $$
 declare g jsonb := ndb_geo_shape(d); p jsonb; ring jsonb; poly jsonb; polys jsonb;
   x double precision; y double precision; r double precision;
   west double precision := 180; east double precision := -180;
@@ -85,7 +87,7 @@ end $$;
 -- subdivided before spherical distance so longitude/latitude segments follow
 -- the same path as map renderers (rather than a single great-circle arc).
 create function ndb_polygon_distance(poly jsonb, x double precision, y double precision)
-returns double precision language plpgsql immutable parallel safe as $$
+returns double precision language plpgsql immutable parallel safe set search_path from current as $$
 declare ring jsonb; p jsonb; pts text; px double precision; py double precision;
   firstx double precision; prevx double precision; prevy double precision;
   qx double precision; inside boolean := false; hole boolean := false; idx integer := 0;
@@ -124,7 +126,7 @@ begin
 end $$;
 
 create function ndb_geo_distance(d jsonb, x double precision, y double precision)
-returns double precision language plpgsql immutable strict parallel safe as $$
+returns double precision language plpgsql immutable strict parallel safe set search_path from current as $$
 declare g jsonb := ndb_geo_shape(d); poly jsonb; best double precision := 'Infinity';
 begin
   if ndb_geo_box(d) is null then return null; end if;
