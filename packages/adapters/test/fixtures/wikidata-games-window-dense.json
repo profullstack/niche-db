@@ -1,0 +1,222 @@
+{
+  "head": {
+    "vars": [
+      "item",
+      "id",
+      "title",
+      "titleMul",
+      "description",
+      "published",
+      "steamAppId",
+      "gogId",
+      "igdbId",
+      "imageFile",
+      "officialSite",
+      "platformLabels",
+      "publisherLabels",
+      "developerLabels",
+      "genreLabels",
+      "modeLabels"
+    ]
+  },
+  "results": {
+    "bindings": [
+      {
+        "item": {
+          "type": "uri",
+          "value": "http://www.wikidata.org/entity/Q135003835"
+        },
+        "id": {
+          "datatype": "http://www.w3.org/2001/XMLSchema#integer",
+          "type": "literal",
+          "value": "135003835"
+        },
+        "title": {
+          "xml:lang": "en",
+          "type": "literal",
+          "value": "MapleStory R: Evolution"
+        },
+        "description": {
+          "xml:lang": "en",
+          "type": "literal",
+          "value": "2021 video game"
+        },
+        "published": {
+          "type": "literal",
+          "value": "2021-09-22T00:00:00Z/11"
+        },
+        "platformLabels": {
+          "type": "literal",
+          "value": ""
+        },
+        "publisherLabels": {
+          "type": "literal",
+          "value": ""
+        },
+        "developerLabels": {
+          "type": "literal",
+          "value": "RASTAR GAMES"
+        },
+        "genreLabels": {
+          "type": "literal",
+          "value": ""
+        },
+        "modeLabels": {
+          "type": "literal",
+          "value": ""
+        },
+        "officialSite": {
+          "type": "uri",
+          "value": "https://msrsea.rastargames.com/"
+        }
+      },
+      {
+        "item": {
+          "type": "uri",
+          "value": "http://www.wikidata.org/entity/Q135005950"
+        },
+        "id": {
+          "datatype": "http://www.w3.org/2001/XMLSchema#integer",
+          "type": "literal",
+          "value": "135005950"
+        },
+        "description": {
+          "xml:lang": "en",
+          "type": "literal",
+          "value": "2000 video game developed by Deadline Games"
+        },
+        "published": {
+          "type": "literal",
+          "value": "2000-01-01T00:00:00Z/9"
+        },
+        "platformLabels": {
+          "type": "literal",
+          "value": "Microsoft Windows"
+        },
+        "publisherLabels": {
+          "type": "literal",
+          "value": "Vision Park"
+        },
+        "developerLabels": {
+          "type": "literal",
+          "value": "Deadline Games"
+        },
+        "genreLabels": {
+          "type": "literal",
+          "value": "educational video game"
+        },
+        "modeLabels": {
+          "type": "literal",
+          "value": "single-player video game"
+        },
+        "officialSite": {
+          "type": "uri",
+          "value": "http://www.deadline.dk/spil_globetrotter1.htm"
+        },
+        "titleMul": {
+          "xml:lang": "mul",
+          "type": "literal",
+          "value": "Globetrotter"
+        },
+        "igdbId": {
+          "type": "literal",
+          "value": "globetrotter"
+        }
+      },
+      {
+        "item": {
+          "type": "uri",
+          "value": "http://www.wikidata.org/entity/Q135009059"
+        },
+        "id": {
+          "datatype": "http://www.w3.org/2001/XMLSchema#integer",
+          "type": "literal",
+          "value": "135009059"
+        },
+        "title": {
+          "xml:lang": "en",
+          "type": "literal",
+          "value": "Holiday Motel Simulator"
+        },
+        "description": {
+          "xml:lang": "en",
+          "type": "literal",
+          "value": "video game"
+        },
+        "platformLabels": {
+          "type": "literal",
+          "value": "Microsoft Windows"
+        },
+        "publisherLabels": {
+          "type": "literal",
+          "value": "Red Phoenix Interactive"
+        },
+        "developerLabels": {
+          "type": "literal",
+          "value": "Red Phoenix Interactive"
+        },
+        "genreLabels": {
+          "type": "literal",
+          "value": "casual game|simulation video game"
+        },
+        "modeLabels": {
+          "type": "literal",
+          "value": "single-player video game"
+        },
+        "titleMul": {
+          "xml:lang": "mul",
+          "type": "literal",
+          "value": "Holiday Motel Simulator"
+        },
+        "igdbId": {
+          "type": "literal",
+          "value": "holiday-motel-simulator"
+        },
+        "steamAppId": {
+          "type": "literal",
+          "value": "2812420"
+        }
+      },
+      {
+        "item": {
+          "type": "uri",
+          "value": "http://www.wikidata.org/entity/Q135013027"
+        },
+        "id": {
+          "datatype": "http://www.w3.org/2001/XMLSchema#integer",
+          "type": "literal",
+          "value": "135013027"
+        },
+        "description": {
+          "xml:lang": "en",
+          "type": "literal",
+          "value": "2009 video game"
+        },
+        "published": {
+          "type": "literal",
+          "value": "2009-06-25T00:00:00Z/11"
+        },
+        "platformLabels": {
+          "type": "literal",
+          "value": ""
+        },
+        "publisherLabels": {
+          "type": "literal",
+          "value": ""
+        },
+        "developerLabels": {
+          "type": "literal",
+          "value": ""
+        },
+        "genreLabels": {
+          "type": "literal",
+          "value": ""
+        },
+        "modeLabels": {
+          "type": "literal",
+          "value": ""
+        }
+      }
+    ]
+  }
+}

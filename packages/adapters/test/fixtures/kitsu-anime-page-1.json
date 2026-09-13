@@ -1,0 +1,286 @@
+{
+  "data": [
+    {
+      "id": "21",
+      "type": "anime",
+      "links": {
+        "self": "https://kitsu.io/api/edge/anime/21"
+      },
+      "attributes": {
+        "createdAt": "2013-02-20T16:00:34.230Z",
+        "updatedAt": "2026-09-13T06:00:26.062Z",
+        "slug": "neon-genesis-evangelion",
+        "synopsis": "In the year 2015, the world stands on the brink of destruction. Humanity's last hope lies in the hands of Nerv, a special agency under the United Nations, and their Evangelions, giant machines capable of defeating the Angels who herald Earth's ruin. Gendou Ikari, head of the organization, seeks compatible pilots who can synchronize with the Evangelions and realize their true potential. Aiding in this defensive endeavor are talented personnel Misato Katsuragi, Head of Tactical Operations, and Ritsuko Akagi, Chief Scientist.\n\nFace to face with his father for the first time in years, 14-year-old Shinji Ikari's average life is irreversibly changed when he is whisked away into the depths of Nerv, and into a harrowing new destiny—he must become the pilot of Evangelion Unit-01 with the fate of mankind on his shoulders.\nWritten by Hideaki Anno, Neon Genesis Evangelion is a heroic tale of a young boy who will become a legend. But as this psychological drama unfolds, ancient secrets beneath the big picture begin to bubble to the surface...\n\n(Source: MAL Rewrite)",
+        "description": "In the year 2015, the world stands on the brink of destruction. Humanity's last hope lies in the hands of Nerv, a special agency under the United Nations, and their Evangelions, giant machines capable of defeating the Angels who herald Earth's ruin. Gendou Ikari, head of the organization, seeks compatible pilots who can synchronize with the Evangelions and realize their true potential. Aiding in this defensive endeavor are talented personnel Misato Katsuragi, Head of Tactical Operations, and Ritsuko Akagi, Chief Scientist.\n\nFace to face with his father for the first time in years, 14-year-old Shinji Ikari's average life is irreversibly changed when he is whisked away into the depths of Nerv, and into a harrowing new destiny—he must become the pilot of Evangelion Unit-01 with the fate of mankind on his shoulders.\nWritten by Hideaki Anno, Neon Genesis Evangelion is a heroic tale of a young boy who will become a legend. But as this psychological drama unfolds, ancient secrets beneath the big picture begin to bubble to the surface...\n\n(Source: MAL Rewrite)",
+        "titles": {
+          "en": "Neon Genesis Evangelion",
+          "en_jp": "Shinseiki Evangelion",
+          "ja_jp": "新世紀エヴァンゲリオン"
+        },
+        "canonicalTitle": "Neon Genesis Evangelion",
+        "abbreviatedTitles": [],
+        "averageRating": "82.15",
+        "userCount": 116357,
+        "favoritesCount": 5051,
+        "startDate": "1995-10-04",
+        "endDate": "1996-03-27",
+        "nextRelease": null,
+        "popularityRank": 74,
+        "ratingRank": 254,
+        "ageRating": "PG",
+        "ageRatingGuide": "Teens 13 or older",
+        "subtype": "TV",
+        "status": "finished",
+        "tba": null,
+        "posterImage": {
+          "tiny": "https://media.kitsu.app/anime/21/poster_image/tiny-32b16200c25d370a90793f30ee8c940a.jpeg",
+          "large": "https://media.kitsu.app/anime/21/poster_image/large-9a3a9086a1b563e9e72d510118eb7d3c.jpeg",
+          "small": "https://media.kitsu.app/anime/21/poster_image/small-6662f66b53b64098d873e037b3f59bd2.jpeg",
+          "medium": "https://media.kitsu.app/anime/21/poster_image/medium-d98a2928c9eda0d71f0dab72c1a0124d.jpeg",
+          "original": "https://media.kitsu.app/anime/21/poster_image/077bf97dfb04853975a6e85694b861f4.jpg",
+          "meta": {
+            "dimensions": {
+              "tiny": {
+                "width": 110,
+                "height": 156
+              },
+              "large": {
+                "width": 550,
+                "height": 780
+              },
+              "small": {
+                "width": 284,
+                "height": 402
+              },
+              "medium": {
+                "width": 390,
+                "height": 554
+              }
+            }
+          }
+        },
+        "coverImage": {
+          "tiny": "https://media.kitsu.app/anime/cover_images/21/tiny.jpg",
+          "large": "https://media.kitsu.app/anime/cover_images/21/large.jpg",
+          "small": "https://media.kitsu.app/anime/cover_images/21/small.jpg",
+          "original": "https://media.kitsu.app/anime/cover_images/21/original.jpg",
+          "meta": {
+            "dimensions": {
+              "tiny": {
+                "width": 840,
+                "height": 200
+              },
+              "large": {
+                "width": 3360,
+                "height": 800
+              },
+              "small": {
+                "width": 1680,
+                "height": 400
+              }
+            }
+          }
+        },
+        "episodeCount": 26,
+        "episodeLength": 24,
+        "totalLength": 624,
+        "youtubeVideoId": "qW5DCdRp3rk",
+        "showType": "TV",
+        "nsfw": false
+      }
+    },
+    {
+      "id": "22",
+      "type": "anime",
+      "links": {
+        "self": "https://kitsu.io/api/edge/anime/22"
+      },
+      "attributes": {
+        "createdAt": "2013-02-20T16:00:35.055Z",
+        "updatedAt": "2026-09-13T06:00:26.062Z",
+        "slug": "neon-genesis-evangelion-death-rebirth",
+        "synopsis": "In the year 2015, more than a decade has passed since the catastrophic event known as Second Impact befell mankind. During this time of recovery, a select few learned of beings known as the Angels—colossal malevolent entities with the intention of triggering the Third Impact and wiping out the rest of humanity.\n\nCalled into the city of Tokyo-3 by his father Gendou Ikari, teenager Shinji is thrust headlong into humanity's struggle. Separated from Gendou since the death of his mother, Shinji presumes that his father wishes to repair their shattered familial bonds; instead, he discovers that he was brought to pilot a giant machine capable of fighting the Angels, Evangelion Unit-01. Forced to battle against wave after wave of mankind's greatest threat, the young boy finds himself caught in the middle of a plan that could affect the future of humanity forever.\n\n(Source: MAL Rewrite)",
+        "description": "In the year 2015, more than a decade has passed since the catastrophic event known as Second Impact befell mankind. During this time of recovery, a select few learned of beings known as the Angels—colossal malevolent entities with the intention of triggering the Third Impact and wiping out the rest of humanity.\n\nCalled into the city of Tokyo-3 by his father Gendou Ikari, teenager Shinji is thrust headlong into humanity's struggle. Separated from Gendou since the death of his mother, Shinji presumes that his father wishes to repair their shattered familial bonds; instead, he discovers that he was brought to pilot a giant machine capable of fighting the Angels, Evangelion Unit-01. Forced to battle against wave after wave of mankind's greatest threat, the young boy finds himself caught in the middle of a plan that could affect the future of humanity forever.\n\n(Source: MAL Rewrite)",
+        "titles": {
+          "en": "Neon Genesis Evangelion: Death & Rebirth",
+          "en_jp": "Shinseiki Evangelion Gekijouban: Shi to Shinsei",
+          "ja_jp": "新世紀エヴァンゲリオン劇場版 シト新生"
+        },
+        "canonicalTitle": "Neon Genesis Evangelion: Death & Rebirth",
+        "abbreviatedTitles": [
+          "Neon Genesis Evangelion - Death and Rebirth"
+        ],
+        "averageRating": "72.57",
+        "userCount": 19121,
+        "favoritesCount": 67,
+        "startDate": "1997-03-15",
+        "endDate": "1997-03-15",
+        "nextRelease": null,
+        "popularityRank": 885,
+        "ratingRank": 3855,
+        "ageRating": "R",
+        "ageRatingGuide": "17+ (violence & profanity)",
+        "subtype": "movie",
+        "status": "finished",
+        "tba": null,
+        "posterImage": {
+          "tiny": "https://media.kitsu.app/anime/22/poster_image/tiny-01c686bf719f75faeaa469f2ae9ac0b9.jpeg",
+          "large": "https://media.kitsu.app/anime/22/poster_image/large-26ededce5894132b719aa254e0d1c60b.jpeg",
+          "small": "https://media.kitsu.app/anime/22/poster_image/small-251c4494ef690183e7518973a610948c.jpeg",
+          "medium": "https://media.kitsu.app/anime/22/poster_image/medium-f4f63bbf9765c7ddc8906caaaf5bfa7f.jpeg",
+          "original": "https://media.kitsu.app/anime/22/poster_image/81d3fdbb54b11f5e20d50c15a7dfc303.jpg",
+          "meta": {
+            "dimensions": {
+              "tiny": {
+                "width": 110,
+                "height": 156
+              },
+              "large": {
+                "width": 550,
+                "height": 780
+              },
+              "small": {
+                "width": 284,
+                "height": 402
+              },
+              "medium": {
+                "width": 390,
+                "height": 554
+              }
+            }
+          }
+        },
+        "coverImage": {
+          "tiny": "https://media.kitsu.app/anime/cover_images/22/tiny.jpg",
+          "large": "https://media.kitsu.app/anime/cover_images/22/large.jpg",
+          "small": "https://media.kitsu.app/anime/cover_images/22/small.jpg",
+          "original": "https://media.kitsu.app/anime/cover_images/22/original.jpg",
+          "meta": {
+            "dimensions": {
+              "tiny": {
+                "width": 840,
+                "height": 200
+              },
+              "large": {
+                "width": 3360,
+                "height": 800
+              },
+              "small": {
+                "width": 1680,
+                "height": 400
+              }
+            }
+          }
+        },
+        "episodeCount": 1,
+        "episodeLength": 101,
+        "totalLength": 101,
+        "youtubeVideoId": "eI8aUqsCovo",
+        "showType": "movie",
+        "nsfw": false
+      }
+    },
+    {
+      "id": "26",
+      "type": "anime",
+      "links": {
+        "self": "https://kitsu.io/api/edge/anime/26"
+      },
+      "attributes": {
+        "createdAt": "2013-02-20T16:00:38.738Z",
+        "updatedAt": "2026-09-13T06:00:26.062Z",
+        "slug": "rurouni-kenshin-tsuiokuhen",
+        "synopsis": "When mankind's savagery surpasses his fear of death, there is little hope for those who wish to live honest lives. Beneath a full moon, a young boy witnesses the murder of the bandits who had enslaved him, and is then christened with a new name by the man who rescued him. This boy is Shinta, now known as Kenshin Himura, and he is destined to become a swordsman. The softness of his heart does not befit the occupation, but his desire to protect the innocent is absolute.Rurouni Kenshin: Meiji Kenkaku Romantan - Tsuioku-hen details the origins of the man who would bear the name of Hitokiri Battousai long before he swore his oath not to kill and before he earned his reputation as an assassin. The young man’s heart is divided between justice and corruption, while the fate of a nation rests on his actions.\n[Written by MAL Rewrite]",
+        "description": "When mankind's savagery surpasses his fear of death, there is little hope for those who wish to live honest lives. Beneath a full moon, a young boy witnesses the murder of the bandits who had enslaved him, and is then christened with a new name by the man who rescued him. This boy is Shinta, now known as Kenshin Himura, and he is destined to become a swordsman. The softness of his heart does not befit the occupation, but his desire to protect the innocent is absolute.Rurouni Kenshin: Meiji Kenkaku Romantan - Tsuioku-hen details the origins of the man who would bear the name of Hitokiri Battousai long before he swore his oath not to kill and before he earned his reputation as an assassin. The young man’s heart is divided between justice and corruption, while the fate of a nation rests on his actions.\n[Written by MAL Rewrite]",
+        "titles": {
+          "en": "Samurai X: Trust and Betrayal",
+          "en_jp": "Rurouni Kenshin: Meiji Kenkaku Romantan - Tsuioku-hen",
+          "en_us": "Samurai X: Trust and Betrayal",
+          "ja_jp": "るろうに剣心―明治剣客浪漫譚―追憶編"
+        },
+        "canonicalTitle": "Rurouni Kenshin: Meiji Kenkaku Romantan - Tsuioku-hen",
+        "abbreviatedTitles": [
+          "Rurouni Kenshin: Tsuiokuhen",
+          "Rurouni Kenshin: Reminiscence"
+        ],
+        "averageRating": "81.99",
+        "userCount": 36840,
+        "favoritesCount": 468,
+        "startDate": "1999-02-20",
+        "endDate": "1999-09-22",
+        "nextRelease": null,
+        "popularityRank": 411,
+        "ratingRank": 345,
+        "ageRating": "R",
+        "ageRatingGuide": "17+ (violence & profanity)",
+        "subtype": "OVA",
+        "status": "finished",
+        "tba": "",
+        "posterImage": {
+          "tiny": "https://media.kitsu.app/anime/poster_images/26/tiny.jpg",
+          "large": "https://media.kitsu.app/anime/poster_images/26/large.jpg",
+          "small": "https://media.kitsu.app/anime/poster_images/26/small.jpg",
+          "medium": "https://media.kitsu.app/anime/poster_images/26/medium.jpg",
+          "original": "https://media.kitsu.app/anime/poster_images/26/original.jpg",
+          "meta": {
+            "dimensions": {
+              "tiny": {
+                "width": 110,
+                "height": 156
+              },
+              "large": {
+                "width": 550,
+                "height": 780
+              },
+              "small": {
+                "width": 284,
+                "height": 402
+              },
+              "medium": {
+                "width": 390,
+                "height": 554
+              }
+            }
+          }
+        },
+        "coverImage": {
+          "tiny": "https://media.kitsu.app/anime/cover_images/26/tiny.jpg",
+          "large": "https://media.kitsu.app/anime/cover_images/26/large.jpg",
+          "small": "https://media.kitsu.app/anime/cover_images/26/small.jpg",
+          "original": "https://media.kitsu.app/anime/cover_images/26/original.png",
+          "meta": {
+            "dimensions": {
+              "tiny": {
+                "width": 840,
+                "height": 200
+              },
+              "large": {
+                "width": 3360,
+                "height": 800
+              },
+              "small": {
+                "width": 1680,
+                "height": 400
+              }
+            }
+          }
+        },
+        "episodeCount": 4,
+        "episodeLength": 30,
+        "totalLength": 120,
+        "youtubeVideoId": "QZ6OFUuVm8Q",
+        "showType": "OVA",
+        "nsfw": false
+      }
+    }
+  ],
+  "meta": {
+    "count": 22418
+  },
+  "links": {
+    "first": "https://kitsu.io/api/edge/anime?page%5Blimit%5D=20&page%5Boffset%5D=0&sort=id",
+    "prev": "https://kitsu.io/api/edge/anime?page%5Blimit%5D=20&page%5Boffset%5D=0&sort=id",
+    "next": "https://kitsu.io/api/edge/anime?page%5Blimit%5D=20&page%5Boffset%5D=40&sort=id",
+    "last": "https://kitsu.io/api/edge/anime?page%5Blimit%5D=20&page%5Boffset%5D=22398&sort=id"
+  }
+}

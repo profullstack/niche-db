@@ -1,0 +1,236 @@
+{
+  "data": [
+    {
+      "id": "51036",
+      "type": "anime",
+      "links": {
+        "self": "https://kitsu.io/api/edge/anime/51036"
+      },
+      "attributes": {
+        "createdAt": "2026-09-12T20:13:54.609Z",
+        "updatedAt": "2026-09-13T06:00:26.062Z",
+        "slug": "oracle-music",
+        "synopsis": "Music video for the song ORACLE by Kei Sugawara.",
+        "description": "Music video for the song ORACLE by Kei Sugawara.",
+        "titles": {
+          "en_jp": "Oracle",
+          "ja_jp": "ORACLE"
+        },
+        "canonicalTitle": "Oracle",
+        "abbreviatedTitles": [],
+        "averageRating": null,
+        "userCount": 1,
+        "favoritesCount": 0,
+        "startDate": "2026-02-11",
+        "endDate": "2026-02-11",
+        "nextRelease": null,
+        "popularityRank": 24067,
+        "ratingRank": null,
+        "ageRating": "G",
+        "ageRatingGuide": null,
+        "subtype": "music",
+        "status": "finished",
+        "tba": null,
+        "posterImage": {
+          "tiny": "https://media.kitsu.app/anime/51036/poster_image/tiny-2e884c7dbce23ffde8f461b51d38c282.jpeg",
+          "large": "https://media.kitsu.app/anime/51036/poster_image/large-57126a0a7d7509b2d64a1a2284b0ec82.jpeg",
+          "small": "https://media.kitsu.app/anime/51036/poster_image/small-7a6414a270041ef986e78d4dd993c30a.jpeg",
+          "medium": "https://media.kitsu.app/anime/51036/poster_image/medium-d2baf48a3e22efe3792b1ef8462963be.jpeg",
+          "original": "https://media.kitsu.app/anime/51036/poster_image/dad6a7529baa1b161249e76dc20c5a5d.png",
+          "meta": {
+            "dimensions": {
+              "tiny": {
+                "width": 110,
+                "height": 156
+              },
+              "large": {
+                "width": 550,
+                "height": 780
+              },
+              "small": {
+                "width": 284,
+                "height": 402
+              },
+              "medium": {
+                "width": 390,
+                "height": 554
+              }
+            }
+          }
+        },
+        "coverImage": {
+          "tiny": "https://media.kitsu.app/anime/51036/cover_image/tiny-7ac8aaf1c6401b3d09cfe9ad64dc1f64.jpeg",
+          "large": "https://media.kitsu.app/anime/51036/cover_image/large-52f7f8377aeb96d0c8f1209f215af25a.jpeg",
+          "small": "https://media.kitsu.app/anime/51036/cover_image/small-f0cf7de0a060bd6520e7d39384daea2e.jpeg",
+          "original": "https://media.kitsu.app/anime/51036/cover_image/866b84a741196147b9a323ed54c0d78a.png",
+          "meta": {
+            "dimensions": {
+              "tiny": {
+                "width": 840,
+                "height": 200
+              },
+              "large": {
+                "width": 3360,
+                "height": 800
+              },
+              "small": {
+                "width": 1680,
+                "height": 400
+              }
+            }
+          }
+        },
+        "episodeCount": 1,
+        "episodeLength": 3,
+        "totalLength": 3,
+        "youtubeVideoId": "EAgqwJPB2f4",
+        "showType": "music",
+        "nsfw": false
+      }
+    },
+    {
+      "id": "51038",
+      "type": "anime",
+      "links": {
+        "self": "https://kitsu.io/api/edge/anime/51038"
+      },
+      "attributes": {
+        "createdAt": "2026-09-12T22:13:04.066Z",
+        "updatedAt": "2026-09-13T06:00:26.062Z",
+        "slug": "dynamite",
+        "synopsis": "Are you ready to style up like #Dynamite?\n\nTinyTAN inspired by BTS\n\n(Source: BANGTANTV Official YouTube Channel)",
+        "description": "Are you ready to style up like #Dynamite?\n\nTinyTAN inspired by BTS\n\n(Source: BANGTANTV Official YouTube Channel)",
+        "titles": {
+          "en": "Dynamite"
+        },
+        "canonicalTitle": "Dynamite",
+        "abbreviatedTitles": [
+          "[TinyTAN | CLIP] - Dynamite"
+        ],
+        "averageRating": null,
+        "userCount": 1,
+        "favoritesCount": 0,
+        "startDate": "2021-04-13",
+        "endDate": "2021-04-13",
+        "nextRelease": null,
+        "popularityRank": 24068,
+        "ratingRank": null,
+        "ageRating": "G",
+        "ageRatingGuide": null,
+        "subtype": "ONA",
+        "status": "finished",
+        "tba": null,
+        "posterImage": {
+          "tiny": "https://media.kitsu.app/anime/51038/poster_image/tiny-2b8b8a3640d54bf3f6cee8d99587da9d.jpeg",
+          "large": "https://media.kitsu.app/anime/51038/poster_image/large-72e2993817fa25d496e9aa8eb8430f33.jpeg",
+          "small": "https://media.kitsu.app/anime/51038/poster_image/small-d7ba836a839c1b7ddd5b0c202cfd2a88.jpeg",
+          "medium": "https://media.kitsu.app/anime/51038/poster_image/medium-71b4fb0b9348cc1c3a7347d152bd478f.jpeg",
+          "original": "https://media.kitsu.app/anime/51038/poster_image/24f3a7f9205549845496ec8c6666e2f7.png",
+          "meta": {
+            "dimensions": {
+              "tiny": {
+                "width": 110,
+                "height": 156
+              },
+              "large": {
+                "width": 550,
+                "height": 780
+              },
+              "small": {
+                "width": 284,
+                "height": 402
+              },
+              "medium": {
+                "width": 390,
+                "height": 554
+              }
+            }
+          }
+        },
+        "coverImage": null,
+        "episodeCount": 1,
+        "episodeLength": 0,
+        "totalLength": 0,
+        "youtubeVideoId": "_K2v-MmAj7E",
+        "showType": "ONA",
+        "nsfw": false
+      }
+    },
+    {
+      "id": "51043",
+      "type": "anime",
+      "links": {
+        "self": "https://kitsu.io/api/edge/anime/51043"
+      },
+      "attributes": {
+        "createdAt": "2026-09-13T00:28:42.473Z",
+        "updatedAt": "2026-09-13T06:00:26.062Z",
+        "slug": "matsuken-anime-kore-seibaishite-mo-ii-desu-ka",
+        "synopsis": "The anime centers on the character Matsuken and his dog partner Matsu Inu, who cheerfully \"vanquish\" various hazy feelings or frustrations of the everyday modern life.\n\n(Source: ANN)",
+        "description": "The anime centers on the character Matsuken and his dog partner Matsu Inu, who cheerfully \"vanquish\" various hazy feelings or frustrations of the everyday modern life.\n\n(Source: ANN)",
+        "titles": {
+          "en": "Matsuken Anime: Can I Pass Judgment on This?",
+          "en_jp": "Matsuken Anime: Kore Seibaishite mo Ii desu ka?",
+          "ja_jp": "マツケンアニメ~コレ成敗してもいいですか？～"
+        },
+        "canonicalTitle": "Matsuken Anime: Kore Seibaishite mo Ii desu ka?",
+        "abbreviatedTitles": [],
+        "averageRating": null,
+        "userCount": 0,
+        "favoritesCount": 0,
+        "startDate": "2026-08-29",
+        "endDate": null,
+        "nextRelease": null,
+        "popularityRank": 24071,
+        "ratingRank": null,
+        "ageRating": "PG",
+        "ageRatingGuide": null,
+        "subtype": "ONA",
+        "status": "current",
+        "tba": null,
+        "posterImage": {
+          "tiny": "https://media.kitsu.app/anime/51043/poster_image/tiny-9a8b28d5ac7b5ac4e69b964d3ced0d33.jpeg",
+          "large": "https://media.kitsu.app/anime/51043/poster_image/large-6c9b930068817af37ed92219b153d02e.jpeg",
+          "small": "https://media.kitsu.app/anime/51043/poster_image/small-759d4476e9b4a950c354311342a8cb12.jpeg",
+          "medium": "https://media.kitsu.app/anime/51043/poster_image/medium-c2a4e920ec52cf9c2aa3352f6be94e93.jpeg",
+          "original": "https://media.kitsu.app/anime/51043/poster_image/b1106024a8e61051ee789a4f4a6c7d67.png",
+          "meta": {
+            "dimensions": {
+              "tiny": {
+                "width": 110,
+                "height": 156
+              },
+              "large": {
+                "width": 550,
+                "height": 780
+              },
+              "small": {
+                "width": 284,
+                "height": 402
+              },
+              "medium": {
+                "width": 390,
+                "height": 554
+              }
+            }
+          }
+        },
+        "coverImage": null,
+        "episodeCount": null,
+        "episodeLength": null,
+        "totalLength": null,
+        "youtubeVideoId": null,
+        "showType": "ONA",
+        "nsfw": false
+      }
+    }
+  ],
+  "meta": {
+    "count": 22418
+  },
+  "links": {
+    "first": "https://kitsu.io/api/edge/anime?page%5Blimit%5D=20&page%5Boffset%5D=0&sort=id",
+    "prev": "https://kitsu.io/api/edge/anime?page%5Blimit%5D=20&page%5Boffset%5D=22390&sort=id",
+    "last": "https://kitsu.io/api/edge/anime?page%5Blimit%5D=20&page%5Boffset%5D=22398&sort=id"
+  }
+}

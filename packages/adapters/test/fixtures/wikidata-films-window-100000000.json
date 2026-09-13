@@ -1,0 +1,301 @@
+{
+ "head": {
+  "vars": [
+   "item",
+   "itemLabel",
+   "firstDate",
+   "imdbId",
+   "tmdbId",
+   "imageFile",
+   "runtime",
+   "genres",
+   "countries",
+   "directors"
+  ]
+ },
+ "results": {
+  "bindings": [
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q100052082"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Demain est à nous"
+    },
+    "firstDate": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "2019-09-25T00:00:00Z"
+    },
+    "imdbId": {
+     "type": "literal",
+     "value": "tt9420080"
+    },
+    "tmdbId": {
+     "type": "literal",
+     "value": "615821"
+    },
+    "imageFile": {
+     "type": "uri",
+     "value": "http://commons.wikimedia.org/wiki/Special:FilePath/Gilles%20de%20Maistre.jpg"
+    },
+    "runtime": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#decimal",
+     "type": "literal",
+     "value": "84"
+    },
+    "genres": {
+     "type": "literal",
+     "value": "documentary film"
+    },
+    "countries": {
+     "type": "literal",
+     "value": "France"
+    },
+    "directors": {
+     "type": "literal",
+     "value": "Gilles de Maistre"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q100136557"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Ariran omo olusho"
+    },
+    "firstDate": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "2020-01-01T00:00:00Z"
+    },
+    "genres": {
+     "type": "literal",
+     "value": "drama film"
+    },
+    "countries": {
+     "type": "literal",
+     "value": "Nigeria"
+    },
+    "directors": {
+     "type": "literal",
+     "value": ""
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q100144651"
+    },
+    "itemLabel": {
+     "xml:lang": "es",
+     "type": "literal",
+     "value": "Arzak since 1897"
+    },
+    "firstDate": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "2020-09-18T00:00:00Z"
+    },
+    "imdbId": {
+     "type": "literal",
+     "value": "tt13087552"
+    },
+    "tmdbId": {
+     "type": "literal",
+     "value": "750477"
+    },
+    "runtime": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#decimal",
+     "type": "literal",
+     "value": "70"
+    },
+    "genres": {
+     "type": "literal",
+     "value": "documentary film"
+    },
+    "countries": {
+     "type": "literal",
+     "value": "Spain"
+    },
+    "directors": {
+     "type": "literal",
+     "value": "Asier Altuna"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q100145755"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "The Free Ones"
+    },
+    "imdbId": {
+     "type": "literal",
+     "value": "tt12660296"
+    },
+    "tmdbId": {
+     "type": "literal",
+     "value": "755262"
+    },
+    "runtime": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#decimal",
+     "type": "literal",
+     "value": "94"
+    },
+    "genres": {
+     "type": "literal",
+     "value": ""
+    },
+    "countries": {
+     "type": "literal",
+     "value": "Canada"
+    },
+    "directors": {
+     "type": "literal",
+     "value": "Nicolas Lévesque"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q100146341"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Inés de Castro"
+    },
+    "firstDate": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "1944-12-28T00:00:00Z"
+    },
+    "imdbId": {
+     "type": "literal",
+     "value": "tt0036960"
+    },
+    "tmdbId": {
+     "type": "literal",
+     "value": "456112"
+    },
+    "imageFile": {
+     "type": "uri",
+     "value": "http://commons.wikimedia.org/wiki/Special:FilePath/Ines%20de%20castro.jpg"
+    },
+    "runtime": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#decimal",
+     "type": "literal",
+     "value": "92"
+    },
+    "genres": {
+     "type": "literal",
+     "value": "drama film|period drama film|historical film"
+    },
+    "countries": {
+     "type": "literal",
+     "value": "Spain|Portugal"
+    },
+    "directors": {
+     "type": "literal",
+     "value": "José Leitão de Barros"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q100156260"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Freaks Out"
+    },
+    "firstDate": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "2021-09-08T00:00:00Z"
+    },
+    "imdbId": {
+     "type": "literal",
+     "value": "tt7270808"
+    },
+    "tmdbId": {
+     "type": "literal",
+     "value": "571468"
+    },
+    "imageFile": {
+     "type": "uri",
+     "value": "http://commons.wikimedia.org/wiki/Special:FilePath/Camigliatello%20Silano%20FCL.jpg"
+    },
+    "runtime": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#decimal",
+     "type": "literal",
+     "value": "141"
+    },
+    "genres": {
+     "type": "literal",
+     "value": "drama film"
+    },
+    "countries": {
+     "type": "literal",
+     "value": "Italy"
+    },
+    "directors": {
+     "type": "literal",
+     "value": "Gabriele Mainetti"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q100191256"
+    },
+    "itemLabel": {
+     "xml:lang": "es",
+     "type": "literal",
+     "value": "Los fieles sirvientes"
+    },
+    "firstDate": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "1980-05-05T00:00:00Z"
+    },
+    "imdbId": {
+     "type": "literal",
+     "value": "tt0079151"
+    },
+    "tmdbId": {
+     "type": "literal",
+     "value": "351271"
+    },
+    "runtime": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#decimal",
+     "type": "literal",
+     "value": "88"
+    },
+    "genres": {
+     "type": "literal",
+     "value": "comedy film"
+    },
+    "countries": {
+     "type": "literal",
+     "value": "Spain"
+    },
+    "directors": {
+     "type": "literal",
+     "value": "Francesc Betriu"
+    }
+   }
+  ]
+ }
+}
