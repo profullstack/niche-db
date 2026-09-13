@@ -1,0 +1,9 @@
+{
+  "plans": {
+    "plan": [
+      { "core_number": 1, "memory_amount": 1024, "name": "1xCPU-1GB", "public_traffic_out": 1024, "storage_size": 25, "storage_tier": "maxiops" },
+      { "core_number": 2, "memory_amount": 4096, "name": "2xCPU-4GB", "public_traffic_out": 4096, "storage_size": 80, "storage_tier": "maxiops" },
+      { "core_number": 8, "memory_amount": 32768, "name": "HICPU-8xCPU-16GB", "public_traffic_out": 8192, "storage_size": 150, "storage_tier": "maxiops" }
+    ]
+  }
+}

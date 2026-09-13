@@ -168,6 +168,25 @@ export const config = {
      * and an email address: https://data.bls.gov/registrationEngine/
      */
     blsApiKey: opt('BLS_API_KEY'),
+    /**
+     * The hosting collection's keyed catalogues. Each provider's plan list
+     * answers 401 without a credential of its own, and each credential reads
+     * nothing about the account: a read-only Hetzner project token, a
+     * read-scope DigitalOcean personal access token, an UpCloud API
+     * username and password. The sources stay paused until these are set.
+     */
+    hetznerApiToken: opt('HETZNER_API_TOKEN'),
+    digitaloceanToken: opt('DIGITALOCEAN_TOKEN'),
+    upcloudUsername: opt('UPCLOUD_USERNAME'),
+    upcloudPassword: opt('UPCLOUD_PASSWORD'),
+    /**
+     * An Obscura MCP server (github.com/h4ckf0r0day/obscura, `obscura mcp
+     * --http`) the storefront adapter renders a JavaScript-only shop through.
+     * Optional: unset means plain fetch only, and a shop that needs a browser
+     * is skipped with a note. It has no auth of its own, so point this at a
+     * private address, never a public one.
+     */
+    obscuraMcpUrl: opt('OBSCURA_MCP_URL'),
   },
 
   /**
