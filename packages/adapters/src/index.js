@@ -22,6 +22,7 @@ import { coingeckoAssets, cryptoPairs } from './crypto.js';
 import { d0rz } from './d0rz.js';
 import { dealcatcher } from './dealcatcher.js';
 import { dealnews } from './dealnews.js';
+import { digitaloceanSizes } from './digitalocean.js';
 import { droughtMonitor } from './droughtmonitor.js';
 import { ecbFxRates } from './ecb.js';
 import { edgar } from './edgar.js';
@@ -41,6 +42,7 @@ import { gdacs } from './gdacs.js';
 import { gdelt } from './gdelt.js';
 import { githubReleases } from './github.js';
 import { goModules } from './golang.js';
+import { hetznerPlans } from './hetzner.js';
 import { huggingface } from './huggingface.js';
 import { igdb } from './igdb.js';
 import { imdbRatings } from './imdb.js';
@@ -84,6 +86,7 @@ import { socrataCrime } from './socratacrime.js';
 import { sportsdbTv } from './sportsdb.js';
 import { statuspage } from './statuspage.js';
 import { steam, steamNews } from './steam.js';
+import { storefront } from './storefront.js';
 import { nwsSurfZone } from './surfzone.js';
 import { swpcSpaceWeather } from './swpc.js';
 import { tedNotices } from './ted.js';
@@ -91,6 +94,7 @@ import { tmdbReleases } from './tmdb.js';
 import { tsbb } from './tsbb.js';
 import { tvmazeSchedule } from './tvmaze.js';
 import { ukPoliceCrime } from './ukpolice.js';
+import { upcloudPlans } from './upcloud.js';
 import { usaspendingAwards } from './usaspending.js';
 import { usgs } from './usgs.js';
 import { vscodeExtensions } from './vscode.js';
@@ -218,6 +222,10 @@ export const ADAPTERS = [
   linodeTypes,
   scalewayInstances,
   ovhVps,
+  hetznerPlans,
+  digitaloceanSizes,
+  upcloudPlans,
+  storefront,
   lowendbox,
   openserver,
 ];

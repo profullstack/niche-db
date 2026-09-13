@@ -1,0 +1,95 @@
+{
+  "server_types": [
+    {
+      "id": 22,
+      "name": "cx22",
+      "description": "CX22",
+      "cores": 2,
+      "memory": 4.0,
+      "disk": 40,
+      "deprecated": false,
+      "deprecation": null,
+      "prices": [
+        {
+          "location": "fsn1",
+          "price_hourly": { "net": "0.0060000000", "gross": "0.0071400000" },
+          "price_monthly": { "net": "3.7900000000", "gross": "4.5101000000" },
+          "included_traffic": 21990232555520
+        },
+        {
+          "location": "ash",
+          "price_hourly": { "net": "0.0074000000", "gross": "0.0088060000" },
+          "price_monthly": { "net": "4.5900000000", "gross": "5.4621000000" },
+          "included_traffic": 1099511627776
+        }
+      ],
+      "storage_type": "local",
+      "cpu_type": "shared",
+      "architecture": "x86"
+    },
+    {
+      "id": 45,
+      "name": "cax11",
+      "description": "CAX11",
+      "cores": 2,
+      "memory": 4.0,
+      "disk": 40,
+      "deprecated": false,
+      "deprecation": null,
+      "prices": [
+        {
+          "location": "fsn1",
+          "price_hourly": { "net": "0.0060000000", "gross": "0.0071400000" },
+          "price_monthly": { "net": "3.7900000000", "gross": "4.5101000000" },
+          "included_traffic": 21990232555520
+        }
+      ],
+      "storage_type": "local",
+      "cpu_type": "shared",
+      "architecture": "arm"
+    },
+    {
+      "id": 96,
+      "name": "ccx13",
+      "description": "CCX13",
+      "cores": 2,
+      "memory": 8.0,
+      "disk": 80,
+      "deprecated": false,
+      "deprecation": null,
+      "prices": [
+        {
+          "location": "nbg1",
+          "price_hourly": { "net": "0.0200000000", "gross": "0.0238000000" },
+          "price_monthly": { "net": "12.4900000000", "gross": "14.8631000000" },
+          "included_traffic": 21990232555520
+        }
+      ],
+      "storage_type": "local",
+      "cpu_type": "dedicated",
+      "architecture": "x86"
+    },
+    {
+      "id": 1,
+      "name": "cx11",
+      "description": "CX11",
+      "cores": 1,
+      "memory": 2.0,
+      "disk": 20,
+      "deprecated": true,
+      "deprecation": { "announced": "2024-06-24T00:00:00+00:00", "unavailable_after": "2024-09-24T00:00:00+00:00" },
+      "prices": [
+        {
+          "location": "fsn1",
+          "price_hourly": { "net": "0.0052000000", "gross": "0.0061880000" },
+          "price_monthly": { "net": "3.2900000000", "gross": "3.9151000000" },
+          "included_traffic": 21990232555520
+        }
+      ],
+      "storage_type": "local",
+      "cpu_type": "shared",
+      "architecture": "x86"
+    }
+  ],
+  "meta": { "pagination": { "page": 1, "per_page": 50, "previous_page": null, "next_page": null, "last_page": 1, "total_entries": 4 } }
+}

@@ -25,6 +25,11 @@ export function envFor() {
     cryptoProxyUrl: config.adapters.cryptoProxyUrl,
     dataGovApiKey: config.adapters.dataGovApiKey,
     blsApiKey: config.adapters.blsApiKey,
+    hetznerApiToken: config.adapters.hetznerApiToken,
+    digitaloceanToken: config.adapters.digitaloceanToken,
+    upcloudUsername: config.adapters.upcloudUsername,
+    upcloudPassword: config.adapters.upcloudPassword,
+    obscuraMcpUrl: config.adapters.obscuraMcpUrl,
     contactEmail: config.contactEmail,
   };
 }
