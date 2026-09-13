@@ -72,6 +72,7 @@ import { openfda } from './openfda.js';
 import { openlibrary } from './openlibrary.js';
 import { openprofiles } from './openprofiles.js';
 import { openserver } from './openserver.js';
+import { opensite } from './opensite.js';
 import { openthreat } from './openthreat.js';
 import { outreachgraph } from './outreachgraph.js';
 import { ovhVps } from './ovh.js';
@@ -243,6 +244,7 @@ export const ADAPTERS = [
   openthreat,
   // People: one entry per person, read off the apps that serve their OpenProfile.md.
   openprofiles,
+  opensite,
   outreachgraph,
 ];
 

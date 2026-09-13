@@ -8,6 +8,7 @@
     "./adapter": "./src/adapter.js",
     "./http": "./src/http.js",
     "./names": "./src/names.js",
+    "./opensite": "./src/opensite.js",
     "./profiles": "./src/profiles.js"
   },
   "dependencies": {

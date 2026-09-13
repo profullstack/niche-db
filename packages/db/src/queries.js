@@ -1214,3 +1214,40 @@ export async function crawlSalesStats() {
   `;
   return row;
 }
+
+/* ------------------------------------------------------------------ sites -- */
+
+/**
+ * The one item in a collection whose url is any of these, newest first. An
+ * OpenSite record is keyed by its canonical address, and a path on the
+ * index stands for that address with or without a scheme or a trailing
+ * slash, so the caller lists the forms and this picks whichever exists.
+ */
+export async function itemByUrls({ collectionId, urls }) {
+  const list = [...new Set((urls ?? []).filter(Boolean))];
+  if (list.length === 0) return null;
+  const [row] = await sql`
+    select ${itemColumns}
+    from items i join sources s on s.id = i.source_id join collections c on c.id = i.collection_id
+    where i.collection_id = ${collectionId}
+      and i.url = any(${pgArray(list)}::text[])
+    order by i.updated_at desc
+    limit 1
+  `;
+  return row ?? null;
+}
+
+/** Every item in a collection on one host, newest first. */
+export async function itemsForHost({ collectionId, host, limit = 50 }) {
+  const h = String(host ?? '').toLowerCase();
+  if (!/^[a-z0-9.-]+(:\d+)?$/.test(h)) return [];
+  return sql`
+    select ${itemColumns}
+    from items i join sources s on s.id = i.source_id join collections c on c.id = i.collection_id
+    where i.collection_id = ${collectionId}
+      and (i.url like ${`https://${h}/%`} or i.url like ${`http://${h}/%`}
+           or i.url = ${`https://${h}`} or i.url = ${`http://${h}`})
+    order by i.updated_at desc
+    limit ${Math.max(1, Math.min(Number(limit) || 50, 200))}
+  `;
+}
