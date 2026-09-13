@@ -211,7 +211,7 @@ export const sportsdbTeams = defineAdapter({
   title: 'TheSportsDB teams',
   collection: 'sports',
   description:
-    'Every team TheSportsDB knows, one row each with its sport, leagues and cups, country, stadium, colours, badge, description, website, socials and the ESPN and API-Football cross-reference ids. Walks the team id space through lookupteam.php, which answers for any id on the free key while the per-league list endpoint ignores its league id on that key and the search is capped at ten rows; a run asks for a fixed number of ids with a pause between them and resumes, the walk ends after a run of unknown ids past the newest team, and the next run starts the catalogue over. TheSportsDB terms of use allow copying data from the official API endpoints with attribution, which every row carries.',
+    'Every team TheSportsDB knows, one row each with its sport, leagues and cups, country, stadium, colours, badge, description, website, socials and the ESPN and API-Football cross-reference ids. Walks the team id space through lookupteam.php, which answers for any id on the free key while the per-league list endpoint ignores its league id on that key and the search is capped at ten rows; a run asks for a fixed number of ids with a pause between them and resumes, the walk ends after a run of unknown ids past the newest team, and the next run starts the catalogue over. TheSportsDB terms of use allow copying anything the official API endpoints return, keep copyright notices intact and ask for a link back where the artwork is used; every row links its team page and carries attribution.',
   docs: 'https://www.thesportsdb.com/documentation',
   kinds: ['team'],
   cadenceMinutes: 1440,
