@@ -67,6 +67,10 @@ export function registerPages(app) {
     }),
   );
 
+  // The address people say out loud for the webrings directory. The collection
+  // itself lives under /c like every other one, so this only ever forwards.
+  app.get('/rings', (c) => c.redirect('/c/webrings', 301));
+
   app.get('/c/:slug', async (c) => {
     const collection = await q.getCollection(c.req.param('slug'));
     if (!collection) return c.notFound();
