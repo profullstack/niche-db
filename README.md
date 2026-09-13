@@ -13,7 +13,7 @@ The first deployment is [nichedb.dev](https://nichedb.dev). Run your own on anyt
 | **item** | One row a source produced. Title, URL, when (with `time_known` and `precision`), tags, and the adapter's payload in `data`. |
 | **feed** | A saved query over a collection. Has a page, RSS and JSON Feed renderings, an API endpoint, and followers who are told when it changes by push, email or signed webhook. |
 
-Adapters are one file each in `packages/adapters/src`. Ninety-four ship today across thirty-four collections:
+Adapters are one file each in `packages/adapters/src`. One hundred and twenty-five ship today across forty-one collections:
 
 | Collection | Adapters | Key needed |
 | --- | --- | --- |
