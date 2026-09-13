@@ -324,7 +324,7 @@ function diskType(word) {
  * is read whole, and left out of every plan feed.
  */
 export const ADDON_RE =
-  /microsoft ?365|office ?365|\bm365\b|exchange online|\bteams\b|audio conferencing|business voice|\blicen[cs]e|\bssl\b|certificate|domain (?:registration|name|transfer|renewal)|\bdomains?\b|\bseo\b|site ?builder|website builder|antivirus|spam (?:filter|expert)|\bcopilot\b|\bvisio\b|\bproject plan\b|\bpower bi\b|\bdynamics\b|\bwindows (?:10|11)\b/i;
+  /microsoft ?365|office ?365|\bm365\b|\bgoogle[\s-]+workspace\b|\bg[\s-]+suite\b|exchange online|\bteams\b|audio conferencing|business voice|\blicen[cs]e|\bssl\b|certificate|domain (?:registration|name|transfer|renewal)|\bdomains?\b|\bseo\b|site ?builder|website builder|antivirus|spam (?:filter|expert)|\bcopilot\b|\bvisio\b|\bproject plan\b|\bpower bi\b|\bdynamics\b|\bwindows (?:10|11)\b/i;
 
 export function kindOf(...names) {
   const s = names.filter(Boolean).join(' ').toLowerCase();
@@ -334,7 +334,7 @@ export function kindOf(...names) {
   if (/bare.?metal/.test(s)) return 'bare-metal';
   if (/dedicated/.test(s)) return 'dedicated';
   if (/gpu/.test(s)) return 'gpu';
-  if (/storage|backup|object/.test(s)) return 'storage';
+  if (/storage|stockage|backup|object/.test(s)) return 'storage';
   if (/managed|cpanel|plesk|wordpress|directadmin/.test(s) && !/vps|vds|kvm|cloud|server/.test(s))
     return 'managed';
   if (/shared|reseller|web ?hosting|cpanel hosting|email/.test(s) && !/vps|vds|kvm|server/.test(s))

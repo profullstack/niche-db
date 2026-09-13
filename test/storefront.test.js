@@ -183,6 +183,41 @@ describe('reading prices, cycles and specs', () => {
 });
 
 describe('what the first live run got wrong', () => {
+  test('Google Workspace seats and French storage products keep their actual kinds', async () => {
+    // Public raw products from /api/v1/items on 2026-09-13, before correction:
+    // /i/10035891 and /i/10035895 both carried kind:vps.
+    const products = JSON.parse(await fixture('storefront-capconnect-products.json'));
+    const items = products.map((product) =>
+      productItem(product, {
+        platform: 'whmcs',
+        domain: 'capconnect.com',
+        provider: 'capconnect',
+        providerName: 'Cap Connect',
+        fetchedAt: '2026-09-13T03:13:46.701Z',
+      }),
+    );
+    const [workspace, storage] = items;
+    expect(workspace.externalId).toBe('storefront:whmcs:capconnect.com:business-starter');
+    expect(workspace.kind).toBe('addon');
+    expect(workspace.data.offer.kind).toBeNull();
+    expect(workspace.tags).not.toContain('plan');
+    expect(workspace.tags).not.toContain('kind:vps');
+    expect(workspace.data.offer.price).toMatchObject({
+      amount: 864,
+      currency: 'MAD',
+      interval: 'year',
+    });
+    expect(storage.externalId).toBe('storefront:whmcs:capconnect.com:1tb');
+    expect(storage.kind).toBe('plan');
+    expect(storage.data.offer.kind).toBe('storage');
+    expect(storage.tags).toContain('kind:storage');
+    expect(storage.tags).not.toContain('kind:vps');
+    expect(storage.data.offer.storage).toEqual([{ type: null, size_gb: 1024 }]);
+    expect(kindOf('Google Workspace', 'Business Standard')).toBe('addon');
+    expect(kindOf('G-Suite', 'Business Starter')).toBe('addon');
+    expect(kindOf('VPS', 'KVM VPS with Google Workspace')).toBe('vps');
+  });
+
   test('a currency written as a suffix word, or only in the page selector, and never a guessed USD', () => {
     expect(parsePrice('120.00dhs')).toEqual({ amount: 120, currency: 'MAD' });
     expect(parsePrice('199 KSh')).toEqual({ amount: 199, currency: 'KES' });
