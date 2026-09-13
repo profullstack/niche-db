@@ -93,6 +93,41 @@ geographic flags. The corresponding MCP tools expose the same fields;
 a snapshot: concurrent arrivals or location changes can shift pages. Use the
 existing ID/update cursors for synchronization with the default ordering.
 
+## Default public scanner directory
+
+`proscan-scanners` seeds the enabled `scanners-proscan` source on startup. It
+indexes the public [ProScan server directory](https://www.proscan.org/web_servers/list)
+every 15 minutes, keeping player URLs, location labels, scanner models and source
+attribution. No API key or manually supplied JSON catalog is needed.
+
+Each run visits up to 12 player pages, least recently checked first, within the
+worker deadline. It extracts explicitly advertised `<audio src>`, nested audio
+sources, direct audio links and `.m3u`/`.pls` playlist links. ProScan's unclosed
+`<audio>` markup is supported. It never guesses a stream endpoint or downloads
+an audio stream. Listings appear even before their player has been checked.
+
+The scanner page links directly to the operator's player, audio URL and media
+playlist. `stream_access: "publicly-advertised"` identifies discovered links;
+`stream_reuse_allowed` remains false because link discovery is not a grant to
+record or redistribute audio. HTTP-only streams open at their source, avoiding
+mixed-content playback problems on NicheDB's HTTPS pages.
+
+Robots rules are checked per origin/path, including redirected player pages.
+Unavailable robots due to a server error, rate limit or network failure defer
+the visit. Missing robots (HTTP 4xx other than 429) has no rules. Authentication
+failures and challenges are not bypassed. Requests pin a validated public DNS
+address, revalidate redirects, cap text responses and use short timeouts.
+
+Disappearing directory entries are marked `directory_present: false` and their
+obsolete audio links are cleared. Transient player failures retain previously
+advertised links with `discovery_status: "unreachable"` and separate discovery
+and attempt timestamps. A failed/changed directory page does not erase records.
+
+Directory locations are labels, not verified radio coverage polygons. No county
+centroid or receiver location is invented: these entries retain unknown GPS
+coverage until a source supplies it, and therefore do not produce speculative
+nearby-crime associations.
+
 ## Permissioned scanner catalogs
 
 Add a `scanner-directory` source in the `crime` collection with `config.url`

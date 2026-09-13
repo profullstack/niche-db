@@ -393,6 +393,45 @@ export const ItemPage = ({
         )}
       />
       {item.data?.exit ? <WayInOut data={item.data} /> : null}
+      {item.kind === 'scanner-stream' ? (
+        <section>
+          <h2>Listen live</h2>
+          <p>{item.data?.location_label ?? item.data?.jurisdiction ?? ''}</p>
+          {item.data?.directory_present === false ? (
+            <p>This scanner is no longer listed.</p>
+          ) : (
+            <p>
+              <a href={item.data?.player_url ?? item.url} rel="noopener nofollow">
+                Open scanner player ↗
+              </a>
+              {item.data?.stream_url ? (
+                <>
+                  {' '}
+                  ·{' '}
+                  <a href={item.data.stream_url} rel="noopener nofollow">
+                    Open audio stream ↗
+                  </a>
+                </>
+              ) : null}
+              {item.data?.playlist_url ? (
+                <>
+                  {' '}
+                  ·{' '}
+                  <a href={item.data.playlist_url} rel="noopener nofollow">
+                    Media-player playlist ↗
+                  </a>
+                </>
+              ) : null}
+            </p>
+          )}
+          {item.data?.directory_url ? (
+            <p class="small muted">
+              Source: <a href={item.data.directory_url}>ProScan public directory</a>. Audio comes
+              directly from the scanner operator.
+            </p>
+          ) : null}
+        </section>
+      ) : null}
       {nearby !== null ? (
         <section>
           <h2>Reported incidents in scanner coverage</h2>
