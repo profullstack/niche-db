@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>AIorNot.vote — Latest media</title>
+    <link>https://aiornot.vote</link>
+    <atom:link href="https://aiornot.vote/rss.xml" rel="self" type="application/rss+xml" />
+    <description>The newest photorealistic images and videos to guess AI or Not AI.</description>
+    <language>en</language>
+    <lastBuildDate>Sat, 12 Sep 2026 20:53:05 GMT</lastBuildDate>
+    <generator>AIorNot.vote</generator>
+    <item>
+      <title>AI or Not: Animal</title>
+      <link>https://aiornot.vote/m/ai-or-not-animal-mtu2lpg8</link>
+      <guid isPermaLink="false">media:med_792571a62a1945a79e9bb2e9463b6112</guid>
+      <pubDate>Wed, 09 Sep 2026 12:24:15 GMT</pubDate>
+      <category>animal</category><category>photorealistic</category><category>image</category>
+      <enclosure url="https://aiornot.vote/media/pool/3fb4b199-2d01-4ded-8df0-9fd6e50e2509.webp" type="image/webp" />
+      <description><![CDATA[<img src="https://aiornot.vote/media/pool/3fb4b199-2d01-4ded-8df0-9fd6e50e2509.webp" alt="AI or Not: Animal" />
+<p>Guess: AI or Not AI.</p>
+<p>No guesses yet — be the first.</p>
+<p>Tags: Animal, Photorealistic, Image</p>]]></description>
+    </item>
+    <item>
+      <title>AI or Not: Landscape</title>
+      <link>https://aiornot.vote/m/ai-or-not-landscape-mtu23ja5</link>
+      <guid isPermaLink="false">media:med_88f716f7cc8a46758ba27460b1a4dffc</guid>
+      <pubDate>Wed, 09 Sep 2026 12:10:07 GMT</pubDate>
+      <category>landscape</category><category>photorealistic</category><category>image</category>
+      <enclosure url="https://aiornot.vote/media/pool/8612fea8-4c20-4bc2-8645-15cb60f97522.webp" type="image/webp" />
+      <description><![CDATA[<img src="https://aiornot.vote/media/pool/8612fea8-4c20-4bc2-8645-15cb60f97522.webp" alt="AI or Not: Landscape" />
+<p>Guess: AI or Not AI.</p>
+<p>No guesses yet — be the first.</p>
+<p>Tags: Landscape, Photorealistic, Image</p>]]></description>
+    </item>
+    <item>
+      <title>AI or Not: Architecture</title>
+      <link>https://aiornot.vote/m/ai-or-not-architecture-mtu1j49l</link>
+      <guid isPermaLink="false">media:med_057077ad7ef948a4abfb7514970205fa</guid>
+      <pubDate>Wed, 09 Sep 2026 11:54:14 GMT</pubDate>
+      <category>architecture</category><category>photorealistic</category><category>image</category>
+      <enclosure url="https://aiornot.vote/media/pool/286c65a0-2db9-43f6-9529-4d89733664cc.webp" type="image/webp" />
+      <description><![CDATA[<img src="https://aiornot.vote/media/pool/286c65a0-2db9-43f6-9529-4d89733664cc.webp" alt="AI or Not: Architecture" />
+<p>Guess: AI or Not AI.</p>
+<p>No guesses yet — be the first.</p>
+<p>Tags: Architecture, Photorealistic, Image</p>]]></description>
+    </item>
+  </channel>
+</rss>

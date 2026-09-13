@@ -1,11 +1,14 @@
 import { adsbFlights } from './adsb.js';
+import { agenticjobs } from './agenticjobs.js';
 import { aiid } from './aiid.js';
+import { aiornot } from './aiornot.js';
 import { alpacaCorporateActions, alpacaNews } from './alpaca.js';
 import { firefoxAddons } from './amo.js';
 import { anilistAiring } from './anilist.js';
 import { arxiv } from './arxiv.js';
 import { aviationHazards, aviationMetar } from './aviationweather.js';
 import { bensbargains } from './bensbargains.js';
+import { bl0ggers } from './bl0ggers.js';
 import { blsSeries } from './bls.js';
 import { brisk } from './brisk.js';
 import { cfpbComplaints } from './cfpb.js';
@@ -16,6 +19,7 @@ import { courtlistener } from './courtlistener.js';
 import { crates } from './crates.js';
 import { crossref } from './crossref.js';
 import { coingeckoAssets, cryptoPairs } from './crypto.js';
+import { d0rz } from './d0rz.js';
 import { dealcatcher } from './dealcatcher.js';
 import { dealnews } from './dealnews.js';
 import { droughtMonitor } from './droughtmonitor.js';
@@ -60,12 +64,14 @@ import { nws } from './nws.js';
 import { ocdsTenders } from './ocds.js';
 import { openfda } from './openfda.js';
 import { openlibrary } from './openlibrary.js';
+import { p0dcasters } from './p0dcasters.js';
 import { buildingPermits } from './permits.js';
 import { podcasts } from './podcasts.js';
 import { pypi } from './pypi.js';
 import { redditDeals } from './redditdeals.js';
 import { rogueIncidents, rogueResearch } from './rogueaitracker.js';
 import { rssamplifier } from './rssamplifier.js';
+import { saasrow } from './saasrow.js';
 import { scryfallCards, scryfallSets } from './scryfall.js';
 import { slickdeals } from './slickdeals.js';
 import { socrataCrime } from './socratacrime.js';
@@ -76,6 +82,7 @@ import { nwsSurfZone } from './surfzone.js';
 import { swpcSpaceWeather } from './swpc.js';
 import { tedNotices } from './ted.js';
 import { tmdbReleases } from './tmdb.js';
+import { tsbb } from './tsbb.js';
 import { tvmazeSchedule } from './tvmaze.js';
 import { ukPoliceCrime } from './ukpolice.js';
 import { usaspendingAwards } from './usaspending.js';
@@ -189,6 +196,15 @@ export const ADAPTERS = [
   imdbRatings,
   // Channels: the whole iptv-org directory, for matching a playlist by name.
   channels,
+  // House aggregators: the directories, boards and marketplaces we run, read
+  // from their own public feeds and APIs.
+  p0dcasters,
+  saasrow,
+  d0rz,
+  bl0ggers,
+  aiornot,
+  agenticjobs,
+  tsbb,
 ];
 
 export { isPlatformHosted, PLATFORM_HOSTS } from './podcastplatforms.js';

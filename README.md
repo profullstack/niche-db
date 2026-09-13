@@ -13,7 +13,7 @@ The first deployment is [nichedb.dev](https://nichedb.dev). Run your own on anyt
 | **item** | One row a source produced. Title, URL, when (with `time_known` and `precision`), tags, and the adapter's payload in `data`. |
 | **feed** | A saved query over a collection. Has a page, RSS and JSON Feed renderings, an API endpoint, and followers who are told when it changes by push, email or signed webhook. |
 
-Adapters are one file each in `packages/adapters/src`. Seventy-nine ship today across twenty-seven collections:
+Adapters are one file each in `packages/adapters/src`. Eighty-six ship today across thirty-one collections:
 
 | Collection | Adapters | Key needed |
 | --- | --- | --- |
@@ -37,11 +37,11 @@ Adapters are one file each in `packages/adapters/src`. Seventy-nine ship today a
 | crime | `socrata-crime`, `uk-police-crime`, `fbi-crime-estimates` | FBI only (free api.data.gov key) |
 | public-money | `usaspending-awards`, `ocds-tenders`, `ted-notices` | no |
 | housing | `uk-land-registry`, `freddie-mac-rates`, `building-permits` | no |
-| jobs | `bls-series`, `eurostat`, `warn-layoffs` | no |
+| jobs | `bls-series`, `eurostat`, `warn-layoffs`, `agenticjobs` | no |
 | ai-incidents | `rogue-ai-incidents`, `rogue-ai-research`, `aiid-reports` | no |
 | news | `newsfeed`, `gdelt`, `rssamplifier`, `brisk`, `news-channels` | no |
 | domains | `ntld-totals`, `ntld-tlds`, `ntld-launches`, `ntld-changes` | no |
-| podcasts | `podcasts` | no |
+| podcasts | `podcasts`, `p0dcasters` | no |
 | aviation | `faa-nas-status`, `aviation-hazards`, `aviation-metar`, `ntsb-accidents`, `adsb-flights` | no (NTSB needs mdbtools + unzip, in the Dockerfile) |
 | water | `nwps-river-gauges`, `coops-water-levels`, `drought-monitor`, `ndbc-buoys`, `nws-surf-zone` | no |
 | consumer-finance | `cfpb-complaints`, `fdic-institutions`, `fdic-structure-changes` | no |
@@ -49,6 +49,27 @@ Adapters are one file each in `packages/adapters/src`. Seventy-nine ship today a
 | sports | `espn-catalogue`, `espn-schedule`, `espn-live`, `espn-plays`, `livetennis`, `sportsdb-tv` | Live Tennis; TheSportsDB (`SPORTSDB_API_KEY`, the shared key `3` returns one row per query); ESPN is keyless (`SPORTS_PROXY_URL` for cloud egress) |
 | screen | `tmdb-releases`, `tvmaze-schedule`, `anilist-airing`, `imdb-ratings` | TMDB only |
 | channels | `iptv-org-channels` | no |
+| saas | `saasrow` | no |
+| marketplace | `d0rz`, `bl0ggers` | no |
+| ai-media | `aiornot` | no |
+| forums | `tsbb` | no |
+
+### House aggregators
+
+Eight of the sites we run publish a public feed or API of their own, and each is read here through it, keyless, the way any other reader would. The endpoint is the one checked live on 2026-09-12; the slug is the seeded source.
+
+| Site | Endpoint | Collection | Source slug | Kinds |
+| --- | --- | --- | --- | --- |
+| p0dcasters.com | `/opml` (every show: feed, site, title) | podcasts | `p0dcasters-shows` | `show` |
+| saasrow.com | `/api/v1/products` (offset paged, 100 a page) | saas | `saasrow-products` | `product` |
+| d0rz.com | `/asks/rss.xml`, `/offers/rss.xml` | marketplace | `d0rz-marketplace` | `ask`, `offer` |
+| bl0ggers.com | `/asks/rss.xml`, `/offers/rss.xml` | marketplace | `bl0ggers-marketplace` | `ask`, `offer` |
+| aiornot.vote | `/rss.xml`, `/rss/featured.xml`, `/rss/trending.xml` | ai-media | `aiornot-media` | `submission` |
+| agenticjobs.work | `/api/v1/jobs` (offset paged, 100 a page) | jobs | `agenticjobs-postings` | `job` |
+| tsbb.dev | `/api/v1/forums`, then `/f/{slug}/feed.xml` per forum | forums | `tsbb-topics` | `post` |
+| c0ncerts.com | none yet: `/api/events` answers 501 "coming soon" and `/api/v1/events` 404s | — | — | — |
+
+saasrow's `/api/v1/listings` is per-account and needs a key, so only the public products directory is read. A submission aiornot carries on more than one feed is stored once and tagged with each feed. tsbb's cross-board `/api/v1/latest` does not say which forum a topic is in, which is why the walk is per forum.
 
 ## Enrichment
 

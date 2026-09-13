@@ -65,6 +65,10 @@ describe('registry', () => {
         'sports',
         'screen',
         'channels',
+        'saas',
+        'marketplace',
+        'ai-media',
+        'forums',
       ]).toContain(a.collection);
     }
     expect(adapterByName('steam').title).toContain('Steam');

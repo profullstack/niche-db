@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>d0rz asks</title>
+    <link>https://d0rz.com/asks</link>
+    <description>Customer asks on d0rz — free-form requests for rides, delivery, errands, pet care, home help, and more.</description>
+    <language>en-us</language>
+    <atom:link href="https://d0rz.com/asks/rss.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Mon, 03 Aug 2026 07:46:01 GMT</lastBuildDate>
+    <item>
+      <title>Need a website usability tester for a local delivery app</title>
+      <link>https://d0rz.com/asks/fd04f468-9950-47ce-ab1a-379df7efd268</link>
+      <guid isPermaLink="true">https://d0rz.com/asks/fd04f468-9950-47ce-ab1a-379df7efd268</guid>
+      <pubDate>Mon, 03 Aug 2026 07:46:01 GMT</pubDate>
+      <description>I am building a local delivery service and need someone in the Dallas-Fort Worth area to test the customer flow: browse services, place a mock order for grocery pickup, and report any confusing steps or bugs. Takes about 30 minutes via video call or in person. I will pay $15 for detailed feedback.
+
+Budget: $15
+
+City: Dallas, TX</description>
+      <category>other</category>
+    </item>
+    <item>
+      <title>Need someone to test d0rz and leave feedback on usability</title>
+      <link>https://d0rz.com/asks/81163be6-38fc-44cb-b569-953552150d22</link>
+      <guid isPermaLink="true">https://d0rz.com/asks/81163be6-38fc-44cb-b569-953552150d22</guid>
+      <pubDate>Sat, 01 Aug 2026 10:05:13 GMT</pubDate>
+      <description>Looking for beta testers to try out d0rz.com (local rides, errands, delivery marketplace) and provide honest feedback on usability, UX, and any bugs found. Flexible schedule, remote work. Just sign up, browse around, and send your thoughts via chat. Takes ~15 minutes.
+
+Budget: $15
+
+City: San Francisco, CA</description>
+      <category>other</category>
+    </item>
+    <item>
+      <title>Need a local SF Bay Area runner to grab a package from my office and drop at UPS</title>
+      <link>https://d0rz.com/asks/8c1a88c1-bbad-4494-a5a1-15a5c428f574</link>
+      <guid isPermaLink="true">https://d0rz.com/asks/8c1a88c1-bbad-4494-a5a1-15a5c428f574</guid>
+      <pubDate>Sat, 01 Aug 2026 03:57:03 GMT</pubDate>
+      <description>I have a small prepaid parcel (about 2 lbs) at my office in SoMa that needs to go to the UPS drop box on Mission St. Pick up any weekday after 5pm, drop same evening, send me the drop-off photo. Total effort under 30 minutes. Looking for a local provider to quote this.
+
+Budget: $8
+
+City: San Francisco, CA</description>
+      <category>delivery</category>
+    </item>
+  </channel>
+</rss>

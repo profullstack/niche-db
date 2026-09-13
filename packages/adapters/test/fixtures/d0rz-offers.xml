@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>d0rz offers</title>
+    <link>https://d0rz.com/offers</link>
+    <description>Provider offers on d0rz — services for rides, delivery, errands, pet care, home help, and more.</description>
+    <language>en-us</language>
+    <atom:link href="https://d0rz.com/offers/rss.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Thu, 03 Sep 2026 11:09:33 GMT</lastBuildDate>
+    <item>
+      <title>Anything around Springfield,OH</title>
+      <link>https://d0rz.com/offers/63b5128f-386b-4bbe-bb1a-8ed5a73ff3c0</link>
+      <guid isPermaLink="true">https://d0rz.com/offers/63b5128f-386b-4bbe-bb1a-8ed5a73ff3c0</guid>
+      <pubDate>Thu, 03 Sep 2026 11:09:33 GMT</pubDate>
+      <description>I’ve done Uber &amp; Lyft to DoorDash &amp; Instacart. I can shop for you, get prescriptions, alcohol, food, etc. just starting with this appp, so not quite sure how it all works just yet. So, if you’ve got something that you want &amp; want something to go somewhere else let me know. Reasonable rates, but please be reasonable as well. Thank you,
+Z</description>
+      <category>delivery</category>
+    </item>
+    <item>
+      <title>Website QA testing &amp; bug reports for local service apps</title>
+      <link>https://d0rz.com/offers/0b632698-5777-47fa-a3ca-3bbb8750cfcf</link>
+      <guid isPermaLink="true">https://d0rz.com/offers/0b632698-5777-47fa-a3ca-3bbb8750cfcf</guid>
+      <pubDate>Mon, 03 Aug 2026 07:46:52 GMT</pubDate>
+      <description>I test local service websites (booking flows, checkout, mobile responsiveness) and deliver detailed bug reports with screenshots. I have tested 15+ local business sites. Available for 1-hour sessions. $20 per site audit.
+
+Rate: $20
+
+City: Dallas, TX</description>
+      <category>other</category>
+    </item>
+  </channel>
+</rss>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <channel>
+    <title>Announcements — tsbb</title>
+    <link>https://tsbb.dev</link>
+    <description>News about the board itself.</description>
+    <atom:link href="https://tsbb.dev/f/announcements/feed.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Sat, 12 Sep 2026 20:53:09 GMT</lastBuildDate>
+    <item>
+      <title>Aaron Swartz and atx: the spec writer open source lost</title>
+      <link>https://tsbb.dev/t/aaron-swartz-and-atx-the-spec-writer-open-source-lost-69</link>
+      <guid isPermaLink="true">https://tsbb.dev/t/aaron-swartz-and-atx-the-spec-writer-open-source-lost-69</guid>
+      <dc:creator>anthony</dc:creator>
+      <pubDate>Sat, 12 Sep 2026 19:16:21 GMT</pubDate>
+      <description>Aaron Swartz&#39;s 2002 atx page is where Markdown&#39;s pound-sign headings and reference links come from. He wrote RSS 1.0 at 14 and Creative Commons metadata at 15. What open specs lost in 2013. Read the original (By Anthony Ettinger, via Chovy&#39;s Blog): https://dev.profullstack.com/anthony/blog/121-post.html</description>
+    </item>
+    <item>
+      <title>Every podcast is now a playlist you can put on the air</title>
+      <link>https://tsbb.dev/t/every-podcast-is-now-a-playlist-you-can-put-on-the-air-68</link>
+      <guid isPermaLink="true">https://tsbb.dev/t/every-podcast-is-now-a-playlist-you-can-put-on-the-air-68</guid>
+      <dc:creator>anthony</dc:creator>
+      <pubDate>Sat, 12 Sep 2026 18:16:21 GMT</pubDate>
+      <description>p0dcasters hands out a playlist.m3u per show, newest first. Paste it into nixamp and the whole show goes live as one channel that plays through, or press Open in nixamp on the show page. Read the original (By Anthony Ettinger, via Chovy&#39;s Blog): https://dev.profullstack.com/anthony/blog/120-post.html</description>
+    </item>
+    <item>
+      <title>nixamp 0.18.0: anyone signed in can go live from a link, IPTV feeds included</title>
+      <link>https://tsbb.dev/t/nixamp-0-18-0-anyone-signed-in-can-go-live-from-a-link-iptv-feeds-includ-67</link>
+      <guid isPermaLink="true">https://tsbb.dev/t/nixamp-0-18-0-anyone-signed-in-can-go-live-from-a-link-iptv-feeds-includ-67</guid>
+      <dc:creator>anthony</dc:creator>
+      <pubDate>Sat, 12 Sep 2026 16:15:50 GMT</pubDate>
+      <description>nixamp 0.18.0 lets any signed-in member go live from a pasted link, IPTV feeds with no file extension included, pick which server carries it, and rename what they put on. Read the original (By Anthony Ettinger, via Chovy&#39;s Blog): https://dev.profullstack.com/anthony/blog/119-post.html</description>
+    </item>
+  </channel>
+</rss>
