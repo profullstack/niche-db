@@ -43,6 +43,14 @@ still there and replaying them gives the same number.
 
 ## People
 
+`apps/web/src/lib/opensaas.js` builds nichedb's own OpenSaaS descriptor from the same config
+the pricing page reads, and `apps/web/src/routes/opensaas.js` serves it at
+`/.well-known/opensaas.json` beside the endpoints it names (billing subscribe and cancel,
+account export and delete) and the pages for the same three things; `packages/db/src/account.js`
+is the store (cancelled terms keep their row, `account_actions` holds the hashed deletion
+link, migration 0019). `packages/adapters/src/opensaas.js` reads other services' descriptors
+into the saas collection, one item per plan with an `exit` block the item page renders.
+
 `packages/core/src/profiles.js` is the pure half of `/c/profiles` (parse, merge, the
 owner's overlay, the item row) over `@profullstack/openprofile`; `packages/db/src/profiles.js`
 stores it (`profiles`, `profile_identities`, `profile_sources`, migration 0018) and

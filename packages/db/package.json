@@ -1,6 +1,6 @@
 {
   "name": "@nichedb/db",
-  "version": "0.17.1",
+  "version": "0.18.0",
   "private": true,
   "type": "module",
   "exports": {
@@ -13,7 +13,8 @@
     "./revenue": "./src/revenue.js",
     "./premium": "./src/premium.js",
     "./submissions": "./src/submissions.js",
-    "./profiles": "./src/profiles.js"
+    "./profiles": "./src/profiles.js",
+    "./account": "./src/account.js"
   },
   "dependencies": {
     "@nichedb/config": "workspace:*",

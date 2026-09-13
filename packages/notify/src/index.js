@@ -171,6 +171,16 @@ export async function sendSubmissionDecision({ email, feedUrl, approved, note, r
   }
 }
 
+/** The one-time link that confirms an account deletion (OpenSaaS `delete`, confirm: email). */
+export async function sendDeleteLink({ email, url }) {
+  return deliverMail({
+    to: email,
+    subject: `Delete your ${config.siteName} account?`,
+    text: `Someone (probably you) asked to delete the ${config.siteName} account for ${email}.\n\nFollow this link to delete it now, for good:\n\n${url}\n\nThe link works once and expires in 30 minutes. If you did not ask for it, ignore this email and nothing happens.`,
+    html: `<p>Someone (probably you) asked to delete the ${esc(config.siteName)} account for ${esc(email)}.</p><p><a href="${esc(url)}">Delete it now, for good</a></p><p>The link works once and expires in 30 minutes. If you did not ask for it, ignore this email and nothing happens.</p>`,
+  });
+}
+
 export async function sendLoginLink({ email, url }) {
   return deliverMail({
     to: email,
