@@ -24,6 +24,7 @@ import { d0rz } from './d0rz.js';
 import { dealcatcher } from './dealcatcher.js';
 import { dealnews } from './dealnews.js';
 import { digitaloceanSizes } from './digitalocean.js';
+import { discogsCatalog } from './discogs-catalog.js';
 import { droughtMonitor } from './droughtmonitor.js';
 import { ecbFxRates } from './ecb.js';
 import { edgar } from './edgar.js';
@@ -60,6 +61,7 @@ import { lowendbox } from './lowendbox.js';
 import { mcpRegistry } from './mcpregistry.js';
 import { isoMicExchanges } from './mic.js';
 import { musicbrainz } from './musicbrainz.js';
+import { musicbrainzCatalog } from './musicbrainz-catalog.js';
 import { nasdaqHalts } from './nasdaqhalts.js';
 import { ndbcBuoys } from './ndbc.js';
 import { newsChannels } from './newschannels.js';
@@ -74,6 +76,7 @@ import { nws } from './nws.js';
 import { ocdsTenders } from './ocds.js';
 import { openfda } from './openfda.js';
 import { openlibrary } from './openlibrary.js';
+import { openlibraryCatalog } from './openlibrary-catalog.js';
 import { openprofiles } from './openprofiles.js';
 import { opensaas } from './opensaas.js';
 import { openserver } from './openserver.js';
@@ -83,6 +86,7 @@ import { outreachgraph } from './outreachgraph.js';
 import { ovhVps } from './ovh.js';
 import { p0dcasters } from './p0dcasters.js';
 import { buildingPermits } from './permits.js';
+import { podcastindexCatalog } from './podcastindex-catalog.js';
 import { podcasts } from './podcasts.js';
 import { pypi } from './pypi.js';
 import { redditDeals } from './redditdeals.js';
@@ -235,6 +239,10 @@ export const ADAPTERS = [
   tvmazeSchedule,
   tvmazeCatalog,
   thetvdbCatalog,
+  musicbrainzCatalog,
+  openlibraryCatalog,
+  podcastindexCatalog,
+  discogsCatalog,
   anilistAiring,
   imdbRatings,
   // Channels: the whole iptv-org directory, for matching a playlist by name.

@@ -1,4 +1,5 @@
 export * from './adapter.js';
+export * from './dump.js';
 export { describeEnrichers, enrichPending } from './enrich.js';
 export { scanFeeds } from './feedscan.js';
 export { makeHttp } from './http.js';

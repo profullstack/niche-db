@@ -20,8 +20,8 @@ Adapters are one file each in `packages/adapters/src`. One hundred and twenty-ei
 | games | `steam`, `steam-news`, `igdb`, `igdb-catalog` (every game IGDB knows, walked by id then kept current from updated_at), `wikidata-games`, `steam-catalog` | IGDB only (Twitch client) |
 | packages | `npm`, `pypi`, `crates`, `go-modules`, `huggingface`, `github-releases` | no (GitHub token optional) |
 | filings | `edgar`, `federal-register`, `courtlistener` | CourtListener only |
-| music | `musicbrainz` | no |
-| books | `openlibrary`, `gutenberg-catalog`, `librivox-catalog` | no |
+| music | `musicbrainz`, `musicbrainz-catalog`, `discogs-catalog` | no |
+| books | `openlibrary`, `gutenberg-catalog`, `librivox-catalog`, `openlibrary-catalog` | no |
 | tabletop | `scryfall-sets`, `scryfall-cards` | no |
 | space | `launch-library` | no |
 | chess | `lichess-broadcasts` | no |
@@ -41,7 +41,7 @@ Adapters are one file each in `packages/adapters/src`. One hundred and twenty-ei
 | ai-incidents | `rogue-ai-incidents`, `rogue-ai-research`, `aiid-reports` | no |
 | news | `newsfeed`, `gdelt`, `rssamplifier`, `brisk`, `news-channels` | no |
 | domains | `ntld-totals`, `ntld-tlds`, `ntld-launches`, `ntld-changes` | no |
-| podcasts | `podcasts`, `p0dcasters` | no |
+| podcasts | `podcasts`, `p0dcasters`, `podcastindex-catalog` | no |
 | aviation | `faa-nas-status`, `aviation-hazards`, `aviation-metar`, `ntsb-accidents`, `adsb-flights` | no (NTSB needs mdbtools + unzip, in the Dockerfile) |
 | water | `nwps-river-gauges`, `coops-water-levels`, `drought-monitor`, `ndbc-buoys`, `nws-surf-zone` | no |
 | consumer-finance | `cfpb-complaints`, `fdic-institutions`, `fdic-structure-changes` | no |
@@ -227,6 +227,54 @@ export const example = defineAdapter({
 ```
 
 Register it in `packages/adapters/src/index.js`. The core normalises items, hashes them so unchanged rows cost no write, writes in batches, records the run and reschedules.
+
+### Streaming a dump
+
+A source that reads a multi-gigabyte file (MusicBrainz, Discogs, Open Library, Podcast Index) cannot return one array: the file does not fit in memory and the walk does not fit in one run. Instead `pull` yields batches and the core drains them one at a time, writing each and saving its cursor before reading the next. `pull` is an `async *` generator (or returns `{ items: <async iterable> }`, which is the same thing), each yielded value is `{ items, cursor }`, and the generator's `return` value is the run's `{ cursor, note, nextInMinutes }`.
+
+```js
+import { dumpDir, gzipLines } from '@nichedb/core/dump';
+
+export const example = defineAdapter({
+  name: 'example-dump',
+  // ...
+  cadenceMinutes: 60,
+  budgetMs: 60 * 60_000,
+  async *pull({ cursor, http, log, deadline }) {
+    const version = await http.text('https://example.com/dumps/LATEST');
+    const skip = cursor.version === version ? Number(cursor.skip) || 0 : 0;
+    if (cursor.version === version && cursor.done) return { cursor, note: 'unchanged' };
+
+    const dir = await dumpDir('example');
+    const file = `${dir}/${version}.ndjson.gz`;
+    const dl = await http.download('https://example.com/dumps/latest.ndjson.gz', file);
+    if (!dl.complete) return { cursor: { version, skip }, note: 'download in progress', nextInMinutes: 1 };
+
+    let n = skip;
+    let batch = [];
+    for await (const line of gzipLines(file, { skip })) {
+      n += 1;
+      batch.push(toItem(JSON.parse(line)));
+      if (batch.length === 500) {
+        yield { items: batch, cursor: { version, skip: n } };
+        batch = [];
+        if (Date.now() > deadline) return { cursor: { version, skip: n }, nextInMinutes: 1 };
+      }
+    }
+    if (batch.length) yield { items: batch, cursor: { version, skip: n } };
+    return { cursor: { version, skip: n, done: true }, note: 'complete' };
+  },
+});
+```
+
+The rules:
+
+- **`budgetMs`** is the run's wall-clock budget and replaces `INGEST_RUN_DEADLINE_MS` (4 minutes) for this adapter. The reaper window and the BullMQ lock widen to the largest budget declared, so an hour-long budget is safe to declare. The core hands it back as `deadline`; check it between batches and return. A batch written past the deadline ends the run from the core's side too, rescheduling in a minute, but the adapter checking first is what keeps a run inside its lock.
+- **Each batch's `cursor`** is the position *after* that batch's items (a line count, a byte offset, a last id) plus whatever identifies the file (a dump date, a version, a `LATEST` value), so a new upstream file resets the walk. It is saved as soon as the batch is in the table. At-least-once delivery is fine: a batch re-written after a crash is an idempotent upsert on `(source, externalId)` and unchanged rows cost nothing.
+- **`return`** the final `{ cursor, note, nextInMinutes }`. `nextInMinutes: 1` keeps an unfinished walk moving between cadences; `done: true` in the cursor lets the next run short-circuit when the upstream file has not changed.
+- **`http.download(url, path, { timeoutMs, headers, onProgress })`** streams to disk and resumes with `Range` from whatever is already there (append on 206, restart on 200, 416 means whole). It returns `{ path, bytes, complete }`; on `complete: false`, return and call it again next run. The user agent is sent; Podcast Index refuses requests without one. Discogs ignores `Range` and rate-limits hard: expect a restart and keep requests to a handful an hour.
+- **`dumpDir(name)`** is where the file goes: under `INGEST_DATA_DIR` when set (mount a volume there), else the OS temp dir, which a redeploy wipes. The cursor is the walk; the directory is a cache.
+- **Readers**: `gzipLines(path, { skip })`, `xzLines(path, { member, skip })` (MusicBrainz: `member: 'mbdump/artist'`, needs `xz` on the host), `tsvJsonLines(path, { skip })` for Open Library's five-column rows (each record carries its `lineNo`), `lineOffsetReader(path, { offset })` for a plain file you want to seek in, `untar(path, dir)` and `sqliteRows(dbPath, sql)` for Podcast Index. Every reader yields every line, so `skip + lines read` is the file position. Skipping into a compressed file re-inflates from the top (seconds per gigabyte for gzip, slower for xz); a plain-file `offset` is a seek.
 
 ## License
 

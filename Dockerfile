@@ -25,9 +25,11 @@ FROM base AS runtime
 ENV NODE_ENV=production
 # `ntsb-accidents` reads a 558 MB Microsoft Access database out of a zip,
 # because the NTSB publishes no working API. mdbtools turns that into NDJSON.
-# Nothing else in the image needs either, and both are a few hundred kilobytes.
+# xz-utils is for the dump adapters: MusicBrainz ships tar.xz, Bun.Archive
+# cannot read xz, and the image's tar needs the xz binary to stream one member
+# out (`tar -xJOf`). All three are a few hundred kilobytes.
 RUN apt-get update \
- && apt-get install -y --no-install-recommends mdbtools unzip \
+ && apt-get install -y --no-install-recommends mdbtools unzip xz-utils \
  && rm -rf /var/lib/apt/lists/*
 # Bun's isolated linker keeps each workspace's node_modules beside it, so the
 # whole deps stage comes across rather than only /app/node_modules.

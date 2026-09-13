@@ -1,0 +1,13 @@
+HTTP/2 206 
+date: Sun, 13 Sep 2026 10:30:06 GMT
+content-type: application/gzip
+content-length: 4194304
+content-range: bytes 0-4194303/1826623856
+accept-ranges: bytes
+last-modified: Sat, 12 Sep 2026 23:24:31 GMT
+x-rgw-object-type: Normal
+etag: "b60fa45859813600fc0320e710b1a73f-117"
+x-amz-tagging-count: 0
+cf-cache-status: DYNAMIC
+server: cloudflare
+
