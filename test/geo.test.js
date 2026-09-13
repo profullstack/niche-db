@@ -3,6 +3,7 @@ import { readdir, readFile } from 'node:fs/promises';
 import { PGlite } from '@electric-sql/pglite';
 import { citext } from '@electric-sql/pglite/contrib/citext';
 import { pg_trgm } from '@electric-sql/pglite/contrib/pg_trgm';
+import { POLICE_CITIES, policeItem } from '../packages/adapters/src/police-updates.js';
 import { toItem, validCoverage } from '../packages/adapters/src/scanners.js';
 import { geoQueryFields, parseGeoQuery } from '../packages/core/src/geo.js';
 
@@ -138,6 +139,26 @@ describe('geographic contract', () => {
 });
 
 describe('database geo filtering', () => {
+  test('police announcements match the linked California radius by jurisdiction, and stay out of incident-only feeds', async () => {
+    const city = POLICE_CITIES.find((c) => c.name === 'Palo Alto');
+    const update = policeItem({ title: 'Police advisory', publishedAt: '2026-09-01' }, city);
+    const id = await item(update.data, { kind: update.kind });
+    const options = {
+      collectionId: crime,
+      lat: 37.243507,
+      long: -121.942648,
+      radius: 100,
+      db: sql,
+    };
+    const rows = await q.recentItems(options);
+    expect(rows.map((r) => Number(r.id))).toContain(id);
+    expect(rows.find((r) => Number(r.id) === id).data.location_precision).toBe('jurisdiction');
+    const incidentFeed = { collection_id: crime, query: { ...options, kinds: ['crime-report'] } };
+    delete incidentFeed.query.db;
+    expect((await q.feedItems(incidentFeed, { db: sql })).map((r) => Number(r.id))).not.toContain(
+      id,
+    );
+  });
   test('existing coordinate shapes, malformed values and unknown locations', async () => {
     for (const d of [
       near,

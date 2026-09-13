@@ -22,6 +22,7 @@ import {
   Landing,
   SearchPage,
 } from '../views/pages.jsx';
+import { PoliceCoveragePage } from '../views/police-coverage.jsx';
 
 /**
  * What a free reader gets where a members-only collection would be.
@@ -78,6 +79,19 @@ export function registerPages(app) {
     return c.redirect(`/c/crime?${params}`, 302);
   });
   app.get('/rings', (c) => c.redirect('/c/webrings', 301));
+
+  app.get('/c/crime/coverage', async (c) =>
+    c.html(
+      await render(
+        <PoliceCoveragePage
+          user={c.get('user')}
+          search={(c.req.query('q') ?? '').slice(0, 100)}
+          minimum={c.req.query('min') === '100000' ? 100000 : 50000}
+          pending={c.req.query('pending') === '1'}
+        />,
+      ),
+    ),
+  );
 
   app.get('/c/:slug', async (c) => {
     const collection = await q.getCollection(c.req.param('slug'));

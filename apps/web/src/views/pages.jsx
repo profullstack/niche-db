@@ -97,6 +97,14 @@ export const CollectionPage = ({
   >
     <h1>{collection.name}</h1>
     <p class="lede">{collection.description}</p>
+    {collection.slug === 'crime' ? (
+      <p>
+        <a href="/c/crime/coverage">California police source coverage</a> ·{' '}
+        <a href={locationLink('/c/crime', geo, { kind: 'police-update' })}>
+          Police updates in this area
+        </a>
+      </p>
+    ) : null}
     <p class="stats">
       <Num n={stats.items} /> items · <Num n={stats.items_today} /> today · {stats.sources} sources
       · {stats.feeds} feeds
@@ -378,6 +386,13 @@ export const ItemPage = ({
         ) : null}
       </p>
       {item.summary ? <p class="lede">{item.summary}</p> : null}
+      {item.kind === 'police-update' ? (
+        <p class="muted">
+          Published by {item.data?.publisher}. This is a police announcement. The date is its
+          publication time; the geographic location is the Census reference point for{' '}
+          {item.data?.jurisdiction}. The incident time and exact location are not supplied here.
+        </p>
+      ) : null}
       <AwardPills counts={awardCounts} />
       <AwardForm
         targetType="item"

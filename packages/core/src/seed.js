@@ -115,7 +115,7 @@ export const COLLECTIONS = [
     slug: 'crime',
     name: 'Crime',
     description:
-      'Crime reports as police departments publish them: incident-level records from seven US city open-data portals, street-level crime across England, Wales and Northern Ireland, and the FBI’s state-by-state estimates. Every row carries its country, state or force area, city and neighbourhood, so it can be read by place rather than only as a stream.',
+      'Crime incident records, local police announcements, scanner directories and annual estimates. California police announcements use the publishing city’s reference point for geographic filters; their dates are publication times. Incident records retain their reported locations and times.',
   },
   {
     slug: 'public-money',
@@ -625,6 +625,14 @@ export const DEFAULT_FEEDS = [
      with: what happened near me, what kind of thing is happening, and how does
      a whole place compare. The per-city feeds are generated from the adapter's
      own city list further down rather than written out twice. */
+  {
+    collection: 'crime',
+    slug: 'police-updates-ca',
+    name: 'California police updates',
+    description:
+      'Public police announcements from participating California cities over 50,000 residents, checked hourly. City-level locations and publication dates.',
+    query: { kinds: ['police-update'], tags: ['ca'] },
+  },
   {
     collection: 'crime',
     slug: 'crime-reports',

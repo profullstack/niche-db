@@ -25,6 +25,7 @@ jobs:
           bun-version: 1.4.0
       - run: bun install
       - run: bun run lint
+      - run: python3 test/police-source-discovery.test.py
       - run: bun test
         env:
           DATABASE_URL: postgres://unused:unused@localhost:5432/unused
