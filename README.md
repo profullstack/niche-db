@@ -20,8 +20,8 @@ Adapters are one file each in `packages/adapters/src`. One hundred and twenty-ei
 | games | `steam`, `steam-news`, `igdb`, `igdb-catalog` (every game IGDB knows, walked by id then kept current from updated_at), `wikidata-games`, `steam-catalog` | IGDB only (Twitch client) |
 | packages | `npm`, `pypi`, `crates`, `go-modules`, `huggingface`, `github-releases` | no (GitHub token optional) |
 | filings | `edgar`, `federal-register`, `courtlistener` | CourtListener only |
-| music | `musicbrainz` | no |
-| books | `openlibrary`, `gutenberg-catalog`, `librivox-catalog` | no |
+| music | `musicbrainz`, `musicbrainz-catalog`, `discogs-catalog` | no |
+| books | `openlibrary`, `gutenberg-catalog`, `librivox-catalog`, `openlibrary-catalog` | no |
 | tabletop | `scryfall-sets`, `scryfall-cards` | no |
 | space | `launch-library` | no |
 | chess | `lichess-broadcasts` | no |
@@ -41,7 +41,7 @@ Adapters are one file each in `packages/adapters/src`. One hundred and twenty-ei
 | ai-incidents | `rogue-ai-incidents`, `rogue-ai-research`, `aiid-reports` | no |
 | news | `newsfeed`, `gdelt`, `rssamplifier`, `brisk`, `news-channels` | no |
 | domains | `ntld-totals`, `ntld-tlds`, `ntld-launches`, `ntld-changes` | no |
-| podcasts | `podcasts`, `p0dcasters` | no |
+| podcasts | `podcasts`, `p0dcasters`, `podcastindex-catalog` | no |
 | aviation | `faa-nas-status`, `aviation-hazards`, `aviation-metar`, `ntsb-accidents`, `adsb-flights` | no (NTSB needs mdbtools + unzip, in the Dockerfile) |
 | water | `nwps-river-gauges`, `coops-water-levels`, `drought-monitor`, `ndbc-buoys`, `nws-surf-zone` | no |
 | consumer-finance | `cfpb-complaints`, `fdic-institutions`, `fdic-structure-changes` | no |
