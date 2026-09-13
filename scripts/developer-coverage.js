@@ -42,6 +42,7 @@ for (const item of items) {
   if (!out) {
     tally.noHome++;
     rows.push([item.data.provider, 'no home url']);
+    console.log(`${item.data.provider}\tno home url`);
     continue;
   }
   if (out.cli) {
@@ -53,14 +54,16 @@ for (const item of items) {
   if (out.api_docs) tally.api++;
   if (out.status) tally.status++;
   if (!out.cli && !out.terraform && !out.api_docs && !out.status) tally.none++;
-  rows.push([
+  const row = [
     item.data.provider,
     out.cli ? `${out.cli.name} (${out.cli.verified})` : '-',
     out.terraform?.source ?? '-',
     out.api_docs ? 'api' : '-',
     out.status ? 'status' : '-',
-  ]);
+  ];
+  rows.push(row);
+  // Streamed as it goes, so a run cut short still leaves its rows behind.
+  console.log(row.join('\t'));
   if (n % 20 === 0) console.error(`${n}/${items.length}`);
 }
-for (const r of rows) console.log(r.join('\t'));
 console.log(JSON.stringify(tally));
