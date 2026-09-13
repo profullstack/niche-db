@@ -2,6 +2,7 @@ import { describe, expect, test } from 'bun:test';
 import { readFile } from 'node:fs/promises';
 
 import {
+  ATTRIBUTION,
   accountPath,
   accountUrl,
   headlineOf,
@@ -248,6 +249,12 @@ describe('the document', () => {
     expect(item.data.page_url).toBe(item.externalId);
     expect(item.data.listing).toBe('https://www.thesportsdb.com/team/133602');
     expect(item.data.wikidata).toBe('Q23759917');
+    expect(item.data.attribution).toBe(ATTRIBUTION);
+    expect(item.data.attribution).toContain('thesportsdb.com');
+    expect(item.data.artwork_cc).toBe(false);
+    expect(normaliseItem(playerItem(alisson, '2026-09-13T06:00:00.000Z')).data.artwork_cc).toBe(
+      true,
+    );
     expect(typeof item.data.doc).toBe('string');
     expect(item.tags).toEqual([
       'openprofile',

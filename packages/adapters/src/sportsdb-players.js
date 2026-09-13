@@ -40,13 +40,20 @@ import { BASE, DEFAULT_KEY, PROVIDER, redact, sportSlug, usingFreeKey } from './
  * `data.source_url`, so `externalId`, `data.source_url` and `data.page_url`
  * are all the player page URL, and never the API URL that carries the key.
  *
- * Licence: TheSportsDB's terms allow its data to be copied from the official
- * API endpoints with a credit, which is where every row here comes from and
- * why every document says so.
+ * Licence: TheSportsDB's terms (docs_terms_of_use.php) allow its data to be
+ * copied from the official API endpoints with a credit, which is where every
+ * row here comes from and why every document and every item's
+ * `data.attribution` says so. The artwork is made by its users and the terms
+ * point at the row's `strCreativeCommons` flag for whether a cutout or thumb
+ * is CC licensed, so that flag travels as `data.artwork_cc`.
  */
 
 export const SITE = 'https://www.thesportsdb.com';
 export const USER_AGENT = 'nichedb (https://nichedb.dev; hello@nichedb.dev)';
+
+/** The credit the terms ask for, on every item. */
+export const ATTRIBUTION =
+  'Data from TheSportsDB (https://www.thesportsdb.com), whose terms allow copying from the official API with a credit.';
 
 /** The first team id that answers; the handful before it are null. */
 export const START_ID = 133590;
@@ -258,6 +265,8 @@ export function playerItem(r, fetchedAt) {
       nationality: text(r.strNationality),
       born: text(r.dateBorn),
       wikidata: text(r.idWikidata),
+      artwork_cc: text(r.strCreativeCommons) === 'Yes',
+      attribution: ATTRIBUTION,
       updated_at: null,
       fetched_at: fetchedAt,
       doc: profileDoc(r),
