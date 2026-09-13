@@ -478,6 +478,42 @@ describe('the walk', () => {
     expect(rest.cursor.books).toBe(part.items.length + rest.items.length);
   });
 
+  test('a retry never asks If-Modified-Since, so a changed feed that broke once is still read', async () => {
+    // The weekly run: the feed moved (200, new stamp) but the connection died
+    // after the header line. The retry must ask for the bytes; asking with the
+    // new stamp would be answered 304 and the changed catalogue never read.
+    const NEW = 'Sun, 20 Sep 2026 21:29:25 GMT';
+    const asked = [];
+    const http = {
+      async request(_url, opts) {
+        asked.push(opts.headers['if-modified-since'] ?? null);
+        if (opts.headers['if-modified-since'] === NEW) return new Response(null, { status: 304 });
+        if (asked.length === 1) {
+          const bytes = new TextEncoder().encode(`${head.body.split('\n')[0]}\n`);
+          let sent = false;
+          const stream = new ReadableStream({
+            pull(controller) {
+              if (sent) controller.error(new Error('connection reset'));
+              else {
+                sent = true;
+                controller.enqueue(bytes);
+              }
+            },
+          });
+          return new Response(stream, { status: 200, headers: { 'last-modified': NEW } });
+        }
+        return new Response(head.body, { status: 200, headers: { 'last-modified': NEW } });
+      },
+    };
+    const first = await run({}, {}, provider());
+    const out = await run({}, first.cursor, { http });
+    expect(asked).toEqual([head.headers['last-modified'], null]);
+    expect(out.items.length).toBeGreaterThan(100);
+    expect(out.cursor.offset).toBeNull();
+    expect(out.cursor.lastModified).toBe(NEW);
+    expect(out.note).toContain('1 download failed');
+  });
+
   test('a body that is not the catalogue is a failure, not a pass of nothing', async () => {
     const p = provider({ body: '<html>maintenance</html>' });
     await expect(run({}, {}, p)).rejects.toThrow(/every request failed/);

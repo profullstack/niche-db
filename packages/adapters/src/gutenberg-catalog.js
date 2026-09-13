@@ -7,8 +7,9 @@ import { defineAdapter, looseDate, slugify } from '@nichedb/core/adapter';
  * cache/epub/feeds/pg_catalog.csv: 21 MB, some 90,000 lines, one row per
  * ebook with the title, authors, subjects, Library of Congress class, language,
  * bookshelves and the date it was released. The books are public domain in the
- * United States and the catalogue itself is free to copy, so this is one of the
- * few book sources a public directory can carry whole. There is no key, no
+ * United States and the catalogue data is granted to the public domain (the
+ * robot access policy says so in those words), so this is one of the few book
+ * sources a public directory can carry whole. There is no key, no
  * paging and no per-book API to ask: the feed IS the API, and Gutenberg's robot
  * policy asks that automated readers use the feeds rather than crawl the site,
  * which is exactly what this source does.
@@ -399,7 +400,7 @@ export const gutenbergCatalog = defineAdapter({
   title: 'Project Gutenberg: every ebook',
   collection: 'books',
   description:
-    "Every ebook in Project Gutenberg's catalogue, close to 80,000, one row each with its title, authors, subjects, bookshelves, Library of Congress class, language, release date, cover and the download links per format. The books are public domain in the United States and the catalogue feed is free to copy and reuse with Project Gutenberg credited, which every row carries. One request per pass: the 21 MB pg_catalog.csv feed, streamed through a CSV parser as it arrives, re-read weekly and skipped when unchanged.",
+    "Every ebook in Project Gutenberg's catalogue, close to 80,000, one row each with its title, authors, subjects, bookshelves, Library of Congress class, language, release date, cover and the download links per format. The books are public domain in the United States and Project Gutenberg grants the catalogue data itself to the public domain, no key and no terms; every row still credits it. One request per pass: the 21 MB pg_catalog.csv feed, streamed through a CSV parser as it arrives, re-read weekly and skipped when unchanged.",
   docs: 'https://www.gutenberg.org/ebooks/offline_catalogs.html',
   kinds: ['book'],
   cadenceMinutes: CADENCE_MINUTES,
@@ -453,9 +454,12 @@ export const gutenbergCatalog = defineAdapter({
       requests += 1;
       try {
         const headers = { accept: 'text/csv, */*', 'user-agent': USER_AGENT };
-        // A finished pass asks whether the feed moved; a pass in progress needs the bytes.
-        if (offset === 0 && state.walkedAt && lastModified)
-          headers['if-modified-since'] = lastModified;
+        // A finished pass asks whether the feed moved; a pass in progress needs
+        // the bytes. Only the first request of a run asks: a retry follows an
+        // attempt that answered 200 with a new stamp and then broke, and asking
+        // again with that stamp would get a 304 for a catalogue never read.
+        if (requests === 1 && offset === 0 && state.walkedAt && state.lastModified)
+          headers['if-modified-since'] = state.lastModified;
         const res = await http.request(CATALOG_URL, { headers, timeoutMs: 180_000 });
         if (res.status === 304) {
           unchanged = true;
