@@ -78,7 +78,7 @@ export const musicbrainz = defineAdapter({
       );
       for (const r of res.releases ?? []) {
         let cover = covers[r.id] ?? null;
-        if (cover === null && spent < budget) {
+        if (cover === null && spent < budget && Date.now() + 10_000 < deadline) {
           spent++;
           const head = await http
             .request(`https://coverartarchive.org/release/${r.id}/front-250`, {
@@ -86,11 +86,13 @@ export const musicbrainz = defineAdapter({
               timeoutMs: 10_000,
             })
             .catch(() => null);
-          cover =
-            head && (head.ok || head.status === 307)
-              ? `https://coverartarchive.org/release/${r.id}/front-250`
-              : false;
-          covers[r.id] = cover;
+          if (head && (head.ok || head.status === 307)) {
+            cover = `https://coverartarchive.org/release/${r.id}/front-250`;
+            covers[r.id] = cover;
+          } else if (head?.status === 404) {
+            cover = false;
+            covers[r.id] = false;
+          }
         }
         items.push(toItem(r, cover || null));
       }

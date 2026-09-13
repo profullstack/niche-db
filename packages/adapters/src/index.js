@@ -96,6 +96,7 @@ import { pypi } from './pypi.js';
 import { redditDeals } from './redditdeals.js';
 import { rogueIncidents, rogueResearch } from './rogueaitracker.js';
 import { rssamplifier } from './rssamplifier.js';
+import { ruuster } from './ruuster.js';
 import { saasrow } from './saasrow.js';
 import { scalewayInstances } from './scaleway.js';
 import { scannerDirectory } from './scanners.js';
@@ -220,6 +221,7 @@ export const ADAPTERS = [
   landRegistrySales,
   freddieMacRates,
   buildingPermits,
+  ruuster,
   fueleconomyCatalog,
   nhtsaRecalls,
   nhtsaComplaints,
