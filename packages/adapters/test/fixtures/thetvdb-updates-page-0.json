@@ -1,0 +1,114 @@
+{
+  "status": "success",
+  "data": [
+    {
+      "recordType": "",
+      "recordId": 448246,
+      "methodInt": 2,
+      "method": "update",
+      "extraInfo": "",
+      "userId": 0,
+      "timeStamp": 1789200944,
+      "entityType": "series"
+    },
+    {
+      "recordType": "",
+      "recordId": 343443,
+      "methodInt": 2,
+      "method": "update",
+      "extraInfo": "",
+      "userId": 0,
+      "timeStamp": 1789200947,
+      "entityType": "series"
+    },
+    {
+      "recordType": "",
+      "recordId": 447187,
+      "methodInt": 2,
+      "method": "update",
+      "extraInfo": "",
+      "userId": 0,
+      "timeStamp": 1789200972,
+      "entityType": "series"
+    },
+    {
+      "recordType": "",
+      "recordId": 448246,
+      "methodInt": 2,
+      "method": "update",
+      "extraInfo": "",
+      "userId": 0,
+      "timeStamp": 1789201004,
+      "entityType": "series"
+    },
+    {
+      "recordType": "",
+      "recordId": 478360,
+      "methodInt": 2,
+      "method": "update",
+      "extraInfo": "",
+      "userId": 0,
+      "timeStamp": 1789201013,
+      "entityType": "series"
+    },
+    {
+      "recordType": "",
+      "recordId": 482422,
+      "methodInt": 1,
+      "method": "create",
+      "extraInfo": "",
+      "userId": 0,
+      "timeStamp": 1789203152,
+      "entityType": "series"
+    },
+    {
+      "recordType": "",
+      "recordId": 482422,
+      "methodInt": 2,
+      "method": "update",
+      "extraInfo": "",
+      "userId": 0,
+      "timeStamp": 1789203152,
+      "entityType": "series"
+    },
+    {
+      "recordType": "",
+      "recordId": 482422,
+      "methodInt": 2,
+      "method": "update",
+      "extraInfo": "",
+      "userId": 0,
+      "timeStamp": 1789203328,
+      "entityType": "series"
+    },
+    {
+      "recordType": "",
+      "recordId": 482423,
+      "methodInt": 1,
+      "method": "create",
+      "extraInfo": "",
+      "userId": 0,
+      "timeStamp": 1789206286,
+      "entityType": "series"
+    },
+    {
+      "recordType": "",
+      "recordId": 462009,
+      "methodInt": 3,
+      "method": "delete",
+      "extraInfo": "",
+      "userId": 0,
+      "timeStamp": 1789219816,
+      "mergeToId": 2266993,
+      "mergeToType": "season",
+      "entityType": "series"
+    }
+  ],
+  "links": {
+    "prev": null,
+    "self": "https://api4.thetvdb.com/v4/updates?since=1789200923&type=series&page=0",
+    "next": "https://api4.thetvdb.com/v4/updates?since=1789200923&type=series&page=1",
+    "total_items": 1874,
+    "page_size": 500
+  }
+}

@@ -1,0 +1,98 @@
+{
+  "status": "success",
+  "data": [
+    {
+      "id": 70909,
+      "name": "The New Adventures of Batman",
+      "slug": "the-new-adventures-of-batman",
+      "image": "/banners/posters/70909-6.jpg",
+      "nameTranslations": [
+        "eng",
+        "fra",
+        "rus",
+        "spa",
+        "pt",
+        "deu"
+      ],
+      "overviewTranslations": [
+        "eng",
+        "fra",
+        "rus",
+        "spa",
+        "pt",
+        "deu"
+      ],
+      "aliases": [
+        {
+          "language": "eng",
+          "name": "Batman (1977)"
+        }
+      ],
+      "firstAired": "1977-02-10",
+      "lastAired": "1977-05-26",
+      "nextAired": "",
+      "score": 3037,
+      "status": {
+        "id": null,
+        "name": null,
+        "recordType": "",
+        "keepUpdated": false
+      },
+      "originalCountry": "usa",
+      "originalLanguage": "eng",
+      "defaultSeasonType": 1,
+      "isOrderRandomized": false,
+      "lastUpdated": "2026-06-19 01:27:25",
+      "averageRuntime": 25,
+      "episodes": null,
+      "overview": "The New Adventures of Batman is an animated series produced by Filmation in 1977 featuring the DC Comics superheroes Batman and Robin, and Batgirl. In The New Adventures of Batman, the \"Dynamic Duo\" fights crime in Gotham City, encountering the classic Batman rogues gallery as well as some original villains. Complicating matters is Bat-Mite, a well meaning imp from another dimension called Ergo, who considers himself Batman's biggest fan. As a result, he wears a variant of Batman’s costume and attempts to help him, only to often create more problems (although he is occasionally an asset). Missing is Alfred, the faithful butler of Batman's alter ego Bruce Wayne.",
+      "year": "1977"
+    },
+    {
+      "id": 70910,
+      "name": "Legends of the Superheroes",
+      "slug": "legends-of-the-super-heroes",
+      "image": "/banners/posters/70910-2.jpg",
+      "nameTranslations": [
+        "eng",
+        "pt"
+      ],
+      "overviewTranslations": [
+        "eng",
+        "pt"
+      ],
+      "aliases": [
+        {
+          "language": "eng",
+          "name": "Legends of the Super Heroes"
+        }
+      ],
+      "firstAired": "1979-01-18",
+      "lastAired": "1979-01-25",
+      "nextAired": "",
+      "score": 237,
+      "status": {
+        "id": null,
+        "name": null,
+        "recordType": "",
+        "keepUpdated": false
+      },
+      "originalCountry": "usa",
+      "originalLanguage": "eng",
+      "defaultSeasonType": 1,
+      "isOrderRandomized": false,
+      "lastUpdated": "2025-08-31 17:23:32",
+      "averageRuntime": 45,
+      "episodes": null,
+      "overview": "Heroes and villains of DC Comics square off in the two-part, live-action, made-for-TV (with a laugh track!) smackdown of Legends of the Super Heroes.",
+      "year": "1979"
+    }
+  ],
+  "links": {
+    "prev": "https://api4.thetvdb.com/v4/series?page=0",
+    "self": "https://api4.thetvdb.com/v4/series?page=1",
+    "next": "https://api4.thetvdb.com/v4/series?page=2",
+    "total_items": 173448,
+    "page_size": 500
+  }
+}

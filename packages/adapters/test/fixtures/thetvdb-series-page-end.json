@@ -1,0 +1,11 @@
+{
+  "status": "success",
+  "data": [],
+  "links": {
+    "prev": "https://api4.thetvdb.com/v4/series?page=99998",
+    "self": "https://api4.thetvdb.com/v4/series?page=99999",
+    "next": null,
+    "total_items": 173448,
+    "page_size": 500
+  }
+}

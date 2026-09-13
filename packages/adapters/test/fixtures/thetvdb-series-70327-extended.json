@@ -1,0 +1,182 @@
+{
+  "status": "success",
+  "data": {
+    "id": 70327,
+    "name": "Buffy the Vampire Slayer",
+    "slug": "buffy-the-vampire-slayer",
+    "image": "https://artworks.thetvdb.com/banners/posters/70327-1.jpg",
+    "nameTranslations": [
+      "ces",
+      "dan",
+      "deu",
+      "eng",
+      "fin",
+      "fra",
+      "heb",
+      "hun",
+      "ita",
+      "por",
+      "rus",
+      "spa",
+      "tur",
+      "pt",
+      "ara",
+      "nld",
+      "ukr"
+    ],
+    "overviewTranslations": [
+      "ces",
+      "deu",
+      "eng",
+      "fin",
+      "fra",
+      "heb",
+      "hun",
+      "ita",
+      "por",
+      "rus",
+      "spa",
+      "swe",
+      "tur",
+      "pt",
+      "ara",
+      "nld",
+      "ukr"
+    ],
+    "aliases": [
+      {
+        "language": "deu",
+        "name": "Buffy - Im Bann der Dämonen"
+      },
+      {
+        "language": "spa",
+        "name": "Buffy, cazavampiros"
+      }
+    ],
+    "firstAired": "1997-03-10",
+    "lastAired": "2003-05-20",
+    "nextAired": "",
+    "score": 517993,
+    "status": {
+      "id": 2,
+      "name": "Ended",
+      "recordType": "series",
+      "keepUpdated": false
+    },
+    "originalCountry": "usa",
+    "originalLanguage": "eng",
+    "defaultSeasonType": 1,
+    "isOrderRandomized": false,
+    "lastUpdated": "2026-08-30 17:44:29",
+    "averageRuntime": 44,
+    "episodes": null,
+    "overview": "In every generation there is a Chosen One. She alone will stand against the vampires, the demons and the forces of darkness. She is the Slayer.\r\n\r\nBuffy Summers is The Chosen One, the one girl in all the world with the strength and skill to fight the vampires. With the help of her close friends, Willow, Xander, and her Watcher Giles she balances slaying, family, friendships, and relationships.",
+    "year": "1997",
+    "artworks": [],
+    "companies": [
+      {
+        "id": 265,
+        "name": "The WB",
+        "slug": "the-wb",
+        "country": "usa",
+        "companyType": {
+          "companyTypeId": 1,
+          "companyTypeName": "Network"
+        }
+      },
+      {
+        "id": 300,
+        "name": "UPN",
+        "slug": "upn",
+        "country": "usa",
+        "companyType": {
+          "companyTypeId": 1,
+          "companyTypeName": "Network"
+        }
+      }
+    ],
+    "originalNetwork": {
+      "id": 265,
+      "name": "The WB",
+      "slug": "the-wb",
+      "country": "usa"
+    },
+    "latestNetwork": {
+      "id": 300,
+      "name": "UPN",
+      "slug": "upn",
+      "country": "usa"
+    },
+    "genres": [
+      {
+        "id": 6,
+        "name": "Horror",
+        "slug": "horror"
+      },
+      {
+        "id": 10,
+        "name": "Fantasy",
+        "slug": "fantasy"
+      },
+      {
+        "id": 12,
+        "name": "Drama",
+        "slug": "drama"
+      },
+      {
+        "id": 15,
+        "name": "Comedy",
+        "slug": "comedy"
+      },
+      {
+        "id": 18,
+        "name": "Adventure",
+        "slug": "adventure"
+      },
+      {
+        "id": 19,
+        "name": "Action",
+        "slug": "action"
+      },
+      {
+        "id": 28,
+        "name": "Romance",
+        "slug": "romance"
+      }
+    ],
+    "trailers": [],
+    "lists": [],
+    "remoteIds": [
+      {
+        "id": "tt0118276",
+        "type": 2,
+        "sourceName": "IMDB"
+      },
+      {
+        "id": "95",
+        "type": 12,
+        "sourceName": "TheMovieDB.com"
+      },
+      {
+        "id": "EP00213110",
+        "type": 3,
+        "sourceName": "TMS (Zap2It)"
+      }
+    ],
+    "characters": null,
+    "airsDays": {
+      "sunday": false,
+      "monday": false,
+      "tuesday": false,
+      "wednesday": false,
+      "thursday": false,
+      "friday": false,
+      "saturday": false
+    },
+    "airsTime": null,
+    "seasons": [],
+    "tags": [],
+    "contentRatings": [],
+    "seasonTypes": []
+  }
+}
