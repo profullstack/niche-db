@@ -79,6 +79,39 @@ export function homeOf(item, homes = FINDHOST_HOMES) {
   return null;
 }
 
+/**
+ * A provider that serves an OpenServer 0.2 descriptor states its own
+ * developer block (the openserver adapter keeps it at data.developer). The
+ * provider's words win over the seed and the registries: `"cli": null` there
+ * means it has none, so nothing is searched; a missing key means unknown.
+ */
+export function descriptorBlock(item) {
+  const d = item?.data?.developer;
+  if (!d || typeof d !== 'object') return null;
+  const cli =
+    d.cli && typeof d.cli === 'object'
+      ? {
+          name: d.cli.name ?? null,
+          repo: d.cli.repo ?? null,
+          docs: d.cli.docs ?? null,
+          install: d.cli.install && typeof d.cli.install === 'object' ? { ...d.cli.install } : {},
+          verified: 'descriptor',
+        }
+      : null;
+  return {
+    cli,
+    api_docs: d.api_docs ?? null,
+    terraform: d.terraform ?? null,
+    status: d.status ?? null,
+    github: d.github ?? null,
+    source_notes: [
+      "from the provider's own OpenServer descriptor",
+      d.cli === null ? 'cli: the provider states it has none' : null,
+    ].filter(Boolean),
+    cliStated: 'cli' in d,
+  };
+}
+
 /** The seed's answer for a domain, shaped as the stored block, or null. */
 export function seedBlock(domain) {
   const row = SEED_DOMAINS.get(domain);
@@ -212,16 +245,20 @@ export const developer = defineEnricher({
     if (!origin) return null;
     const domain = registrableDomain(new URL(origin).hostname.replace(/^www\./, ''));
     const slug = String(item.data?.provider ?? '').toLowerCase();
-    const block = seedBlock(domain) ?? {
-      cli: null,
-      api_docs: null,
-      terraform: null,
-      status: null,
-      github: null,
-      source_notes: [],
-    };
+    const stated = descriptorBlock(item);
+    const block = stated ??
+      seedBlock(domain) ?? {
+        cli: null,
+        api_docs: null,
+        terraform: null,
+        status: null,
+        github: null,
+        source_notes: [],
+      };
+    const cliStated = Boolean(stated?.cliStated);
+    if (stated) delete stated.cliStated;
 
-    if (!block.cli) {
+    if (!block.cli && !cliStated) {
       // Step 2: the registries, by domain.
       try {
         const brew = brewMatches((await brewIndex(http)).get(domain), domain);
