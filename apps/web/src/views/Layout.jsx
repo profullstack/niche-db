@@ -145,7 +145,7 @@ export const Layout = (props) => (
             <a href="/lounge">Lounge</a>
           ) : (
             <a class="premium-link" href="/premium">
-              Premium
+              Premium · ${(config.premium.dayCents / 100).toFixed(2)}/day
             </a>
           )}
           {props.user ? (
@@ -162,15 +162,13 @@ export const Layout = (props) => (
         {props.children}
       </main>
 
-      {/* The ad, and the offer to be rid of it. The upsell belongs exactly here
-          and nowhere else: the only honest moment to sell an ad-free tier is
-          beside the ad it removes. */}
+      {/* Put the ad-free offer beside the ad it removes. */}
       {config.ads.enabled && currentModules().ads ? (
         <aside class="ad-slot">
           <div data-cp-ad data-slot={config.ads.slot} data-format="text_link" />
           <p class="small muted upsell">
             Ads and the tracker pay for the free tier.{' '}
-            <a href="/premium">
+            <a href="/premium?from=ad#plans">
               Premium turns both off for ${(config.premium.dayCents / 100).toFixed(2)} a day
             </a>
             .

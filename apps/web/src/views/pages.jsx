@@ -1,4 +1,5 @@
 import { config } from '@nichedb/config';
+import { currentModules } from '../lib/modules.js';
 import {
   FeedCard,
   ItemList,
@@ -12,6 +13,7 @@ import {
 } from './components.jsx';
 import { EnrichmentBlocks } from './enrichment.jsx';
 import { Layout } from './Layout.jsx';
+import { PremiumUpsell } from './PremiumUpsell.jsx';
 import { AwardForm, AwardPills, PlanBadge } from './premium.jsx';
 
 export const Landing = ({ user, stats, collections, latest, feeds }) => (
@@ -29,6 +31,8 @@ export const Landing = ({ user, stats, collections, latest, feeds }) => (
         <Num n={stats.sources} /> sources · <Num n={stats.feeds} /> feeds
       </p>
     </section>
+
+    <PremiumUpsell plan={currentModules().plan} source="home" />
 
     <section>
       <h2>Collections</h2>
@@ -684,11 +688,7 @@ export const Settings = ({
         {plan !== 'free' ? <span class="muted small"> · {balance} credits</span> : null}
       </p>
       {plan === 'free' ? (
-        <p class="small">
-          Free pages and feeds carry an ad and a tracker. <a href="/premium">Premium</a> turns both
-          off and opens the Lounge, the credits, the themes and early access for $
-          {(config.premium.dayCents / 100).toFixed(2)} a day.
-        </p>
+        <PremiumUpsell plan={plan} source="settings" />
       ) : (
         <p class="small">
           <a href="/lounge">The Lounge</a> · <a href="/premium">manage or extend</a> ·{' '}

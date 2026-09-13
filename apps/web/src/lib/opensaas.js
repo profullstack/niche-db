@@ -40,7 +40,7 @@ export function plans() {
         price: term.cents / 100,
         period: PERIODS[term.id] ?? term.id,
         renews: false,
-        url: term.id === 'day' ? `${site}/crawl` : `${site}/premium`,
+        url: `${site}/premium?term=${term.id}#plans`,
         includes: [
           'no ads',
           'no tracker',

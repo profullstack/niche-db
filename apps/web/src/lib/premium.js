@@ -30,7 +30,8 @@ export async function planForUser(user, { now = new Date() } = {}) {
 export async function loadPlan(c, next) {
   const plan = await planForUser(c.get('user'));
   c.set('plan', plan);
-  c.set('entitlements', entitlements(plan));
+  c.set('entitlements', entitlements(plan, { monthlyCredits: config.premium.monthlyCredits }));
+  await ensureMonthlyCredits(c);
   await next();
 }
 
@@ -82,7 +83,7 @@ export async function ensureMonthlyCredits(c) {
   const user = c.get('user');
   const ent = entitlementsOf(c);
   if (!user || !ent.monthlyCredits) return null;
-  const amount = Math.min(ent.monthlyCredits, config.premium.monthlyCredits * 2);
+  const amount = ent.monthlyCredits;
   try {
     return await premiumDb.grantCredits({
       userId: user.id,

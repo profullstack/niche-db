@@ -6,6 +6,7 @@
  * therefore only appear on this page by existing as data first.
  */
 import { config } from '@nichedb/config';
+import { entitlements } from '@nichedb/premium';
 import { Notice, Num } from './components.jsx';
 import { Layout } from './Layout.jsx';
 
@@ -55,201 +56,418 @@ export const AwardForm = ({ targetType, targetId, awards, plan, balance }) =>
     </form>
   );
 
+const TermCard = ({ term, user, enabled, selected }) => {
+  const titles = { day: 'Try a day', month: 'Make it your daily', year: 'Stay for the year' };
+  const durations = { day: '24 hours', month: '30 days', year: '365 days' };
+  return (
+    <article class={`premium-term${selected ? ' selected' : ''}`}>
+      <p class="premium-eyebrow">
+        {term.savedPercent > 0
+          ? `Save ${term.savedPercent}% vs daily`
+          : term.id === 'month'
+            ? 'Standard price'
+            : 'Start small'}
+      </p>
+      <h3>{titles[term.id]}</h3>
+      <p class="premium-term-price">
+        {money(term.cents)} <span>{term.label}</span>
+      </p>
+      <p class="small muted">
+        ${(term.perDayCents / 100).toFixed(2)}/day · {durations[term.id]} of Premium
+      </p>
+      <p class="small">
+        {term.savedCents > 0
+          ? `Keep ${money(term.savedCents)} compared with buying ${term.days} individual days.`
+          : 'Every Premium perk. One upfront payment.'}
+      </p>
+      {term.discountCents > 0 ? (
+        <p class="small premium-referral">
+          Your referral saves {money(term.discountCents)} on this term.
+        </p>
+      ) : null}
+      {enabled ? (
+        user ? (
+          <form method="post" action="/api/premium/buy">
+            <input type="hidden" name="term" value={term.id} />
+            <button type="submit" class={selected ? 'cta' : 'ghost'}>
+              Get {durations[term.id]} · {money(term.checkoutCents ?? term.cents)}
+            </button>
+          </form>
+        ) : (
+          <a
+            class={`button ${selected ? 'cta' : 'ghost'}`}
+            href={`/login?next=${encodeURIComponent(`/premium?term=${term.id}#plans`)}`}
+          >
+            Sign in for {durations[term.id]}
+          </a>
+        )
+      ) : (
+        <p class="small muted">Checkout unavailable</p>
+      )}
+    </article>
+  );
+};
+
 export const PremiumPage = ({
   user,
   plan,
   terms,
   rows,
-  score,
   reddit,
   members,
   snapshot,
-  discountCents,
   enabled,
+  selectedTerm = 'month',
   notice,
   error,
 }) => {
   const day = terms.find((t) => t.id === 'day');
-  const month = terms.find((t) => t.id === 'month');
-  const year = terms.find((t) => t.id === 'year');
+  const member = plan !== 'free';
+  const api = config.api.premiumPerHour.toLocaleString('en-US');
+  const credits = config.premium.monthlyCredits.toLocaleString('en-US');
+  const perks = [
+    [
+      '01',
+      'No ads. No tracking.',
+      'Your pages and authenticated feeds stay clear of our ads and analytics scripts. Just the data you came for.',
+    ],
+    [
+      '02',
+      'The Lounge',
+      'Meet the members, explore member collections and see the items the community is awarding this week.',
+    ],
+    [
+      '03',
+      `${credits} monthly credits`,
+      'Recognize a useful find with credits included in your membership. Granted on your first visit each calendar month.',
+    ],
+    [
+      '04',
+      'Awards that give credit',
+      'Give Useful, Verified or Scoop awards to items and contributions. Let good work stand out.',
+    ],
+    [
+      '05',
+      'Your Premium badge',
+      'Put a badge beside your contributions, with a visual highlight that makes your work easier to spot.',
+    ],
+    [
+      '06',
+      'Themes and app icons',
+      'Make it feel like yours: six themes and five app icons for the web and installed app.',
+    ],
+    [
+      '07',
+      'Early access',
+      'Explore collections opened to members before their public release. Find what is new in the Lounge.',
+    ],
+    [
+      '08',
+      'Room to build',
+      `${api} API requests an hour, unlimited feeds, your own sources and vehicle lookups included.`,
+    ],
+  ];
+  const plans = ['free', 'premium', 'pro'].map((plan) =>
+    entitlements(plan, { monthlyCredits: config.premium.monthlyCredits }),
+  );
+  const planRows = [
+    ['Browse, search and read public data', () => 'Included'],
+    ['Ads and analytics scripts', (p) => (p.ads ? 'On' : 'Off')],
+    [
+      'API requests / hour',
+      (p) =>
+        (p.apiTier === 'pro'
+          ? config.api.proPerHour
+          : p.apiTier === 'premium'
+            ? config.api.premiumPerHour
+            : config.api.freePerHour
+        ).toLocaleString('en-US'),
+    ],
+    [
+      'Unlimited feeds and own sources',
+      (p) => (p.unlimitedFeeds && p.ownSources ? 'Included' : 'Limited feeds'),
+    ],
+    ['Lounge and early access', (p) => (p.lounge && p.earlyAccess ? 'Included' : '—')],
+    [
+      'Award credits / calendar month',
+      (p) => (p.monthlyCredits ? p.monthlyCredits.toLocaleString('en-US') : '—'),
+    ],
+    [
+      'Badge, themes and app icons',
+      (p) => (p.badge && p.appearance ? 'Included' : 'Default appearance'),
+    ],
+    ['Automated crawl pass for the term', (p) => (p.crawlPass ? 'Included' : 'Sold separately')],
+  ];
   return (
     <Layout
       user={user}
-      title="Premium"
+      title={`Premium · ${money(day?.cents ?? config.premium.dayCents)} a day`}
       canonical="/premium"
-      description={`${config.siteName} Premium: no ads, the Lounge, monthly credits, themes, early access and the whole database, for ${money(day?.cents ?? 100)} a day.`}
+      description={`${config.siteName} Premium: no ads, no tracking, the Lounge, award credits, themes and higher data limits. ${money(day?.cents ?? config.premium.dayCents)} a day. No automatic renewal.`}
     >
-      <section class="hero">
-        <h1>Premium</h1>
-        <p class="lede">
-          A dollar a day. No ads, no tracker, the members' Lounge, credits to award with, themes and
-          app icons, early access to new collections, and the higher limits on everything
-          {config.siteName} holds. The same dollar a day the crawlers pay, because it is the same
-          database.
-        </p>
-        <p class="stats">
-          {terms.map((t) => (
-            <span class="price" key={t.id}>
-              {money(t.cents)} {t.label}
-              {t.savedPercent > 0 ? (
-                <span class="muted small"> ({t.savedPercent}% off)</span>
-              ) : null}
-              {' · '}
-            </span>
-          ))}
-          <a href="#compare">Compared with Reddit Premium</a>
-        </p>
-        {members?.premium || members?.pro ? (
-          <p class="small muted">
-            <Num n={(members.premium ?? 0) + (members.pro ?? 0)} /> members right now.
+      <div class="premium-page">
+        <section class="premium-hero">
+          <div>
+            <p class="premium-eyebrow">{config.siteName} Premium</p>
+            <h1>
+              Your niche.
+              <br />
+              <span>All the extras.</span>
+            </h1>
+            <p class="lede">
+              A quieter place to explore. More room to build. Get the member perks and the data
+              tools, at our standard daily price.
+            </p>
+            <div class="row buy-row">
+              <a class="cta button" href="#plans">
+                {member ? 'Extend your Premium' : 'Get Premium'}
+              </a>
+              <a href="#benefits">Explore the perks ↓</a>
+            </div>
+            <p class="small muted">Pay for the time you want. No automatic renewal.</p>
+          </div>
+          <div class="premium-hero-price">
+            <p class="premium-eyebrow">The standard</p>
+            <p>
+              <strong>{money(day?.cents ?? config.premium.dayCents)}</strong>
+              <span> / day</span>
+            </p>
+            <p>
+              Every Premium perk.
+              <br />
+              Even for just one day.
+            </p>
+            <a class="small" href="#compare">
+              Compare with Reddit Premium ↗
+            </a>
+          </div>
+        </section>
+
+        <Notice notice={notice} error={error} />
+        {member ? (
+          <p class="feedback ok">
+            You are {plan}. <a href="/lounge">Open the Lounge</a> · {snapshot?.balance ?? 0} credits
+            · <a href="/account/billing">Manage your membership</a>
           </p>
         ) : null}
-      </section>
 
-      <Notice notice={notice} error={error} />
-
-      {plan !== 'free' ? (
-        <p class="feedback ok">
-          You are {plan}
-          {snapshot?.terms?.[0]
-            ? ` until ${new Date(snapshot.terms[0].expires_at).toLocaleDateString('en-US')}`
-            : ''}
-          . <a href="/lounge">The Lounge</a> · {snapshot?.balance ?? 0} credits.
-        </p>
-      ) : null}
-
-      <section>
-        <h2>What it includes</h2>
-        <ul class="benefits">
-          <li>
-            <b>No ads, no tracking.</b> Not on a page, and not at the top of an RSS or JSON feed
-            either. The sponsored item free readers get is simply not built for you.
-          </li>
-          <li>
-            <b>The Lounge.</b> A members-only room: the collections that are open to members before
-            they are public, what the membership is awarding this week, and who else is in here.
-          </li>
-          <li>
-            <b>{config.premium.monthlyCredits.toLocaleString('en-US')} credits a month.</b> Granted
-            on the first of the month and spendable on awards. They are a ledger, not a promise:
-            every grant and every spend is a row you can read back.
-          </li>
-          <li>
-            <b>Awards.</b> Mark any item or contribution as useful, verified or a scoop. The counts
-            are public, so an award is worth something to the person who gets it.
-          </li>
-          <li>
-            <b>A badge.</b> Beside your name on your profile, on every contribution you make, and in
-            the API.
-          </li>
-          <li>
-            <b>Themes and app icons.</b> Six themes and five icons, on the web and in the installed
-            app.
-          </li>
-          <li>
-            <b>Early access.</b> New collections open to members first.
-          </li>
-          <li>
-            <b>The higher limits.</b> {config.api.premiumPerHour.toLocaleString('en-US')} API
-            requests an hour, unlimited feeds, your own sources, and the metered vehicle lookups
-            included rather than counted.
-          </li>
-        </ul>
-      </section>
-
-      <section id="compare">
-        <h2>
-          {config.siteName} Premium vs {reddit.name}
-        </h2>
-        <p class="small muted">
-          {reddit.name} is {money(reddit.monthlyCents)} a month or {money(reddit.yearlyCents)} a
-          year (prices and benefits captured {reddit.capturedOn} from{' '}
-          {reddit.sources.map((s, i) => (
-            <span key={s.url}>
-              {i ? ', ' : ''}
-              <a href={s.url} rel="noopener nofollow">
-                {new URL(s.url).host}
-              </a>
-            </span>
-          ))}
-          ; reddit.com/premium answers anything that is not a logged-in browser with a network
-          block). We win {score.ours} of {score.total} rows and say so where we do not.
-        </p>
-        <div class="table-scroll">
-          <table class="table small compare">
-            <thead>
-              <tr>
-                <th>&nbsp;</th>
-                <th>{reddit.name}</th>
-                <th>{config.siteName} Premium</th>
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((r) => (
-                <tr key={r.feature} class={r.wins ? 'wins' : ''}>
-                  <th scope="row">{r.feature}</th>
-                  <td class="muted">{r.reddit}</td>
-                  <td>
-                    {r.ours}
-                    {r.note ? <span class="muted small"> {r.note}</span> : null}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <p class="small muted">
-          The honest summary: Reddit Premium turns Reddit's ads off. This turns ours off and hands
-          you the database underneath — by web, RSS, JSON Feed, API, CLI and MCP — and sells you a
-          single day for {money(day?.cents ?? 100)} if a day is all you want, which is not a thing
-          Reddit offers at any price.
-        </p>
-      </section>
-
-      <section class="cta-block">
-        <h2>Take a day, a month or a year</h2>
-        <p class="stats">
-          {money(day?.cents ?? 100)} a day · {money(month?.cents ?? 3000)} a month ·{' '}
-          {money(year?.cents ?? 30000)} a year
-          {discountCents ? (
-            <span class="muted small"> (referral: {money(discountCents)} off)</span>
+        <div class="premium-stats">
+          <p>
+            <strong>{api}</strong>
+            <span>API requests / hour</span>
+          </p>
+          <p>
+            <strong>{credits}</strong>
+            <span>award credits / month</span>
+          </p>
+          <p>
+            <strong>0</strong>
+            <span>ads or tracking scripts</span>
+          </p>
+          {members?.premium || members?.pro ? (
+            <p>
+              <strong>
+                <Num n={(members.premium ?? 0) + (members.pro ?? 0)} />
+              </strong>
+              <span>current members</span>
+            </p>
           ) : null}
-        </p>
-        {enabled ? (
-          user ? (
-            <div class="row buy-row">
-              <form method="post" action="/api/premium/buy">
-                <input type="hidden" name="term" value="month" />
-                <button type="submit" class="cta">
-                  A month, {money(month?.cents ?? 3000)}
-                </button>
-              </form>
-              <form method="post" action="/api/premium/buy">
-                <input type="hidden" name="term" value="year" />
-                <button type="submit" class="ghost">
-                  A year, {money(year?.cents ?? 30000)}
-                </button>
-              </form>
-            </div>
-          ) : (
-            <a class="cta button" href="/login?next=/premium">
-              Sign in first
-            </a>
-          )
-        ) : (
-          <p class="muted">Payments are not configured on this deployment. Ask its operator.</p>
-        )}
-        <p class="muted small">
-          Paid in crypto through CoinPay. A single day is bought the way the crawlers buy it, over
-          x402 at <a href="/crawl">/crawl</a> — no account, no subscription, and the more you have
-          paid here the less a day costs.
-        </p>
-        <p class="muted small">
-          Running agents rather than reading? <a href="/pro">Pro</a> is the operator tier:
-          everything here plus {config.api.proPerHour.toLocaleString('en-US')} requests an hour and
-          a crawl pass for the whole term.
-        </p>
-      </section>
+        </div>
+
+        <section id="plans" class="premium-section">
+          <p class="premium-eyebrow">One membership. Your choice of time.</p>
+          <h2>Start with a day. Stay as long as you like.</h2>
+          <p class="muted">
+            The same Premium benefits in every term. Prices in {config.premium.currency}; paid
+            upfront through CoinPay in crypto.
+          </p>
+          <div class="premium-terms">
+            {terms.map((term) => (
+              <TermCard
+                key={term.id}
+                term={term}
+                user={user}
+                enabled={enabled}
+                selected={term.id === selectedTerm}
+              />
+            ))}
+          </div>
+          {!enabled ? (
+            <p class="feedback">Payments are not configured on this deployment.</p>
+          ) : null}
+          <p class="small muted">
+            Access begins after payment confirmation. Extending adds time to your current Premium
+            term.
+          </p>
+        </section>
+
+        <section id="benefits" class="premium-section">
+          <p class="premium-eyebrow">The good stuff, included</p>
+          <h2>Make more of every visit.</h2>
+          <div class="premium-perks">
+            {perks.map(([number, title, description]) => (
+              <article key={number} class="premium-perk">
+                <span class="premium-perk-number" aria-hidden="true">
+                  {number}
+                </span>
+                <h3>{title}</h3>
+                <p>{description}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section class="premium-section" id="plan-compare">
+          <p class="premium-eyebrow">From curious to all in</p>
+          <h2>A plan for how you use the data.</h2>
+          <section class="table-scroll" aria-label="Compare nichedb plans" tabindex="0">
+            <table class="table compare premium-plan-table">
+              <thead>
+                <tr>
+                  <th scope="col">Included</th>
+                  <th scope="col">
+                    Free
+                    <br />
+                    <span class="small muted">$0</span>
+                  </th>
+                  <th scope="col">
+                    Premium
+                    <br />
+                    <span class="small">{money(day?.cents ?? config.premium.dayCents)}/day</span>
+                  </th>
+                  <th scope="col">
+                    Pro
+                    <br />
+                    <span class="small muted">
+                      {money(config.membership.priceCents)} / {config.membership.termDays} days
+                    </span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {planRows.map(([feature, value]) => (
+                  <tr key={feature}>
+                    <th scope="row">{feature}</th>
+                    {plans.map((p) => (
+                      <td key={p.plan}>{value(p)}</td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </section>
+          <p class="small muted">
+            Automating at scale? <a href="/pro">Get Pro</a> for every Premium perk, the highest API
+            allowance and a crawl pass for your entire term.
+          </p>
+        </section>
+
+        <section id="compare" class="premium-section">
+          <p class="premium-eyebrow">The comparison you came for</p>
+          <h2>
+            {config.siteName} Premium vs {reddit.name}
+          </h2>
+          <p class="muted">
+            Reddit costs {money(reddit.monthlyCents)} a month or {money(reddit.yearlyCents)} a year
+            on the web. Our {money(day?.cents ?? config.premium.dayCents)} day is a smaller first
+            purchase, with data tools alongside the member perks.
+          </p>
+          <section class="table-scroll" aria-label="Compare Reddit Premium" tabindex="0">
+            <table class="table small compare">
+              <thead>
+                <tr>
+                  <th scope="col">Feature</th>
+                  <th scope="col">{reddit.name}</th>
+                  <th scope="col">{config.siteName} Premium</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rows.map((r) => (
+                  <tr key={r.feature}>
+                    <th scope="row">{r.feature}</th>
+                    <td class="muted">{r.reddit}</td>
+                    <td>
+                      {r.ours}
+                      {r.note ? <p class="small muted">{r.note}</p> : null}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </section>
+          <p class="small muted">
+            Checked {reddit.capturedOn} against{' '}
+            {reddit.sources.map((s, i) => (
+              <span key={s.url}>
+                {i ? ' and ' : ''}
+                <a href={s.url} rel="noopener nofollow">
+                  {s.title}
+                </a>
+              </span>
+            ))}
+            . Reddit prices may vary by location and purchase platform.
+          </p>
+        </section>
+
+        <section class="premium-section premium-faq">
+          <p class="premium-eyebrow">A few useful details</p>
+          <h2>Before you make it Premium.</h2>
+          <details>
+            <summary>Does the one-day plan really include all the perks?</summary>
+            <p>
+              Yes. It gives your signed-in account 24 hours of Premium after payment confirmation:
+              no ads or tracking, the Lounge, themes, awards, early access and higher limits.
+              Credits are granted once per calendar month while your membership is active.
+            </p>
+          </details>
+          <details>
+            <summary>Will I be charged again automatically?</summary>
+            <p>
+              No. Each purchase pays for a fixed term. When it ends, your account returns to Free
+              unless you extend it. You can view your access in{' '}
+              <a href="/account/billing">billing settings</a>.
+            </p>
+          </details>
+          <details>
+            <summary>Is the daily crawl pass the same as Premium?</summary>
+            <p>
+              A <a href="/crawl">crawl pass</a> lets an agent buy automated access without an
+              account. Premium belongs to your account and includes the member perks. Pro includes
+              both membership benefits and a crawl pass.
+            </p>
+          </details>
+          <details>
+            <summary>How do credits and awards work?</summary>
+            <p>
+              On your first member visit each calendar month, you receive {credits} credits. Spend
+              them on Useful, Verified and Scoop awards for items and contributions. Buying more
+              terms in the same month does not grant extra monthly credits. Your balance and history
+              are in the Lounge.
+            </p>
+          </details>
+          <details>
+            <summary>Can I keep using nichedb for free?</summary>
+            <p>
+              Yes. Browse and search public collections, read feeds and use the free API allowance.
+              Upgrade when you want the member extras and higher limits.
+            </p>
+          </details>
+        </section>
+
+        <section class="premium-close">
+          <div>
+            <p class="premium-eyebrow">Make yourself at home</p>
+            <h2>One day is all it takes.</h2>
+            <p class="muted">
+              {money(day?.cents ?? config.premium.dayCents)} for a day of Premium. Pick your term
+              and explore.
+            </p>
+          </div>
+          <a class="cta button" href="#plans">
+            {member ? 'Extend Premium' : 'Choose your Premium'}
+          </a>
+        </section>
+      </div>
     </Layout>
   );
 };

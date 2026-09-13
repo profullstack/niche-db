@@ -36,6 +36,7 @@ const {
 const { comparisonRows, REDDIT, scoreboard } = await import(
   '../packages/premium/src/comparison.js'
 );
+const { grantMembership, membershipTerm } = await import('../packages/payments/src/membership.js');
 const { ALL_ON, decideModules } = await import('../apps/web/src/lib/modules.js');
 
 const PRICES = { dayCents: 100, monthCents: 3000, yearCents: 30000 };
@@ -78,6 +79,13 @@ describe('which plan somebody holds', () => {
 });
 
 describe('what each plan is entitled to', () => {
+  test('configured credits match both paid plans without granting credits to Free', () => {
+    const options = { monthlyCredits: 1500 };
+    expect(entitlements('free', options).monthlyCredits).toBe(0);
+    expect(entitlements('premium', options).monthlyCredits).toBe(1500);
+    expect(entitlements('pro', options).monthlyCredits).toBe(3000);
+  });
+
   test('free carries the ad and the tracker and gets none of the rest', () => {
     const free = entitlements('free');
     expect(free.ads).toBe(true);
@@ -92,7 +100,7 @@ describe('what each plan is entitled to', () => {
     expect(free.ownSources).toBe(false);
   });
 
-  test('premium turns the ads off and opens everything Reddit sells', () => {
+  test('premium turns the ads off and grants the advertised member benefits', () => {
     const premium = entitlements('premium');
     expect(premium.ads).toBe(false);
     expect(premium.tracking).toBe(false);
@@ -240,9 +248,10 @@ describe('the comparison with Reddit Premium', () => {
   test("Reddit's price is the one captured, and it is dated and sourced", () => {
     expect(REDDIT.monthlyCents).toBe(599);
     expect(REDDIT.yearlyCents).toBe(4999);
-    expect(REDDIT.capturedOn).toBe('2026-09-11');
+    expect(REDDIT.capturedOn).toBe('2026-09-13');
     expect(REDDIT.sources.length).toBeGreaterThanOrEqual(2);
-    for (const s of REDDIT.sources) expect(s.url).toStartWith('https://');
+    for (const s of REDDIT.sources)
+      expect(new URL(s.url).hostname).toMatch(/(^|\.)(reddit\.com|reddithelp\.com)$/);
   });
 
   test('we beat them on most rows and admit the one we do not', () => {
@@ -264,12 +273,11 @@ describe('the comparison with Reddit Premium', () => {
    * the pricing page growing a promise the entitlement table has never heard
    * of.
    */
-  test('every Reddit benefit has a row, and every row we win is an entitlement', () => {
+  test('the advertised member benefits have an entitlement', () => {
     const features = rows.map((r) => r.feature);
     for (const expected of [
       'Ad-free',
       'Members-only room',
-      'Badge',
       'Monthly credits',
       'Themes and icons',
       'Higher limits',
@@ -282,7 +290,6 @@ describe('the comparison with Reddit Premium', () => {
       'Ad-free': !premium.ads,
       'No tracking': !premium.tracking,
       'Members-only room': premium.lounge,
-      Badge: premium.badge === 'premium',
       'Monthly credits': premium.monthlyCredits > 0,
       Awards: premium.awards,
       'Themes and icons': premium.appearance,
@@ -380,6 +387,35 @@ describe('awards, against a real Postgres', () => {
 });
 
 describe('memberships carry a plan', () => {
+  test('settling a daily purchase grants exactly 24 hours of account Premium', async () => {
+    const id = await user();
+    const purchase = membershipTerm({ plan: 'premium', term_days: '1' }, 30);
+    const tx = (strings, ...values) =>
+      rows(
+        strings.reduce((query, part, index) => query + (index ? `$${index}` : '') + part, ''),
+        values,
+      );
+    const term = await grantMembership(tx, {
+      userId: id,
+      priceCents: 100,
+      currency: 'USD',
+      termDays: purchase.days,
+      plan: purchase.plan,
+    });
+    expect(new Date(term.expires_at) - new Date(term.started_at)).toBe(86_400_000);
+    const active = planFor({ user: { role: 'user' }, terms: [term] });
+    expect(active).toBe('premium');
+    expect(entitlements(active).lounge).toBe(true);
+    expect(entitlements(active).ads).toBe(false);
+    expect(
+      planFor({
+        user: { role: 'user' },
+        terms: [term],
+        now: new Date(Date.now() + 2 * 86_400_000),
+      }),
+    ).toBe('free');
+  });
+
   test('an existing term with no plan named is Pro, which is what it always meant', async () => {
     const id = await user();
     const row = await one(

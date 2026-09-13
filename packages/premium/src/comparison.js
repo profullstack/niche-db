@@ -1,64 +1,29 @@
-/**
- * nichedb Premium beside Reddit Premium, line by line.
- *
- * Reddit is the reason this tier exists in the shape it does: it is the
- * subscription everybody has already been offered, so it is the one a buyer
- * measures ours against. The honest way to win that comparison is to put both
- * lists side by side and let the reader see which one is a product and which
- * one is an ad switch with cosmetics attached.
- *
- * Every Reddit fact here is dated and sourced. reddit.com/premium answers
- * anything that is not a logged-in browser with "You've been blocked by
- * network security", and the Reddit help centre returns 403 to the same
- * fetchers, so the figures below were taken on 2026-09-11 from two independent
- * write-ups published that month which agree on both the price and the list.
- * Re-check them before quoting them in an ad.
- */
-
+/** Verified against Reddit's own web pricing and help page on the date below. */
 export const REDDIT = Object.freeze({
   name: 'Reddit Premium',
   monthlyCents: 599,
   yearlyCents: 4999,
-  /** The smallest amount of money that buys you anything at all. */
   entryCents: 599,
-  capturedOn: '2026-09-11',
+  capturedOn: '2026-09-13',
   sources: Object.freeze([
+    { title: 'Reddit Premium — web pricing and benefits', url: 'https://www.reddit.com/premium' },
     {
-      title: 'Reddit Is Still Free. The $5.99 Upsell Is Just Loud.',
-      url: 'https://contextbolt.com/blog/reddit-premium-vs-free/',
-      published: '2026-09-11',
-    },
-    {
-      title: 'Is Reddit Premium Worth It? Features, Cost & Review (2026)',
-      url: 'https://getupvotes.com/reddit-premium-guide/',
-      published: '2026',
+      title: 'What is a Reddit Premium subscription?',
+      url: 'https://support.reddithelp.com/hc/en-us/articles/360043034412-What-is-a-Reddit-Premium-subscription',
     },
   ]),
-  /** What Reddit's own marketing lists, in its words as reported by those sources. */
   benefits: Object.freeze([
-    'Ad-free browsing on desktop and the official apps',
-    'r/lounge, a members-only subreddit',
-    'Custom app icons and avatar gear',
-    'Longer post bodies and longer video uploads',
-    'New comments since your last visit flagged, and basic stats on your own posts',
-    'A monthly Coin allowance (700 a month) — retired in 2023 and never replaced',
-  ]),
-  /** What it does not include, which is as much of the comparison as what it does. */
-  excludes: Object.freeze([
-    'Early access to new features',
-    'Any access to the data itself',
-    'Anything an agent or a script can use',
+    'Ad-free browsing',
+    'New comment highlighting',
+    'Higher content limits',
+    '100 daily AI search questions',
+    'Account performance analytics',
+    'Custom app icons and exclusive avatar accessories',
+    'Access to r/lounge',
   ]),
 });
 
-/**
- * One row per thing a buyer is actually choosing between.
- *
- * `ours` is written against what this repo enforces, not against what would
- * sound good: every row here has a gate in code, and the test suite asserts
- * the pairing so a benefit cannot be added to the page without being added to
- * the entitlement table first.
- */
+/** Comparisons describe shipped features; an unlisted competitor perk is not a claimed absence. */
 export function comparisonRows({
   dayCents = 100,
   monthCents = 3000,
@@ -71,87 +36,99 @@ export function comparisonRows({
   return [
     {
       feature: 'What it costs to try',
-      reddit: `${money(REDDIT.entryCents)}, and the smallest purchase is a month`,
-      ours: `${money(dayCents)} for a day, no account and no subscription`,
-      wins: true,
+      reddit: `${money(REDDIT.entryCents)} for the shortest term: one month`,
+      ours: `${money(dayCents)} for one day of Premium, including account perks`,
+      wins: dayCents < REDDIT.entryCents,
     },
     {
       feature: 'Price',
       reddit: `${money(REDDIT.monthlyCents)} a month, ${money(REDDIT.yearlyCents)} a year`,
       ours: `${money(dayCents)} a day, ${money(monthCents)} a month, ${money(yearCents)} a year`,
-      wins: false,
-      note: 'We cost more a month, and the rest of this table is why.',
+      wins: monthCents < REDDIT.monthlyCents && yearCents < REDDIT.yearlyCents,
+      note: 'At our standard rates, the month and year cost more than Reddit. Compare what you will use.',
+    },
+    {
+      feature: 'Renewal',
+      reddit: 'Automatically renews monthly or yearly',
+      ours: 'Prepaid access. No automatic renewal; extend when you choose',
+      wins: true,
     },
     {
       feature: 'Ad-free',
-      reddit: 'Yes, on Reddit',
-      ours: `Yes, on every page and inside every feed — the sponsored item is dropped from the RSS and JSON renderings too`,
+      reddit: 'Included',
+      ours: 'Included on pages and in authenticated RSS and JSON feeds',
       wins: true,
     },
     {
       feature: 'No tracking',
-      reddit: 'No. The ads go; the analytics stay',
-      ours: 'Yes. The tracker is not loaded for a paying reader',
+      reddit: 'Tracker removal is not listed as a Premium benefit',
+      ours: 'Our advertising and analytics scripts are disabled for members',
       wins: true,
     },
     {
       feature: 'Members-only room',
       reddit: 'r/lounge',
-      ours: 'The Lounge: early-access collections, the members roll, and what other members are awarding',
-      wins: true,
-    },
-    {
-      feature: 'Badge',
-      reddit: 'A badge on your profile',
-      ours: 'A badge on your profile, on every contribution you make, and in the API',
+      ours: 'The Lounge: member collections, the member directory and awarded items',
       wins: true,
     },
     {
       feature: 'Monthly credits',
-      reddit: '700 Coins a month, retired in 2023',
-      ours: `${monthlyCredits.toLocaleString('en-US')} credits a month, granted on the first of the month, spendable on awards`,
+      reddit: 'No monthly credit allowance listed',
+      ours: `${monthlyCredits.toLocaleString('en-US')} award credits, granted on your first visit each calendar month while a member`,
       wins: true,
     },
     {
       feature: 'Awards',
-      reddit: 'Gone with the Coins',
-      ours: 'Three awards you can give any item or contribution, counted publicly and paid out of your credits',
+      reddit: 'No award budget listed in Premium',
+      ours: 'Spend included credits on Useful, Verified and Scoop awards',
       wins: true,
     },
     {
       feature: 'Themes and icons',
-      reddit: 'App icons and avatar gear, mobile only',
-      ours: 'Six themes and five app icons, on the web and in the installed PWA',
+      reddit: 'Special app icons and avatar accessories',
+      ours: 'Six themes, five app icons and a Premium badge on your contributions',
       wins: true,
     },
     {
       feature: 'Early access',
-      reddit: 'Explicitly not included',
-      ours: 'Yes. New collections open to members first, before they are public',
+      reddit: 'Not listed as a Premium benefit',
+      ours: 'Access to collections marked for members before their public release',
       wins: true,
     },
     {
       feature: 'Higher limits',
-      reddit: 'Longer posts and longer video uploads',
-      ours: `${apiPremiumPerHour.toLocaleString('en-US')} API requests an hour, unlimited feeds, your own sources, and the metered vehicle lookups included`,
+      reddit: 'Larger posts, longer videos and more saved avatar outfits',
+      ours: `${apiPremiumPerHour.toLocaleString('en-US')} API requests an hour, unlimited feeds, your own sources and vehicle lookups included`,
       wins: true,
     },
     {
-      feature: 'The data',
-      reddit: 'Nothing. Premium is an ad switch on a website you already read',
-      ours: `Every row ${siteName} holds, by web, RSS, JSON Feed, API, CLI and MCP`,
-      wins: true,
+      feature: 'New comment highlighting',
+      reddit: 'Marks comments added since your previous visit',
+      ours: 'Not included. Member contributions get a visual highlight; this does not mark unread comments',
+      wins: false,
     },
     {
-      feature: 'Usable by an agent',
-      reddit: 'No',
-      ours: 'Yes: the same access is buyable over x402 by the day, with no account at all',
+      feature: 'AI search',
+      reddit: '100 questions daily; availability varies by language and location',
+      ours: 'Search, API, CLI and MCP access. A hosted AI question allowance is not included',
+      wins: false,
+    },
+    {
+      feature: 'Performance analytics',
+      reddit: 'Account-level content analytics',
+      ours: 'Public award counts and your credit history. A content analytics dashboard is not included',
+      wins: false,
+    },
+    {
+      feature: 'Data and automation',
+      reddit: 'Developer API access is not listed in the Premium bundle',
+      ours: `Read ${siteName} through web, RSS, JSON Feed, API, CLI and MCP. Automated crawl passes are sold separately or included with Pro`,
       wins: true,
     },
   ];
 }
 
-/** How many rows we win, for the line above the table. Counted, never typed. */
+/** Retained for API consumers; the page leaves the value judgement to the reader. */
 export function scoreboard(rows) {
   return {
     total: rows.length,

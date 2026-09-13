@@ -21,9 +21,7 @@ const { config } = await import('../packages/config/src/index.js');
 const { entitlements, termOptions, THEMES, APP_ICONS, awardKinds } = await import(
   '../packages/premium/src/index.js'
 );
-const { comparisonRows, REDDIT, scoreboard } = await import(
-  '../packages/premium/src/comparison.js'
-);
+const { comparisonRows, REDDIT } = await import('../packages/premium/src/comparison.js');
 const { PremiumPage, PlanBadge, AwardForm } = await import('../apps/web/src/views/premium.jsx');
 const { withModules, decideModules } = await import('../apps/web/src/lib/modules.js');
 const { Layout } = await import('../apps/web/src/views/Layout.jsx');
@@ -49,13 +47,11 @@ const renderPremium = (props = {}) =>
     PremiumPage({
       user: props.user ?? null,
       plan: props.plan ?? 'free',
-      terms: termOptions(prices),
+      terms: props.terms ?? termOptions(prices),
       rows,
-      score: scoreboard(rows),
       reddit: REDDIT,
       members: props.members ?? {},
       snapshot: props.snapshot ?? null,
-      discountCents: 0,
       enabled: props.enabled ?? true,
     }).toString(),
   );
@@ -99,10 +95,10 @@ describe('the pricing page', () => {
   });
 
   test('a signed-out visitor is asked to sign in; a signed-in one is offered the terms', async () => {
-    expect(await renderPremium()).toContain('/login?next=/premium');
+    expect(await renderPremium()).toContain('/login?next=%2Fpremium%3Fterm%3Dday%23plans');
     const signedIn = await renderPremium({ user: { id: 'u1', email: 'a@b.test' } });
     expect(signedIn).toContain('/api/premium/buy');
-    expect(signedIn).toContain('value="year"');
+    for (const term of ['day', 'month', 'year']) expect(signedIn).toContain(`value="${term}"`);
   });
 
   test('a deployment with no payments configured says so rather than offering a dead button', async () => {

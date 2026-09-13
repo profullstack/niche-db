@@ -225,15 +225,15 @@ export const config = {
    * crawl pass is a dollar a day, a vehicle lookup is a dollar a day), so the
    * month and the year are that same day rate with the discount for paying up
    * front made explicit: 30 days for $30, and a year for the price of ten
-   * months. Sold through CoinPay for a term, or over x402 for a single day
-   * with no account at all.
+   * months. Every term is sold through CoinPay. The account-free x402 crawl
+   * pass is a separate product and does not grant membership perks.
    */
   premium: {
     dayCents: num('PREMIUM_DAY_CENTS', 100),
     monthCents: num('PREMIUM_MONTH_CENTS', 3000),
     yearCents: num('PREMIUM_YEAR_CENTS', 30000),
     currency: opt('PREMIUM_CURRENCY', 'USD'),
-    /** Credits a member is granted on the first of each month. */
+    /** Credits granted on the first member visit each calendar month. */
     monthlyCredits: num('PREMIUM_MONTHLY_CREDITS', 1000),
     get enabled() {
       return Boolean(config.coinpay.enabled);

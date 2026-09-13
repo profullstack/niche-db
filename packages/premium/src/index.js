@@ -65,7 +65,7 @@ export const MONTHLY_CREDITS = { free: 0, premium: 1000, pro: 2000 };
  * carrying a number, because the numbers are deployment configuration and this
  * file is not allowed to read configuration.
  */
-export function entitlements(plan = 'free') {
+export function entitlements(plan = 'free', { monthlyCredits = MONTHLY_CREDITS.premium } = {}) {
   const name = isPlan(plan) ? plan : 'free';
   const paid = name !== 'free';
   return Object.freeze({
@@ -83,7 +83,7 @@ export function entitlements(plan = 'free') {
     appearance: paid,
     /** Their own contributions are lifted in a list. */
     highlight: paid,
-    monthlyCredits: MONTHLY_CREDITS[name],
+    monthlyCredits: paid ? monthlyCredits * (name === 'pro' ? 2 : 1) : 0,
     unlimitedFeeds: paid,
     ownSources: paid,
     /** A signed crawl pass for the whole term. The operator tier only. */

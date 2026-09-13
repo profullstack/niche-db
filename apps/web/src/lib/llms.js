@@ -113,6 +113,8 @@ export async function llmsTxt() {
     `  unlimited feeds, your own sources, the members' Lounge, ${config.premium.monthlyCredits.toLocaleString('en-US')} credits a month to award`,
     '  with, themes and app icons, early access to new collections, and the metered vehicle',
     `  lookups included. Entitlements as JSON: ${base}/api/v1/premium.`,
+    `  Every term, including one day, buys account membership through CoinPay at ${base}/api/premium/buy.`,
+    '  Prepaid; no automatic renewal. A crawl pass is separate and does not include account perks.',
     `- **Pro, $${(config.membership.priceCents / 100).toFixed(0)} a month** (${base}/pro): everything Premium has, plus`,
     `  ${config.api.proPerHour.toLocaleString('en-US')} API requests an hour and a crawl pass for the whole term so your own`,
     '  agents walk through the paywall on your key. Paid in crypto through CoinPay.',

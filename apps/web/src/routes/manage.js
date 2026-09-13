@@ -5,7 +5,7 @@ import { sql } from '@nichedb/db';
 import * as q from '@nichedb/db/queries';
 import { enrichersFor } from '@nichedb/enrichers';
 import * as pay from '@nichedb/payments';
-import { grantMembership, MEMBERSHIP_KIND, PLANS } from '@nichedb/payments/membership';
+import { grantMembership, MEMBERSHIP_KIND, membershipTerm } from '@nichedb/payments/membership';
 import {
   buildReferralUrl,
   codeFor,
@@ -448,12 +448,6 @@ export function registerManage(app) {
 
   /* ----------------------------------------------------------------- pro -- */
 
-  /**
-   * The terms a checkout is allowed to have bought. A webhook naming anything
-   * else gets the Pro term, never the number it asked for.
-   */
-  const TERM_DAYS = [30, 365, config.membership.termDays];
-
   app.post('/api/membership/buy', async (c) => {
     const user = requireUser(c);
     if (!config.membership.enabled)
@@ -493,15 +487,7 @@ export function registerManage(app) {
     const result = await pay.settleWebhook(payload, {
       grant: async (tx, { meta, payment }) => {
         if (meta.kind !== MEMBERSHIP_KIND) return null;
-        // The plan and the term ride on the checkout's metadata, which is the
-        // only thing tying this webhook to what was bought. Both are validated
-        // rather than trusted: an unknown plan is Pro's price paid for Pro, and
-        // a term that is not one we sell falls back to the Pro term instead of
-        // minting whatever number arrived.
-        const plan = PLANS.includes(meta.plan) ? meta.plan : 'pro';
-        const days = TERM_DAYS.includes(Number(meta.term_days))
-          ? Number(meta.term_days)
-          : config.membership.termDays;
+        const { plan, days } = membershipTerm(meta, config.membership.termDays);
         const term = await grantMembership(tx, {
           userId: meta.user_id,
           paymentId: payment.id,

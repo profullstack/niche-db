@@ -20,15 +20,16 @@ import { priceFor } from '@nichedb/payments/referrals';
 import { termById } from '@nichedb/premium';
 import { render, requireUser, respond, wantsJson } from '../lib/http.js';
 import { actor, descriptor, SCOPES } from '../lib/opensaas.js';
+import { prices, startPremiumCheckout } from '../lib/premium-checkout.js';
 import { Denied } from '../lib/service.js';
 import { BillingPage, DeletedPage, DeletePage, ExportPage } from '../views/account.jsx';
-import { prices } from './premium.js';
 
 const DELETE_ACTION = 'delete-account';
 
 export function registerOpenSaaS(app, deps = {}) {
   const store = { ...accountDb, ...deps.store };
   const who = deps.actor ?? actor;
+  const premiumCheckout = deps.premiumCheckout ?? startPremiumCheckout;
   const mail = deps.sendDeleteLink ?? sendDeleteLink;
   const describe = deps.descriptor ?? descriptor;
 
@@ -75,26 +76,7 @@ export function registerOpenSaaS(app, deps = {}) {
     }
     const term = termById(wanted.replace(/^premium-/, ''), prices());
     if (!wanted.startsWith('premium-') || !term) return refused(c, `No such plan: ${wanted}.`);
-    if (term.id === 'day') return pending(c, `${config.siteUrl}/crawl`, { plan: wanted });
-    const price = await priceFor(sql, {
-      userId: user.id,
-      referredBy: user.referred_by,
-      amountCents: term.cents,
-    });
-    const { checkoutUrl } = await pay.createCheckout({
-      user,
-      amountCents: price.amountCents,
-      currency: config.premium.currency,
-      description: `${config.siteName} Premium, ${term.days} days`,
-      metadata: {
-        kind: MEMBERSHIP_KIND,
-        plan: 'premium',
-        term_days: String(term.days),
-        referral_code: price.code ?? '',
-        list_price_cents: String(term.cents),
-      },
-      blockchain: config.payments.blockchain,
-    });
+    const { checkoutUrl } = await premiumCheckout(user, term.id);
     return pending(c, checkoutUrl, { plan: wanted });
   });
 

@@ -11,8 +11,6 @@ import { config } from '@nichedb/config';
 import { sql } from '@nichedb/db';
 import * as premiumDb from '@nichedb/db/premium';
 import * as q from '@nichedb/db/queries';
-import * as pay from '@nichedb/payments';
-import { MEMBERSHIP_KIND } from '@nichedb/payments/membership';
 import { priceFor } from '@nichedb/payments/referrals';
 import {
   APP_ICONS,
@@ -26,8 +24,8 @@ import {
   termById,
   termOptions,
 } from '@nichedb/premium';
-import { comparisonRows, REDDIT, scoreboard } from '@nichedb/premium/comparison';
-import { render, requireUser, respond } from '../lib/http.js';
+import { comparisonRows, REDDIT } from '@nichedb/premium/comparison';
+import { render, requireUser, respond, wantsJson } from '../lib/http.js';
 import {
   awardCheck,
   ensureMonthlyCredits,
@@ -36,15 +34,11 @@ import {
   premiumSnapshot,
   requirePremium,
 } from '../lib/premium.js';
+import { prices, startPremiumCheckout } from '../lib/premium-checkout.js';
 import { Denied } from '../lib/service.js';
 import { LoungePage, PremiumPage } from '../views/premium.jsx';
 
-/** The three numbers the price of Premium is made of, in one place. */
-export const prices = () => ({
-  dayCents: config.premium.dayCents,
-  monthCents: config.premium.monthCents,
-  yearCents: config.premium.yearCents,
-});
+export { prices };
 
 /** The comparison, built from this deployment's own numbers. */
 export const rowsForSite = () =>
@@ -55,23 +49,29 @@ export const rowsForSite = () =>
     siteName: config.siteName,
   });
 
-export function registerPremium(app) {
+export function registerPremium(app, { checkout = startPremiumCheckout } = {}) {
   /* ----------------------------------------------------------- the pitch -- */
 
   app.get('/premium', async (c) => {
     const user = c.get('user');
     const plan = planOf(c);
     const terms = termOptions(prices());
-    // The referral discount already exists for Pro and is not a different
-    // thing here: a code the buyer arrived with takes its cut off whatever
-    // term they choose, so the price they are quoted is the price they pay.
-    const discount = user
-      ? await priceFor(sql, {
-          userId: user.id,
-          referredBy: user.referred_by,
-          amountCents: config.premium.monthCents,
-        }).catch(() => null)
-      : null;
+    const quotedTerms = await Promise.all(
+      terms.map(async (term) => {
+        const quote = user
+          ? await priceFor(sql, {
+              userId: user.id,
+              referredBy: user.referred_by,
+              amountCents: term.cents,
+            }).catch(() => null)
+          : null;
+        return {
+          ...term,
+          checkoutCents: quote?.amountCents ?? term.cents,
+          discountCents: quote?.discountCents ?? 0,
+        };
+      }),
+    );
     const [members, snapshot] = await Promise.all([
       premiumDb.memberCounts().catch(() => ({})),
       user ? premiumSnapshot(c) : Promise.resolve(null),
@@ -81,13 +81,12 @@ export function registerPremium(app) {
         <PremiumPage
           user={user}
           plan={plan}
-          terms={terms}
+          terms={quotedTerms}
           rows={rowsForSite()}
-          score={scoreboard(rowsForSite())}
           reddit={REDDIT}
           members={members}
           snapshot={snapshot}
-          discountCents={discount?.discountCents ?? 0}
+          selectedTerm={termById(c.req.query('term'), prices())?.id ?? 'month'}
           enabled={config.premium.enabled}
           notice={c.req.query('notice')}
           error={c.req.query('error')}
@@ -96,12 +95,7 @@ export function registerPremium(app) {
     );
   });
 
-  /**
-   * The same thing an agent can read. Premium is bought by people, but what it
-   * includes is exactly what a crawl pass includes plus the account-shaped
-   * parts, and an agent deciding whether to pay should not have to scrape a
-   * pricing page to find that out.
-   */
+  /** Membership pricing and entitlements, distinct from account-free crawl access. */
   app.get('/api/v1/premium', (c) =>
     c.json({
       plan: planOf(c),
@@ -109,7 +103,9 @@ export function registerPremium(app) {
       pricing: {
         currency: config.premium.currency,
         terms: termOptions(prices()),
-        day_over_x402: `${config.siteUrl}/crawl`,
+        purchase: `${config.siteUrl}/api/premium/buy`,
+        renews: false,
+        crawl_pass: { url: `${config.siteUrl}/crawl`, includes_account_perks: false },
       },
       monthly_credits: config.premium.monthlyCredits,
       awards: awardKinds(),
@@ -128,48 +124,18 @@ export function registerPremium(app) {
 
   app.post('/api/premium/buy', async (c) => {
     const user = requireUser(c);
-    if (!config.premium.enabled)
-      throw new Denied('Payments are not configured on this deployment.', 400);
-    const body = await c.req.parseBody().catch(() => ({}));
-    const wanted = String(body.term ?? c.req.query('term') ?? 'month');
-    const term = termById(wanted, prices());
-    if (!term) throw new Denied('No such term.', 400);
-    // A single day is not sold through a checkout: it is the x402 crawl pass
-    // that already exists, bought by presenting a payment rather than by
-    // filling in a form. Sending a person to CoinPay for a dollar would cost
-    // them more in confirmation time than the day is worth.
-    if (term.id === 'day')
-      return respond(c, { json: { crawl: `${config.siteUrl}/crawl` }, redirectTo: '/crawl' });
-
-    const price = await priceFor(sql, {
-      userId: user.id,
-      referredBy: user.referred_by,
-      amountCents: term.cents,
-    });
-    const { checkoutUrl } = await pay.createCheckout({
-      user,
-      amountCents: price.amountCents,
-      currency: config.premium.currency,
-      description: `${config.siteName} Premium, ${term.days} days`,
-      metadata: {
-        kind: MEMBERSHIP_KIND,
-        plan: 'premium',
-        term_days: String(term.days),
-        referral_code: price.code ?? '',
-        list_price_cents: String(term.cents),
-      },
-      blockchain: config.payments.blockchain,
-    });
-    return respond(c, { json: { checkoutUrl }, redirectTo: checkoutUrl });
+    const body = c.req.header('content-type')?.includes('application/json')
+      ? await c.req.json().catch(() => ({}))
+      : await c.req.parseBody().catch(() => ({}));
+    const wanted = String(body?.term ?? c.req.query('term') ?? 'month');
+    const { checkoutUrl } = await checkout(user, wanted);
+    // Keep the provider's origin: the generic respond() helper only redirects locally.
+    return wantsJson(c) ? c.json({ checkoutUrl }) : c.redirect(checkoutUrl, 303);
   });
 
   /* --------------------------------------------------------------- lounge -- */
 
-  /**
-   * The members' room. Reddit's r/lounge is a subreddit with nothing in it;
-   * this one holds the collections members get before everyone else, what the
-   * membership is awarding this week, and who else is in here.
-   */
+  /** Member collections, the member directory and this week's awarded items. */
   app.get('/lounge', async (c) => {
     const user = requireUser(c);
     requirePremium(c, 'The Lounge');
@@ -283,4 +249,7 @@ export function registerPremium(app) {
 }
 
 /** Exported for the tests and for llms.txt: what a plan gets, as data. */
-export const planTable = () => ['free', 'premium', 'pro'].map((plan) => entitlements(plan));
+export const planTable = () =>
+  ['free', 'premium', 'pro'].map((plan) =>
+    entitlements(plan, { monthlyCredits: config.premium.monthlyCredits }),
+  );
