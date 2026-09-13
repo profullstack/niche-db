@@ -104,7 +104,7 @@ export function seedBlock(domain) {
         }
       : null,
     status: null,
-    github: cli?.repo ? (cli.repo.match(/github\.com\/([^/]+)/)?.[0] ?? null) : null,
+    github: cli?.repo ? (cli.repo.match(/https:\/\/github\.com\/[^/]+/)?.[0] ?? null) : null,
     source_notes: [
       cli
         ? `cli: read off ${row.cli.docs}`

@@ -59,7 +59,7 @@ describe('the developer seed', () => {
       source: 'ovh/ovh',
       docs: 'https://registry.terraform.io/providers/ovh/ovh/latest/docs',
     });
-    expect(b.github).toBe('github.com/ovh');
+    expect(b.github).toBe('https://github.com/ovh');
     expect(b.source_notes[0]).toContain('read off https://github.com/ovh/ovhcloud-cli');
   });
 
@@ -251,6 +251,7 @@ describe('the item page', () => {
     expect(html).toContain('href="https://github.com/scaleway/scaleway-cli"');
     expect(html).toContain('Terraform scaleway/scaleway');
     expect(html).toContain('as printed on the vendor');
+    expect(html).toContain('href="https://github.com/scaleway"');
     const none = EnrichmentBlocks({
       enrichment: { developer: { ...seedBlock('kinsta.com'), status: null } },
     }).toString();
