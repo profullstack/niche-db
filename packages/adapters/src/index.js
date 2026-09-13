@@ -91,6 +91,7 @@ import { p0dcasters } from './p0dcasters.js';
 import { buildingPermits } from './permits.js';
 import { podcastindexCatalog } from './podcastindex-catalog.js';
 import { podcasts } from './podcasts.js';
+import { proscanDirectory } from './proscan.js';
 import { pypi } from './pypi.js';
 import { redditDeals } from './redditdeals.js';
 import { rogueIncidents, rogueResearch } from './rogueaitracker.js';
@@ -163,6 +164,7 @@ export const ADAPTERS = [
   ecbFxRates,
   socrataCrime,
   scannerDirectory,
+  proscanDirectory,
   ukPoliceCrime,
   fbiCrimeEstimates,
   usaspendingAwards,
