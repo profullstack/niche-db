@@ -20,8 +20,11 @@ const longestRunMs = () =>
  * forward as the job begins, so a long run is not re-enqueued by the next tick.
  */
 async function runTick(job) {
-  await q.reapStaleRuns({ minutes: Math.ceil(longestRunMs() / 60_000) + 10 });
-  const due = await q.dueSources({ limit: 50, force: Boolean(job.data?.force) });
+  // One window for both: a run younger than this is in flight and must not be
+  // enqueued again; one older than it was just marked abandoned and may be.
+  const runningMinutes = Math.ceil(longestRunMs() / 60_000) + 10;
+  await q.reapStaleRuns({ minutes: runningMinutes });
+  const due = await q.dueSources({ limit: 50, force: Boolean(job.data?.force), runningMinutes });
   for (const s of due) {
     await queues.run.add(
       'run',

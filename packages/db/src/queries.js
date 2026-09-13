@@ -388,10 +388,28 @@ export async function requestRun(id) {
  * The sources whose turn it is. Ordered by how overdue, so a starved one is
  * served first after an outage.
  */
-export async function dueSources({ limit = 20, force = false } = {}) {
+export async function dueSources({ limit = 20, force = false, runningMinutes = 30 } = {}) {
+  /*
+   * A source whose run is still in flight is not due, whatever its clock says.
+   *
+   * `startRun` pushes `next_run_at` one cadence out, which is enough for a run
+   * shorter than its cadence and for nothing else: an hour-long dump walk on an
+   * hourly source, a `nextInMinutes: 1` it asked for last time, or a reaper that
+   * reset the clock, all bring the source back while the first run is still
+   * writing, and the tick enqueues a second one beside it. The bound keeps this
+   * from ever parking a source for good: a run older than `runningMinutes` is
+   * what the reaper marks abandoned on the same tick, so past that it no longer
+   * counts, and `force` (the boot sweep) gets the same guard because the old
+   * container may still be draining exactly those runs.
+   */
   return sql`
-    select id, slug, adapter, next_run_at from sources
+    select id, slug, adapter, next_run_at from sources s
     where enabled and (${force} or next_run_at <= now())
+      and not exists (
+        select 1 from runs r
+        where r.source_id = s.id and r.status = 'running'
+          and r.started_at > now() - (${`${runningMinutes} minutes`})::interval
+      )
     order by next_run_at limit ${limit}
   `;
 }
@@ -471,6 +489,20 @@ export async function finishRun({
       next_run_at = coalesce(${nextRunAt ?? null}, next_run_at),
       item_count = (select count(*)::int from items where source_id = ${sourceId}),
       updated_at = now()
+    where id = ${sourceId}
+  `;
+}
+
+/**
+ * Checkpoint a run in progress. A dump adapter hands the core its items a batch
+ * at a time, and the cursor it carried with each batch is written here as soon
+ * as that batch is in the table, so a container that dies an hour into a walk
+ * resumes at the last batch written rather than at the start of the file.
+ * `finishRun` still writes the final cursor when the run ends.
+ */
+export async function saveCursor(sourceId, cursor) {
+  await sql`
+    update sources set cursor = ${JSON.stringify(cursor ?? {})}::jsonb, updated_at = now()
     where id = ${sourceId}
   `;
 }

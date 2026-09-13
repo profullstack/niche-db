@@ -17,8 +17,14 @@ import { canonicalUrl } from './canonical.js';
  * @property {string} [docs]        upstream documentation URL
  * @property {string[]} kinds       item kinds this adapter emits
  * @property {number} [cadenceMinutes=60]
+ * @property {number} [budgetMs]     wall-clock budget for one run, replacing the
+ *                                  deployment's INGEST_RUN_DEADLINE_MS. Declare it on a
+ *                                  walk that takes longer than a few minutes (a dump);
+ *                                  the reaper window and the job lock widen to the
+ *                                  largest budget any adapter declares. The core hands
+ *                                  it back as `deadline` and expects pull to stop there.
  * @property {ConfigField[]} [configFields]
- * @property {(ctx: PullContext) => Promise<PullResult>} pull
+ * @property {(ctx: PullContext) => Promise<PullResult> | AsyncIterable<Batch>} pull
  *
  * @typedef {object} ConfigField
  * @property {string} key
@@ -33,7 +39,7 @@ import { canonicalUrl } from './canonical.js';
  * @property {object} config        the source's config, merged over the adapter's defaults
  * @property {object} cursor        whatever pull returned as cursor last time, or {}
  * @property {object} env           deployment secrets the adapter may need (tokens)
- * @property {object} http          fetchJson / fetchText helpers with UA and timeout
+ * @property {object} http          json / text / request / download, with UA and timeout
  * @property {(msg: string) => void} log
  * @property {number} budget        detail lookups this run may spend
  * @property {number} deadline      Date.now() past which the adapter should return
@@ -41,10 +47,25 @@ import { canonicalUrl } from './canonical.js';
  *                                  the `data` this source last wrote for those ids
  *
  * @typedef {object} PullResult
- * @property {Item[]} items
+ * @property {Item[] | AsyncIterable<Batch>} items
+ *                                  an array is written in one go; an async iterable of
+ *                                  batches is drained one batch at a time, its cursor
+ *                                  saved after every batch that carries one, and the
+ *                                  iterator's RETURN value is read as the final
+ *                                  { cursor, note, nextInMinutes }. `pull` may also be
+ *                                  an `async *` generator, which is the same thing.
  * @property {object} [cursor]      resume state for next time
  * @property {string} [note]        one line for the run log
  * @property {number} [nextInMinutes] override the cadence for the next run only
+ *
+ * @typedef {object} Batch
+ * @property {Item[]} items         a few hundred items, the memory a run holds at once
+ * @property {object} [cursor]      where to resume if the process dies after this batch
+ *                                  is written: the position AFTER these items (a line
+ *                                  count, a byte offset, an id) plus what identifies the
+ *                                  file (a dump date, a version), so a new upstream file
+ *                                  resets the walk. At-least-once is safe: upserts are
+ *                                  idempotent per (source, externalId).
  */
 
 const KINDS = new Set(['minute', 'day', 'month', 'year']);
