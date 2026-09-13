@@ -11,6 +11,7 @@ import { bensbargains } from './bensbargains.js';
 import { bl0ggers } from './bl0ggers.js';
 import { blsSeries } from './bls.js';
 import { brisk } from './brisk.js';
+import { buyvps } from './buyvps.js';
 import { cfpbComplaints } from './cfpb.js';
 import { channels } from './channels.js';
 import { clinicalTrials } from './clinicaltrials.js';
@@ -225,6 +226,7 @@ export const ADAPTERS = [
   saasrow,
   d0rz,
   bl0ggers,
+  buyvps,
   aiornot,
   agenticjobs,
   tsbb,
