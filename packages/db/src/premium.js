@@ -17,7 +17,7 @@ export async function activeTerms(userId) {
     select id, plan, started_at, expires_at, price_cents, currency
     from memberships
     where user_id = ${userId}::uuid and expires_at > now()
-    order by case plan when 'pro' then 2 else 1 end desc, expires_at desc
+    order by case plan when 'data' then 3 when 'pro' then 2 else 1 end desc, expires_at desc
   `;
 }
 
@@ -230,7 +230,8 @@ export async function plansForUsers(userIds) {
   if (ids.length === 0) return {};
   const rows = await sql`
     select user_id::text as user_id,
-           case when bool_or(plan = 'pro') then 'pro' else 'premium' end as plan
+           case when bool_or(plan = 'data') then 'data'
+                when bool_or(plan = 'pro') then 'pro' else 'premium' end as plan
     from memberships
     where expires_at > now() and user_id = any(${pgArray(ids)}::uuid[])
     group by user_id

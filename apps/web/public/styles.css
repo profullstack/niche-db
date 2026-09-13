@@ -1667,3 +1667,19 @@ table.kv td {
     font-size: 1.5rem;
   }
 }
+
+.data-dumps-price {
+  flex-shrink: 0;
+}
+.data-dumps-price strong {
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  white-space: nowrap;
+}
+.data-dumps-price > p {
+  margin: 0.6rem 0;
+}
+.badge.plan-data {
+  border-color: var(--accent);
+  color: var(--accent);
+  text-transform: uppercase;
+}

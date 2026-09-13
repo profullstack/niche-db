@@ -105,6 +105,12 @@ export function registerPremium(app, { checkout = startPremiumCheckout } = {}) {
         terms: termOptions(prices()),
         purchase: `${config.siteUrl}/api/premium/buy`,
         renews: false,
+        data: {
+          cents: config.dataDumps.priceCents,
+          days: 30,
+          cadence_minutes: 60,
+          url: `${config.siteUrl}/dumps`,
+        },
         crawl_pass: { url: `${config.siteUrl}/crawl`, includes_account_perks: false },
       },
       monthly_credits: config.premium.monthlyCredits,
@@ -250,6 +256,6 @@ export function registerPremium(app, { checkout = startPremiumCheckout } = {}) {
 
 /** Exported for the tests and for llms.txt: what a plan gets, as data. */
 export const planTable = () =>
-  ['free', 'premium', 'pro'].map((plan) =>
+  ['free', 'premium', 'pro', 'data'].map((plan) =>
     entitlements(plan, { monthlyCredits: config.premium.monthlyCredits }),
   );

@@ -12,6 +12,7 @@ import { registerAgents } from './routes/agents.js';
 import { registerApi } from './routes/api.js';
 import { registerAuth } from './routes/auth.js';
 import { registerAutomotive } from './routes/automotive.js';
+import { registerDataDumps } from './routes/data-dumps.js';
 import { registerKnowledge } from './routes/knowledge.js';
 import { registerManage } from './routes/manage.js';
 import { registerMcp } from './routes/mcp.js';
@@ -127,6 +128,7 @@ registerProfiles(app);
 /** Sites: /c/sites/<host>/<path>, one OpenSite record per page, and /c/sites/add, which reads any address now. */
 registerSites(app);
 registerPremium(app);
+registerDataDumps(app);
 registerOpenSaaS(app);
 registerAutomotive(app);
 registerMcp(app);

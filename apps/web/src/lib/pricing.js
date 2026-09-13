@@ -114,6 +114,7 @@ export function gatewayOptions(priceCents) {
       '/healthz',
       '/manifest.webmanifest',
       '/premium',
+      '/dumps',
       '/leaderboard',
       '/leaderboard/',
       // The pitch is how a publisher finds out they can be paid for what a

@@ -240,6 +240,21 @@ export const config = {
     },
   },
 
+  dataDumps: {
+    priceCents: num('DATA_DUMPS_MONTH_CENTS', 199900),
+    termDays: 30,
+    intervalMs: 60 * 60_000,
+    retentionHours: num('DATA_DUMPS_RETENTION_HOURS', 24),
+    endpoint: opt('DATA_DUMPS_S3_ENDPOINT'),
+    bucket: opt('DATA_DUMPS_S3_BUCKET'),
+    region: opt('DATA_DUMPS_S3_REGION', 'auto'),
+    accessKeyId: opt('DATA_DUMPS_S3_ACCESS_KEY_ID'),
+    secretAccessKey: opt('DATA_DUMPS_S3_SECRET_ACCESS_KEY'),
+    get enabled() {
+      return Boolean(this.endpoint && this.bucket && this.accessKeyId && this.secretAccessKey);
+    },
+  },
+
   payments: {
     blockchain: opt('COINPAY_BLOCKCHAIN', 'BTC'),
     payoutAddress: opt('COINPAY_PAYOUT_ADDRESS'),

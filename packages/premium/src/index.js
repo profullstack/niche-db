@@ -6,22 +6,23 @@
  * read straight onto the pricing page, so what the page promises and what the
  * code enforces are the same object rather than two lists that drift.
  *
- * Three plans, in order:
+ * Four plans, in order:
  *
  *   free     reads everything, pages and feeds carry one ad and a tracker
  *   premium  a dollar a day: no ads, the badge, the lounge, credits, early
  *            access, the appearance settings, the bigger API allowance
  *   pro      everything Premium has plus the operator tier: the top API
  *            allowance and a crawl pass for the whole term
+ *   data     everything Pro has plus hourly public-data snapshots
  *
  * Pro is deliberately a superset. Somebody paying $120 a month must never
  * discover that the $30 tier had something theirs does not.
  */
 
-export const PLANS = ['free', 'premium', 'pro'];
+export const PLANS = ['free', 'premium', 'pro', 'data'];
 
 /** Higher wins when two things both say what a user is. */
-const RANK = { free: 0, premium: 1, pro: 2 };
+const RANK = { free: 0, premium: 1, pro: 2, data: 3 };
 
 export const isPlan = (plan) => PLANS.includes(plan);
 
@@ -56,7 +57,7 @@ export function planFor({ user, terms = [], now = new Date() } = {}) {
 /* ------------------------------------------------------------ entitlements -- */
 
 /** How many credits a month each plan is granted. Reddit's retired coin drip was 700. */
-export const MONTHLY_CREDITS = { free: 0, premium: 1000, pro: 2000 };
+export const MONTHLY_CREDITS = { free: 0, premium: 1000, pro: 2000, data: 2000 };
 
 /**
  * The whole entitlement table, one object per plan.
@@ -68,6 +69,7 @@ export const MONTHLY_CREDITS = { free: 0, premium: 1000, pro: 2000 };
 export function entitlements(plan = 'free', { monthlyCredits = MONTHLY_CREDITS.premium } = {}) {
   const name = isPlan(plan) ? plan : 'free';
   const paid = name !== 'free';
+  const operator = name === 'pro' || name === 'data';
   return Object.freeze({
     plan: name,
     /** Does a page or feed for this user carry the sponsored unit? */
@@ -83,12 +85,13 @@ export function entitlements(plan = 'free', { monthlyCredits = MONTHLY_CREDITS.p
     appearance: paid,
     /** Their own contributions are lifted in a list. */
     highlight: paid,
-    monthlyCredits: paid ? monthlyCredits * (name === 'pro' ? 2 : 1) : 0,
+    monthlyCredits: paid ? monthlyCredits * (operator ? 2 : 1) : 0,
     unlimitedFeeds: paid,
     ownSources: paid,
     /** A signed crawl pass for the whole term. The operator tier only. */
-    crawlPass: name === 'pro',
-    apiTier: name === 'pro' ? 'pro' : name === 'premium' ? 'premium' : 'free',
+    crawlPass: operator,
+    apiTier: operator ? 'pro' : name === 'premium' ? 'premium' : 'free',
+    dataDumps: name === 'data',
   });
 }
 

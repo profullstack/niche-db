@@ -10,7 +10,8 @@
     "./names": "./src/names.js",
     "./opensite": "./src/opensite.js",
     "./profiles": "./src/profiles.js",
-    "./dump": "./src/dump.js"
+    "./dump": "./src/dump.js",
+    "./data-dumps": "./src/data-dumps.js"
   },
   "dependencies": {
     "@nichedb/adapters": "workspace:*",

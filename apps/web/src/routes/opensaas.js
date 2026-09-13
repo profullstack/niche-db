@@ -18,6 +18,7 @@ import * as pay from '@nichedb/payments';
 import { MEMBERSHIP_KIND, PLANS } from '@nichedb/payments/membership';
 import { priceFor } from '@nichedb/payments/referrals';
 import { termById } from '@nichedb/premium';
+import { startDataCheckout } from '../lib/data-checkout.js';
 import { render, requireUser, respond, wantsJson } from '../lib/http.js';
 import { actor, descriptor, SCOPES } from '../lib/opensaas.js';
 import { prices, startPremiumCheckout } from '../lib/premium-checkout.js';
@@ -52,6 +53,10 @@ export function registerOpenSaaS(app, deps = {}) {
     const wanted = String(body.plan ?? 'premium-month');
     if (!config.premium.enabled && !config.membership.enabled)
       return refused(c, 'Payments are not configured on this deployment.');
+    if (wanted === 'data') {
+      const { checkoutUrl } = await (deps.dataCheckout ?? startDataCheckout)(user);
+      return pending(c, checkoutUrl, { plan: 'data' });
+    }
     if (wanted === 'pro') {
       const price = await priceFor(sql, {
         userId: user.id,

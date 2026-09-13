@@ -223,7 +223,8 @@ export async function activeMembership(userId, { plan = 'pro' } = {}) {
   if (!userId) return null;
   const [row] = await sql`
     select * from memberships
-    where user_id = ${userId} and expires_at > now() and plan = ${plan}
+    where user_id = ${userId} and expires_at > now()
+      and (plan = ${plan} or (${plan} = 'pro' and plan = 'data'))
     order by expires_at desc limit 1
   `;
   return row ?? null;

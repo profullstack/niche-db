@@ -64,6 +64,22 @@ export function plans() {
       status: 'active',
     });
   }
+  if (config.dataDumps.enabled && config.premium.enabled) {
+    out.push({
+      id: 'data',
+      name: 'Data: hourly data dumps',
+      price: config.dataDumps.priceCents / 100,
+      period: 'month',
+      renews: false,
+      url: `${site}/dumps`,
+      includes: [
+        'everything in Pro',
+        'full public-data snapshots every hour',
+        'gzip-compressed NDJSON downloads',
+      ],
+      status: 'active',
+    });
+  }
   return out;
 }
 

@@ -1,5 +1,6 @@
 import { config } from '@nichedb/config';
 import { ADAPTERS, enrichPending, runSource, scanFeeds } from '@nichedb/core';
+import { generateDump } from '@nichedb/core/data-dumps';
 import * as q from '@nichedb/db/queries';
 import { sendEmail, sendPush } from '@nichedb/notify';
 import { buildEvent, sendWebhook } from '@profullstack/autoblog';
@@ -162,6 +163,14 @@ export function startWorkers() {
       lockDuration: 10 * 60_000,
     }),
   ];
+  if (config.dataDumps.enabled)
+    workers.push(
+      new Worker(QUEUES.dumps, () => generateDump({ log }), {
+        connection,
+        concurrency: 1,
+        lockDuration: 60 * 60_000,
+      }),
+    );
   for (const w of workers) {
     w.on('failed', (job, err) =>
       console.error(`[worker] ${w.name} job ${job?.id} failed:`, err?.message),

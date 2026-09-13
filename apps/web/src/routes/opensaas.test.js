@@ -145,7 +145,11 @@ describe('the way out', () => {
     const ok = build({ principal: { sub: 'p1', scopes: [SCOPES.cancel], email: ALICE.email } });
     const res = await ok.app.request('/api/v1/billing/cancel', json({}));
     expect(res.status).toBe(200);
-    expect(ok.calls.map((c) => c[0])).toEqual(['cancel', 'cancel']);
+    expect(ok.calls).toEqual([
+      ['cancel', ALICE.id, 'premium'],
+      ['cancel', ALICE.id, 'pro'],
+      ['cancel', ALICE.id, 'data'],
+    ]);
     const wrongScope = build({
       principal: { sub: 'p1', scopes: ['openprofile:edit'], email: ALICE.email },
     });

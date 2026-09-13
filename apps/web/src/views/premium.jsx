@@ -8,13 +8,14 @@
 import { config } from '@nichedb/config';
 import { entitlements } from '@nichedb/premium';
 import { Notice, Num } from './components.jsx';
+import { DataDumpsOffer } from './data-dumps.jsx';
 import { Layout } from './Layout.jsx';
 
 const money = (cents) => `$${(cents / 100).toFixed(cents % 100 === 0 ? 0 : 2)}`;
 
 /** The mark beside a member's name. Nothing at all for a free account. */
 export const PlanBadge = ({ plan }) =>
-  plan === 'premium' || plan === 'pro' ? (
+  plan === 'premium' || plan === 'pro' || plan === 'data' ? (
     <span class={`badge plan-${plan}`} title={`${config.siteName} ${plan}`}>
       {plan}
     </span>
@@ -264,10 +265,10 @@ export const PremiumPage = ({
             <strong>0</strong>
             <span>ads or tracking scripts</span>
           </p>
-          {members?.premium || members?.pro ? (
+          {members?.premium || members?.pro || members?.data ? (
             <p>
               <strong>
-                <Num n={(members.premium ?? 0) + (members.pro ?? 0)} />
+                <Num n={(members.premium ?? 0) + (members.pro ?? 0) + (members.data ?? 0)} />
               </strong>
               <span>current members</span>
             </p>
@@ -361,6 +362,8 @@ export const PremiumPage = ({
             allowance and a crawl pass for your entire term.
           </p>
         </section>
+
+        <DataDumpsOffer access={plan === 'data'} />
 
         <section id="compare" class="premium-section">
           <p class="premium-eyebrow">The comparison you came for</p>

@@ -185,8 +185,9 @@ export const Layout = (props) => (
         <p class="muted">
           <a href="/about">About</a> · <a href="/submit">Submit a feed</a> ·{' '}
           <a href="/docs/api">API</a> · <a href="/docs/cli">CLI</a> · <a href="/docs/mcp">MCP</a> ·{' '}
-          <a href="/llms.txt">llms.txt</a> · <a href="/premium">Premium</a> · <a href="/pro">Pro</a>{' '}
-          · <a href="/crawl">Crawl access</a> · <a href="/opportunities">Opportunities</a>
+          <a href="/llms.txt">llms.txt</a> · <a href="/dumps">Data dumps</a> ·{' '}
+          <a href="/premium">Premium</a> · <a href="/pro">Pro</a> ·{' '}
+          <a href="/crawl">Crawl access</a> · <a href="/opportunities">Opportunities</a>
         </p>
       </footer>
 

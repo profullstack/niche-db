@@ -73,3 +73,9 @@ claiming a lower monthly price. Hosted AI search, unread-comment highlighting
 and a content analytics dashboard are not included in nichedb Premium.
 Unlisted Reddit benefits are labelled unlisted rather than assumed unavailable.
 The source URLs and verification date live in `packages/premium/src/comparison.js`.
+
+## Data tier
+
+Data adds hourly full public-data snapshots to all Pro benefits for $1,999 per
+30 days. It is a separate monthly plan, not part of $1/day Premium. See
+[data-dumps.md](data-dumps.md) for delivery, access and storage configuration.

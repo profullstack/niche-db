@@ -14,13 +14,20 @@ export const MEMBERSHIP_KIND = 'membership';
  * they already hold. Decided in SQL so two concurrent webhooks cannot both read
  * the same end date. Idempotent through payment_id, which is unique.
  */
-export const PLANS = ['premium', 'pro'];
+export const PLANS = ['premium', 'pro', 'data'];
 
 /** Resolve settled metadata to a term we sell. Missing plan means legacy Pro. */
 export function membershipTerm(meta, proTermDays) {
   const plan = meta.plan ?? 'pro';
   const days = Number(meta.term_days ?? (plan === 'pro' ? proTermDays : NaN));
-  const allowed = plan === 'premium' ? [1, 30, 365] : plan === 'pro' ? [proTermDays] : [];
+  const allowed =
+    plan === 'premium'
+      ? [1, 30, 365]
+      : plan === 'pro'
+        ? [proTermDays]
+        : plan === 'data'
+          ? [30]
+          : [];
   if (!allowed.includes(days)) throw new Error('Unknown membership plan or term');
   return { plan, days };
 }

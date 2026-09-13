@@ -57,7 +57,7 @@ export function decideModules({ plan = 'free', paid, disable }) {
       ads: false,
       tracking: false,
       paid: true,
-      pro: ent.plan === 'pro',
+      pro: ent.crawlPass,
       premium: true,
       plan: ent.plan,
     };
