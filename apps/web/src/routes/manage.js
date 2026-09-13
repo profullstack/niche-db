@@ -36,6 +36,7 @@ import {
   editSource,
   normaliseQuery,
 } from '../lib/service.js';
+import { parseJson } from '../lib/source-config.js';
 import { FeedForm, FeedsPage, SourceForm, SourcePage, SourcesPage } from '../views/admin.jsx';
 import { Settings } from '../views/pages.jsx';
 
@@ -126,7 +127,7 @@ export function registerManage(app) {
       await render(
         <SourcePage
           user={user}
-          source={source}
+          source={{ ...source, config: parseJson(source.config), cursor: parseJson(source.cursor) }}
           adapter={adapterByName(source.adapter)}
           runs={runs}
           items={items}

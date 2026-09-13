@@ -1,4 +1,5 @@
 import { config } from '@nichedb/config';
+import { describeConfig, parseJson, progressOf } from '../lib/source-config.js';
 import { FeedCard, ItemList, Notice, Num, Relative, Status } from './components.jsx';
 import { Layout } from './Layout.jsx';
 import { describeQuery } from './pages.jsx';
@@ -223,6 +224,65 @@ export const SourceForm = ({ user, adapters, adapter, collections, values = {}, 
   </Layout>
 );
 
+/**
+ * The config as the adapter declared it, and where a walk has got to. A
+ * list is a count with the entries folded under it, never a line of JSON:
+ * a bulk source holds thousands of addresses and the page has to stay a
+ * page.
+ */
+const SourceConfig = ({ adapter, source }) => {
+  const fields = describeConfig(adapter, source.config);
+  const progress = progressOf(source.cursor, {
+    runCount: source.run_count,
+    enabled: source.enabled,
+  });
+  return (
+    <div class="source-config small">
+      {progress ? (
+        <p>
+          <strong>Progress:</strong> {progress}
+        </p>
+      ) : null}
+      {fields.length === 0 ? (
+        <p class="muted">No config.</p>
+      ) : (
+        fields.map((f) =>
+          f.kind === 'list' ? (
+            <details key={f.key}>
+              <summary>
+                {f.label}: {f.count.toLocaleString('en-US')} {f.count === 1 ? 'entry' : 'entries'}
+              </summary>
+              <ul class="config-list">
+                {f.entries.map((e, i) => (
+                  <li key={`${f.key}-${i}`}>
+                    {/^https?:\/\//.test(e) ? (
+                      <a href={e} rel="noopener nofollow">
+                        {e}
+                      </a>
+                    ) : (
+                      e
+                    )}
+                  </li>
+                ))}
+              </ul>
+              {f.more ? <p class="muted">and {f.more.toLocaleString('en-US')} more</p> : null}
+            </details>
+          ) : f.kind === 'json' ? (
+            <details key={f.key}>
+              <summary>{f.label}</summary>
+              <pre class="data">{f.value}</pre>
+            </details>
+          ) : (
+            <p key={f.key}>
+              <strong>{f.label}:</strong> <code class="mono">{f.value}</code>
+            </p>
+          ),
+        )
+      )}
+    </div>
+  );
+};
+
 export const SourcePage = ({ user, source, adapter, runs, items, canEdit, notice, error }) => (
   <Layout user={user} title={source.name} canonical={`/s/${source.slug}`}>
     <p class="crumb">
@@ -271,23 +331,27 @@ export const SourcePage = ({ user, source, adapter, runs, items, canEdit, notice
               {f.type === 'select' ? (
                 <select id={`edit-${f.key}`} name={`config.${f.key}`}>
                   {f.options.map((o) => (
-                    <option key={o} value={o} selected={String(source.config?.[f.key] ?? '') === o}>
+                    <option
+                      key={o}
+                      value={o}
+                      selected={String(parseJson(source.config)?.[f.key] ?? '') === o}
+                    >
                       {o || '(any)'}
                     </option>
                   ))}
                 </select>
               ) : f.type === 'list' ? (
-                <textarea id={`edit-${f.key}`} name={`config.${f.key}`} rows="3">
-                  {Array.isArray(source.config?.[f.key])
-                    ? source.config[f.key].join(', ')
-                    : (source.config?.[f.key] ?? '')}
+                <textarea id={`edit-${f.key}`} name={`config.${f.key}`} rows="6">
+                  {Array.isArray(parseJson(source.config)?.[f.key])
+                    ? parseJson(source.config)[f.key].join('\n')
+                    : (parseJson(source.config)?.[f.key] ?? '')}
                 </textarea>
               ) : (
                 <input
                   id={`edit-${f.key}`}
                   type={f.type === 'number' ? 'number' : 'text'}
                   name={`config.${f.key}`}
-                  value={source.config?.[f.key] ?? ''}
+                  value={parseJson(source.config)?.[f.key] ?? ''}
                 />
               )}
               {f.help ? <span class="help">{f.help}</span> : null}
@@ -350,9 +414,7 @@ export const SourcePage = ({ user, source, adapter, runs, items, canEdit, notice
             </tbody>
           </table>
         )}
-        <p class="small">
-          Config: <code class="mono">{JSON.stringify(source.config)}</code>
-        </p>
+        <SourceConfig adapter={adapter} source={source} />
       </section>
       <section>
         <h2>Latest items</h2>
