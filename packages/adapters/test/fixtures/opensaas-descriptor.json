@@ -1,0 +1,80 @@
+{
+  "opensaas": "0.1",
+  "service": {
+    "name": "NicheDB",
+    "web": "https://nichedb.dev",
+    "operator": "https://logicsrc.com/.well-known/openprofile.md",
+    "openaccess": "https://nichedb.dev/.well-known/openaccess.json",
+    "support": "https://nichedb.dev/about",
+    "terms": "https://nichedb.dev/terms",
+    "privacy": "https://nichedb.dev/privacy",
+    "currency": "USD"
+  },
+  "updated": "2026-09-13T06:00:00Z",
+  "plans": [
+    {
+      "id": "premium",
+      "name": "Premium",
+      "price": 1,
+      "period": "day",
+      "renews": true,
+      "url": "https://nichedb.dev/premium",
+      "includes": ["no ads", "no tracker"],
+      "status": "active"
+    },
+    {
+      "id": "pro",
+      "name": "Pro",
+      "price": 30,
+      "period": "month",
+      "trial": "14 days",
+      "renews": true,
+      "url": "https://nichedb.dev/pro",
+      "includes": ["everything in Premium", "add sources", "API key"],
+      "status": "active"
+    }
+  ],
+  "actions": {
+    "subscribe": {
+      "page": "https://nichedb.dev/premium",
+      "api": { "method": "POST", "url": "https://nichedb.dev/api/v1/billing/subscribe" },
+      "scope": "billing:subscribe",
+      "steps": 2,
+      "requires": ["account", "payment"]
+    },
+    "cancel": {
+      "page": "https://nichedb.dev/account/billing",
+      "api": { "method": "POST", "url": "https://nichedb.dev/api/v1/billing/cancel" },
+      "scope": "billing:cancel",
+      "steps": 1,
+      "confirm": "click",
+      "effective": "period-end",
+      "refund": "none"
+    },
+    "unsubscribe": {
+      "page": "https://nichedb.dev/account/mail",
+      "api": { "method": "POST", "url": "https://nichedb.dev/api/v1/mail/unsubscribe" },
+      "scope": "mail:unsubscribe",
+      "steps": 1,
+      "list_unsubscribe": true
+    },
+    "export": {
+      "page": "https://nichedb.dev/account/export",
+      "api": { "method": "POST", "url": "https://nichedb.dev/api/v1/account/export" },
+      "scope": "account:export",
+      "steps": 1,
+      "formats": ["json"],
+      "within": "P1D"
+    },
+    "delete": {
+      "page": "https://nichedb.dev/account/delete",
+      "api": { "method": "POST", "url": "https://nichedb.dev/api/v1/account/delete" },
+      "scope": "account:delete",
+      "steps": 2,
+      "confirm": "email",
+      "effective": "immediate",
+      "retention": "P30D"
+    }
+  },
+  "policies": { "auto_renew": true, "renewal_notice": "P7D", "price_change_notice": "P30D" }
+}

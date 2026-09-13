@@ -15,6 +15,7 @@ import { registerAutomotive } from './routes/automotive.js';
 import { registerKnowledge } from './routes/knowledge.js';
 import { registerManage } from './routes/manage.js';
 import { registerMcp } from './routes/mcp.js';
+import { registerOpenSaaS } from './routes/opensaas.js';
 import { registerPages } from './routes/pages.js';
 import { registerPremium } from './routes/premium.js';
 import { registerProfiles } from './routes/profiles.js';
@@ -126,6 +127,7 @@ registerProfiles(app);
 /** Sites: /c/sites/<host>/<path>, one OpenSite record per page, and /c/sites/add, which reads any address now. */
 registerSites(app);
 registerPremium(app);
+registerOpenSaaS(app);
 registerAutomotive(app);
 registerMcp(app);
 
