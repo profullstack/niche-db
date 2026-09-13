@@ -97,6 +97,7 @@ import { rogueIncidents, rogueResearch } from './rogueaitracker.js';
 import { rssamplifier } from './rssamplifier.js';
 import { saasrow } from './saasrow.js';
 import { scalewayInstances } from './scaleway.js';
+import { scannerDirectory } from './scanners.js';
 import { scryfallCards, scryfallSets } from './scryfall.js';
 import { slickdeals } from './slickdeals.js';
 import { socrataCrime } from './socratacrime.js';
@@ -161,6 +162,7 @@ export const ADAPTERS = [
   nasdaqHalts,
   ecbFxRates,
   socrataCrime,
+  scannerDirectory,
   ukPoliceCrime,
   fbiCrimeEstimates,
   usaspendingAwards,

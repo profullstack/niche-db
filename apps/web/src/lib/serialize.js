@@ -44,6 +44,9 @@ export function itemOut(i, siteUrl, { enrichers = null } = {}) {
     precision: i.precision,
     tags: i.tags,
     data: i.data,
+    ...(i.distance_m !== null && i.distance_m !== undefined
+      ? { distance_m: Number(i.distance_m) }
+      : {}),
     first_seen_at: i.first_seen_at,
     enrichment: enrichmentOut(
       i,

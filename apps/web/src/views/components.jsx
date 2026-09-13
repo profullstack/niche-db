@@ -126,6 +126,9 @@ export const ItemRow = ({ item, showSource = true, enrichers = null, reserveThum
         ) : null}
         {' · '}
         <span class="kind">{item.kind}</span>
+        {item.distance_m != null ? (
+          <span> · {(Number(item.distance_m) / 1000).toFixed(2)} km from point or coverage</span>
+        ) : null}
         {item.url ? (
           <>
             {' · '}
@@ -168,14 +171,21 @@ export const ItemList = ({
   );
 };
 
-export const Pager = ({ items, base }) => {
-  if (items.length === 0) return null;
+export const Pager = ({ items, base, offset = null }) => {
+  if (items.length === 0 || (offset !== null && offset >= 10000)) return null;
   const last = items[items.length - 1];
   const sep = base.includes('?') ? '&' : '?';
   return (
     <p class="pager">
-      <a class="ghost button" href={`${base}${sep}before=${last.id}`}>
-        Older →
+      <a
+        class="ghost button"
+        href={
+          offset === null
+            ? `${base}${sep}before=${last.id}`
+            : `${base}${sep}offset=${offset + items.length}`
+        }
+      >
+        {offset === null ? 'Older →' : 'Next →'}
       </a>
     </p>
   );

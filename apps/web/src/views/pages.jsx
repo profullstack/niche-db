@@ -1,3 +1,10 @@
+const geoParams = (geo = {}) =>
+  Object.fromEntries(
+    Object.entries(geo).map(([k, v]) => [k, Array.isArray(v) ? v.join(',') : String(v)]),
+  );
+const locationLink = (base, geo, extra = {}) =>
+  `${base}?${new URLSearchParams({ ...geoParams(geo), ...extra })}`;
+
 import { config } from '@nichedb/config';
 import { currentModules } from '../lib/modules.js';
 import {
@@ -79,6 +86,8 @@ export const CollectionPage = ({
   tags,
   tag,
   kind,
+  geo = {},
+  offset = 0,
 }) => (
   <Layout
     user={user}
@@ -92,7 +101,15 @@ export const CollectionPage = ({
       <Num n={stats.items} /> items · <Num n={stats.items_today} /> today · {stats.sources} sources
       · {stats.feeds} feeds
       {' · '}
-      <a href={`/feeds/new?collection=${collection.slug}`}>make a feed</a>
+      <a
+        href={locationLink('/feeds/new', geo, {
+          collection: collection.slug,
+          ...(tag ? { tags: tag } : {}),
+          ...(kind ? { kinds: kind } : {}),
+        })}
+      >
+        make a feed
+      </a>
       {' · '}
       <a href={`/submit?collection=${collection.slug}`}>suggest a feed</a>
     </p>
@@ -114,9 +131,9 @@ export const CollectionPage = ({
         <ul class="plain">
           {feeds.map((f) => (
             <li key={f.slug}>
-              <a href={`/f/${f.slug}`}>{f.name}</a>{' '}
+              <a href={locationLink(`/f/${f.slug}`, geo)}>{f.name}</a>{' '}
               <span class="muted small">
-                <a href={`/f/${f.slug}.rss`}>rss</a>
+                <a href={locationLink(`/f/${f.slug}.rss`, geo)}>rss</a>
               </span>
             </li>
           ))}
@@ -129,7 +146,10 @@ export const CollectionPage = ({
                 <a
                   key={k.kind}
                   class={`tag ${kind === k.kind ? 'on' : ''}`}
-                  href={`/c/${collection.slug}?kind=${k.kind}`}
+                  href={locationLink(`/c/${collection.slug}`, geo, {
+                    kind: k.kind,
+                    ...(tag ? { tag } : {}),
+                  })}
                 >
                   {k.kind} <span class="muted">{k.n}</span>
                 </a>
@@ -143,7 +163,10 @@ export const CollectionPage = ({
             <a
               key={t.tag}
               class={`tag ${tag === t.tag ? 'on' : ''}`}
-              href={`/c/${collection.slug}?tag=${encodeURIComponent(t.tag)}`}
+              href={locationLink(`/c/${collection.slug}`, geo, {
+                tag: t.tag,
+                ...(kind ? { kind } : {}),
+              })}
             >
               {t.tag}
             </a>
@@ -161,7 +184,11 @@ export const CollectionPage = ({
         <ItemList items={latest} />
         <Pager
           items={latest}
-          base={`/c/${collection.slug}${tag ? `?tag=${encodeURIComponent(tag)}` : kind ? `?kind=${kind}` : ''}`}
+          base={locationLink(`/c/${collection.slug}`, geo, {
+            ...(tag ? { tag } : {}),
+            ...(kind ? { kind } : {}),
+          })}
+          offset={geo.sort === 'distance' ? offset : null}
         />
       </section>
     </div>
@@ -169,6 +196,8 @@ export const CollectionPage = ({
 );
 
 export const FeedPage = ({
+  geo = {},
+  offset = 0,
   user,
   feed,
   items,
@@ -187,7 +216,7 @@ export const FeedPage = ({
       feed.description ?? `${feed.name} — a ${feed.collection_name} feed on ${config.siteName}`
     }
     canonical={`/f/${feed.slug}`}
-    feedUrl={`/f/${feed.slug}.rss`}
+    feedUrl={locationLink(`/f/${feed.slug}.rss`, geo)}
     feedTitle={feed.name}
   >
     <div class="page-head">
@@ -199,7 +228,8 @@ export const FeedPage = ({
         {feed.description ? <p class="lede">{feed.description}</p> : null}
         <p class="small muted">
           {describeQuery(query)} · {feed.follower_count} following ·{' '}
-          <a href={`/f/${feed.slug}.rss`}>RSS</a> · <a href={`/f/${feed.slug}.json`}>JSON</a> ·{' '}
+          <a href={locationLink(`/f/${feed.slug}.rss`, geo)}>RSS</a> ·{' '}
+          <a href={locationLink(`/f/${feed.slug}.json`, geo)}>JSON</a> ·{' '}
           <a href={`/api/v1/feeds/${feed.slug}/items`}>API</a>
           {canEdit ? (
             <>
@@ -288,12 +318,20 @@ export const FeedPage = ({
       </details>
     ) : null}
     <ItemList items={items} enrichers={enrichers} />
-    <Pager items={items} base={`/f/${feed.slug}`} />
+    <Pager
+      items={items}
+      base={locationLink(`/f/${feed.slug}`, geo)}
+      offset={(geo.sort ?? query.sort) === 'distance' ? offset : null}
+    />
   </Layout>
 );
 
 export function describeQuery(q) {
   const parts = [];
+  if (q.lat !== undefined && q.long !== undefined)
+    parts.push(`within ${q.radius ?? 10} ${q.unit ?? 'km'} of ${q.lat}, ${q.long}`);
+  if (q.bbox) parts.push(`map bounds: ${q.bbox}`);
+  if (q.sort === 'distance') parts.push('nearest first');
   if (q.sources?.length) parts.push(`sources: ${q.sources.join(', ')}`);
   if (q.kinds?.length) parts.push(`kinds: ${q.kinds.join(', ')}`);
   if (q.tags?.length) parts.push(`tags: ${q.tags.join(', ')}`);
@@ -305,6 +343,8 @@ export function describeQuery(q) {
 }
 
 export const ItemPage = ({
+  nearby = null,
+  contextOptions = {},
   user,
   item,
   enrichers,
@@ -353,6 +393,48 @@ export const ItemPage = ({
         )}
       />
       {item.data?.exit ? <WayInOut data={item.data} /> : null}
+      {nearby !== null ? (
+        <section>
+          <h2>Reported incidents in scanner coverage</h2>
+          <p>
+            Geographic context, not verified links to these radio transmissions. Source locations
+            may be approximate or anonymised.
+          </p>
+          <p class="small muted">
+            Coverage: {item.data?.coverage_basis ?? 'unknown'}. Most recent available reports; an
+            empty list does not mean no crime.
+          </p>
+          {item.data?.stream_reuse_allowed && item.data?.stream_url ? (
+            <audio controls preload="none" src={item.data.stream_url}>
+              <track kind="captions" />
+              Your browser does not support audio playback.
+            </audio>
+          ) : null}
+          <form method="get" action={`/i/${item.id}`} class="filters">
+            {Object.entries(geoParams(contextOptions))
+              .filter(([key]) => !['from', 'to'].includes(key))
+              .map(([key, value]) => (
+                <input key={key} type="hidden" name={key} value={value} />
+              ))}
+            <label>
+              From <input type="date" name="from" value={contextOptions.from?.slice(0, 10) ?? ''} />
+            </label>
+            <label>
+              Before <input type="date" name="to" value={contextOptions.to?.slice(0, 10) ?? ''} />
+            </label>
+            <button type="submit">Filter reports</button>
+          </form>
+          <ItemList items={nearby} />
+          <a
+            href={locationLink(
+              `/api/v1/items/${item.id}/nearby-crime`,
+              Object.fromEntries(Object.entries(contextOptions).filter(([, v]) => v !== null)),
+            )}
+          >
+            Crime context JSON (supports from/to date filters)
+          </a>
+        </section>
+      ) : null}
       <h2>Data</h2>
       <pre class="data">{JSON.stringify(item.data, null, 2)}</pre>
       <p class="small muted">

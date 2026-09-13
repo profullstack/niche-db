@@ -1,5 +1,6 @@
 import { config } from '@nichedb/config';
 import { adapterByName, slugify } from '@nichedb/core';
+import { geoQueryFields } from '@nichedb/core/geo';
 import * as knowledge from '@nichedb/db/knowledge';
 import * as premiumDb from '@nichedb/db/premium';
 import * as q from '@nichedb/db/queries';
@@ -169,7 +170,7 @@ export function normaliseQuery(raw = {}) {
       .map((s) => String(s).trim())
       .filter(Boolean)
       .slice(0, 20);
-  const out = {};
+  const out = { ...geoQueryFields(raw) };
   const sources = arr(raw.sources);
   const kinds = arr(raw.kinds);
   const tags = arr(raw.tags).map((t) => t.toLowerCase());
