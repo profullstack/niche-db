@@ -96,6 +96,9 @@ mock.module('@nichedb/db/profiles', () => store);
 const { registerProfiles } = await import('./profiles.js');
 const { Denied } = await import('../lib/service.js');
 const { withModules, decideModules } = await import('../lib/modules.js');
+const { config } = await import('@nichedb/config');
+// CI pins SITE_URL to localhost; every absolute URL below is whatever the deployment says it is.
+const SITE = config.siteUrl;
 
 function appAs(user) {
   const app = new Hono();
@@ -157,7 +160,7 @@ describe('the page', () => {
     const html = await r.text();
     expect(html).toContain('<h1>Ada Lovelace</h1>');
     expect(html).toContain(
-      '<link rel="openprofile" href="https://nichedb.test/c/profiles/ada-lovelace-12/openprofile.md"',
+      `<link rel="openprofile" href="${SITE}/c/profiles/ada-lovelace-12/openprofile.md"`,
     );
     expect(html).toContain('href="/c/profiles/ada-lovelace-12/edit"');
     expect(html).toContain('The Analytical Engine');
@@ -188,10 +191,8 @@ describe('the API', () => {
     const body = await (await appAs(null).request('/api/v1/profiles')).json();
     expect(body.profiles[0].ref).toBe('ada-lovelace-12');
     expect(body.profiles[0].broadcasts[0].Show).toBe('The Analytical Engine');
-    expect(body.openprofiles[0].url).toBe(
-      'https://nichedb.test/c/profiles/ada-lovelace-12/openprofile.md',
-    );
-    expect(body.openprofiles[1].page).toBe('https://nichedb.test/c/profiles/bob');
+    expect(body.openprofiles[0].url).toBe(`${SITE}/c/profiles/ada-lovelace-12/openprofile.md`);
+    expect(body.openprofiles[1].page).toBe(`${SITE}/c/profiles/bob`);
   });
 
   test('a stranger cannot edit; the owner can, as JSON or as a whole file', async () => {
