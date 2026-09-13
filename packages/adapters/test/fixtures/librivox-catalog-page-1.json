@@ -124,6 +124,41 @@
         }
       ],
       "translators": []
+    },
+    {
+      "id": "22925",
+      "title": "Amundsen: The Splendid Norseman",
+      "description": "Will fill in at a later date.",
+      "url_text_source": "https://babel.hathitrust.org/cgi/pt?id=mdp.39015028332255&seq=1",
+      "language": "English",
+      "copyright_year": "1929",
+      "num_sections": "21",
+      "url_rss": "https://librivox.org/rss/22925",
+      "url_zip_file": "",
+      "url_project": "",
+      "url_librivox": "",
+      "url_other": "",
+      "totaltime": "",
+      "totaltimesecs": 0,
+      "authors": [
+        {
+          "id": "19823",
+          "first_name": "Bellamy",
+          "last_name": "Partridge",
+          "dob": "1877",
+          "dod": "1960"
+        }
+      ],
+      "coverart_jpg": null,
+      "coverart_thumbnail": null,
+      "url_iarchive": "",
+      "genres": [
+        {
+          "id": "80",
+          "name": "Biography & Autobiography"
+        }
+      ],
+      "translators": []
     }
   ]
 }

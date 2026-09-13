@@ -22,7 +22,9 @@ const fixture = async (name) =>
     await readFile(new URL(`../packages/adapters/test/fixtures/${name}`, import.meta.url), 'utf8'),
   );
 
-// Two real pages of the walk, trimmed, and the real past-the-end answer.
+// Two real pages of the walk, trimmed (the second ends with a real project
+// still being recorded, from the tail of the catalogue), and the real
+// past-the-end answer.
 const page0 = await fixture('librivox-catalog-page-0.json');
 const page1 = await fixture('librivox-catalog-page-1.json');
 const end = await fixture('librivox-catalog-end.json');
@@ -126,9 +128,25 @@ describe('bookItem', () => {
     expect(bookItem({ title: 'No id' })).toBeNull();
     expect(bookItem({ id: '1', title: '' })).toBeNull();
     expect(bookItem(null)).toBeNull();
-    expect(pageItems([{ id: '1', title: 'Fine' }, {}, null])).toHaveLength(1);
+    expect(
+      pageItems([{ id: '1', title: 'Fine', url_librivox: 'https://librivox.org/fine/' }, {}, null]),
+    ).toHaveLength(1);
     expect(pageItems({ not: 'a list' })).toEqual([]);
     expect(pageItems(page0.books)).toHaveLength(page0.books.length);
+  });
+
+  test('a project still being recorded, with no catalogue page and no archive page, is skipped', () => {
+    const inProgress = page1.books.find((b) => !b.url_librivox);
+    expect(inProgress.id).toBe('22925');
+    expect(inProgress.totaltimesecs).toBe(0);
+    expect(inProgress.url_rss).toMatch(/^https:\/\/librivox\.org\/rss\//);
+    expect(bookItem(inProgress)).toBeNull();
+    expect(bookItem({ ...monteCristo, url_librivox: '', url_iarchive: '' })).toBeNull();
+    const archiveOnly = bookItem({ ...monteCristo, url_librivox: '' });
+    expect(archiveOnly.url).toBe(
+      'https://www.archive.org/details/count_monte_cristo_0711_librivox',
+    );
+    expect(pageItems(page1.books)).toHaveLength(page1.books.length - 1);
   });
 
   test('an empty description falls back to author, language and running time', () => {
@@ -189,13 +207,16 @@ describe('pages', () => {
 });
 
 describe('the walk', () => {
-  const total = page0.books.length + page1.books.length;
+  const total = pageItems(page0.books).length + pageItems(page1.books).length;
+  const rows = page0.books.length + page1.books.length;
 
   test('walks page by page to the 404 and marks the pass done', async () => {
     const p = provider();
     const out = await run({}, {}, p);
     expect(out.items).toHaveLength(total);
+    expect(total).toBe(rows - 1);
     expect(out.items[0].externalId).toBe('librivox:47');
+    for (const i of out.items) expect(i.url).not.toMatch(/\/rss\//);
     expect(out.cursor.offset).toBeNull();
     expect(out.cursor.total).toBe(total);
     expect(out.cursor.walkedAt).toMatch(/^\d{4}-/);
@@ -216,7 +237,8 @@ describe('the walk', () => {
     expect(first.note).toContain('stopped at the page cap');
 
     const second = await run({ requestCap: 10 }, first.cursor, p);
-    expect(second.items).toHaveLength(page1.books.length);
+    expect(new URL(p.urls[1]).searchParams.get('offset')).toBe(String(page0.books.length));
+    expect(second.items).toHaveLength(page1.books.length - 1);
     expect(second.items[0].externalId).toBe(`librivox:${page1.books[0].id}`);
     expect(second.cursor.offset).toBeNull();
     expect(second.cursor.total).toBe(total);

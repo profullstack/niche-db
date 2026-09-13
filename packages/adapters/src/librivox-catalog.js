@@ -22,6 +22,13 @@ import { defineAdapter, slugify, stripHtml } from '@nichedb/core/adapter';
  * over from offset 0, so a re-read of the whole catalogue lands about every
  * twelve runs and picks up new recordings at the tail.
  *
+ * The list is every project with an id, not every finished book: a project
+ * still being recorded is on it too, with no catalogue page, no archive.org
+ * page, no zip and a running time of 0 (three to seven a page through the
+ * middle of the range, most of the last page), and its `url_rss` redirects to
+ * the forum login rather than a feed. A row with neither a catalogue page nor
+ * an archive page is skipped and picked up on a later pass once it is done.
+ *
  * The origin is slow (ten to thirty seconds a page near the end, a minute
  * for any page when it is under load, and a Cloudflare 522 or 525 in place of
  * an answer now and then), so the timeout is long and a failed page is
@@ -235,11 +242,17 @@ export function parsePage(status, body) {
   return { books, end: books.length === 0 };
 }
 
-/** One audiobook row -> one item, or null for a row with no id or title. */
+/**
+ * One audiobook row -> one item, or null for a row with no id or title, or for
+ * a project still being recorded (no catalogue page and no archive page).
+ */
 export function bookItem(b) {
   const id = text(b?.id);
   const title = text(b?.title);
   if (!id || !title) return null;
+  const pageLink = url(b.url_librivox);
+  const archive = url(b.url_iarchive);
+  if (!pageLink && !archive) return null;
   const description = stripHtml(text(b.description) ?? '') || null;
   const language = text(b.language);
   const lang = languageCode(language);
@@ -250,8 +263,6 @@ export function bookItem(b) {
   const translators = people(b.translators);
   const coverJpg = url(b.coverart_jpg);
   const coverThumb = url(b.coverart_thumbnail);
-  const pageLink = url(b.url_librivox);
-  const archive = url(b.url_iarchive);
   const year = copyrightYear(b.copyright_year);
   return {
     externalId: `librivox:${id}`,
@@ -262,7 +273,7 @@ export function bookItem(b) {
       : [authors.map((a) => a.name).join(', ') || null, language, text(b.totaltime)]
           .filter(Boolean)
           .join(' · ') || null,
-    url: pageLink ?? archive ?? url(b.url_rss),
+    url: pageLink ?? archive,
     imageUrl: coverJpg ?? coverThumb,
     publishedAt: null,
     tags: [
@@ -299,7 +310,7 @@ export function bookItem(b) {
   };
 }
 
-/** The books on a page as items; a row with no id or title is skipped. */
+/** The books on a page as items; a row with no id or title, or not yet finished, is skipped. */
 export function pageItems(books) {
   if (!Array.isArray(books)) return [];
   return books.map(bookItem).filter(Boolean);
@@ -316,7 +327,7 @@ export const librivoxCatalog = defineAdapter({
   title: 'LibriVox: every audiobook',
   collection: 'books',
   description:
-    'Every finished audiobook on LibriVox, about 22,300, one row each with the readers’ description, authors and translators with their dates, language, genres, running time, section count, cover art, the RSS and zip download links, the archive.org page and the source text. Every recording is public domain and so is the catalogue, keyless, credited to LibriVox on each row. Walks /api/feed/audiobooks 50 a page in id order; a run reads a fixed number of pages and resumes, the pass ends past the last book, and the next run starts over.',
+    'Every finished audiobook on LibriVox, about 22,300, one row each with the readers’ description, authors and translators with their dates, language, genres, running time, section count, cover art, the RSS and zip download links, the archive.org page and the source text. Every recording is public domain and so is the catalogue, keyless, credited to LibriVox on each row. Walks /api/feed/audiobooks 50 a page in id order; a run reads a fixed number of pages and resumes, the pass ends past the last book, and the next run starts over. A project still being recorded is on the API list too and is left out until it is done.',
   docs: 'https://librivox.org/api/info',
   kinds: ['audiobook'],
   cadenceMinutes: 1440,
