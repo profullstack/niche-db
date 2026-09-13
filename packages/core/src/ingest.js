@@ -98,14 +98,16 @@ export async function runSource(sourceId, { log = console.log } = {}) {
     let pulled = (result?.items ?? []).map(normaliseItem).filter(Boolean);
 
     /*
-     * People are not rows an adapter can write on its own. A document the
-     * openprofiles adapter fetched is matched to a profile by its identity
+     * People are not rows an adapter can write on its own. A document an
+     * adapter fetched or compiled (openprofiles reads the apps' own files,
+     * sportarr-persons writes one per athlete from Wikidata) is matched to a
+     * profile by its identity
      * keys, stored as one of that profile's sources, and the profile is
      * re-rendered under the owner's overrides; what reaches the collection is
      * one row per person, not one per document. Done here because it needs
      * the database, which an adapter never sees.
      */
-    if (adapter.name === 'openprofiles') {
+    if (Array.isArray(adapter.kinds) && adapter.kinds.includes('openprofile')) {
       pulled = await absorbProfiles({ source, pulled, log: l });
     }
 
