@@ -560,7 +560,7 @@ describe('the walk', () => {
     expect((await stat(join(dir, 'podcastindex_feeds.db'))).isFile()).toBe(true);
   });
 
-  test('a run out of time stops after the batch in hand and the next resumes exactly there', async () => {
+  test('a run at its deadline yields nothing; one that runs out mid-walk stops after the batch in hand, and the next resumes exactly there', async () => {
     // Batches of 50 are the floor, so a two-run walk needs a database with more rows.
     const many = Array.from({ length: 120 }, (_, i) => ({
       id: 100 + i,
@@ -573,9 +573,33 @@ describe('the walk', () => {
     const headers = { ...REAL_HEAD, etag: '"many-1"' };
     const p = fakeHttp({ headers, archive: () => archive });
 
-    // Deadline already past: the first batch is still yielded, then the run returns.
-    const first = await drain(pull(p.http, { batchSize: 50, deadline: Date.now() - 1 }));
-    expect(first.batches).toHaveLength(1);
+    // Deadline already past before anything is on disk: no download, nothing yielded, back in ten.
+    const late = await drain(pull(p.http, { batchSize: 50, deadline: Date.now() - 1 }));
+    expect(late.batches).toEqual([]);
+    expect(late.outcome).toEqual({
+      cursor: { version: 'many-1', lastModified: '2026-09-12T23:24:31.000Z', afterId: 0 },
+      note: 'out of time before the download',
+      nextInMinutes: RESUME_IN_MINUTES,
+    });
+    expect(p.seen.downloads).toHaveLength(0);
+
+    // The clock runs out after the first batch: that batch is yielded, then the run returns.
+    const realNow = Date.now;
+    let elapsed = 0;
+    Date.now = () => realNow() + elapsed;
+    let first;
+    try {
+      const gen = pull(p.http, { batchSize: 50, deadline: realNow() + 60_000 });
+      const one = await gen.next();
+      expect(one.done).toBe(false);
+      elapsed = 120_000;
+      const end = await gen.next();
+      expect(end.done).toBe(true);
+      first = { batches: [one.value], outcome: end.value };
+    } finally {
+      Date.now = realNow;
+    }
+    expect(p.seen.downloads).toHaveLength(1);
     expect(first.batches[0].items).toHaveLength(45);
     expect(first.batches[0].cursor).toEqual({
       version: 'many-1',
@@ -585,6 +609,18 @@ describe('the walk', () => {
     expect(first.outcome.cursor).toEqual(first.batches[0].cursor);
     expect(first.outcome.nextInMinutes).toBe(RESUME_IN_MINUTES);
     expect(first.outcome.note).toMatch(/out of time at id 149/);
+
+    // At the deadline with the database already extracted: nothing read, the place kept.
+    const idle = await drain(
+      pull(p.http, { batchSize: 50, cursor: first.outcome.cursor, deadline: Date.now() - 1 }),
+    );
+    expect(idle.batches).toEqual([]);
+    expect(idle.outcome).toEqual({
+      cursor: first.outcome.cursor,
+      note: 'out of time at id 149: 0 shows, 0 skipped',
+      nextInMinutes: RESUME_IN_MINUTES,
+    });
+    expect(p.seen.downloads).toHaveLength(1);
 
     // Next run, from that cursor: no second download (the extract is cached), rows after 149 only.
     const second = await drain(pull(p.http, { batchSize: 50, cursor: first.outcome.cursor }));
@@ -615,6 +651,20 @@ describe('the walk', () => {
     expect(fourth.outcome.cursor.done).toBe(true);
     await expect(stat(join(work, 'data', 'podcastindex', 'many-1'))).rejects.toThrow();
     expect((await stat(join(work, 'data', 'podcastindex', 'many-2'))).isDirectory()).toBe(true);
+
+    // The core closes the generator at its own backstop after writing a batch: the
+    // cursor of that batch is exactly where the next run starts.
+    const gen = pull(fresh.http, {
+      batchSize: 50,
+      cursor: { version: 'many-2', lastModified: '2026-09-12T23:24:31.000Z', afterId: 0 },
+    });
+    const one = await gen.next();
+    await gen.return();
+    expect(one.value.cursor.afterId).toBe(149);
+    const resumed = await drain(pull(fresh.http, { batchSize: 50, cursor: one.value.cursor }));
+    expect(ids(resumed.batches)[0]).toBe('podcastindex:feed:150');
+    expect(ids(resumed.batches)).toHaveLength(63);
+    expect(fresh.seen.downloads).toHaveLength(1);
   });
 
   test('a download still in progress yields nothing and comes back in ten minutes', async () => {

@@ -565,6 +565,9 @@ export const podcastindexCatalog = defineAdapter({
     let afterId = same ? Math.max(0, Math.floor(Number(prev?.afterId)) || 0) : 0;
     const at = (extra = {}) => ({ version, lastModified, afterId, ...extra });
     if (!same && prev?.version) log(`new dump ${version}; the walk starts over`);
+    /* A run that is at its deadline does no work: nothing is yielded, the place
+     * is kept, and the next run ten minutes on picks up exactly there. */
+    const outOfTime = (note) => ({ cursor: at(), note, nextInMinutes: RESUME_IN_MINUTES });
 
     // 2. The file, on disk and extracted. Resumable at every step.
     const dir = await dumpDir('podcastindex');
@@ -575,6 +578,7 @@ export const podcastindexCatalog = defineAdapter({
     let dbPath = await readyDatabase(marker);
 
     if (!dbPath) {
+      if (Date.now() >= stopAt) return outOfTime('out of time before the download');
       await pruneOthers(dir, stamp, log);
       let lastLogged = 0;
       const dl = await attempt('download', () =>
@@ -593,15 +597,15 @@ export const podcastindexCatalog = defineAdapter({
       if (!dl) {
         // Either the deadline arrived mid-transfer or three attempts failed in a
         // row; the partial file is on disk either way and the next run resumes it.
-        const why =
+        return outOfTime(
           Date.now() >= stopAt
             ? 'download in progress'
-            : 'download stopped after repeated failures';
-        return { cursor: at(), note: why, nextInMinutes: RESUME_IN_MINUTES };
+            : 'download stopped after repeated failures',
+        );
       }
       if (!dl.complete) {
         log(`download in progress: ${dl.bytes} of ${bytes ?? '?'} bytes`);
-        return { cursor: at(), note: 'download in progress', nextInMinutes: RESUME_IN_MINUTES };
+        return outOfTime('download in progress');
       }
 
       log(`extracting ${Math.round(dl.bytes / 1e6)} MB archive`);
@@ -626,6 +630,13 @@ export const podcastindexCatalog = defineAdapter({
     let skipped = 0;
     let bad = 0;
     for (;;) {
+      // Checked before every read, the first included: a run that arrives at its
+      // deadline reads nothing, and one that reaches it mid-walk stops after the
+      // batch already handed over.
+      if (Date.now() >= stopAt) {
+        log(`out of time at id ${afterId} after ${batches} batches: ${kept} shows this run`);
+        return outOfTime(`out of time at id ${afterId}: ${kept} shows, ${skipped} skipped`);
+      }
       const rows = [...sqliteRows(dbPath, sql, [afterId, batchSize])];
       if (rows.length === 0) {
         log(`walk complete at id ${afterId}: ${kept} shows, ${skipped} skipped, ${bad} bad rows`);
@@ -647,15 +658,6 @@ export const podcastindexCatalog = defineAdapter({
       afterId = lastId;
       batches += 1;
       yield { items: out.items, cursor: at() };
-
-      if (Date.now() >= stopAt) {
-        log(`out of time at id ${afterId} after ${batches} batches: ${kept} shows this run`);
-        return {
-          cursor: at(),
-          note: `out of time at id ${afterId}: ${kept} shows, ${skipped} skipped`,
-          nextInMinutes: RESUME_IN_MINUTES,
-        };
-      }
     }
   },
 });
