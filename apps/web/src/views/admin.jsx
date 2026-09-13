@@ -20,6 +20,9 @@ export const SourcesPage = ({ user, sources, adapters, canAdd, notice, error }) 
         </p>
       </div>
       <div class="actions">
+        <a class="ghost button" href="/submit">
+          Suggest a feed
+        </a>{' '}
         {canAdd ? (
           <a class="cta button" href="/sources/new">
             Add a source
@@ -618,6 +621,7 @@ export const ApiDocs = ({ user, stats }) => (
             '{ channels?: ["webpush","email","webhook"], webhook_url?, webhook_secret? }',
           ],
           [
+            'POST /api/v1/submissions (suggest a feed; no key needed, an admin reviews it)',
             'POST /api/v1/sources',
             '{ adapter, collection?, name?, config: {…}, cadence_minutes? } — admins and Pro.',
           ],

@@ -5,6 +5,7 @@ import * as q from '@nichedb/db/queries';
 import { enqueueRun } from '@nichedb/queue';
 import { allowedEnrichers, collectionOut, feedOut, itemOut, sourceOut } from '../serialize.js';
 import { addSource, createFeed, Denied, editSource } from '../service.js';
+import { submissionOut, submitFeed } from '../submissions.js';
 
 /**
  * Every MCP tool, in the order they are worth learning. This array is the
@@ -288,6 +289,38 @@ export const TOOLS = [
         webhookSecret: webhook_secret ?? null,
       });
       return { ok: true, feed: feedOut(await q.getFeed(f.slug), site()) };
+    },
+  },
+  {
+    name: 'submit_feed',
+    description:
+      'Suggest an RSS or Atom feed for the index. No key needed. An admin reviews every suggestion before anything is fetched; approved podcast feeds are handed to rssamplifier, everything else becomes a source here.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        url: str('The feed URL, starting with https://'),
+        collection: str('Collection slug it belongs in (optional; an admin decides otherwise)'),
+        note: str('Why it belongs here: who publishes it, what it covers (optional)'),
+        email: str('Where to hear back, if you are not sending a key (optional)'),
+      },
+      required: ['url'],
+    },
+    run: async (args, ctx) => {
+      const { submission, duplicate } = await submitFeed({
+        user: ctx.user ?? null,
+        url: args.url,
+        collection: args.collection ?? null,
+        note: args.note ?? null,
+        email: args.email ?? null,
+      });
+      return {
+        ok: true,
+        duplicate,
+        submission: submissionOut(submission),
+        note: duplicate
+          ? 'That feed was already suggested and is waiting for review.'
+          : 'Suggested. An admin will review it; approved feeds appear on their collection page.',
+      };
     },
   },
   {

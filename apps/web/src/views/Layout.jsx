@@ -125,7 +125,9 @@ export const Layout = (props) => (
         <nav>
           <a href="/sources">Sources</a>
           <a href="/feeds">Feeds</a>
+          <a href="/submit">Submit a feed</a>
           <a href="/vin">VIN</a>
+          {props.user?.role === 'admin' ? <a href="/admin/submissions">Queue</a> : null}
           {props.user ? <a href="/following">Following</a> : null}
           <a href="/docs/api">API</a>
           {currentModules().premium ? (
@@ -172,10 +174,10 @@ export const Layout = (props) => (
           shown in <span data-tz-label>your device's</span> time zone.
         </p>
         <p class="muted">
-          <a href="/about">About</a> · <a href="/docs/api">API</a> · <a href="/docs/cli">CLI</a> ·{' '}
-          <a href="/docs/mcp">MCP</a> · <a href="/llms.txt">llms.txt</a> ·{' '}
-          <a href="/premium">Premium</a> · <a href="/pro">Pro</a> ·{' '}
-          <a href="/crawl">Crawl access</a> · <a href="/opportunities">Opportunities</a>
+          <a href="/about">About</a> · <a href="/submit">Submit a feed</a> ·{' '}
+          <a href="/docs/api">API</a> · <a href="/docs/cli">CLI</a> · <a href="/docs/mcp">MCP</a> ·{' '}
+          <a href="/llms.txt">llms.txt</a> · <a href="/premium">Premium</a> · <a href="/pro">Pro</a>{' '}
+          · <a href="/crawl">Crawl access</a> · <a href="/opportunities">Opportunities</a>
         </p>
       </footer>
 

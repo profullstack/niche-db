@@ -11,7 +11,8 @@
     "./automotive": "./src/automotive.js",
     "./agents": "./src/agents.js",
     "./revenue": "./src/revenue.js",
-    "./premium": "./src/premium.js"
+    "./premium": "./src/premium.js",
+    "./submissions": "./src/submissions.js"
   },
   "dependencies": {
     "@nichedb/config": "workspace:*",

@@ -172,6 +172,7 @@ export function registerStatic(app, gateway) {
       { loc: '/about' },
       { loc: '/sources' },
       { loc: '/feeds' },
+      { loc: '/submit' },
       { loc: '/docs/api' },
       { loc: '/docs/cli' },
       { loc: '/docs/mcp' },
