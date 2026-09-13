@@ -1,0 +1,16 @@
+{
+  "url": "https://www.gutenberg.org/cache/epub/feeds/pg_catalog.csv",
+  "fetchedAt": "2026-09-13T07:06:17Z",
+  "header": "Text#,Type,Issued,Title,Language,Authors,Subjects,LoCC,Bookshelves\r",
+  "note": "Raw records lifted verbatim from the live catalogue, each one chosen for an edge the parser or the author splitter has to survive.",
+  "rows": {
+    "noAuthor": "7,Text,1977-12-01,The Mayflower Compact,en,,\"Massachusetts -- History -- New Plymouth, 1620-1691 -- Sources; Pilgrims (New Plymouth Colony); Mayflower Compact (1620)\",F001,Category: History - American; Category: History - Early Modern (c. 1450-1750); Category: History - Religious\r\n",
+    "bce": "21,Text,2008-06-25,\"Three hundred Aesop’s fables\r\nTranslated by George Fyler Townsend\",en,\"Aesop, 621? BCE-565? BCE; Townsend, George Fyler, 1814-1900 [Translator]\",\"Fables, Greek -- Translations into English; Aesop's fables -- Translations into English\",PA; PZ,\"Category: Mythology, Legends & Folklore; Category: Classics of Literature\"\r\n",
+    "openYear": "38,Text,1992-08-01,\"The Jargon File, Version 2.9.10, 01 Jul 1992\",en,\"Raymond, Eric S., 1957- [Editor]; Steele, Guy L., 1954- [Editor]\",Electronic data processing -- Terminology -- Humor; Computers -- Humor; Computers -- Slang -- Dictionaries,TK,Category: Humour; Category: Engineering & Technology; Category: Encyclopedias/Dictionaries/Reference; Category: Journalism/Media/Writing\r\n",
+    "baroness": "60,Text,2006-03-08,The Scarlet Pimpernel,en,\"Orczy, Emmuska Orczy, Baroness, 1865-1947\",\"Historical fiction; France -- History -- Revolution, 1789-1799 -- Fiction; Adventure stories; British -- France -- Fiction; Nobility -- Fiction; Blakeney, Percy, Sir (Fictitious character) -- Fiction\",PR,Adventure; Best Books Ever Listings; Movie Books; Category: Historical Novels; Category: Adventure; Category: British Literature\r\n",
+    "quotedQuote": "63,Text,1993-04-01,\"The Number \"\"e\"\"\",en,Unknown,Mathematics; Mathematical constants,QA,Historical Fiction; Category: Mathematics\r\n",
+    "multiLanguage": "417,Text,1996-02-01,\"Dr. Martin Luther's Deutsche Geistliche Lieder\r\nThe Hymns of Martin Luther Set to Their Original Melodies, With an English Version\",de; en,\"Luther, Martin, 1483-1546; Allen, Nathan H. (Nathan Hale), 1848-1925 [Editor]; Bacon, Leonard Woolsey, 1830-1907 [Editor]\",\"Hymns, German; Lutheran Church -- Hymns\",BX,Christianity; Category: Poetry; Category: German Literature; Category: History - Early Modern (c. 1450-1750); Category: Music; Category: Religion/Spirituality\r\n",
+    "newlineAndQuotes": "464,Text,1996-03-01,\"In the South Seas\r\nBeing an Account of Experiences and Observations in the Marquesas, Paumotus and Gilbert Islands in the Course of Two Cruises on the Yacht \"\"Casco\"\" (1888) and the Schooner \"\"Equator\"\" (1889)\",en,\"Stevenson, Robert Louis, 1850-1894\",Oceania -- Description and travel; Polynesia -- Description and travel,PR,Category: Travel Writing; Category: Archaeology & Anthropology\r\n",
+    "sound": "3002,Sound,2002-01-01,Society's Child (audiofile),en,\"Ian, Janis, 1951- [Performer]\",\"Folk songs, English -- United States; Popular music -- 1961-1970\",M,\r\n"
+  }
+}
