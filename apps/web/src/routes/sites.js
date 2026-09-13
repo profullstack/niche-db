@@ -1,7 +1,15 @@
 import { config } from '@nichedb/config';
 import { cached, render, respond } from '../lib/http.js';
 import { Denied } from '../lib/service.js';
-import { findByPath, listForHost, pathOf, readAndKeep, recordFor, siteOut } from '../lib/sites.js';
+import {
+  findByPath,
+  listForHost,
+  pathOf,
+  readAndKeep,
+  recordFor,
+  siteOut,
+  submitBulk,
+} from '../lib/sites.js';
 import { SiteAddPage, SiteHostPage, SitePage } from '../views/sites.jsx';
 
 /**
@@ -54,6 +62,23 @@ export function registerSites(app) {
   app.post('/c/sites/add', async (c) => {
     const body = await c.req.parseBody();
     if (body.website) return c.redirect('/c/sites/add', 303);
+    // A list, pasted or as a file, becomes a source the worker walks.
+    const file = body.file instanceof File && body.file.size > 0 ? body.file : null;
+    const pasted = String(body.urls ?? '').trim();
+    if (pasted !== '' || file) {
+      const text = `${pasted}\n${file ? await file.text() : ''}`;
+      try {
+        const out = await submitBulk({ user: c.get('user'), text, name: String(body.name ?? '') });
+        const notice = `${out.queued} addresses queued${out.rejected.length ? `, ${out.rejected.length} could not be read` : ''}${out.dropped ? `, ${out.dropped} over the cap of ten thousand left out` : ''}. The worker reads them a few hundred a minute; this page shows how far it has got.`;
+        return c.redirect(`${out.page}?notice=${encodeURIComponent(notice)}`, 303);
+      } catch (err) {
+        if (!(err instanceof Denied)) throw err;
+        return c.html(
+          await render(<SiteAddPage user={c.get('user')} list={pasted} error={err.message} />),
+          err.status,
+        );
+      }
+    }
     const url = String(body.url ?? '').trim();
     return c.redirect(`/c/sites/add?url=${encodeURIComponent(url)}`, 303);
   });
@@ -92,6 +117,38 @@ export function registerSites(app) {
   });
 
   /* ------------------------------------------------------------------ api -- */
+
+  app.post('/api/v1/sites/bulk', async (c) => {
+    const type = c.req.header('content-type') ?? '';
+    let text = '';
+    let name = '';
+    if (/json/i.test(type)) {
+      const body = await c.req.json().catch(() => ({}));
+      text = Array.isArray(body.urls)
+        ? body.urls.map(String).join('\n')
+        : String(body.urls ?? body.text ?? '');
+      name = String(body.name ?? '');
+    } else {
+      text = await c.req.text();
+    }
+    try {
+      const out = await submitBulk({ user: c.get('user'), text, name });
+      return c.json(
+        {
+          source: out.source.slug,
+          queued: out.queued,
+          rejected: out.rejected,
+          dropped: out.dropped,
+          page: `${config.siteUrl}${out.page}`,
+          api: `${config.siteUrl}/api/v1/items?source=${out.source.slug}`,
+        },
+        202,
+      );
+    } catch (err) {
+      if (!(err instanceof Denied)) throw err;
+      return c.json({ error: err.message }, err.status);
+    }
+  });
 
   app.get('/api/v1/sites', async (c) => {
     const url = (c.req.query('url') ?? '').trim();

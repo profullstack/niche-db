@@ -477,6 +477,86 @@ export function fit(record) {
   return out;
 }
 
+/**
+ * An address on the public web, or null: http(s), a host with a dot in it,
+ * and never a loopback, private, link-local or platform-internal name. The
+ * reader runs inside a deployment, and a pasted address must not be a way
+ * to make it fetch its neighbours.
+ */
+export function publicWebUrl(value, base) {
+  const href = webUrl(value, base);
+  if (!href) return null;
+  const host = new URL(href).hostname.toLowerCase().replace(/^\[|\]$/g, '');
+  if (!host.includes('.') && !host.includes(':')) return null;
+  if (
+    /^(localhost|.*\.localhost|.*\.local|.*\.internal|.*\.railway\.internal|.*\.home\.arpa)$/.test(
+      host,
+    )
+  )
+    return null;
+  const v4 = host.match(/^(\d+)\.(\d+)\.(\d+)\.(\d+)$/);
+  if (v4) {
+    const [a, b] = [Number(v4[1]), Number(v4[2])];
+    if (
+      a === 0 ||
+      a === 10 ||
+      a === 127 ||
+      (a === 169 && b === 254) ||
+      (a === 172 && b >= 16 && b <= 31) ||
+      (a === 192 && b === 168) ||
+      a >= 224
+    )
+      return null;
+  }
+  if (host.includes(':')) {
+    if (
+      host === '::1' ||
+      host === '::' ||
+      /^f[cd]/i.test(host) ||
+      /^fe[89ab]/i.test(host) ||
+      host.startsWith('::ffff:')
+    )
+      return null;
+  }
+  return href;
+}
+
+/** How many addresses one list may hold. */
+export const LIST_MAX = 10_000;
+
+/**
+ * A pasted list of addresses: one per line, or separated by commas or
+ * spaces; bullets, quotes and angle brackets stripped; a bare domain read as
+ * https; the same address once. What could not be read is named, not
+ * dropped in silence, and the list is cut at the cap.
+ */
+export function parseUrlList(text, max = LIST_MAX) {
+  const seen = new Set();
+  const urls = [];
+  const rejected = [];
+  let dropped = 0;
+  for (const raw of String(text ?? '').split(/[\r\n,\s]+/)) {
+    const token = raw.replace(/^[-*\u2022>\s"'<]+|[\s"'>.,;]+$/g, '');
+    if (token === '' || token.startsWith('#')) continue;
+    // A word with no dot and no scheme is not an address anyone meant.
+    if (!token.includes('.') && !/^[a-z][a-z0-9+.-]*:\/\//i.test(token)) continue;
+    const candidate = /^[a-z][a-z0-9+.-]*:\/\//i.test(token) ? token : `https://${token}`;
+    const href = publicWebUrl(candidate);
+    if (!href) {
+      if (rejected.length < 50) rejected.push(token.slice(0, 200));
+      continue;
+    }
+    if (seen.has(href)) continue;
+    if (urls.length >= max) {
+      dropped += 1;
+      continue;
+    }
+    seen.add(href);
+    urls.push(href);
+  }
+  return { urls, rejected, dropped };
+}
+
 /* ---------------------------------------------------------------- paths -- */
 
 /**
@@ -658,6 +738,7 @@ async function policyFor(origin, { http, cache }) {
 export async function readUrl(url, { http, cache = new Map(), now = () => new Date() } = {}) {
   const asked = webUrl(url);
   if (!asked) return null;
+  if (!publicWebUrl(asked)) return readRecord({ url: asked, fetchedAt: now(), blocked: true });
   const origin = new URL(asked).origin;
   const policy = await policyFor(origin, { http, cache });
   const site = policy.descriptor?.site
