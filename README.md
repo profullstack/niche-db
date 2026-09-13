@@ -85,6 +85,7 @@ After ingest, every item is enriched by the enrichers that apply to it (`package
 | `npm-stats` | last week's downloads | packages |
 | `sec-company` | tickers, exchange, industry, state, website of the filer | filings |
 | `company-ticker` | the listed company behind a hosting provider: ticker and CIK from the SEC's company list, matched on name | hosting |
+| `developer` | the official CLI and its install commands (read off the vendor's guide, or matched by domain in Homebrew, npm and the Terraform registry), API docs, Terraform provider, status page | hosting |
 | `semantic-scholar` | TL;DR, citation counts, open-access PDF (key optional) | research |
 | `openlibrary-work` | description and subjects | books |
 | `opengraph` | the page's own preview image and description | most collections |

@@ -1,0 +1,602 @@
+{
+  "vultr.com": {
+    "url": "https://github.com/vultr/vultr-cli",
+    "fetched": [
+      "https://raw.githubusercontent.com/vultr/vultr-cli/HEAD/README.md"
+    ],
+    "status": 200,
+    "verified": [
+      "brew install vultr/vultr-cli/vultr-cli",
+      "go install github.com/vultr/vultr-cli/v3@latest",
+      "pacman -S vultr-cli",
+      "dnf install vultr-cli"
+    ],
+    "missing": [],
+    "at": "2026-09-13"
+  },
+  "linode.com": {
+    "url": "https://techdocs.akamai.com/cloud-computing/docs/install-and-configure-the-cli",
+    "fetched": [
+      "https://techdocs.akamai.com/cloud-computing/docs/install-and-configure-the-cli"
+    ],
+    "status": 200,
+    "verified": [
+      "pip3 install linode-cli --upgrade",
+      "pipx install linode-cli"
+    ],
+    "missing": [],
+    "at": "2026-09-13"
+  },
+  "scaleway.com": {
+    "url": "https://github.com/scaleway/scaleway-cli",
+    "fetched": [
+      "https://raw.githubusercontent.com/scaleway/scaleway-cli/HEAD/README.md"
+    ],
+    "status": 200,
+    "verified": [
+      "brew install scw",
+      "go install github.com/scaleway/scaleway-cli/v2/cmd/scw@latest",
+      "curl -s https://raw.githubusercontent.com/scaleway/scaleway-cli/main/scripts/get.sh | sh",
+      "pacman -S scaleway-cli",
+      "choco install scaleway-cli"
+    ],
+    "missing": [],
+    "at": "2026-09-13"
+  },
+  "ovhcloud.com": {
+    "url": "https://github.com/ovh/ovhcloud-cli",
+    "fetched": [
+      "https://raw.githubusercontent.com/ovh/ovhcloud-cli/HEAD/README.md"
+    ],
+    "status": 200,
+    "verified": [
+      "brew install --cask ovh/tap/ovhcloud-cli",
+      "go install github.com/ovh/ovhcloud-cli/cmd/ovhcloud@latest",
+      "curl -fsSL https://raw.githubusercontent.com/ovh/ovhcloud-cli/main/install.sh | sh"
+    ],
+    "missing": [],
+    "at": "2026-09-13"
+  },
+  "hetzner.com": {
+    "url": "https://github.com/hetznercloud/cli/blob/main/docs/tutorials/setup-hcloud-cli.md",
+    "fetched": [
+      "https://raw.githubusercontent.com/hetznercloud/cli/main/docs/tutorials/setup-hcloud-cli.md"
+    ],
+    "status": 200,
+    "verified": [
+      "brew install hcloud",
+      "go install github.com/hetznercloud/cli/cmd/hcloud@latest",
+      "winget install HetznerCloud.CLI",
+      "scoop install hcloud"
+    ],
+    "missing": [],
+    "at": "2026-09-13"
+  },
+  "digitalocean.com": {
+    "url": "https://docs.digitalocean.com/reference/doctl/how-to/install/",
+    "fetched": [
+      "https://docs.digitalocean.com/reference/doctl/how-to/install/"
+    ],
+    "status": 200,
+    "verified": [
+      "brew install doctl",
+      "snap install doctl"
+    ],
+    "missing": [],
+    "at": "2026-09-13"
+  },
+  "upcloud.com": {
+    "url": "https://github.com/UpCloudLtd/upcloud-cli/blob/main/docs/index.md",
+    "fetched": [
+      "https://raw.githubusercontent.com/UpCloudLtd/upcloud-cli/main/docs/index.md"
+    ],
+    "status": 200,
+    "verified": [
+      "brew tap UpCloudLtd/tap",
+      "brew install upcloud-cli"
+    ],
+    "missing": [],
+    "at": "2026-09-13"
+  },
+  "civo.com": {
+    "url": "https://github.com/civo/cli",
+    "fetched": [
+      "https://raw.githubusercontent.com/civo/cli/HEAD/README.md"
+    ],
+    "status": 200,
+    "verified": [
+      "brew tap civo/tools",
+      "brew install civo",
+      "curl -sL https://civo.com/get | sh",
+      "choco install civo-cli",
+      "scoop bucket add extras",
+      "scoop install civo"
+    ],
+    "missing": [],
+    "at": "2026-09-13"
+  },
+  "exoscale.com": {
+    "url": "https://community.exoscale.com/tools/command-line-interface/",
+    "fetched": [
+      "https://community.exoscale.com/tools/command-line-interface/"
+    ],
+    "status": 200,
+    "verified": [
+      "brew tap exoscale/tap",
+      "brew install exoscale-cli",
+      "scoop bucket add exoscale-cli https://github.com/exoscale/cli",
+      "scoop install exoscale-cli"
+    ],
+    "missing": [],
+    "at": "2026-09-13"
+  },
+  "fly.io": {
+    "url": "https://fly.io/docs/flyctl/install/",
+    "fetched": [
+      "https://fly.io/docs/flyctl/install/"
+    ],
+    "status": 200,
+    "verified": [
+      "brew install flyctl",
+      "curl -L https://fly.io/install.sh | sh"
+    ],
+    "missing": [],
+    "at": "2026-09-13"
+  },
+  "railway.com": {
+    "url": "https://docs.railway.com/guides/cli",
+    "fetched": [
+      "https://docs.railway.com/guides/cli"
+    ],
+    "status": 200,
+    "verified": [
+      "npm i -g @railway/cli",
+      "brew install railway",
+      "scoop install railway"
+    ],
+    "missing": [],
+    "at": "2026-09-13"
+  },
+  "render.com": {
+    "url": "https://render.com/docs/cli",
+    "fetched": [
+      "https://render.com/docs/cli"
+    ],
+    "status": 200,
+    "verified": [
+      "brew install render",
+      "winget install render.cli",
+      "curl -fsSL https://raw.githubusercontent.com/render-oss/cli/refs/heads/main/bin/install.sh | sh"
+    ],
+    "missing": [],
+    "at": "2026-09-13"
+  },
+  "vercel.com": {
+    "url": "https://vercel.com/docs/cli",
+    "fetched": [
+      "https://vercel.com/docs/cli"
+    ],
+    "status": 200,
+    "verified": [
+      "npm i -g vercel",
+      "pnpm i -g vercel"
+    ],
+    "missing": [],
+    "at": "2026-09-13"
+  },
+  "netlify.com": {
+    "url": "https://docs.netlify.com/cli/get-started/",
+    "fetched": [
+      "https://docs.netlify.com/cli/get-started/"
+    ],
+    "status": 200,
+    "verified": [
+      "npm install -g netlify-cli"
+    ],
+    "missing": [],
+    "at": "2026-09-13"
+  },
+  "cloudflare.com": {
+    "url": "https://developers.cloudflare.com/workers/wrangler/install-and-update/",
+    "fetched": [
+      "https://developers.cloudflare.com/workers/wrangler/install-and-update/"
+    ],
+    "status": 200,
+    "verified": [
+      "npm i -D wrangler@latest",
+      "pnpm add -D wrangler@latest"
+    ],
+    "missing": [],
+    "at": "2026-09-13"
+  },
+  "amazon.com": {
+    "url": "https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html",
+    "fetched": [
+      "https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html"
+    ],
+    "status": 200,
+    "verified": [
+      "curl -fsSL https://awscli.amazonaws.com/v2/install.sh | bash",
+      "snap install aws-cli --classic"
+    ],
+    "missing": [],
+    "at": "2026-09-13"
+  },
+  "google.com": {
+    "url": "https://cloud.google.com/sdk/docs/install",
+    "fetched": [
+      "https://cloud.google.com/sdk/docs/install"
+    ],
+    "status": 200,
+    "verified": [
+      "apt-get install google-cloud-cli"
+    ],
+    "missing": [],
+    "at": "2026-09-13"
+  },
+  "microsoft.com": {
+    "url": "https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-macos",
+    "fetched": [
+      "https://learn.microsoft.com/en-us/cli/azure/install-azure-cli-macos"
+    ],
+    "status": 200,
+    "verified": [
+      "brew install azure-cli"
+    ],
+    "missing": [],
+    "at": "2026-09-13"
+  },
+  "oracle.com": {
+    "url": "https://docs.oracle.com/en-us/iaas/Content/API/SDKDocs/cliinstall.htm",
+    "fetched": [
+      "https://docs.oracle.com/en-us/iaas/Content/API/SDKDocs/cliinstall.htm"
+    ],
+    "status": 200,
+    "verified": [
+      "brew install oci-cli",
+      "bash -c \"$(curl -L https://raw.githubusercontent.com/oracle/oci-cli/master/scripts/install/install.sh)\""
+    ],
+    "missing": [],
+    "at": "2026-09-13"
+  },
+  "ibm.com": {
+    "url": "https://cloud.ibm.com/docs/cli?topic=cli-install-ibmcloud-cli",
+    "fetched": [
+      "https://cloud.ibm.com/docs/cli?topic=cli-install-ibmcloud-cli"
+    ],
+    "status": 200,
+    "verified": [
+      "curl -fsSL https://clis.cloud.ibm.com/install/linux | sh"
+    ],
+    "missing": [],
+    "at": "2026-09-13"
+  },
+  "alibabacloud.com": {
+    "url": "https://github.com/aliyun/aliyun-cli",
+    "fetched": [
+      "https://raw.githubusercontent.com/aliyun/aliyun-cli/HEAD/README.md"
+    ],
+    "status": 200,
+    "verified": [
+      "brew install aliyun-cli"
+    ],
+    "missing": [],
+    "at": "2026-09-13"
+  },
+  "tencentcloud.com": {
+    "url": "https://github.com/TencentCloud/tencentcloud-cli",
+    "fetched": [
+      "https://raw.githubusercontent.com/TencentCloud/tencentcloud-cli/HEAD/README.md"
+    ],
+    "status": 200,
+    "verified": [
+      "pip install tccli",
+      "brew tap tencentcloud/tccli",
+      "brew install tccli"
+    ],
+    "missing": [],
+    "at": "2026-09-13"
+  },
+  "backblaze.com": {
+    "url": "https://github.com/Backblaze/B2_Command_Line_Tool",
+    "fetched": [
+      "https://raw.githubusercontent.com/Backblaze/B2_Command_Line_Tool/HEAD/README.md"
+    ],
+    "status": 200,
+    "verified": [
+      "pip install b2",
+      "brew install b2-tools"
+    ],
+    "missing": [],
+    "at": "2026-09-13"
+  },
+  "kamatera.com": {
+    "url": "https://github.com/cloudwm/cloudcli",
+    "fetched": [
+      "https://raw.githubusercontent.com/cloudwm/cloudcli/HEAD/README.md"
+    ],
+    "status": 200,
+    "verified": [],
+    "missing": [],
+    "at": "2026-09-13"
+  },
+  "contabo.com": {
+    "url": "https://github.com/contabo/cntb",
+    "fetched": [
+      "https://raw.githubusercontent.com/contabo/cntb/HEAD/README.md"
+    ],
+    "status": 200,
+    "verified": [],
+    "missing": [],
+    "at": "2026-09-13"
+  },
+  "hostinger.com": {
+    "url": "https://github.com/hostinger/api-cli",
+    "fetched": [
+      "https://raw.githubusercontent.com/hostinger/api-cli/HEAD/README.md"
+    ],
+    "status": 200,
+    "verified": [
+      "brew install hostinger/tap/hostinger"
+    ],
+    "missing": [],
+    "at": "2026-09-13"
+  },
+  "fastly.com": {
+    "url": "https://www.fastly.com/documentation/reference/tools/cli/",
+    "fetched": [
+      "https://www.fastly.com/documentation/reference/tools/cli/"
+    ],
+    "status": 200,
+    "verified": [
+      "brew install fastly/tap/fastly",
+      "npm install -g @fastly/cli@latest"
+    ],
+    "missing": [],
+    "at": "2026-09-13"
+  },
+  "akamai.com": {
+    "url": "https://github.com/akamai/cli",
+    "fetched": [
+      "https://raw.githubusercontent.com/akamai/cli/HEAD/README.md"
+    ],
+    "status": 200,
+    "verified": [
+      "brew install akamai"
+    ],
+    "missing": [],
+    "at": "2026-09-13"
+  },
+  "equinix.com": {
+    "url": "https://github.com/equinix/metal-cli",
+    "fetched": [
+      "https://raw.githubusercontent.com/equinix/metal-cli/HEAD/README.md"
+    ],
+    "status": 200,
+    "verified": [
+      "brew tap equinix/homebrew-tap",
+      "brew install metal-cli",
+      "go install github.com/equinix/metal-cli/cmd/metal@latest"
+    ],
+    "missing": [],
+    "at": "2026-09-13"
+  },
+  "latitude.sh": {
+    "url": "https://github.com/latitudesh/lsh",
+    "fetched": [
+      "https://raw.githubusercontent.com/latitudesh/lsh/HEAD/README.md"
+    ],
+    "status": 200,
+    "verified": [
+      "brew install latitudesh/tools/lsh",
+      "curl -fsSL https://cli.latitude.sh/install.sh | sh"
+    ],
+    "missing": [],
+    "at": "2026-09-13"
+  },
+  "cherryservers.com": {
+    "url": "https://github.com/cherryservers/cherryctl",
+    "fetched": [
+      "https://raw.githubusercontent.com/cherryservers/cherryctl/HEAD/README.md"
+    ],
+    "status": 200,
+    "verified": [
+      "brew tap cherryservers/cherryctl",
+      "brew install cherryctl",
+      "go install github.com/cherryservers/cherryctl@latest"
+    ],
+    "missing": [],
+    "at": "2026-09-13"
+  },
+  "gandi.net": {
+    "url": "https://github.com/Gandi/gandi.cli",
+    "fetched": [
+      "https://raw.githubusercontent.com/Gandi/gandi.cli/HEAD/README.md"
+    ],
+    "status": 200,
+    "verified": [
+      "pip install gandi.cli"
+    ],
+    "missing": [],
+    "at": "2026-09-13"
+  },
+  "pantheon.io": {
+    "url": "https://github.com/pantheon-systems/terminus",
+    "fetched": [
+      "https://raw.githubusercontent.com/pantheon-systems/terminus/HEAD/README.md"
+    ],
+    "status": 200,
+    "verified": [
+      "brew install pantheon-systems/external/terminus"
+    ],
+    "missing": [],
+    "at": "2026-09-13"
+  },
+  "platform.sh": {
+    "url": "https://github.com/platformsh/cli",
+    "fetched": [
+      "https://raw.githubusercontent.com/platformsh/cli/HEAD/README.md"
+    ],
+    "status": 200,
+    "verified": [
+      "curl -fsSL https://raw.githubusercontent.com/platformsh/cli/main/installer.sh | bash"
+    ],
+    "missing": [],
+    "at": "2026-09-13"
+  },
+  "upsun.com": {
+    "url": "https://github.com/upsun/cli",
+    "fetched": [
+      "https://raw.githubusercontent.com/upsun/cli/HEAD/README.md"
+    ],
+    "status": 200,
+    "verified": [
+      "brew install upsun/tap/upsun-cli",
+      "curl -fsSL https://raw.githubusercontent.com/upsun/cli/main/installer.sh | bash",
+      "scoop bucket add upsun https://github.com/upsun/homebrew-tap.git",
+      "scoop install upsun",
+      "nix profile install nixpkgs#upsun"
+    ],
+    "missing": [],
+    "at": "2026-09-13"
+  },
+  "heroku.com": {
+    "url": "https://devcenter.heroku.com/articles/heroku-cli",
+    "fetched": [
+      "https://devcenter.heroku.com/articles/heroku-cli"
+    ],
+    "status": 200,
+    "verified": [
+      "brew install heroku/brew/heroku",
+      "curl https://cli-assets.heroku.com/install.sh | sh",
+      "npm install -g heroku"
+    ],
+    "missing": [],
+    "at": "2026-09-13"
+  },
+  "koyeb.com": {
+    "url": "https://github.com/koyeb/koyeb-cli",
+    "fetched": [
+      "https://raw.githubusercontent.com/koyeb/koyeb-cli/HEAD/README.md"
+    ],
+    "status": 200,
+    "verified": [
+      "brew install koyeb/tap/koyeb",
+      "go install github.com/koyeb/koyeb-cli/cmd/koyeb"
+    ],
+    "missing": [],
+    "at": "2026-09-13"
+  },
+  "northflank.com": {
+    "url": "https://northflank.com/docs/v1/api/use-the-cli",
+    "fetched": [
+      "https://northflank.com/docs/v1/api/use-the-cli"
+    ],
+    "status": 200,
+    "verified": [
+      "npm i -g @northflank/cli"
+    ],
+    "missing": [],
+    "at": "2026-09-13"
+  },
+  "qovery.com": {
+    "url": "https://github.com/Qovery/qovery-cli",
+    "fetched": [
+      "https://raw.githubusercontent.com/Qovery/qovery-cli/HEAD/README.md"
+    ],
+    "status": 200,
+    "verified": [
+      "curl -s https://get.qovery.com | bash",
+      "brew tap Qovery/qovery-cli",
+      "brew install qovery-cli",
+      "scoop bucket add qovery https://github.com/Qovery/scoop-qovery-cli",
+      "scoop install qovery-cli"
+    ],
+    "missing": [],
+    "at": "2026-09-13"
+  },
+  "bunny.net": {
+    "url": "https://github.com/BunnyWay/cli",
+    "fetched": [
+      "https://raw.githubusercontent.com/BunnyWay/cli/HEAD/README.md"
+    ],
+    "status": 200,
+    "verified": [
+      "curl -fsSL https://cli.bunny.net/install.sh | sh",
+      "npm install -g @bunny.net/cli"
+    ],
+    "missing": [],
+    "at": "2026-09-13"
+  },
+  "servers.com": {
+    "url": "https://github.com/serverscom/srvctl",
+    "fetched": [
+      "https://raw.githubusercontent.com/serverscom/srvctl/HEAD/README.md"
+    ],
+    "status": 200,
+    "verified": [
+      "brew tap serverscom/serverscom",
+      "brew install srvctl"
+    ],
+    "missing": [],
+    "at": "2026-09-13"
+  },
+  "leaseweb.com": {
+    "url": "https://github.com/leaseweb/leaseweb-cli",
+    "fetched": [
+      "https://raw.githubusercontent.com/leaseweb/leaseweb-cli/HEAD/README.md"
+    ],
+    "status": 200,
+    "verified": [],
+    "missing": [],
+    "at": "2026-09-13"
+  },
+  "liquidweb.com": {
+    "url": "https://github.com/liquidweb/liquidweb-cli",
+    "fetched": [
+      "https://raw.githubusercontent.com/liquidweb/liquidweb-cli/HEAD/README.md"
+    ],
+    "status": 200,
+    "verified": [],
+    "missing": [],
+    "at": "2026-09-13"
+  },
+  "fortrabbit.com": {
+    "url": "https://github.com/fortrabbit/frbit-cli",
+    "fetched": [
+      "https://raw.githubusercontent.com/fortrabbit/frbit-cli/HEAD/README.md"
+    ],
+    "status": 200,
+    "verified": [
+      "curl -fsSL https://github.com/fortrabbit/frbit-cli/releases/latest/download/install.sh | sh"
+    ],
+    "missing": [],
+    "at": "2026-09-13"
+  },
+  "coolify.io": {
+    "url": "https://github.com/coollabsio/coolify-cli",
+    "fetched": [
+      "https://raw.githubusercontent.com/coollabsio/coolify-cli/HEAD/README.md"
+    ],
+    "status": 200,
+    "verified": [
+      "curl -fsSL https://raw.githubusercontent.com/coollabsio/coolify-cli/main/scripts/install.sh | bash",
+      "brew install coollabsio/coolify-cli/coolify-cli",
+      "go install github.com/coollabsio/coolify-cli/coolify@latest"
+    ],
+    "missing": [],
+    "at": "2026-09-13"
+  },
+  "godaddy.com": {
+    "url": "https://github.com/godaddy/cli",
+    "fetched": [
+      "https://raw.githubusercontent.com/godaddy/cli/HEAD/README.md"
+    ],
+    "status": 200,
+    "verified": [
+      "curl -fsSL https://github.com/godaddy/cli/releases/latest/download/install.sh | bash"
+    ],
+    "missing": [],
+    "at": "2026-09-13"
+  }
+}

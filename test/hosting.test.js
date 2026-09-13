@@ -347,9 +347,10 @@ describe('the listed-company enrichment', () => {
     expect(matchCompany('Digital', rows)).toBeNull();
     expect(matchCompany('Hetzner', rows)).toBeNull();
   });
-  test('hosting turns on wikipedia, opengraph and the ticker lookup by default', () => {
+  test('hosting turns on wikipedia, opengraph, the ticker lookup and the developer tools by default', () => {
     expect(defaultEnrichers('hosting').sort()).toEqual([
       'company-ticker',
+      'developer',
       'opengraph',
       'wikipedia',
     ]);
@@ -390,6 +391,7 @@ describe('the hosting collection is registered', () => {
     const feeds = DEFAULT_FEEDS.filter((f) => f.collection === 'hosting').map((f) => f.slug);
     expect(feeds).toEqual([
       'hosting-providers',
+      'hosting-cli',
       'vps-plans',
       'vps-under-5',
       'bare-metal-plans',

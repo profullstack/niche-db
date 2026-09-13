@@ -11,6 +11,7 @@ export const Badges = ({ enrichment }) => {
     out.push(`▶ ${e.youtube.videos.length} video${e.youtube.videos.length === 1 ? '' : 's'}`);
   if (e.wikipedia) out.push('Wikipedia');
   if (e['github-repo']) out.push(`★ ${fmt(e['github-repo'].stars)}`);
+  if (e.developer?.cli) out.push(`CLI ${e.developer.cli.name}`);
   if (e['npm-stats']) out.push(`⇩ ${fmt(e['npm-stats'].weeklyDownloads)}/wk`);
   if (e['semantic-scholar']) out.push(`${fmt(e['semantic-scholar'].citations)} cites`);
   if (e['sec-company']?.tickers?.length) out.push(e['sec-company'].tickers.slice(0, 2).join(' '));
@@ -160,6 +161,61 @@ export const EnrichmentBlocks = ({ enrichment }) => {
       <section class="enrich" key="ol">
         <h2>Description</h2>
         <p>{e['openlibrary-work'].description}</p>
+      </section>,
+    );
+  }
+  if (
+    e.developer &&
+    (e.developer.cli || e.developer.api_docs || e.developer.terraform || e.developer.status)
+  ) {
+    const d = e.developer;
+    const installs = Object.entries(d.cli?.install ?? {});
+    const links = [
+      d.cli?.docs ? ['Install guide', d.cli.docs] : null,
+      d.cli?.repo && d.cli.repo !== d.cli.docs ? ['Source', d.cli.repo] : null,
+      d.api_docs ? ['API docs', d.api_docs] : null,
+      d.terraform ? [`Terraform ${d.terraform.source}`, d.terraform.docs] : null,
+      d.status ? ['Status page', d.status] : null,
+      d.github && d.github !== d.cli?.repo ? ['GitHub', d.github] : null,
+    ].filter(Boolean);
+    blocks.push(
+      <section class="enrich" key="developer">
+        <h2>{d.cli ? `Install the CLI: ${d.cli.name}` : 'For developers'}</h2>
+        {d.cli?.deprecated ? (
+          <p class="muted">The vendor says this CLI is no longer maintained.</p>
+        ) : null}
+        {installs.length ? (
+          <ul class="plain small">
+            {installs.map(([how, cmd]) => (
+              <li key={how}>
+                <span class="muted">{how}</span> <code>{cmd}</code>
+              </li>
+            ))}
+          </ul>
+        ) : d.cli ? (
+          <p class="muted">{d.cli.note ?? 'Prebuilt binaries on the releases page.'}</p>
+        ) : (
+          <p class="muted">No official CLI found.</p>
+        )}
+        {links.length ? (
+          <p class="small">
+            {links.map(([label, href], i) => (
+              <span key={href}>
+                {i ? ' · ' : ''}
+                <a href={href} rel="noopener nofollow">
+                  {label}
+                </a>
+              </span>
+            ))}
+          </p>
+        ) : null}
+        <p class="small muted">
+          {d.cli?.verified === 'guide'
+            ? 'Commands as printed on the vendor’s own guide.'
+            : d.cli
+              ? 'Found by domain in a package registry.'
+              : null}
+        </p>
       </section>,
     );
   }
