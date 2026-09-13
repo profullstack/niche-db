@@ -1,6 +1,12 @@
 import { describe, expect, test } from 'bun:test';
 import { readFile } from 'node:fs/promises';
 import { parseFeed as parseArxiv } from '../packages/adapters/src/arxiv.js';
+import {
+  advance as dhtAdvance,
+  toItem as dhtItem,
+  humanSize,
+  isAdult,
+} from '../packages/adapters/src/bittorrented.js';
 import { parseFeed as parseEdgar, parseTitle } from '../packages/adapters/src/edgar.js';
 import { toItem as frItem } from '../packages/adapters/src/federalregister.js';
 import { parseFeed as parseGdacs } from '../packages/adapters/src/gdacs.js';
@@ -76,6 +82,7 @@ describe('registry', () => {
         'directory',
         'sites',
         'coupons',
+        'dht',
       ]).toContain(a.collection);
     }
     expect(adapterByName('steam').title).toContain('Steam');
@@ -330,5 +337,92 @@ describe('new niches', () => {
       'impact-minor',
       'git operations',
     ]);
+  });
+});
+
+describe('bittorrented dht', () => {
+  const row = {
+    id: '86d6675e152370409b120538f7481c451a083fe9',
+    infohash: '86D6675E152370409B120538F7481C451A083FE9',
+    name: '  salem   spirits ',
+    magnet_uri: 'magnet:?xt=urn:btih:86d6675e152370409b120538f7481c451a083fe9&dn=salem spirits',
+    size: 465042298,
+    files_count: 3,
+    seeders: 1,
+    leechers: 0,
+    created_at: '2026-09-12T00:00:28.014674+00:00',
+    content_type: 'music',
+    source: 'dht',
+  };
+
+  test('a row becomes a torrent keyed by its lower-cased infohash', () => {
+    const item = dhtItem(row);
+    expect(item.externalId).toBe('86d6675e152370409b120538f7481c451a083fe9');
+    expect(item.kind).toBe('torrent');
+    expect(item.title).toBe('salem spirits');
+    expect(item.summary).toBe('3 files, 443 MB, 1 seeder, 0 leechers when crawled');
+    expect(item.url).toBe('https://bittorrented.com/dht/86d6675e152370409b120538f7481c451a083fe9');
+    expect(item.tags).toEqual(['dht', 'type:music', 'seeded']);
+    expect(item.data.magnet).toBe(
+      'magnet:?xt=urn:btih:86d6675e152370409b120538f7481c451a083fe9&dn=salem%20spirits',
+    );
+    expect(normaliseItem(item).publishedAt.toISOString()).toBe('2026-09-12T00:00:28.014Z');
+  });
+
+  test('an unclassified, unseeded torrent says so in its tags and summary', () => {
+    const item = dhtItem({ ...row, content_type: null, seeders: 0, files_count: 0, size: null });
+    expect(item.tags).toEqual(['dht', 'type:unknown', 'unseeded']);
+    expect(item.summary).toBe('0 seeders, 0 leechers when crawled');
+    expect(item.data.sizeBytes).toBeNull();
+  });
+
+  test('adult material never becomes an item', () => {
+    expect(isAdult({ ...row, content_type: 'xxx' })).toBe(true);
+    expect(isAdult({ ...row, content_type: null, name: 'Some.Movie.XXX.1080p' })).toBe(true);
+    expect(isAdult({ ...row, content_type: 'movie', name: 'Sussex Downs walk' })).toBe(false);
+    expect(dhtItem({ ...row, content_type: 'xxx' })).toBeNull();
+  });
+
+  test('a malformed row is dropped', () => {
+    expect(dhtItem({ ...row, infohash: 'nope' })).toBeNull();
+    expect(dhtItem({ ...row, name: '   ' })).toBeNull();
+    expect(dhtItem(null)).toBeNull();
+  });
+
+  test('sizes read like a person would say them', () => {
+    expect(humanSize(0)).toBeNull();
+    expect(humanSize(900)).toBe('900 B');
+    expect(humanSize(1536)).toBe('1.5 KB');
+    expect(humanSize(465042298)).toBe('443 MB');
+    expect(humanSize(9.4 * 1024 ** 2)).toBe('9.4 MB');
+    expect(humanSize(12 * 1024 ** 3)).toBe('12 GB');
+  });
+
+  test('the cursor pages inside one timestamp and moves past it with the rows already read', () => {
+    const t1 = '2026-09-12T00:00:28+00:00';
+    const t2 = '2026-09-12T00:05:00+00:00';
+    // A short page ending on a new timestamp: move there, remember the two rows at it.
+    expect(
+      dhtAdvance({ since: t1, offset: 0 }, [
+        { created_at: t1 },
+        { created_at: t2 },
+        { created_at: t2 },
+      ]),
+    ).toEqual({
+      since: t2,
+      offset: 2,
+    });
+    // A page that is all one timestamp, which we are already inside: keep counting.
+    expect(dhtAdvance({ since: t2, offset: 2 }, [{ created_at: t2 }, { created_at: t2 }])).toEqual({
+      since: t2,
+      offset: 4,
+    });
+    // A page that is all one new timestamp: start counting there.
+    expect(dhtAdvance({ since: t1, offset: 7 }, [{ created_at: t2 }, { created_at: t2 }])).toEqual({
+      since: t2,
+      offset: 2,
+    });
+    // Nothing read: nothing moves.
+    expect(dhtAdvance({ since: t1, offset: 3 }, [])).toEqual({ since: t1, offset: 3 });
   });
 });

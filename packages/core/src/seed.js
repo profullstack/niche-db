@@ -267,6 +267,12 @@ export const COLLECTIONS = [
     description:
       'One entry per person, assembled from every app that serves their OpenProfile.md (logicsrc.com/openprofile): podcasters from p0dcasters, the public profiles from OutreachGraph, and whoever else publishes the file. Two documents that share an account URL are one person; two that share only a name are two. A person who finds their entry claims it, takes a handle, and edits it from here, by API, CLI, MCP or the page, and nothing a pull brings in overwrites what they wrote. The Broadcast and Guest sections are what a host and a guest are matched on.',
   },
+  {
+    slug: 'dht',
+    name: 'DHT',
+    description:
+      'Torrents as they appear on the BitTorrent DHT, observed by the bittorrented.com crawler and read from its own database: infohash, name, size, file count, the swarm as it stood when crawled and the content class the crawler gave it. Adult material is left out. Follow the newest, the seeded, or one class of content.',
+  },
 ];
 
 export const DEFAULT_FEEDS = [
@@ -1574,6 +1580,48 @@ export const DEFAULT_FEEDS = [
     slug: 'tsbb-announcements',
     name: 'tsbb announcements',
     query: { kinds: ['post'], tags: ['forum:announcements'] },
+  },
+  {
+    collection: 'dht',
+    slug: 'dht-latest',
+    name: 'Newest on the DHT',
+    query: { kinds: ['torrent'] },
+  },
+  {
+    collection: 'dht',
+    slug: 'dht-seeded',
+    name: 'Seeded when crawled',
+    query: { kinds: ['torrent'], tags: ['seeded'] },
+  },
+  {
+    collection: 'dht',
+    slug: 'dht-movies',
+    name: 'Movies',
+    query: { kinds: ['torrent'], tags: ['type:movie'] },
+  },
+  {
+    collection: 'dht',
+    slug: 'dht-tv',
+    name: 'TV',
+    query: { kinds: ['torrent'], tags: ['type:tv_show'] },
+  },
+  {
+    collection: 'dht',
+    slug: 'dht-music',
+    name: 'Music',
+    query: { kinds: ['torrent'], tags: ['type:music'] },
+  },
+  {
+    collection: 'dht',
+    slug: 'dht-software',
+    name: 'Software',
+    query: { kinds: ['torrent'], tags: ['type:software'] },
+  },
+  {
+    collection: 'dht',
+    slug: 'dht-books',
+    name: 'Books',
+    query: { kinds: ['torrent'], tags: ['type:ebook'] },
   },
 ];
 

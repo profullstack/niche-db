@@ -54,6 +54,7 @@ Adapters are one file each in `packages/adapters/src`. One hundred and twenty-ei
 | ai-media | `aiornot` | no |
 | forums | `tsbb` | no |
 | coupons | `c0upons` (what c0upons.com took in on its own: submitted codes and its r/couponcodes listings; rows it copied from `deals` are not read back) | no |
+| dht | `bittorrented-dht` (adult material left out) | bittorrented.com's Supabase URL and publishable key (`BITTORRENTED_SUPABASE_URL`, `BITTORRENTED_SUPABASE_KEY`); paused without them |
 | hosting | `findhost`, `buyvps`, `vultr-plans`, `linode-types`, `scaleway-instances`, `ovh-vps`, `storefront` (WHMCS, Blesta and WooCommerce order forms), `lowendbox`, `openserver`; `hetzner-plans`, `digitalocean-sizes`, `upcloud-plans` | no for the first eight (FindHost data is CC BY 4.0: credit FindHost, findhost.app; `OBSCURA_MCP_URL` optional for JavaScript-only shops); Hetzner (`HETZNER_API_TOKEN`), DigitalOcean (`DIGITALOCEAN_TOKEN`) and UpCloud (`UPCLOUD_USERNAME`, `UPCLOUD_PASSWORD`) each need a read-only credential and stay paused without one |
 | threats | `openthreat` (ThreatCrush first; any reporter serving `/.well-known/openthreat.json`) | no |
 | profiles | `openprofiles` (p0dcasters and OutreachGraph listings first; any app that lists the OpenProfile.md files it serves), `sportarr-persons` (Sportarr's 111k names, kept only when Wikidata knows the person as a human with a sport, with their socials), `sportsdb-players` | no |
@@ -80,7 +81,7 @@ One record per page, read the way [OpenSite](https://logicsrc.com/opensite) says
 
 ### House aggregators
 
-Nine of the sites we run publish a public feed or API of their own, and each is read here through it, keyless, the way any other reader would. The endpoint is the one checked live on 2026-09-12 (c0upons on 2026-09-13); the slug is the seeded source.
+Ten of the sites we run publish a public feed or API of their own, and each is read here through it, keyless, the way any other reader would. The endpoint is the one checked live on 2026-09-12 (c0upons on 2026-09-13); the slug is the seeded source.
 
 | Site | Endpoint | Collection | Source slug | Kinds |
 | --- | --- | --- | --- | --- |
@@ -93,6 +94,7 @@ Nine of the sites we run publish a public feed or API of their own, and each is 
 | outreachgraph.com | `/api/v1/public/directory` (cursor paged, 200 a page; companies and sites by domain, people only when self-published) | directory | `outreachgraph-directory` | `company`, `site`, `person` |
 | tsbb.dev | `/api/v1/forums`, then `/f/{slug}/feed.xml` per forum | forums | `tsbb-topics` | `post` |
 | c0upons.com | `/api/coupons` (offset paged, 200 a page, store joined in; rows with `source: nichedb` skipped) | coupons | `c0upons-coupons` | `coupon` |
+| bittorrented.com | PostgREST `rpc/browse_dht_torrents` on the site's own Supabase, by date from a cursor, 500 a page (the site has no submit or export endpoint) | dht | `bittorrented-dht` | `torrent` |
 | c0ncerts.com | none yet: `/api/events` answers 501 "coming soon" and `/api/v1/events` 404s | — | — | — |
 
 saasrow's `/api/v1/listings` is per-account and needs a key, so only the public products directory is read. A submission aiornot carries on more than one feed is stored once and tagged with each feed. tsbb's cross-board `/api/v1/latest` does not say which forum a topic is in, which is why the walk is per forum.
