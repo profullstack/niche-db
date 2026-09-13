@@ -43,6 +43,15 @@ export const REQUEST_CAP = 120;
 /** Consecutive failures after which a run stops asking, so an outage costs little. */
 const FAILURE_STOP = 3;
 
+/**
+ * Pause between lookups. The first live run fired 103 lookups back to back and
+ * the free key refused the last three in a row, which read as an outage and
+ * ended the run early; a short gap keeps a run under the key's burst limit.
+ */
+export const PAUSE_MS = 600;
+
+const sleep = (ms) => (ms > 0 ? new Promise((r) => setTimeout(r, ms)) : Promise.resolve());
+
 export const leagueUrl = (key, id) =>
   `${BASE}/${encodeURIComponent(String(key ?? DEFAULT_KEY))}/lookupleague.php?id=${encodeURIComponent(String(id))}`;
 
@@ -191,6 +200,13 @@ export const sportsdbLeagues = defineAdapter({
       help: 'The walk stops here and picks up ten minutes later. About 1,500 ids exist, so 120 a run is a full pass in a day.',
     },
     {
+      key: 'pauseMs',
+      label: 'Pause between lookups (ms)',
+      type: 'number',
+      placeholder: String(PAUSE_MS),
+      help: 'The free key refuses a burst of a hundred lookups; a short gap keeps a run under that.',
+    },
+    {
       key: 'tailMisses',
       label: 'Unknown ids that end a pass',
       type: 'number',
@@ -198,18 +214,30 @@ export const sportsdbLeagues = defineAdapter({
       help: 'Ids have gaps, so one unknown id means nothing; this many in a row means the walk is past the newest league.',
     },
   ],
-  defaults: { startId: START_ID, requestCap: REQUEST_CAP, tailMisses: TAIL_MISSES },
+  defaults: {
+    startId: START_ID,
+    requestCap: REQUEST_CAP,
+    tailMisses: TAIL_MISSES,
+    pauseMs: PAUSE_MS,
+  },
   defaultSources: [
     {
       slug: 'sportsdb-leagues',
       name: 'Sports: leagues (TheSportsDB)',
-      config: { startId: START_ID, requestCap: REQUEST_CAP, tailMisses: TAIL_MISSES },
+      config: {
+        startId: START_ID,
+        requestCap: REQUEST_CAP,
+        tailMisses: TAIL_MISSES,
+        pauseMs: PAUSE_MS,
+      },
     },
   ],
   async pull({ config, cursor: prev, env, http, log, deadline }) {
     const key = String(env?.sportsdbApiKey ?? env?.SPORTSDB_API_KEY ?? DEFAULT_KEY);
     const cap = Math.max(1, Math.floor(Number(config?.requestCap)) || REQUEST_CAP);
     const tail = Math.max(1, Math.floor(Number(config?.tailMisses)) || TAIL_MISSES);
+    const pause =
+      config?.pauseMs === 0 ? 0 : Math.max(0, Math.floor(Number(config?.pauseMs))) || PAUSE_MS;
     const stopAt = Number.isFinite(deadline) ? deadline : Number.POSITIVE_INFINITY;
     const startedAt = resumeId(prev, config);
     let id = startedAt;
@@ -234,6 +262,7 @@ export const sportsdbLeagues = defineAdapter({
         stopped = 'tail';
         break;
       }
+      if (requests > 0) await sleep(pause);
       requests += 1;
       let body = null;
       try {
