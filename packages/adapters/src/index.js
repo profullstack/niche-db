@@ -72,6 +72,7 @@ import { openlibrary } from './openlibrary.js';
 import { openprofiles } from './openprofiles.js';
 import { openserver } from './openserver.js';
 import { openthreat } from './openthreat.js';
+import { outreachgraph } from './outreachgraph.js';
 import { ovhVps } from './ovh.js';
 import { p0dcasters } from './p0dcasters.js';
 import { buildingPermits } from './permits.js';
@@ -234,6 +235,7 @@ export const ADAPTERS = [
   openthreat,
   // People: one entry per person, read off the apps that serve their OpenProfile.md.
   openprofiles,
+  outreachgraph,
 ];
 
 export { isPlatformHosted, PLATFORM_HOSTS } from './podcastplatforms.js';

@@ -62,6 +62,7 @@ Adapters are one file each in `packages/adapters/src`. Ninety-three ship today a
 One entry per person, assembled from every app that serves their [OpenProfile.md](https://logicsrc.com/openprofile). The `openprofiles` adapter pages each app's listing (`/api/openprofiles?since=…`), fetches every document from the host that listed it, and merges documents that share an identity key (the `Web` URL, any `Accounts` URL, `Email`, `DID`) into one profile; a shared name alone never merges. The page is `/c/profiles/<slug>-<id>` (the id resolves, the name is cosmetic, a wrong name 301s) or `/c/profiles/<handle>` once the owner took one, and `…/openprofile.md` next to it is the file, `text/markdown`, CORS open, with `<link rel="openprofile">` on the page.
 
 A person claims their entry with **This is me** (proven by the email the profile lists, or a link back to the page from their site or show; admins may claim for an email) and edits it from the page, `PUT /api/v1/profiles/<ref>` (JSON overlay or a whole `text/markdown` file), `nichedb profile edit`, or the `update_profile` MCP tool, with a session, an API key, or an OpenAccess token carrying `openprofile:edit`. What the owner writes is an overlay that wins over every source and survives every re-read; a section written as `none` is removed. The `Broadcast` and `Guest` sections ([OpenBroadcast](https://logicsrc.com/openbroadcast), [OpenGuest](https://logicsrc.com/openguest)) are what the `podcasters` and `guests` feeds cut on.
+| directory | `outreachgraph` | no |
 
 ### House aggregators
 
@@ -75,6 +76,7 @@ Eight of the sites we run publish a public feed or API of their own, and each is
 | bl0ggers.com | `/asks/rss.xml`, `/offers/rss.xml` | marketplace | `bl0ggers-marketplace` | `ask`, `offer` |
 | aiornot.vote | `/rss.xml`, `/rss/featured.xml`, `/rss/trending.xml` | ai-media | `aiornot-media` | `submission` |
 | agenticjobs.work | `/api/v1/jobs` (offset paged, 100 a page) | jobs | `agenticjobs-postings` | `job` |
+| outreachgraph.com | `/api/v1/public/directory` (cursor paged, 200 a page; companies and sites by domain, people only when self-published) | directory | `outreachgraph-directory` | `company`, `site`, `person` |
 | tsbb.dev | `/api/v1/forums`, then `/f/{slug}/feed.xml` per forum | forums | `tsbb-topics` | `post` |
 | c0ncerts.com | none yet: `/api/events` answers 501 "coming soon" and `/api/v1/events` 404s | — | — | — |
 
