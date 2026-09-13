@@ -3,6 +3,8 @@ import { normaliseItem } from '@nichedb/core/adapter';
 import { makeHttp } from '@nichedb/core/http';
 import {
   AGENT,
+  LIST_MAX,
+  parseUrlList,
   readUrl,
   recordItem,
   recordPath,
@@ -10,7 +12,7 @@ import {
   webUrl,
 } from '@nichedb/core/opensite';
 import * as q from '@nichedb/db/queries';
-import { Denied } from './service.js';
+import { canAddSources, Denied } from './service.js';
 
 /**
  * The operations behind /c/sites, shared by the page, the API and the MCP
@@ -27,6 +29,52 @@ export const PASTED_SOURCE = 'sites-pasted';
 
 /** How stale a kept record may be before an ask reads the page again. */
 export const FRESH_MS = 60 * 60 * 1000;
+
+/** Pages a bulk source reads per run; the worker runs it again a minute later until done. */
+export const BULK_PAGES_PER_RUN = 250;
+/** A list is read again this often once it has been walked: a month. */
+export const BULK_CADENCE_MINUTES = 30 * 24 * 60;
+
+/**
+ * A pasted list of addresses, up to ten thousand, as a source of its own.
+ *
+ * Reading ten thousand pages is hours of work, not a request, so the list
+ * becomes a source of the `opensite` adapter: the worker walks it a few
+ * hundred pages a run, a minute apart, and the source's own page shows how
+ * far it has got. It is the submitter's source, so they can pause it, and
+ * it is read again a month later so the records stay current. Making the
+ * deployment fetch on a schedule is gated the way every source is.
+ */
+export async function submitBulk({ user, text, name = '' }) {
+  if (!user)
+    throw new Denied('Sign in to submit a list; one address at a time needs no account.', 401);
+  if (!(await canAddSources(user)))
+    throw new Denied('Your plan does not include sources of your own.', 403);
+  const { urls, rejected, dropped } = parseUrlList(text, LIST_MAX);
+  if (urls.length === 0) throw new Denied('No web address in that list.', 400);
+  const collection = await q.getCollection(COLLECTION);
+  if (!collection) throw new Denied('The sites index is not set up on this deployment.', 503);
+  const stamp = new Date().toISOString().slice(0, 16).replace('T', ' ');
+  const slug = `sites-bulk-${Math.random().toString(36).slice(2, 10)}`;
+  const label = String(name ?? '')
+    .trim()
+    .slice(0, 80);
+  const source = await q.insertSource({
+    collectionId: collection.id,
+    adapter: 'opensite',
+    slug,
+    name: label
+      ? `${label} (${urls.length} addresses)`
+      : `${urls.length} addresses pasted ${stamp}`,
+    description: `A list of ${urls.length} addresses pasted at /c/sites/add on ${stamp}, read ${BULK_PAGES_PER_RUN} pages a run until done, then once a month.`,
+    config: { urls, sitemaps: [], pages: BULK_PAGES_PER_RUN },
+    cadenceMinutes: BULK_CADENCE_MINUTES,
+    ownerId: user.id,
+    enabled: true,
+  });
+  await q.requestRun(source.id);
+  return { source, queued: urls.length, rejected, dropped, page: `/s/${slug}` };
+}
 
 const http = () => makeHttp({ userAgent: `${AGENT} ${config.siteUrl}` });
 

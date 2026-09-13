@@ -14,6 +14,8 @@ import {
   decodeEntities,
   kindOf,
   parseHead,
+  parseUrlList,
+  publicWebUrl,
   readRecord,
   readSitemap,
   readUrl,
@@ -372,12 +374,10 @@ describe('the adapter', () => {
       log: () => {},
       deadline: Date.now() + 10_000,
     });
-    expect(one.items.map((i) => i.url)).toEqual([
-      'https://a.example/',
-      'https://a.example/p1',
-      'https://a.example/p2',
-    ]);
-    expect(one.cursor).toEqual({ offset: 2 });
+    // One pool, the front page first, two a run, and back to the start when done.
+    expect(one.items.map((i) => i.url)).toEqual(['https://a.example/', 'https://a.example/p1']);
+    expect(one.cursor).toEqual({ offset: 2, total: 4 });
+    expect(one.nextInMinutes).toBe(1);
     const two = await opensite.pull({
       config,
       cursor: one.cursor,
@@ -385,8 +385,105 @@ describe('the adapter', () => {
       log: () => {},
       deadline: Date.now() + 10_000,
     });
-    expect(two.items.map((i) => i.url)).toEqual(['https://a.example/', 'https://a.example/p3']);
-    expect(two.cursor).toEqual({ offset: 0 });
+    expect(two.items.map((i) => i.url)).toEqual(['https://a.example/p2', 'https://a.example/p3']);
+    expect(two.cursor).toEqual({ offset: 0, total: 4 });
+    expect(two.nextInMinutes).toBeUndefined();
     expect(normaliseItem(one.items[1]).title).toBe('p1');
+  });
+});
+
+describe('a list of addresses', () => {
+  test('lines, commas, bullets, bare domains, repeats, the cap, and what could not be read', () => {
+    const out = parseUrlList(
+      'https://a.example/x\n- b.example, "https://a.example/x#frag"\n<c.example/p>\nnot a url\n# a comment\nhttp://10.0.0.1/admin\n',
+      3,
+    );
+    expect(out.urls).toEqual(['https://a.example/x', 'https://b.example/', 'https://c.example/p']);
+    expect(out.rejected).toEqual(['http://10.0.0.1/admin']);
+    expect(out.dropped).toBe(0);
+    const capped = parseUrlList('a.example\nb.example\nc.example\nd.example', 2);
+    expect(capped.urls).toHaveLength(2);
+    expect(capped.dropped).toBe(2);
+  });
+
+  test('a public address is on the public web', () => {
+    expect(publicWebUrl('https://example.com/x')).toBe('https://example.com/x');
+    for (const bad of [
+      'http://localhost/',
+      'http://web.railway.internal:3000/',
+      'http://127.0.0.1/',
+      'http://10.1.2.3/',
+      'http://172.16.0.9/',
+      'http://192.168.1.1/',
+      'http://169.254.169.254/latest/meta-data',
+      'http://[::1]/',
+      'http://intranet/',
+      'ftp://example.com/',
+    ])
+      expect(publicWebUrl(bad)).toBeNull();
+  });
+
+  test('readUrl answers blocked for a private address without fetching', async () => {
+    const asked = [];
+    const http = {
+      async request(u) {
+        asked.push(u);
+        return new Response('');
+      },
+    };
+    const r = await readUrl('http://169.254.169.254/latest/meta-data', { http });
+    expect(r.status).toBe('blocked');
+    expect(asked).toEqual([]);
+  });
+});
+
+describe('a long list is walked a few pages a run', () => {
+  test('the cursor advances, the run asks to come back in a minute, and wraps at the end', async () => {
+    const pages = [
+      'https://a.example/1',
+      'https://a.example/2',
+      'https://a.example/3',
+      'https://a.example/4',
+      'https://a.example/5',
+    ];
+    const http = {
+      async request(url) {
+        if (url.endsWith('/robots.txt') || url.endsWith('/opensite.json'))
+          return new Response('', { status: 404 });
+        return new Response(`<html><head><title>${url.split('/').pop()}</title></head></html>`, {
+          headers: { 'content-type': 'text/html' },
+        });
+      },
+    };
+    const config = { urls: pages, sitemaps: [], pages: 2 };
+    const one = await opensite.pull({
+      config,
+      cursor: {},
+      http,
+      log: () => {},
+      deadline: Date.now() + 10_000,
+    });
+    expect(one.items.map((i) => i.url)).toEqual(pages.slice(0, 2));
+    expect(one.cursor).toEqual({ offset: 2, total: 5 });
+    expect(one.nextInMinutes).toBe(1);
+    const two = await opensite.pull({
+      config,
+      cursor: one.cursor,
+      http,
+      log: () => {},
+      deadline: Date.now() + 10_000,
+    });
+    expect(two.items.map((i) => i.url)).toEqual(pages.slice(2, 4));
+    const three = await opensite.pull({
+      config,
+      cursor: two.cursor,
+      http,
+      log: () => {},
+      deadline: Date.now() + 10_000,
+    });
+    expect(three.items.map((i) => i.url)).toEqual(pages.slice(4));
+    expect(three.cursor).toEqual({ offset: 0, total: 5 });
+    expect(three.nextInMinutes).toBeUndefined();
+    expect(three.note).toContain('1 of 5 pages');
   });
 });

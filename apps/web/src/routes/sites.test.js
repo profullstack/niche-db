@@ -68,6 +68,16 @@ const store = {
     store.upserts.push(...items);
     return { added: items.length, updated: 0 };
   },
+  sources: [],
+  async insertSource(row) {
+    const source = { id: 100 + store.sources.length, run_count: 0, ...row };
+    store.sources.push(source);
+    return source;
+  },
+  runs: [],
+  async requestRun(id) {
+    store.runs.push(id);
+  },
 };
 mock.module('@nichedb/db/queries', () => store);
 
@@ -89,11 +99,11 @@ const { registerSites } = await import('./sites.js');
 const { Denied } = await import('../lib/service.js');
 const { withModules, decideModules } = await import('../lib/modules.js');
 
-function app() {
+function app(user = { id: 'u-reader', email: 'r@example.com', role: 'user', timezone: 'UTC' }) {
   const a = new Hono();
   a.use('*', async (c, next) => {
     // A signed-in reader, so pages render directly rather than through the page cache.
-    c.set('user', { id: 'u-reader', email: 'r@example.com', role: 'user', timezone: 'UTC' });
+    c.set('user', user);
     await withModules(decideModules({ plan: 'free', paid: false }), next);
   });
   a.onError((err, c) => {
@@ -177,5 +187,83 @@ describe('the api', () => {
     expect((await app().request('/api/v1/sites/nowhere.example/x')).status).toBe(404);
     const host = await app().request('/api/v1/sites/nixamp.com');
     expect((await host.json()).count).toBe(1);
+  });
+});
+
+describe('a whole list', () => {
+  const admin = { id: 'u-admin', email: 'a@example.com', role: 'admin', timezone: 'UTC' };
+
+  test('a pasted list becomes a source of the submitter, asked to run now, and the page says so', async () => {
+    const before = store.sources.length;
+    const r = await app(admin).request('/c/sites/add', {
+      method: 'POST',
+      body: new URLSearchParams({
+        urls: 'https://a.example/\nb.example\nhttp://localhost/',
+        name: 'two hosts',
+      }),
+    });
+    expect(r.status).toBe(303);
+    const source = store.sources.at(-1);
+    expect(store.sources).toHaveLength(before + 1);
+    expect(source.adapter).toBe('opensite');
+    expect(source.slug).toStartWith('sites-bulk-');
+    expect(source.ownerId).toBe('u-admin');
+    expect(source.config.urls).toEqual(['https://a.example/', 'https://b.example/']);
+    expect(source.config.pages).toBe(250);
+    expect(source.name).toBe('two hosts (2 addresses)');
+    expect(store.runs).toContain(source.id);
+    const to = r.headers.get('location');
+    expect(to).toStartWith(`/s/${source.slug}?notice=`);
+    expect(decodeURIComponent(to)).toContain('2 addresses queued, 1 could not be read');
+  });
+
+  test('a file of addresses works the same', async () => {
+    const form = new FormData();
+    form.set(
+      'file',
+      new File(['https://c.example/\nhttps://d.example/x\n'], 'list.txt', { type: 'text/plain' }),
+    );
+    const r = await app(admin).request('/c/sites/add', { method: 'POST', body: form });
+    expect(r.status).toBe(303);
+    expect(store.sources.at(-1).config.urls).toEqual(['https://c.example/', 'https://d.example/x']);
+  });
+
+  test('nobody signed in is told to sign in; an empty list is a 400', async () => {
+    const r = await app(null).request('/c/sites/add', {
+      method: 'POST',
+      body: new URLSearchParams({ urls: 'https://a.example/' }),
+    });
+    expect(r.status).toBe(401);
+    expect(await r.text()).toContain('Sign in');
+    const empty = await app(admin).request('/api/v1/sites/bulk', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ urls: ['not a url', 'http://localhost/'] }),
+    });
+    expect(empty.status).toBe(400);
+  });
+
+  test('the API takes JSON or plain text and answers 202 with where to watch', async () => {
+    const json = await app(admin).request('/api/v1/sites/bulk', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        urls: ['https://e.example/', 'e.example', 'https://f.example/'],
+        name: 'ef',
+      }),
+    });
+    expect(json.status).toBe(202);
+    const body = await json.json();
+    expect(body.queued).toBe(2);
+    expect(body.source).toStartWith('sites-bulk-');
+    expect(body.page).toContain(`/s/${body.source}`);
+    expect(body.api).toContain(`source=${body.source}`);
+    const text = await app(admin).request('/api/v1/sites/bulk', {
+      method: 'POST',
+      headers: { 'content-type': 'text/plain' },
+      body: 'g.example\nh.example\n',
+    });
+    expect(text.status).toBe(202);
+    expect((await text.json()).queued).toBe(2);
   });
 });

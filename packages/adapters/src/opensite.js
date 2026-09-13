@@ -106,7 +106,7 @@ export const opensite = defineAdapter({
   async pull({ config, cursor, http, log, deadline }) {
     const urls = list(config.urls);
     const sitemaps = list(config.sitemaps);
-    const perRun = Math.max(0, Math.min(Number(config.pages) || 0, 2000));
+    const perRun = Math.max(1, Math.min(Number(config.pages) || DEFAULT_PAGES, 2000));
     const cache = new Map();
     const items = [];
     const read = async (url) => {
@@ -115,41 +115,43 @@ export const opensite = defineAdapter({
       if (item) items.push(item);
       return record;
     };
-    for (const url of urls) {
+    // One pool: the addresses named, then every page the sitemaps name.
+    // Walked in order from where the last run stopped, `pages` at a time,
+    // and asked to run again in a minute until the end, so a list of ten
+    // thousand pasted addresses is read in an hour or so of short runs and
+    // a small site is done in one. At the end the cursor goes back to the
+    // start and the ordinary cadence takes over.
+    const pool = [...urls];
+    for (const s of sitemaps) {
+      if (Date.now() > deadline) break;
+      const { urls: pages, sitemaps: nested } = await readSitemap(s, { http });
+      pool.push(...pages);
+      for (const n of nested.slice(0, 10)) {
+        if (Date.now() > deadline) break;
+        pool.push(...(await readSitemap(n, { http })).urls);
+      }
+    }
+    const pages = [...new Set(pool)];
+    let offset = Number(cursor?.offset) || 0;
+    if (offset >= pages.length) offset = 0;
+    let walked = 0;
+    for (const url of pages.slice(offset, offset + perRun)) {
       if (Date.now() > deadline) break;
       await read(url);
+      walked += 1;
     }
-    // The sitemap walk: every page address the sitemaps name, in order,
-    // from where the last run stopped, wrapping to the start at the end.
-    let walked = 0;
-    let offset = Number(cursor?.offset) || 0;
-    if (perRun > 0 && sitemaps.length > 0) {
-      const all = [];
-      for (const s of sitemaps) {
-        const { urls: pages, sitemaps: nested } = await readSitemap(s, { http });
-        all.push(...pages);
-        for (const n of nested.slice(0, 10)) {
-          if (Date.now() > deadline) break;
-          all.push(...(await readSitemap(n, { http })).urls);
-        }
-      }
-      const pages = [...new Set(all)].filter((u) => !urls.includes(u));
-      if (offset >= pages.length) offset = 0;
-      const slice = pages.slice(offset, offset + perRun);
-      for (const url of slice) {
-        if (Date.now() > deadline) break;
-        await read(url);
-        walked += 1;
-      }
-      offset = offset + walked >= pages.length ? 0 : offset + walked;
-      log(`${pages.length} in sitemaps, read ${walked}, next from ${offset}`);
-    }
+    const next = offset + walked;
+    const finished = next >= pages.length || walked === 0;
     const blocked = items.filter((i) => i.data.record.status === 'blocked').length;
     const gone = items.filter((i) => i.data.record.status === 'gone').length;
+    log(
+      `${pages.length} to read, read ${walked} from ${offset}${finished ? ', done' : `, next from ${next}`}`,
+    );
     return {
       items,
-      cursor: { offset },
-      note: `${items.length} pages${blocked ? `, ${blocked} blocked` : ''}${gone ? `, ${gone} gone` : ''}`,
+      cursor: { offset: finished ? 0 : next, total: pages.length },
+      note: `${items.length} of ${pages.length} pages${blocked ? `, ${blocked} blocked` : ''}${gone ? `, ${gone} gone` : ''}${finished ? '' : `, ${pages.length - next} to go`}`,
+      ...(finished ? {} : { nextInMinutes: 1 }),
     };
   },
 });

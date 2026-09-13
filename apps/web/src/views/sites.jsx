@@ -163,7 +163,44 @@ const AddForm = ({ url = '' }) => (
   </form>
 );
 
-export const SiteAddPage = ({ user, url = '', notice, error, missing = false }) => (
+const BulkForm = ({ list = '', user }) => (
+  <form method="post" action="/c/sites/add" enctype="multipart/form-data" class="stack form">
+    <label>
+      Many addresses, one per line (up to ten thousand)
+      <textarea
+        name="urls"
+        rows="8"
+        maxlength="1000000"
+        placeholder={'https://example.com/\nhttps://example.org/pricing\nanother.example'}
+      >
+        {list}
+      </textarea>
+    </label>
+    <label>
+      Or a text or CSV file of addresses
+      <input type="file" name="file" accept=".txt,.csv,.tsv,text/plain,text/csv" />
+    </label>
+    <label>
+      A name for the list <span class="muted">(optional)</span>
+      <input type="text" name="name" maxlength="80" placeholder="hosting providers, September" />
+    </label>
+    <input
+      type="text"
+      name="website"
+      tabindex="-1"
+      autocomplete="off"
+      style="position:absolute;left:-9999px"
+    />
+    <button type="submit">Queue the list</button>
+    <p class="small muted">
+      {user
+        ? 'The list becomes a source of yours: the worker reads a few hundred pages a minute, honouring robots.txt, and the source page shows the progress. It is read again a month later so the records stay current.'
+        : 'Sign in first: a list makes the index fetch on a schedule, and every source has an owner.'}
+    </p>
+  </form>
+);
+
+export const SiteAddPage = ({ user, url = '', list = '', notice, error, missing = false }) => (
   <Layout
     user={user}
     title={missing ? 'Not indexed yet' : 'Read a page'}
@@ -188,6 +225,15 @@ export const SiteAddPage = ({ user, url = '', notice, error, missing = false }) 
         POST /api/v1/sites {'{'} "url" {'}'}
       </code>
       . Spec: <a href="https://logicsrc.com/opensite">logicsrc.com/opensite</a>.
+    </p>
+    <h2>A whole list</h2>
+    <BulkForm list={list} user={user} />
+    <p class="small muted">
+      The same by API:{' '}
+      <code>
+        POST /api/v1/sites/bulk {'{'} "urls": [ … ], "name": "…" {'}'}
+      </code>{' '}
+      or a text body, one address per line; answers 202 with the source and its progress page.
     </p>
   </Layout>
 );
