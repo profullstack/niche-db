@@ -29,6 +29,11 @@ import { normTitleOrNull } from './screen-titles.js';
  * row has none of those, so a series is at its richest after its first
  * refresh. Ids are carried between runs as `pending` when the cap stops a run.
  *
+ * The first delta listing starts from when the walk BEGAN (`startedAt` in the
+ * cursor), not when it ended: a walk is many runs over a few hours, and a
+ * series changed after its page was read would otherwise wait for its next
+ * change. The listing is inclusive of `since` and dedupes, so nothing is lost.
+ *
  * Login is `POST /login {apikey}`, answered with a JWT good for about a month;
  * the token and its expiry ride in the cursor, the way igdb.js keeps its
  * Twitch token, and are renewed within a day of expiry or on a 401.
@@ -220,6 +225,7 @@ export function updatedIds(body) {
 /** Where a run starts. `walkedAt` set means the pass is done and the delta path applies. */
 export function resumeFrom(prev) {
   const page = Math.floor(Number(prev?.page));
+  const startedAt = typeof prev?.startedAt === 'string' ? prev.startedAt : null;
   const walkedAt = typeof prev?.walkedAt === 'string' ? prev.walkedAt : null;
   const refreshedAt = typeof prev?.refreshedAt === 'string' ? prev.refreshedAt : walkedAt;
   const listedAt = typeof prev?.listedAt === 'string' ? prev.listedAt : null;
@@ -230,6 +236,7 @@ export function resumeFrom(prev) {
   const tokenExpires = Number(prev?.tokenExpires) || 0;
   return {
     page: page >= 0 ? page : 0,
+    startedAt,
     walkedAt,
     refreshedAt,
     listedAt,
@@ -370,6 +377,7 @@ export const thetvdbCatalog = defineAdapter({
 
     // ── First pass: page walk ──────────────────────────────────────────────
     if (!state.walkedAt) {
+      const startedAt = state.startedAt ?? now.toISOString();
       let page = state.page;
       let pages = 0;
       let done = false;
@@ -413,14 +421,16 @@ export const thetvdbCatalog = defineAdapter({
           ? {
               ...tokenCursor(),
               page: null,
+              startedAt,
               walkedAt: now.toISOString(),
-              refreshedAt: now.toISOString(),
+              refreshedAt: startedAt,
               listedAt: null,
               pending: [],
             }
           : {
               ...tokenCursor(),
               page,
+              startedAt,
               walkedAt: null,
               refreshedAt: null,
               listedAt: null,
@@ -468,8 +478,13 @@ export const thetvdbCatalog = defineAdapter({
       }
       pending = [...ids].sort((a, b) => a - b);
       listed = true;
-      // A complete listing moves the mark to now; a cut-off one only as far as it read.
-      listedAt = more && lastTs ? new Date(lastTs * 1000).toISOString() : now.toISOString();
+      // A complete listing moves the mark to now; a cut-off one only as far as it
+      // read, and one that read nothing (the deadline came first) not at all.
+      listedAt = !more
+        ? now.toISOString()
+        : lastTs
+          ? new Date(lastTs * 1000).toISOString()
+          : (state.refreshedAt ?? state.walkedAt);
       if (more)
         log(`updates listing cut off after ${listPages} pages; resuming from the last row's time`);
     }
@@ -511,6 +526,7 @@ export const thetvdbCatalog = defineAdapter({
       cursor: {
         ...tokenCursor(),
         page: null,
+        startedAt: state.startedAt,
         walkedAt: state.walkedAt,
         refreshedAt: caughtUp
           ? (listedAt ?? now.toISOString())
