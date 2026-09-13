@@ -214,6 +214,12 @@ export const COLLECTIONS = [
       'What ThreatCrush and other OpenThreat reporters identified in the open: findings in public repositories, attacks observed against the reporter’s own hosts, indicators worth blocking, advisories. Each row is read from the reporter’s own /.well-known/openthreat.json, in the reporter’s words, with the reporter named and the subject linked, and re-read hourly so a threat goes fixed, blocked or withdrawn in place. Never from a private scan: a reporter publishes only what was already visible to anyone who looked, a secret is published unlocated, and a paying user’s scan never appears.',
   },
   {
+    slug: 'webrings',
+    name: 'Webrings',
+    description:
+      'Webrings, and who is in them: every ring an OpenWebring host serves at its own /.well-known/openwebring.json, read from the host and never scraped, with one row per ring and one per member. Each member carries its own word on who makes the site, human, AI or both, unverified and shown as unstated when it said nothing, and the status the host last found when it checked the member’s page for the ring’s links. The first host is rssamplifier.com, one ring per topic and a ring of the sites Profullstack publishes. Follow the human web, the machine web, or a subject, by ring.',
+  },
+  {
     slug: 'directory',
     name: 'Directory',
     description:
@@ -1371,6 +1377,46 @@ export const DEFAULT_FEEDS = [
     description:
       'Threats not yet fixed, mitigated, blocked or withdrawn. No status reads as open, as the spec says.',
     query: { kinds: ['finding', 'attack', 'indicator', 'advisory'], tags: ['status:open'] },
+  },
+  // Webrings: the rings, the members, and the members by who makes them.
+  {
+    collection: 'webrings',
+    slug: 'rings',
+    name: 'Every ring',
+    description:
+      'One row per ring an OpenWebring host serves, with its member count and what it accepts.',
+    query: { kinds: ['ring'] },
+  },
+  {
+    collection: 'webrings',
+    slug: 'ring-members',
+    name: 'Every member',
+    description:
+      'Every site in a ring, as the host lists it, with the status the host last verified.',
+    query: { kinds: ['member'] },
+  },
+  {
+    collection: 'webrings',
+    slug: 'human-made-members',
+    name: 'Made by people',
+    description:
+      'Members whose own descriptor says a person makes the site. A member that said nothing is unstated, and absent here.',
+    query: { kinds: ['member'], tags: ['made_by:human'] },
+  },
+  {
+    collection: 'webrings',
+    slug: 'ai-made-members',
+    name: 'Made by AI',
+    description: 'Members whose own descriptor says a model or agent makes the site.',
+    query: { kinds: ['member'], tags: ['made_by:ai'] },
+  },
+  {
+    collection: 'webrings',
+    slug: 'active-members',
+    name: 'Active members',
+    description:
+      'Members whose page the host last found linking to the ring; the ones a hop can reach.',
+    query: { kinds: ['member'], tags: ['status:active'] },
   },
   // People: everyone, the hosts, and the ones who will appear.
   {

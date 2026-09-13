@@ -1,0 +1,28 @@
+{
+  "openwebring": "0.1",
+  "site": { "url": "https://rssamplifier.com/", "name": "RSS Amplifier" },
+  "hosts": [
+    {
+      "slug": "profullstack",
+      "name": "Profullstack",
+      "url": "https://rssamplifier.com/ring/profullstack",
+      "description": "The sites Profullstack, Inc. publishes.",
+      "join": "https://rssamplifier.com/ring/profullstack#join",
+      "members": 5,
+      "members_url": "https://rssamplifier.com/ring/profullstack/openwebring.json",
+      "opml": "https://rssamplifier.com/ring/profullstack/opml",
+      "updated": "2026-09-13T10:00:00Z"
+    },
+    {
+      "slug": "business",
+      "name": "business",
+      "url": "https://rssamplifier.com/ring/business",
+      "accepts": ["human", "both"],
+      "members": 100,
+      "members_url": "https://rssamplifier.com/ring/business/openwebring.json",
+      "opml": "https://rssamplifier.com/ring/business/opml"
+    },
+    { "name": "no url and no slug" }
+  ],
+  "spec": "https://logicsrc.com/openwebring"
+}
