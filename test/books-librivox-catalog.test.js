@@ -141,7 +141,9 @@ describe('bookItem', () => {
     expect(languageCode('English')).toBe('en');
     expect(languageCode('Ancient Greek')).toBe('grc');
     expect(languageCode('Multilingual')).toBe('mul');
+    expect(languageCode('Bisaya/Cebuano')).toBe('ceb');
     expect(languageCode(' Klingon ')).toBe('klingon');
+    expect(languageCode('Foo/Bar')).toBe('foo-bar');
     expect(languageCode('')).toBeNull();
     expect(genreSlug('Science Fiction/Fantasy')).toBe('science-fiction-fantasy');
     expect(genreSlug('Published 1800 -1900')).toBe('published-1800-1900');

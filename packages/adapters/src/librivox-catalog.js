@@ -4,7 +4,7 @@ import { defineAdapter, slugify, stripHtml } from '@nichedb/core/adapter';
  * LibriVox: every audiobook in the catalogue, for the `books` collection.
  *
  * LibriVox is volunteers reading public domain books, and the recordings are
- * public domain too: about 20,400 finished audiobooks on 2026-09-13, every one
+ * public domain too: 22,343 finished audiobooks on 2026-09-13, every one
  * free to copy, in any language a volunteer speaks. The API is keyless and
  * documented at librivox.org/api/info. `/api/feed/audiobooks/?format=json`
  * pages by `limit` and `offset` in id order, 50 a page; an offset past the end
@@ -20,11 +20,12 @@ import { defineAdapter, slugify, stripHtml } from '@nichedb/core/adapter';
  * in both directions. A run reads `requestCap` pages and stops; the cursor
  * carries the next offset and the pass ends on the 404. The next run starts
  * over from offset 0, so a re-read of the whole catalogue lands about every
- * ten runs and picks up new recordings at the tail.
+ * twelve runs and picks up new recordings at the tail.
  *
- * The origin is slow at deep offsets (ten to thirty seconds a page near the
- * end, and a 522 when it is under load), so the timeout is long and a failed
- * page is retried in place rather than skipped.
+ * The origin is slow (ten to thirty seconds a page near the end, a minute
+ * for any page when it is under load, and a Cloudflare 522 or 525 in place of
+ * an answer now and then), so the timeout is long and a failed page is
+ * retried in place rather than skipped.
  */
 
 export const BASE = 'https://librivox.org/api/feed/audiobooks/';
@@ -35,7 +36,7 @@ export const USER_AGENT = 'nichedb (https://nichedb.dev; hello@nichedb.dev)';
 /** Books per page: the API's default and its documented ceiling is unstated, so this stays at the default. */
 export const PAGE_SIZE = 50;
 
-/** Pages per run by default: 2,000 books, a full pass in about ten runs. */
+/** Pages per run by default: 2,000 books, a full pass in about twelve runs. */
 export const REQUEST_CAP = 40;
 
 /** Consecutive failures after which a run stops asking, so an outage costs little. */
@@ -134,6 +135,8 @@ export const LANGUAGES = {
   estonian: 'et',
   esperanto: 'eo',
   tagalog: 'tl',
+  cebuano: 'ceb',
+  'bisaya/cebuano': 'ceb',
   indonesian: 'id',
   malay: 'ms',
   thai: 'th',
@@ -187,7 +190,7 @@ export function languageCode(name) {
   const s = text(name);
   if (!s) return null;
   const key = s.toLowerCase().replace(/\s+/g, ' ');
-  return LANGUAGES[key] ?? slugify(key) ?? null;
+  return LANGUAGES[key] ?? slugify(key.replace(/[/&+]+/g, ' ')) ?? null;
 }
 
 /** "Science Fiction/Fantasy" -> "science-fiction-fantasy", not "science-fictionfantasy". */
@@ -313,7 +316,7 @@ export const librivoxCatalog = defineAdapter({
   title: 'LibriVox: every audiobook',
   collection: 'books',
   description:
-    'Every finished audiobook on LibriVox, about 20,400, one row each with the readers’ description, authors and translators with their dates, language, genres, running time, section count, cover art, the RSS and zip download links, the archive.org page and the source text. Every recording is public domain and so is the catalogue, keyless, credited to LibriVox on each row. Walks /api/feed/audiobooks 50 a page in id order; a run reads a fixed number of pages and resumes, the pass ends past the last book, and the next run starts over.',
+    'Every finished audiobook on LibriVox, about 22,300, one row each with the readers’ description, authors and translators with their dates, language, genres, running time, section count, cover art, the RSS and zip download links, the archive.org page and the source text. Every recording is public domain and so is the catalogue, keyless, credited to LibriVox on each row. Walks /api/feed/audiobooks 50 a page in id order; a run reads a fixed number of pages and resumes, the pass ends past the last book, and the next run starts over.',
   docs: 'https://librivox.org/api/info',
   kinds: ['audiobook'],
   cadenceMinutes: 1440,
@@ -323,7 +326,7 @@ export const librivoxCatalog = defineAdapter({
       label: 'Pages per run',
       type: 'number',
       placeholder: String(REQUEST_CAP),
-      help: '50 books a page. The walk stops here and picks up ten minutes later; 40 pages is a full pass in about ten runs.',
+      help: '50 books a page. The walk stops here and picks up ten minutes later; 40 pages is a full pass in about twelve runs.',
     },
     {
       key: 'pauseMs',
