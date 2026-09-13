@@ -13,7 +13,7 @@ The first deployment is [nichedb.dev](https://nichedb.dev). Run your own on anyt
 | **item** | One row a source produced. Title, URL, when (with `time_known` and `precision`), tags, and the adapter's payload in `data`. |
 | **feed** | A saved query over a collection. Has a page, RSS and JSON Feed renderings, an API endpoint, and followers who are told when it changes by push, email or signed webhook. |
 
-Adapters are one file each in `packages/adapters/src`. One hundred and twenty-six ship today across forty-one collections:
+Adapters are one file each in `packages/adapters/src`. One hundred and twenty-eight ship today across forty-one collections:
 
 | Collection | Adapters | Key needed |
 | --- | --- | --- |
@@ -53,7 +53,7 @@ Adapters are one file each in `packages/adapters/src`. One hundred and twenty-si
 | marketplace | `d0rz`, `bl0ggers` | no |
 | ai-media | `aiornot` | no |
 | forums | `tsbb` | no |
-| hosting | `findhost`, `vultr-plans`, `linode-types`, `scaleway-instances`, `ovh-vps`, `storefront` (WHMCS, Blesta and WooCommerce order forms), `lowendbox`, `openserver`; `hetzner-plans`, `digitalocean-sizes`, `upcloud-plans` | no for the first eight (FindHost data is CC BY 4.0: credit FindHost, findhost.app; `OBSCURA_MCP_URL` optional for JavaScript-only shops); Hetzner (`HETZNER_API_TOKEN`), DigitalOcean (`DIGITALOCEAN_TOKEN`) and UpCloud (`UPCLOUD_USERNAME`, `UPCLOUD_PASSWORD`) each need a read-only credential and stay paused without one |
+| hosting | `findhost`, `buyvps`, `vultr-plans`, `linode-types`, `scaleway-instances`, `ovh-vps`, `storefront` (WHMCS, Blesta and WooCommerce order forms), `lowendbox`, `openserver`; `hetzner-plans`, `digitalocean-sizes`, `upcloud-plans` | no for the first eight (FindHost data is CC BY 4.0: credit FindHost, findhost.app; `OBSCURA_MCP_URL` optional for JavaScript-only shops); Hetzner (`HETZNER_API_TOKEN`), DigitalOcean (`DIGITALOCEAN_TOKEN`) and UpCloud (`UPCLOUD_USERNAME`, `UPCLOUD_PASSWORD`) each need a read-only credential and stay paused without one |
 | threats | `openthreat` (ThreatCrush first; any reporter serving `/.well-known/openthreat.json`) | no |
 | profiles | `openprofiles` (p0dcasters and OutreachGraph listings first; any app that lists the OpenProfile.md files it serves), `sportarr-persons` (Sportarr's 111k names, kept only when Wikidata knows the person as a human with a sport, with their socials) | no |
 
