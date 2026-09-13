@@ -164,3 +164,68 @@ describe('the slot a failed lookup costs', () => {
     expect(Number(retry.mins)).toBeLessThan(3);
   });
 });
+
+/**
+ * The statements `reapStaleRuns` runs, kept identical to the query: a run
+ * abandoned by a container that died is marked, and its source is asked to
+ * run again now rather than a whole cadence later.
+ */
+const REAP = `
+  update runs set status = 'error', finished_at = now(), error = 'abandoned (process exited)'
+  where status = 'running' and started_at < now() - ($1)::interval
+  returning id, source_id`;
+const REQUEUE = `
+  update sources set next_run_at = now(), updated_at = now()
+  where id = any($1::int[]) and enabled`;
+
+describe('a run killed by a redeploy does not park its source for a cadence', () => {
+  test('the abandoned run is marked and the source is due again now', async () => {
+    // A bulk list: read once a month, and its first run began two hours ago.
+    const id = await source({ adapter: 'opensite', minutesOut: 43_200, cadence: 43_200 });
+    await one(
+      `insert into runs (source_id, started_at) values ($1, now() - interval '2 hours') returning id`,
+      [id],
+    );
+    const before = await one(
+      `select next_run_at > now() + interval '29 days' as parked from sources where id = $1`,
+      [id],
+    );
+    expect(before.parked).toBe(true);
+    const reaped = await rows(REAP, ['40 minutes']);
+    expect(reaped.map((r) => r.source_id)).toContain(id);
+    await rows(REQUEUE, [[...new Set(reaped.map((r) => r.source_id))]]);
+    const run = await one(`select status, error from runs where source_id = $1`, [id]);
+    expect(run.status).toBe('error');
+    expect(run.error).toBe('abandoned (process exited)');
+    const after = await one(`select next_run_at <= now() as due from sources where id = $1`, [id]);
+    expect(after.due).toBe(true);
+  });
+
+  test('a run still inside its window, and a paused source, are left alone', async () => {
+    const fresh = await source({ adapter: 'opensite', minutesOut: 43_200, cadence: 43_200 });
+    await one(
+      `insert into runs (source_id, started_at) values ($1, now() - interval '5 minutes') returning id`,
+      [fresh],
+    );
+    const paused = await source({
+      adapter: 'opensite',
+      minutesOut: 43_200,
+      cadence: 43_200,
+      enabled: false,
+    });
+    await one(
+      `insert into runs (source_id, started_at) values ($1, now() - interval '2 hours') returning id`,
+      [paused],
+    );
+    const reaped = await rows(REAP, ['40 minutes']);
+    expect(reaped.map((r) => r.source_id)).not.toContain(fresh);
+    expect(reaped.map((r) => r.source_id)).toContain(paused);
+    await rows(REQUEUE, [[...new Set(reaped.map((r) => r.source_id))]]);
+    expect(
+      (await one(`select next_run_at > now() as later from sources where id = $1`, [fresh])).later,
+    ).toBe(true);
+    expect(
+      (await one(`select next_run_at > now() as later from sources where id = $1`, [paused])).later,
+    ).toBe(true);
+  });
+});
