@@ -65,6 +65,9 @@ export const CADENCE_MINUTES = 30 * 24 * 60;
 /** How soon an unfinished walk, or an unfinished download, picks up again. */
 export const RESUME_MINUTES = 10;
 
+/** The least a download is given; with less than this left a run does not start one. */
+export const DOWNLOAD_MIN_MS = 30_000;
+
 /** Consecutive failed requests after which a run stops asking. */
 export const FAILURE_STOP = 3;
 
@@ -100,12 +103,6 @@ export function versionFromUrl(url) {
     /ol_dump_(?:authors|works|editions|all)_(\d{4}-\d{2}-\d{2})\.txt\.gz/,
   );
   return m ? m[1] : null;
-}
-
-/** A dump date from a Last-Modified header when the URL does not carry one. */
-export function versionFromLastModified(value) {
-  const d = new Date(String(value ?? ''));
-  return Number.isNaN(d.getTime()) ? null : d.toISOString().slice(0, 10);
 }
 
 // ── Rows ─────────────────────────────────────────────────────────────────────
@@ -402,8 +399,11 @@ export function staleFiles(names, version) {
 
 /**
  * The dump date behind the `_latest` URL: one HEAD request through the two
- * redirects, the date read off the final URL, or off Last-Modified when the
- * mirror hands back something unnamed.
+ * redirects, the date read off the final URL. Nothing else names the dump:
+ * Last-Modified is the upload, days after the date in the file name, and a
+ * dated URL built from it would ask archive.org for an item it does not have.
+ * A mirror that hands back something unnamed is a failed request, and a walk
+ * in progress carries on with the date its cursor already knows.
  */
 export async function resolveVersion(http) {
   const res = await http.request(latestUrl(FILES[0]), {
@@ -413,9 +413,12 @@ export async function resolveVersion(http) {
   });
   await res.body?.cancel?.().catch?.(() => {});
   if (!res.ok) throw new Error(`openlibrary answered ${res.status} for the latest dump`);
-  const version =
-    versionFromUrl(res.url) ?? versionFromLastModified(res.headers?.get?.('last-modified'));
-  if (!version) throw new Error('openlibrary did not say which dump is latest');
+  const version = versionFromUrl(res.url);
+  if (!version) {
+    throw new Error(
+      `openlibrary did not say which dump is latest (${String(res.url).slice(0, 120)})`,
+    );
+  }
   return version;
 }
 
@@ -546,9 +549,18 @@ export const openlibraryCatalog = defineAdapter({
         (failures ? `, ${failures} requests failed` : '');
 
       // Download, resuming whatever is on disk, until the file is whole.
-      // No deadline check here: the transfer is bounded by the run's own
-      // deadline through timeoutMs, and a cut past it is reported as in
-      // progress below, with the partial file kept for the resume.
+      // With less than the floor of the transfer timeout left there is no
+      // point starting one: stop here and let the next run make the request.
+      // Past that the transfer is bounded by the run's own deadline through
+      // timeoutMs, and a cut past it is reported as in progress below, with
+      // the partial file kept for the resume.
+      if (stopAt - Date.now() < DOWNLOAD_MIN_MS) {
+        return {
+          cursor: cursorAt(kind, line),
+          note: `${summary()}; out of time before the ${kind} download, resuming in 10 min`,
+          nextInMinutes: RESUME_MINUTES,
+        };
+      }
       let dl = null;
       while (dl === null) {
         requests += 1;
@@ -556,7 +568,9 @@ export const openlibraryCatalog = defineAdapter({
           dl = await http.download(datedUrl(kind, version), path, {
             headers: { 'user-agent': USER_AGENT },
             // The whole transfer, but never past the run's own deadline.
-            timeoutMs: Number.isFinite(stopAt) ? Math.max(30_000, stopAt - Date.now()) : BUDGET_MS,
+            timeoutMs: Number.isFinite(stopAt)
+              ? Math.max(DOWNLOAD_MIN_MS, stopAt - Date.now())
+              : BUDGET_MS,
           });
           streak = 0;
         } catch (err) {

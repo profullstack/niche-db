@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, describe, expect, test } from 'bun:test';
+import { afterAll, beforeAll, describe, expect, spyOn, test } from 'bun:test';
 import { mkdtemp, readFile, rm, stat, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -35,6 +35,7 @@ const {
   openlibraryCatalog,
   parseRow,
   publishDate,
+  resolveVersion,
   resumeFrom,
   rowItem,
   splitN,
@@ -42,7 +43,6 @@ const {
   textOf,
   trimTo,
   USER_AGENT,
-  versionFromLastModified,
   versionFromUrl,
   workItem,
 } = await import('../packages/adapters/src/openlibrary-catalog.js');
@@ -106,21 +106,44 @@ function provider({
   return { http, calls };
 }
 
-/** Drive the generator by hand: every batch, then the return value. */
-async function run({ config: cfg = {}, cursor = {}, p = provider(), deadline, log } = {}) {
-  const gen = openlibraryCatalog.pull({
-    config: { batchRows: 40, pauseMs: 0, ...cfg },
-    cursor,
-    env: {},
-    http: p.http,
-    log: log ?? (() => {}),
-    deadline: deadline ?? Number.POSITIVE_INFINITY,
-  });
-  const batches = [];
-  for (;;) {
-    const { value, done } = await gen.next();
-    if (done) return { batches, outcome: value, calls: p.calls };
-    batches.push(value);
+/**
+ * Drive the generator by hand: every batch, then the return value.
+ *
+ * `stopAfterBatches` is the clock: the deadline is an hour away until that
+ * many batches have come out, then `Date.now` jumps past it, so the adapter
+ * meets its deadline exactly where a long walk would, between two batches.
+ */
+async function run({
+  config: cfg = {},
+  cursor = {},
+  p = provider(),
+  deadline,
+  stopAfterBatches = Number.POSITIVE_INFINITY,
+  log,
+} = {}) {
+  const realNow = Date.now;
+  let past = false;
+  const clock = spyOn(Date, 'now').mockImplementation(() => (past ? 1e15 : realNow()));
+  try {
+    const gen = openlibraryCatalog.pull({
+      config: { batchRows: 40, pauseMs: 0, ...cfg },
+      cursor,
+      env: {},
+      http: p.http,
+      log: log ?? (() => {}),
+      deadline:
+        deadline ??
+        (Number.isFinite(stopAfterBatches) ? realNow() + 3_600_000 : Number.POSITIVE_INFINITY),
+    });
+    const batches = [];
+    for (;;) {
+      const { value, done } = await gen.next();
+      if (done) return { batches, outcome: value, calls: p.calls };
+      batches.push(value);
+      if (batches.length >= stopAfterBatches) past = true;
+    }
+  } finally {
+    clock.mockRestore();
   }
 }
 
@@ -415,7 +438,7 @@ describe('the cursor', () => {
     expect(isStale(undefined, '2022-01-01T00:00:00')).toBe(false);
   });
 
-  test('the version comes off the mirror URL, or Last-Modified, and other dumps are stale files', () => {
+  test('the version comes off the mirror URL, never off Last-Modified, and other dumps are stale files', async () => {
     expect(
       versionFromUrl(
         'https://ia800909.us.archive.org/1/items/ol_dump_2026-08-31/ol_dump_authors_2026-08-31.txt.gz',
@@ -423,8 +446,17 @@ describe('the cursor', () => {
     ).toBe('2026-08-31');
     expect(versionFromUrl('https://openlibrary.org/data/ol_dump_works_latest.txt.gz')).toBeNull();
     expect(versionFromUrl(null)).toBeNull();
-    expect(versionFromLastModified('Wed, 02 Sep 2026 16:01:56 GMT')).toBe('2026-09-02');
-    expect(versionFromLastModified('soon')).toBeNull();
+    // Last-Modified is the upload (Sep 2 for the Aug 31 dump): a date taken
+    // from it would name an archive.org item that does not exist.
+    const unnamed = provider({}).http;
+    unnamed.request = async () => ({
+      ok: true,
+      status: 200,
+      url: 'https://ia800909.us.archive.org/1/items/ol_dump_latest/ol_dump_authors_latest.txt.gz',
+      headers: new Headers({ 'last-modified': 'Wed, 02 Sep 2026 16:01:56 GMT' }),
+      body: null,
+    });
+    await expect(resolveVersion(unnamed)).rejects.toThrow(/did not say which dump is latest/);
     expect(
       staleFiles(
         [
@@ -448,8 +480,8 @@ describe('the walk', () => {
     const authorIds = itemsOf('authors').map((i) => i.externalId);
     const workIds = itemsOf('works').map((i) => i.externalId);
 
-    // Run 1: the deadline is already past, so one batch and out.
-    const first = await run({ deadline: 0 });
+    // Run 1: the deadline passes after the first batch, so one batch and out.
+    const first = await run({ stopAfterBatches: 1 });
     expect(first.batches).toHaveLength(1);
     expect(first.batches[0].items).toHaveLength(40);
     expect(first.batches[0].items[0].kind).toBe('author');
@@ -514,6 +546,25 @@ describe('the walk', () => {
     expect(third.calls.map((c) => c.kind)).toEqual(['head']);
   });
 
+  test('a deadline already near yields nothing, makes no download and asks for ten minutes', async () => {
+    for (const deadline of [0, Date.now() - 1, Date.now() + 5_000]) {
+      const p = provider();
+      const got = await run({
+        p,
+        deadline,
+        cursor: { version: VERSION, file: 'works', line: 700 },
+      });
+      expect(got.batches).toEqual([]);
+      expect(got.outcome).toMatchObject({
+        cursor: { version: VERSION, file: 'works', line: 700, done: false },
+        nextInMinutes: 10,
+      });
+      expect(got.outcome.note).toMatch(/out of time before the works download/);
+      expect(p.calls.map((c) => c.kind)).toEqual(['head']);
+    }
+    expect(await exists(localPath('works'))).toBe(false);
+  });
+
   test('a new dump after a complete pass skips the rows modified before the watermark', async () => {
     const watermark = '2021-12-27T14:49:34.041676';
     const expected = FILES.flatMap((kind) =>
@@ -549,7 +600,7 @@ describe('the walk', () => {
 
   test('a new dump while a walk is in progress starts the walk over, keeping the old pass watermark', async () => {
     const got = await run({
-      deadline: 0,
+      stopAfterBatches: 1,
       cursor: {
         version: '2026-07-31',
         file: 'works',
@@ -569,7 +620,7 @@ describe('the walk', () => {
   test('a stale file of another dump is removed before the walk', async () => {
     const old = localPath('works', '2026-06-30');
     await writeFile(old, 'old');
-    await run({ deadline: 0 });
+    await run({ stopAfterBatches: 1 });
     expect(await exists(old)).toBe(false);
     await rm(localPath('authors'), { force: true });
   });
@@ -660,7 +711,7 @@ describe('failures', () => {
     const p = provider({ fail: (n) => n <= 3 });
     const got = await run({
       p,
-      deadline: 0,
+      stopAfterBatches: 1,
       cursor: { version: '2026-07-31', file: 'works', line: 0, done: false },
     });
     expect(p.calls.map((c) => c.kind)).toEqual(['head', 'head', 'head', 'download']);
