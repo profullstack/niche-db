@@ -180,6 +180,9 @@ main.wide {
 .brand:hover {
   text-decoration: none;
 }
+.brand img {
+  flex: none;
+}
 .topsearch {
   flex: 1 1 14rem;
 }

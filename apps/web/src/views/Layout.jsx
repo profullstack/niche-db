@@ -114,8 +114,8 @@ export const Layout = (props) => (
               appIconFor({ plan: currentModules().plan, icon: props.user?.premium_icon }),
             )}
             alt=""
-            width="28"
-            height="28"
+            width="56"
+            height="56"
           />
           <span>{config.siteName}</span>
         </a>

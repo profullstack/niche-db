@@ -30,6 +30,10 @@ Express connection and data flow through the geometry of the mark itself.
   faces, decorative circuit diagrams, and tiny lettering inside the icon.
 - Use a quiet rounded graphite tile for the primary logo. Use a full-bleed
   background for maskable icons so the operating system can apply its own crop.
+- Render the site-header logo at **56 × 56 CSS pixels** on desktop and mobile,
+  100% larger in each dimension than the previous 28 × 28 mark. Keep its full
+  square viewBox visible and prevent flex layouts from shrinking it, so the
+  sculpted layers and core remain visible. Navigation may wrap around the brand.
 
 | Role | Color |
 | --- | --- |
@@ -68,7 +72,7 @@ Express connection and data flow through the geometry of the mark itself.
    If changing the semantic `surface` group, update the maskable derivation too.
 2. Open `brand/preview.html` for the large mark, light and dark backgrounds,
    real-size favicons, theme variants, and a circular mask preview.
-3. Inspect at 16, 28, 32, 48, 192, and 512 pixels. The stacked layers and mint
+3. Inspect at 16, 32, 48, 56, 192, and 512 pixels. The stacked layers and mint
    core should remain recognizable; fine highlights may simplify at small sizes.
 4. Check XML validity, local reference integrity, image dimensions, transparent
    primary corners, and opaque maskable corners. The public SVG copies must
