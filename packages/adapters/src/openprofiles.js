@@ -153,34 +153,58 @@ export const openprofiles = defineAdapter({
       log('no listings configured');
       return { items: [], note: 'no listings configured' };
     }
+    /*
+     * Three things the cursor remembers per listing. `since` is the newest
+     * `updatedAt` seen on a walk that finished, and is what the next walk asks
+     * the listing for. `complete` says a walk has ever finished: a listing of a
+     * hundred thousand shows is cut by the run's deadline long before its end,
+     * and asking for changes "since" the newest entry of an unfinished walk
+     * would skip everything the walk never reached. `resume` is where a cut
+     * walk stopped (the page it was on and the newest it had seen), so the next
+     * run, asked for in two minutes rather than an hour, carries on from there.
+     */
     const since = { ...(cursor?.since ?? {}) };
+    const complete = { ...(cursor?.complete ?? {}) };
+    const resume = { ...(cursor?.resume ?? {}) };
     const items = [];
     const notes = [];
     for (const listing of listings) {
       if (Date.now() > deadline) break;
       const app = appOf(listing);
-      let next = null;
+      const resuming = resume[listing] && typeof resume[listing] === 'object';
+      const incremental = !resuming && complete[listing] === true && Boolean(since[listing]);
+      let pageCursor = resuming ? resume[listing].at || null : null;
+      let newest = resuming
+        ? (resume[listing].newest ?? null)
+        : incremental
+          ? since[listing]
+          : null;
       let pages = 0;
       let fetched = 0;
       let rejected = 0;
-      let newest = since[listing] ?? null;
-      const startedFrom = since[listing] ?? null;
+      let cut = false;
+      let missing = false;
       try {
         do {
           const body = await http.jsonOrNull(
-            pageUrl(listing, { since: startedFrom, cursor: next, limit: 200 }),
-            {
-              timeoutMs: 20_000,
-            },
+            pageUrl(listing, {
+              since: incremental ? since[listing] : null,
+              cursor: pageCursor,
+              limit: 200,
+            }),
+            { timeoutMs: 20_000 },
           );
           if (body === null) {
             notes.push(`${app}: listing not there yet (404)`);
+            missing = true;
             break;
           }
           const page = parseListing(body);
-          pages += 1;
           for (const entry of page.entries) {
-            if (Date.now() > deadline) break;
+            if (Date.now() > deadline) {
+              cut = true;
+              break;
+            }
             if (!sameOrigin(listing, entry.url)) {
               rejected += 1;
               continue;
@@ -202,17 +226,37 @@ export const openprofiles = defineAdapter({
               log(`${app}: ${entry.url} ${String(err.message).slice(0, 60)}`);
             }
           }
-          next = page.next;
-        } while (next && pages < 50 && Date.now() < deadline);
-        if (newest) since[listing] = newest;
-        notes.push(
-          `${app}: ${fetched} documents${rejected ? `, ${rejected} off-origin dropped` : ''}`,
-        );
+          if (cut) break;
+          pages += 1;
+          pageCursor = page.next;
+        } while (pageCursor && pages < 50 && Date.now() < deadline);
+        if (missing) continue;
+        // Stopped between pages by the page cap or the clock: that is a cut too.
+        if (!cut && pageCursor) cut = true;
+        if (cut) {
+          // A cut mid-page resumes from that page, so the entries after the cut
+          // are fetched again next time; absorbing a document twice is a no-op.
+          resume[listing] = { at: pageCursor ?? '', newest };
+          notes.push(`${app}: ${fetched} documents, walk cut, resuming in 2 minutes`);
+        } else {
+          delete resume[listing];
+          complete[listing] = true;
+          if (newest) since[listing] = newest;
+          notes.push(
+            `${app}: ${fetched} documents${rejected ? `, ${rejected} off-origin dropped` : ''}`,
+          );
+        }
       } catch (err) {
         notes.push(`${app}: ${String(err.message).slice(0, 60)}`);
       }
     }
     log(notes.join('; '));
-    return { items, cursor: { since }, note: notes.join('; ') };
+    const pending = Object.keys(resume).length > 0;
+    return {
+      items,
+      cursor: { since, complete, resume },
+      note: notes.join('; '),
+      ...(pending ? { nextInMinutes: 2 } : {}),
+    };
   },
 });
