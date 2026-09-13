@@ -1293,6 +1293,14 @@ export const DEFAULT_FEEDS = [
   },
   {
     collection: 'hosting',
+    slug: 'hosting-cli',
+    name: 'Hosting providers with a CLI',
+    description:
+      'Providers whose official command-line tool we found, with the install command as their own guide prints it, plus API docs, Terraform provider and status page where they exist.',
+    query: { kinds: ['provider'], tags: ['has-cli'] },
+  },
+  {
+    collection: 'hosting',
     slug: 'vps-plans',
     name: 'VPS and bare metal plans',
     query: { kinds: ['plan'] },

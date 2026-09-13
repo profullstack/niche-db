@@ -1,4 +1,5 @@
 import { companyTicker } from './company-ticker.js';
+import { developer } from './developer.js';
 import { githubRepo } from './github.js';
 import { npmStats } from './npm.js';
 import { opengraph } from './opengraph.js';
@@ -17,6 +18,7 @@ export const ENRICHERS = [
   npmStats,
   secCompany,
   companyTicker,
+  developer,
   semanticScholar,
   openlibraryWork,
   opengraph,
