@@ -99,6 +99,7 @@ import { tedNotices } from './ted.js';
 import { tmdbReleases } from './tmdb.js';
 import { tsbb } from './tsbb.js';
 import { tvmazeSchedule } from './tvmaze.js';
+import { tvmazeCatalog } from './tvmaze-catalog.js';
 import { ukPoliceCrime } from './ukpolice.js';
 import { upcloudPlans } from './upcloud.js';
 import { usaspendingAwards } from './usaspending.js';
@@ -211,6 +212,7 @@ export const ADAPTERS = [
   // Screen: films, TV and anime, and the IMDb ratings behind 400k titles.
   tmdbReleases,
   tvmazeSchedule,
+  tvmazeCatalog,
   anilistAiring,
   imdbRatings,
   // Channels: the whole iptv-org directory, for matching a playlist by name.
