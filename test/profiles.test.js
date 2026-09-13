@@ -195,11 +195,13 @@ describe('the openprofiles adapter', () => {
     const startedAt = first.cursor.resume[P0D].startedAt;
     expect(typeof startedAt).toBe('string');
 
-    // The second run carries on: the first page again (a document twice is a no-op), then page two.
+    expect(first.cursor.resume[P0D].offset).toBe(1);
+
+    // The second run carries on: the first page from its second entry, then page two.
     const second = ctx(table, { config: { urls: [P0D] }, cursor: first.cursor });
     const done = await openprofiles.pull(second.ctx);
     expect(second.seen[0]).not.toContain('since=');
-    expect(done.items.map((i) => i.title).sort()).toEqual(['Ada Lovelace', 'Pigweed and Crowhill']);
+    expect(done.items.map((i) => i.title)).toEqual(['Ada Lovelace']);
     expect(done.nextInMinutes).toBeUndefined();
     expect(done.cursor.resume).toEqual({});
     expect(done.cursor.complete[P0D]).toBe(true);
@@ -252,7 +254,28 @@ describe('the openprofiles adapter', () => {
     expect(out.items).toEqual([]);
     expect(out.nextInMinutes).toBe(2);
     expect(out.note).toContain('throttled');
-    expect(out.cursor.resume[P0D].at).toBe('');
+    expect(out.cursor.resume[P0D]).toMatchObject({ at: '', offset: 0 });
+  });
+
+  test('a refusal part way through a page resumes at the first refused entry, not the top of the page', async () => {
+    const table = await twoPages();
+    const t = ctx(table, { config: { urls: [P0D], concurrency: 1 } });
+    const realText = t.ctx.http.text;
+    let calls = 0;
+    t.ctx.http.text = async (u) => {
+      calls += 1;
+      if (calls > 1) throw new Error(`402 from ${u}`);
+      return realText(u);
+    };
+    const out = await openprofiles.pull(t.ctx);
+    expect(out.items.length).toBe(1);
+    expect(out.cursor.resume[P0D]).toMatchObject({ at: '', offset: 1 });
+    expect(out.note).toContain('entry 1');
+    // Next run: the first page again, but starting at entry 1, so the one that got through is not refetched.
+    const again = ctx(table, { config: { urls: [P0D], concurrency: 1 }, cursor: out.cursor });
+    const done = await openprofiles.pull(again.ctx);
+    expect(done.items.map((i) => i.title).sort()).toEqual(['Ada Lovelace']);
+    expect(done.cursor.complete[P0D]).toBe(true);
   });
 
   test('a since recorded before any walk finished is not trusted: the next run walks everything', async () => {
