@@ -34,6 +34,7 @@
   "devDependencies": {
     "@biomejs/biome": "^2.3.0",
     "@electric-sql/pglite": "^0.5.5",
-    "@profullstack/favicon-generator": "^1.2.1"
+    "@profullstack/favicon-generator": "^1.2.1",
+    "@profullstack/svgcrusher": "file:vendor/profullstack-svgcrusher-0.1.0.tgz"
   }
 }

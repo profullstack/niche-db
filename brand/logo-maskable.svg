@@ -1,35 +1,66 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" fill="none" role="img" aria-labelledby="nichedb-title nichedb-desc">
-  <title id="nichedb-title">NicheDB</title>
-  <desc id="nichedb-desc">An N connects two open data nodes. Sources in, feeds out.</desc>
-  <metadata>Design reference: https://w3bs.org/standards/design (coming soon; conformance pending). Editable design brief: brand/prompt.md.</metadata>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" fill="none" role="img" aria-labelledby="title desc">
+  <title id="title">NicheDB</title>
+  <desc id="desc">Three sculpted amber data layers surrounding a mint-green agent core on an obsidian tile.</desc>
+  <metadata id="design-contract"><![CDATA[
+{"brand":"NicheDB","asset":"logo","designStandard":{"uri":"https://w3bs.org/standards/design","status":"pending","conformance":"unverified","anticipatedSourceFormats":["SKILL.md","prompt.md"]},"colorTokens":{"surface":"#11181F","data":"#F29932","agent":"#5EE39A"},"editablePaints":["tile","edge","gold","middle","lower","core","aura"],"requirements":{"selfContained":true,"externalFonts":false,"embeddedRaster":false,"scripts":false},"notes":"Future-facing metadata only; reconcile with the published design standard when available. Edit named gradient stops and semantic groups to retheme."}
+  ]]></metadata>
   <defs>
-    <linearGradient id="nichedb-surface" x1="64" y1="0" x2="448" y2="512" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#202735"/>
-      <stop offset="1" stop-color="#12161f"/>
+    <linearGradient id="tile" x1="64" y1="16" x2="448" y2="512" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#202932"/><stop offset=".5" stop-color="#11181F"/><stop offset="1" stop-color="#090F15"/>
     </linearGradient>
-    <linearGradient id="nichedb-input" x1="144" y1="144" x2="144" y2="368" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#ffda96"/>
-      <stop offset="1" stop-color="#f2a33a"/>
+    <linearGradient id="edge" x1="92" y1="24" x2="428" y2="492" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#59636C" stop-opacity=".55"/><stop offset=".48" stop-color="#26343C" stop-opacity=".1"/><stop offset="1" stop-color="#5EE39A" stop-opacity=".22"/>
     </linearGradient>
-    <linearGradient id="nichedb-bridge" x1="156" y1="152" x2="356" y2="360" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#ffda96"/>
-      <stop offset="0.45" stop-color="#f2c875"/>
-      <stop offset="1" stop-color="#5ee39a"/>
+    <linearGradient id="gold" x1="117" y1="172" x2="367" y2="256" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#FFE3A0"/><stop offset=".48" stop-color="#FFC365"/><stop offset="1" stop-color="#F29932"/>
     </linearGradient>
-    <linearGradient id="nichedb-output" x1="368" y1="144" x2="368" y2="368" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#a6f5cf"/>
-      <stop offset="1" stop-color="#5ee39a"/>
+    <linearGradient id="middle" x1="108" y1="238" x2="398" y2="332" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F7BA60"/><stop offset="1" stop-color="#C97927"/>
     </linearGradient>
+    <linearGradient id="lower" x1="108" y1="314" x2="396" y2="396" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#D79442"/><stop offset="1" stop-color="#945126"/>
+    </linearGradient>
+    <linearGradient id="core" x1="215" y1="120" x2="290" y2="202" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#D4FFE0"/><stop offset=".5" stop-color="#74F8B3"/><stop offset="1" stop-color="#37CE94"/>
+    </linearGradient>
+    <radialGradient id="aura" cx="0" cy="0" r="1" gradientTransform="translate(256 159) scale(116 91)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#5EE39A" stop-opacity=".13"/><stop offset="1" stop-color="#5EE39A" stop-opacity="0"/>
+    </radialGradient>
   </defs>
-  <rect id="nichedb-background" width="512" height="512" fill="url(#nichedb-surface)"/>
-  <g id="nichedb-mark" transform="translate(30.72 30.72) scale(0.88)">
-    <!-- Two rails and a shared route form the N; the apertures are open ports. -->
-    <path d="M144 368V160" stroke="url(#nichedb-input)" stroke-width="64" stroke-linecap="round"/>
-    <path d="M368 144V352" stroke="url(#nichedb-output)" stroke-width="64" stroke-linecap="round"/>
-    <path d="M144 160L368 352" stroke="#12161f" stroke-width="88" stroke-linecap="round"/>
-    <path d="M144 160L368 352" stroke="url(#nichedb-bridge)" stroke-width="64" stroke-linecap="round"/>
-    <path d="M174 176L350 327" stroke="#ffffff" stroke-opacity="0.26" stroke-width="3" stroke-linecap="round"/>
-    <circle cx="144" cy="160" r="14" fill="#12161f"/>
-    <circle cx="368" cy="352" r="14" fill="#12161f"/>
+  <rect width="512" height="512" fill="url(#tile)"/>
+<g id="maskable-mark" transform="translate(30.72 30.72) scale(0.88)">
+  <g id="data-lower">
+  <!-- Lower data tier -->
+  <path d="M110 305L244 236Q256 230 268 236L402 305V329Q402 337 394 341L269 407Q256 414 243 407L118 341Q110 337 110 329Z" fill="#713F21"/>
+  <path d="M110 305L244 236Q256 230 268 236L402 305L268 376Q256 383 244 376Z" fill="url(#lower)"/>
+  <path d="M256 381V411" stroke="#E0A658" stroke-opacity=".3" stroke-width="2"/>
   </g>
+  <g id="data-middle">
+  <!-- Middle data tier -->
+  <path d="M110 231L244 162Q256 156 268 162L402 231V255Q402 263 394 267L269 333Q256 340 243 333L118 267Q110 263 110 255Z" fill="#A86228"/>
+  <path d="M110 231L244 162Q256 156 268 162L402 231L268 302Q256 309 244 302Z" fill="url(#middle)"/>
+  <path d="M256 307V337" stroke="#FFCC79" stroke-opacity=".4" stroke-width="2"/>
+  </g>
+  <g id="data-upper">
+  <!-- Open upper tier: the negative space cradles the agent core -->
+  <path d="M110 158L158 133L207 159L166 180L256 228L346 180L305 159L354 133L402 158V182Q402 190 394 194L268 261Q256 268 244 261L118 194Q110 190 110 182Z" fill="#D88B35"/>
+  <path d="M110 158L158 133L207 159L166 180L256 228L346 180L305 159L354 133L402 158L268 229Q256 236 244 229Z" fill="url(#gold)"/>
+  <path d="M111 158L244 229Q256 236 268 229L401 158" stroke="#FFF0C5" stroke-opacity=".5" stroke-width="2"/>
+  <path d="M256 235V265" stroke="#FFE0A0" stroke-opacity=".65" stroke-width="2"/>
+  </g>
+  <g id="agent-core">
+  <!-- Autonomous core -->
+  <ellipse cx="256" cy="159" rx="116" ry="91" fill="url(#aura)"/>
+  <path d="M212 132L256 108L300 132V168L256 192L212 168Z" fill="#229B74"/>
+  <path d="M212 132L256 108L300 132L256 157Z" fill="url(#core)"/>
+  <path d="M212 132L256 157V192L212 168Z" fill="#5EE3A1"/>
+  <path d="M256 157L300 132V168L256 192Z" fill="#2ABA87"/>
+  <path d="M213 132L256 156L299 132" stroke="#DCFFE8" stroke-opacity=".7" stroke-width="2"/>
+  <path d="M256 157V190" stroke="#B5FFD3" stroke-opacity=".45" stroke-width="2"/>
+  </g>
+  <g id="active-records">
+  <!-- Three active records on the lower right face -->
+  <path d="M329 363L341 357M351 351L363 345M373 339L385 333" stroke="#81F5B7" stroke-width="5" stroke-linecap="round"/>
+  </g>
+</g>
 </svg>

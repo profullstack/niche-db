@@ -4,6 +4,11 @@ import { html } from 'hono/html';
 import { assetUrl } from '../lib/asset-version.js';
 import { currentModules } from '../lib/modules.js';
 
+const faviconFor = (user) => {
+  const icon = appIconFor({ plan: currentModules().plan, icon: user?.premium_icon });
+  return assetUrl(icon === 'logo.svg' ? 'favicon.svg' : icon);
+};
+
 /**
  * The single HTML shell. Every page renders through here.
  *
@@ -37,11 +42,13 @@ export const Layout = (props) => (
       <link rel="manifest" href="/manifest.webmanifest" />
       <link
         rel="icon"
-        type="image/svg+xml"
-        href={assetUrl(appIconFor({ plan: currentModules().plan, icon: props.user?.premium_icon }))}
+        type="image/x-icon"
+        sizes="16x16 32x32"
+        href={assetUrl('icons/favicon.ico')}
       />
       <link rel="icon" type="image/png" sizes="32x32" href={assetUrl('icons/favicon-32.png')} />
       <link rel="icon" type="image/png" sizes="16x16" href={assetUrl('icons/favicon-16.png')} />
+      <link rel="icon" type="image/svg+xml" sizes="any" href={faviconFor(props.user)} />
       {[180, 152, 144, 120, 76].map((s) => (
         <link
           key={s}

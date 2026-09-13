@@ -10,8 +10,11 @@ const STATIC_FILES = [
   ['/vendor-webauthn.js', 'vendor-webauthn.js', 'text/javascript'],
   ['/sw.js', 'sw.js', 'text/javascript'],
   ['/logo.svg', 'logo.svg', 'image/svg+xml'],
+  ['/favicon.svg', 'favicon.svg', 'image/svg+xml'],
+  ['/favicon.ico', 'icons/favicon.ico', 'image/x-icon'],
 ];
 const VERSIONED_ICONS = [
+  'icons/favicon.svg',
   'icons/favicon-16.png',
   'icons/favicon-32.png',
   ...[76, 120, 144, 152, 180].map((s) => `icons/apple-touch-icon-${s}x${s}.png`),
@@ -60,13 +63,6 @@ export function registerStatic(app, gateway) {
     return c.body(await f.arrayBuffer());
   });
 
-  app.get('/favicon.ico', async (c) => {
-    const f = Bun.file(new URL('../../public/icons/favicon.ico', import.meta.url).pathname);
-    c.header('content-type', 'image/x-icon');
-    c.header('cache-control', 'public, max-age=604800');
-    return c.body(await f.arrayBuffer());
-  });
-
   /**
    * The installed app's manifest.
    *
@@ -81,10 +77,12 @@ export function registerStatic(app, gateway) {
       plan: c.get('plan') ?? 'free',
       icon: c.get('user')?.premium_icon,
     });
-    const memberIcon =
-      chosen === APP_ICONS[0].file
-        ? []
-        : [{ src: assetUrl(chosen), sizes: 'any', type: 'image/svg+xml', purpose: 'any' }];
+    const svgIcon = {
+      src: assetUrl(chosen === APP_ICONS[0].file ? 'favicon.svg' : chosen),
+      sizes: 'any',
+      type: 'image/svg+xml',
+      purpose: 'any',
+    };
     return c.json({
       name: config.siteName,
       short_name: config.siteName,
@@ -94,7 +92,7 @@ export function registerStatic(app, gateway) {
       background_color: '#12161f',
       theme_color: '#12161f',
       icons: [
-        ...memberIcon,
+        svgIcon,
         ...[48, 128, 192, 256, 384, 512].map((s) => ({
           src: assetUrl(`icons/icon-${s}x${s}.png`),
           sizes: `${s}x${s}`,

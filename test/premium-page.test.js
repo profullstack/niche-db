@@ -118,6 +118,30 @@ describe('the pricing page', () => {
   });
 });
 
+describe('SVG favicons', () => {
+  const page = (plan, icon) =>
+    withModules(decideModules({ plan, paid: plan !== 'free' }), () =>
+      Layout({ user: { premium_icon: icon }, children: 'hello' }).toString(),
+    );
+
+  test('the default SVG is scalable and follows the raster fallbacks', async () => {
+    const html = await page('free', 'ember');
+    const icons = html.match(/<link\b[^>]*rel="icon"[^>]*>/g);
+    expect(icons).toHaveLength(4);
+    expect(icons.at(-1)).toContain('type="image/svg+xml"');
+    expect(icons.at(-1)).toContain('sizes="any"');
+    expect(icons.at(-1)).toContain('href="/favicon.svg');
+    expect(icons[0]).toContain('favicon.ico');
+    expect(html).toContain('apple-touch-icon');
+  });
+
+  test('the preferred SVG respects a member’s icon selection', async () => {
+    const html = await page('pro', 'ember');
+    const icons = html.match(/<link\b[^>]*rel="icon"[^>]*>/g);
+    expect(icons.at(-1)).toContain('/icons/app-ember.svg');
+  });
+});
+
 describe('the upsell appears where the thing it sells is missing', () => {
   const page = (plan) =>
     withModules(decideModules({ plan, paid: plan !== 'free' }), () =>

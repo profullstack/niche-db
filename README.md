@@ -190,6 +190,18 @@ right then, so a tier that moves tomorrow never re-prices yesterday's sale
 
 Bun, Hono (server-rendered JSX), Postgres via Bun's native driver, BullMQ on Redis, Biome. `bun apps/worker/src/enrich-cli.js [n]` runs enrichment from a terminal. Shared Profullstack modules: `@profullstack/x402-gateway`, `@profullstack/emailer`, `@profullstack/coinpay`, `@profullstack/referrals`, `@profullstack/api-key-manager`, `@profullstack/autoblog` (signed webhooks), `@profullstack/favicon-generator`.
 
+## Brand assets
+
+`brand/logo.svg` is the editable SVG master. Run `bun run build:brand` to crush it
+into `favicon.svg` with SVGCrusher, then run the installed `fav` CLI to regenerate
+`apps/web/public/icons`. The build also updates `/logo.svg`, `/favicon.svg`, member
+palettes, and maskable app icons. SVG is preferred in the page and app manifest;
+PNG and ICO remain fallbacks. Preview everything in `brand/preview.html`.
+
+SVGCrusher's initial CLI release is bundled in `vendor/` so this command works
+from a clean checkout before an npm release. Its standalone source lives in
+[profullstack/svgcrusher](https://github.com/profullstack/svgcrusher).
+
 ## Configuration
 
 Everything is read once from the environment in `packages/config/src/index.js`; `.env.example` lists every variable. Production secrets live in the `nichedb--prod` [logicsrc](https://logicsrc.com) vault:

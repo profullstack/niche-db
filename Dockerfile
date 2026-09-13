@@ -5,6 +5,7 @@ WORKDIR /app
 
 FROM base AS deps
 COPY package.json bun.lock* bunfig.toml ./
+COPY vendor/ vendor/
 COPY apps/web/package.json apps/web/
 COPY apps/worker/package.json apps/worker/
 COPY apps/cli/package.json apps/cli/
