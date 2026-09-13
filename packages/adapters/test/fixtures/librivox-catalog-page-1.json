@@ -1,0 +1,129 @@
+{
+  "books": [
+    {
+      "id": "133",
+      "title": "Jane Eyre",
+      "description": "<i>Jane Eyre</i> is not your typical romance. It is a story of a woman who struggles with a world in which she doesn't quite fit. Once finished with her schooling, and with no family that really cares of her she strikes out on her own as a governess. Jane Eyre searches for love, someone to care for her, and someone to care for, and finds it in unexpected places. (summary by Kri)",
+      "url_text_source": "https://www.gutenberg.org/etext/1260",
+      "language": "English",
+      "copyright_year": "1847",
+      "num_sections": "39",
+      "url_rss": "https://librivox.org/rss/133",
+      "url_zip_file": "https://archive.org/compress/jane_eyre_librivox/formats=64KBPS MP3&file=/jane_eyre_librivox.zip",
+      "url_project": "https://en.wikipedia.org/wiki/Jane_Eyre",
+      "url_librivox": "https://librivox.org/jane-eyre-by-charlotte-bront/",
+      "url_other": "",
+      "totaltime": "20:36:36",
+      "totaltimesecs": 74196,
+      "authors": [
+        {
+          "id": "931",
+          "first_name": "Charlotte",
+          "last_name": "Brontë",
+          "dob": "1816",
+          "dod": "1855"
+        }
+      ],
+      "coverart_jpg": "https://www.archive.org/download/LibrivoxCdCoverArt10/Jane_Eyre_1108.jpg",
+      "coverart_thumbnail": "https://www.archive.org/download/LibrivoxCdCoverArt10/Jane_Eyre_1108_thumb.jpg",
+      "url_iarchive": "https://archive.org/details/jane_eyre_librivox",
+      "genres": [
+        {
+          "id": "15",
+          "name": "General Fiction"
+        },
+        {
+          "id": "27",
+          "name": "Romance"
+        }
+      ],
+      "translators": []
+    },
+    {
+      "id": "134",
+      "title": "Eclogues",
+      "description": "This book of poems, written between 42 en 39 BC, was a bestseller in ancient Rome, and still holds a fascination today. Held to be divinely inspired not only by the Romans themselves, but by the Medieval Catholic church, The Eclogues is one of the most beloved collections of Latin short poetry. (Summary by Caeristhiona)<BR> The translator of this version is unknown. This recording is done in the form of a dramatic reading: in each eclogue, every character is read by a different Librivox volunteer.<BR><BR>\nReaders of the eclogues that were done by multiple readers:<BR><BR>\n<I>Eclogue 1</I><BR>\nMeliboeus: <a href=\"http://librivox.org/reader/26\">Denny Sayers</a><br>Tityrus: <a href=\"http://kayray.org/\">Kara Shallenberg</a><br>\n<I>Eclogue 3</I><BR>\nMenalcas: <a href=\"http://librivox.org/reader/2961\">Leni Ribeiro</a><br>Damoetas: <a href=\"http://librivox.org/reader/87\">Rosalind Wills</a><br>Palaemon: <a href=\"http://kayray.org/\">Kara Shallenberg</a><br>\n<I>Eclogue 5</I><BR>\nMenalcas: <a href=\"http://librivox.org/reader/2961\">Leni Ribeiro</a><br>Mopsus: <a href=\"http://librivox.org/reader/1724\">Anna Simon</a><br>\n<I>Eclogue 7</I><BR>\nMeliboeus: <a href=\"http://librivox.org/reader/26\">Denny Sayers</a><br>\nCorydon: <a href=\"http://librivox.org/reader/2961\">Leni Ribeiro</a><br>\nTityrus: <a href=\"http://librivox.org/reader/1724\">Anna Simon</a><br>\n<I>Eclogue 8</I><BR>\nPollio: <a href=\"http://librivox.org/reader/1724\">Anna Simon</a><br>\nDamon: <a href=\"http://librivox.org/reader/2607\">Ruthie Golding</a><br>\nAlphesiboeus: <a href=\"http://frisco-squid.blogspot.com/\">Squid Varilekova</a><br>\n<I>Eclogue 9</I><BR>\nLycidas: <a href=\"www.gregelmensdorp.com\">Greg Elmensdorp</a><br>\nMoeris: <a href=\"http://librivox.org/reader/2961\">Leni Ribeiro</a><br><BR>\nAlso available: <a href=\"http://librivox.org/eclogae-by-publius-vergilius-maro/\">a Librivox recording of The Eclogues in their original Latin.</a>",
+      "url_text_source": "https://www.gutenberg.org/etext/230",
+      "language": "English",
+      "copyright_year": "0",
+      "num_sections": "10",
+      "url_rss": "https://librivox.org/rss/134",
+      "url_zip_file": "https://archive.org/compress/eclogues_0810_librivox/formats=64KBPS MP3&file=/eclogues_0810_librivox.zip",
+      "url_project": "https://en.wikipedia.org/wiki/Eclogues",
+      "url_librivox": "https://librivox.org/the-eclogues-by-publius-vergilius-maro/",
+      "url_other": "",
+      "totaltime": "1:08:21",
+      "totaltimesecs": 4101,
+      "authors": [
+        {
+          "id": "6359",
+          "first_name": "",
+          "last_name": "Virgil",
+          "dob": "70 BCE",
+          "dod": "19 BCE"
+        }
+      ],
+      "coverart_jpg": "https://www.archive.org/download/LibrivoxCdCoverArt14/Eclogues_1202.jpg",
+      "coverart_thumbnail": "https://www.archive.org/download/LibrivoxCdCoverArt14/Eclogues_1202_thumb.jpg",
+      "url_iarchive": "https://www.archive.org/details/eclogues_0810_librivox",
+      "genres": [
+        {
+          "id": "4",
+          "name": "Classics (Greek & Latin Antiquity)"
+        },
+        {
+          "id": "25",
+          "name": "Poetry"
+        }
+      ],
+      "translators": [
+        {
+          "id": "221",
+          "first_name": "",
+          "last_name": "Unknown",
+          "dob": "",
+          "dod": ""
+        }
+      ]
+    },
+    {
+      "id": "135",
+      "title": "Eclogae (dramatic reading)",
+      "description": "This book of poems, written between 42 en 39 BC, was a bestseller in ancient Rome, and still holds a fascination today. Held to be divinely inspired not only by the Romans themselves, but by the Medieval Catholic church, The Eclogues is one of the most beloved collections of Latin short poetry. (Summary by Caeristhiona)<br /><br />This recording is done in the original Latin, in the form of a dramatic reading: in each eclogue, every character is read by a different Librivox volunteer. Two eclogues are included twice - giving you a \"Choice of Voice\" !",
+      "url_text_source": "https://www.gutenberg.org/etext/229",
+      "language": "Latin",
+      "copyright_year": "0",
+      "num_sections": "12",
+      "url_rss": "https://librivox.org/rss/135",
+      "url_zip_file": "https://archive.org/compress/ecloga_0810_librivox/formats=64KBPS MP3&file=/ecloga_0810_librivox.zip",
+      "url_project": "",
+      "url_librivox": "https://librivox.org/eclogae-by-publius-vergilius-maro/",
+      "url_other": "",
+      "totaltime": "1:29:50",
+      "totaltimesecs": 5390,
+      "authors": [
+        {
+          "id": "6359",
+          "first_name": "",
+          "last_name": "Virgil",
+          "dob": "70 BCE",
+          "dod": "19 BCE"
+        }
+      ],
+      "coverart_jpg": "https://www.archive.org/download/LibrivoxCdCoverArt14/Eclogae_1202.jpg",
+      "coverart_thumbnail": "https://www.archive.org/download/LibrivoxCdCoverArt14/Eclogae_1202_thumb.jpg",
+      "url_iarchive": "https://www.archive.org/details/ecloga_0810_librivox",
+      "genres": [
+        {
+          "id": "4",
+          "name": "Classics (Greek & Latin Antiquity)"
+        },
+        {
+          "id": "25",
+          "name": "Poetry"
+        }
+      ],
+      "translators": []
+    }
+  ]
+}
