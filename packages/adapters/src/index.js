@@ -70,6 +70,7 @@ import { ocdsTenders } from './ocds.js';
 import { openfda } from './openfda.js';
 import { openlibrary } from './openlibrary.js';
 import { openserver } from './openserver.js';
+import { openthreat } from './openthreat.js';
 import { ovhVps } from './ovh.js';
 import { p0dcasters } from './p0dcasters.js';
 import { buildingPermits } from './permits.js';
@@ -228,6 +229,8 @@ export const ADAPTERS = [
   storefront,
   lowendbox,
   openserver,
+  // Threats: what OpenThreat reporters found in the open, read off each one's own descriptor.
+  openthreat,
 ];
 
 export { isPlatformHosted, PLATFORM_HOSTS } from './podcastplatforms.js';

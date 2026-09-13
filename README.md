@@ -54,6 +54,7 @@ Adapters are one file each in `packages/adapters/src`. Ninety-three ship today a
 | ai-media | `aiornot` | no |
 | forums | `tsbb` | no |
 | hosting | `findhost`, `vultr-plans`, `linode-types`, `scaleway-instances`, `ovh-vps`, `storefront` (WHMCS, Blesta and WooCommerce order forms), `lowendbox`, `openserver`; `hetzner-plans`, `digitalocean-sizes`, `upcloud-plans` | no for the first eight (FindHost data is CC BY 4.0: credit FindHost, findhost.app; `OBSCURA_MCP_URL` optional for JavaScript-only shops); Hetzner (`HETZNER_API_TOKEN`), DigitalOcean (`DIGITALOCEAN_TOKEN`) and UpCloud (`UPCLOUD_USERNAME`, `UPCLOUD_PASSWORD`) each need a read-only credential and stay paused without one |
+| threats | `openthreat` (ThreatCrush first; any reporter serving `/.well-known/openthreat.json`) | no |
 
 ### House aggregators
 

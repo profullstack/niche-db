@@ -208,6 +208,12 @@ export const COLLECTIONS = [
       'Who sells servers and at what price: the FindHost register of 185 web hosts described by attribute rather than score (data CC BY 4.0, credit FindHost, findhost.app), every VPS and bare metal plan Vultr, Linode, Scaleway and OVHcloud publish with vCPU, RAM, disk and monthly price in one shape, the catalogues of the small hosts read off the WHMCS, Blesta and WooCommerce order forms they run, and the deals and industry news LowEndBox files daily. Hetzner, DigitalOcean and UpCloud join when their read-only credential is set. Plans are stored as OpenServer offers, and a provider serving its own /.well-known/openserver.json is read in its own words. Every source permits the reading: an API, a licence, a feed, or a shop page visited once a day with robots.txt honoured.',
   },
   {
+    slug: 'threats',
+    name: 'Threats',
+    description:
+      'What ThreatCrush and other OpenThreat reporters identified in the open: findings in public repositories, attacks observed against the reporter’s own hosts, indicators worth blocking, advisories. Each row is read from the reporter’s own /.well-known/openthreat.json, in the reporter’s words, with the reporter named and the subject linked, and re-read hourly so a threat goes fixed, blocked or withdrawn in place. Never from a private scan: a reporter publishes only what was already visible to anyone who looked, a secret is published unlocated, and a paying user’s scan never appears.',
+  },
+  {
     slug: 'saas',
     name: 'SaaS',
     description:
@@ -1297,6 +1303,48 @@ export const DEFAULT_FEEDS = [
     slug: 'hosting-deals',
     name: 'Hosting deals',
     query: { kinds: ['deal'] },
+  },
+  // Threats: every threat a reporter serves, and the cuts a defender asks for first.
+  {
+    collection: 'threats',
+    slug: 'all-threats',
+    name: 'Every threat',
+    description:
+      'Every finding, attack, indicator and advisory an OpenThreat reporter serves, in the reporter’s words, attributed to the reporter.',
+    query: { kinds: ['finding', 'attack', 'indicator', 'advisory'] },
+  },
+  {
+    collection: 'threats',
+    slug: 'critical-and-high-threats',
+    name: 'Critical and high severity',
+    description:
+      'Threats the reporter rated critical or high. An unstated severity is not low; it is unstated, and absent here.',
+    query: {
+      kinds: ['finding', 'attack', 'indicator', 'advisory'],
+      tags: ['severity:critical', 'severity:high'],
+    },
+  },
+  {
+    collection: 'threats',
+    slug: 'threat-findings',
+    name: 'Findings in public repositories',
+    query: { kinds: ['finding'] },
+  },
+  {
+    collection: 'threats',
+    slug: 'threat-attacks',
+    name: 'Attacks observed',
+    description:
+      'Traffic a reporter observed against its own infrastructure: source, target and count.',
+    query: { kinds: ['attack'] },
+  },
+  {
+    collection: 'threats',
+    slug: 'open-threats',
+    name: 'Open threats',
+    description:
+      'Threats not yet fixed, mitigated, blocked or withdrawn. No status reads as open, as the spec says.',
+    query: { kinds: ['finding', 'attack', 'indicator', 'advisory'], tags: ['status:open'] },
   },
   // House aggregators: one feed per directory, board and side.
   {

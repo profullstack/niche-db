@@ -70,6 +70,7 @@ describe('registry', () => {
         'ai-media',
         'forums',
         'hosting',
+        'threats',
       ]).toContain(a.collection);
     }
     expect(adapterByName('steam').title).toContain('Steam');

@@ -1,0 +1,79 @@
+{
+  "openthreat": "0.1",
+  "reporter": {
+    "name": "ThreatCrush",
+    "web": "https://threatcrush.com",
+    "operator": "https://profullstack.com/.well-known/openprofile.md",
+    "tool": "threatcrush",
+    "policy": "https://threatcrush.com/discovery#policy"
+  },
+  "updated": "2026-09-13T06:00:00Z",
+  "threats": [
+    {
+      "id": "3f9a1c2b",
+      "kind": "finding",
+      "title": "SQL assembled by concatenation",
+      "severity": "high",
+      "confidence": "evidence",
+      "rule": "js-sql-string-building",
+      "cwe": "CWE-89",
+      "category": "code",
+      "subject": {
+        "name": "Northwind/api",
+        "url": "https://github.com/northwind/api",
+        "ref": "main",
+        "commit": "9c1f0e2"
+      },
+      "location": { "file": "src/db/users.ts", "line": 42 },
+      "status": "open",
+      "first_seen": "2026-09-10T02:14:00Z",
+      "last_seen": "2026-09-13T05:40:00Z",
+      "message": "A query string is built from request input.",
+      "consequence": "An attacker who controls the input controls the query.",
+      "refs": ["https://cwe.mitre.org/data/definitions/89.html"],
+      "tlp": "clear",
+      "x-threatcrush-scan": "scan_01J8"
+    },
+    {
+      "id": "b71e0d44",
+      "kind": "finding",
+      "title": "Hardcoded credential",
+      "severity": "critical",
+      "rule": "secret-generic-credential",
+      "cwe": "CWE-798",
+      "category": "secret",
+      "subject": { "name": "northwind/api", "url": "https://github.com/northwind/api" },
+      "status": "open",
+      "last_seen": "2026-09-13T05:40:00Z"
+    },
+    {
+      "id": "ssh-91.232.105.3",
+      "kind": "attack",
+      "title": "SSH brute force",
+      "severity": "medium",
+      "rule": "ssh-bruteforce",
+      "source": { "ip": "91.232.105.3", "country": "RU" },
+      "target": { "port": 22, "service": "ssh" },
+      "indicators": [{ "type": "ip", "value": "91.232.105.3" }],
+      "status": "blocked",
+      "first_seen": "2026-09-12T22:01:00Z",
+      "last_seen": "2026-09-13T04:52:00Z",
+      "count": 47
+    },
+    {
+      "id": "c0ffee01",
+      "title": "Unpinned GitHub Action",
+      "rule": "gha-unpinned-action",
+      "subject": { "name": "northwind/web" },
+      "status": "withdrawn",
+      "first_seen": "2026-09-11T01:00:00Z"
+    },
+    {
+      "title": "Outdated lodash",
+      "severity": "low",
+      "rule": "dep-outdated",
+      "category": "dependency",
+      "subject": { "name": "northwind/web", "url": "https://github.com/northwind/web" }
+    }
+  ]
+}
