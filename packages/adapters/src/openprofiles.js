@@ -126,7 +126,10 @@ export const openprofiles = defineAdapter({
       placeholder: 'https://p0dcasters.com/api/openprofiles',
     },
   ],
-  defaults: { urls: [] },
+  // Documents are fetched one at a time with a pause between them, because the
+  // apps meter callers by the minute (p0dcasters answers 402 past its
+  // allowance); 700 ms is under a hundred a minute. Tests set it to 0.
+  defaults: { urls: [], paceMs: 700 },
   defaultSources: [
     {
       slug: 'openprofiles',
@@ -184,16 +187,31 @@ export const openprofiles = defineAdapter({
       let rejected = 0;
       let cut = false;
       let missing = false;
+      let stopped = null;
+      const paceMs = Math.max(0, Number(config.paceMs) || 0);
+      let lastFetch = 0;
       try {
         do {
-          const body = await http.jsonOrNull(
-            pageUrl(listing, {
-              since: incremental ? since[listing] : null,
-              cursor: pageCursor,
-              limit: 200,
-            }),
-            { timeoutMs: 20_000 },
-          );
+          let body;
+          try {
+            body = await http.jsonOrNull(
+              pageUrl(listing, {
+                since: incremental ? since[listing] : null,
+                cursor: pageCursor,
+                limit: 200,
+              }),
+              { timeoutMs: 20_000 },
+            );
+          } catch (err) {
+            // A listing that stops answering mid-walk (a 402 past its
+            // allowance, a 5xx) is a cut, not a failure: the walk keeps its
+            // place and asks again soon. Only a listing that never answered
+            // at all is reported as an error.
+            if (pages === 0 && fetched === 0) throw err;
+            stopped = String(err.message).slice(0, 60);
+            cut = true;
+            break;
+          }
           if (body === null) {
             notes.push(`${app}: listing not there yet (404)`);
             missing = true;
@@ -210,6 +228,9 @@ export const openprofiles = defineAdapter({
               continue;
             }
             try {
+              const wait = paceMs - (Date.now() - lastFetch);
+              if (wait > 0) await new Promise((r) => setTimeout(r, wait));
+              lastFetch = Date.now();
               const doc = await http.text(entry.url, {
                 timeoutMs: 15_000,
                 headers: { accept: 'text/markdown, text/plain, */*' },
@@ -237,7 +258,9 @@ export const openprofiles = defineAdapter({
           // A cut mid-page resumes from that page, so the entries after the cut
           // are fetched again next time; absorbing a document twice is a no-op.
           resume[listing] = { at: pageCursor ?? '', newest };
-          notes.push(`${app}: ${fetched} documents, walk cut, resuming in 2 minutes`);
+          notes.push(
+            `${app}: ${fetched} documents, walk cut${stopped ? ` (${stopped})` : ''}, resuming in 2 minutes`,
+          );
         } else {
           delete resume[listing];
           complete[listing] = true;

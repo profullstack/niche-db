@@ -97,7 +97,7 @@ function ctx(table, over = {}) {
         text: answer,
       },
       ...over,
-      config: { ...openprofiles.defaults, ...(over.config ?? {}) },
+      config: { ...openprofiles.defaults, paceMs: 0, ...(over.config ?? {}) },
     },
   };
 }
@@ -199,6 +199,31 @@ describe('the openprofiles adapter', () => {
     expect(done.cursor.complete[P0D]).toBe(true);
     expect(done.cursor.since[P0D]).toBe('2026-09-13T04:05:00.000Z');
     expect(second.seen.some((u) => u.includes('cursor=p2'))).toBe(true);
+  });
+
+  test('a listing that stops answering mid-walk (402 past its allowance) is a cut, not a failure', async () => {
+    const table = await routes();
+    const page1 = JSON.parse(table[P0D]);
+    page1.openprofiles = page1.openprofiles.slice(0, 2);
+    page1.next = 'p2';
+    table[P0D] = JSON.stringify(page1);
+    const t = ctx(table, { config: { urls: [P0D] } });
+    const realJson = t.ctx.http.jsonOrNull;
+    t.ctx.http.jsonOrNull = async (u) => {
+      if (u.includes('cursor=p2'))
+        throw new Error('402 from https://p0dcasters.com/api/openprofiles?cursor=p2');
+      return realJson(u);
+    };
+    const out = await openprofiles.pull(t.ctx);
+    expect(out.items.length).toBe(2);
+    expect(out.nextInMinutes).toBe(2);
+    expect(out.cursor.resume[P0D]).toEqual({ at: 'p2', newest: '2026-09-13T04:05:00.000Z' });
+    expect(out.cursor.complete[P0D]).toBeUndefined();
+    expect(out.note).toContain('402');
+    // The next run asks for page two straight away, not page one again.
+    const again = ctx(table, { config: { urls: [P0D] }, cursor: out.cursor });
+    await openprofiles.pull(again.ctx).catch(() => {});
+    expect(again.seen[0]).toContain('cursor=p2');
   });
 
   test('a since recorded before any walk finished is not trusted: the next run walks everything', async () => {
