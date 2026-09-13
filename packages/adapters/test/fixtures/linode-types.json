@@ -1,0 +1,135 @@
+{
+ "data": [
+  {
+   "id": "g6-nanode-1",
+   "label": "Nanode 1GB",
+   "price": {
+    "hourly": 0.0075,
+    "monthly": 5.0
+   },
+   "region_prices": [
+    {
+     "id": "id-cgk",
+     "hourly": 0.009,
+     "monthly": 6.0
+    },
+    {
+     "id": "br-gru",
+     "hourly": 0.0105,
+     "monthly": 7.0
+    }
+   ],
+   "addons": {
+    "backups": {
+     "price": {
+      "hourly": 0.003,
+      "monthly": 2.0
+     },
+     "region_prices": [
+      {
+       "id": "id-cgk",
+       "hourly": 0.0036,
+       "monthly": 2.4
+      },
+      {
+       "id": "br-gru",
+       "hourly": 0.004,
+       "monthly": 2.8
+      }
+     ]
+    }
+   },
+   "memory": 1024,
+   "disk": 25600,
+   "transfer": 1000,
+   "vcpus": 1,
+   "gpus": 0,
+   "network_out": 1000,
+   "class": "nanode",
+   "successor": null,
+   "capabilities": [],
+   "accelerated_devices": 0
+  },
+  {
+   "id": "g6-standard-1",
+   "label": "Linode 2GB",
+   "price": {
+    "hourly": 0.018,
+    "monthly": 12.0
+   },
+   "region_prices": [
+    {
+     "id": "id-cgk",
+     "hourly": 0.022,
+     "monthly": 14.4
+    },
+    {
+     "id": "br-gru",
+     "hourly": 0.025,
+     "monthly": 16.8
+    }
+   ],
+   "addons": {
+    "backups": {
+     "price": {
+      "hourly": 0.004,
+      "monthly": 2.5
+     },
+     "region_prices": [
+      {
+       "id": "id-cgk",
+       "hourly": 0.0045,
+       "monthly": 3.0
+      },
+      {
+       "id": "br-gru",
+       "hourly": 0.005,
+       "monthly": 3.5
+      }
+     ]
+    }
+   },
+   "memory": 2048,
+   "disk": 51200,
+   "transfer": 2000,
+   "vcpus": 1,
+   "gpus": 0,
+   "network_out": 2000,
+   "class": "standard",
+   "successor": null,
+   "capabilities": [],
+   "accelerated_devices": 0
+  },
+  {
+   "id": "g1-gpu-rtx6000-1",
+   "label": "Dedicated 32GB + RTX6000 GPU x1",
+   "price": {
+    "hourly": 1.5,
+    "monthly": null
+   },
+   "region_prices": [],
+   "addons": {
+    "backups": {
+     "price": {
+      "hourly": 0.06,
+      "monthly": 40.0
+     },
+     "region_prices": []
+    }
+   },
+   "memory": 32768,
+   "disk": 655360,
+   "transfer": 16000,
+   "vcpus": 8,
+   "gpus": 1,
+   "network_out": 10000,
+   "class": "gpu",
+   "successor": null,
+   "capabilities": [],
+   "accelerated_devices": 0
+  }
+ ],
+ "page": 1,
+ "pages": 1,
+ "results": 3
+}

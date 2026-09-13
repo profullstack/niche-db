@@ -34,6 +34,7 @@ import { faaAirportStatus } from './faanas.js';
 import { fbiCrimeEstimates } from './fbicrime.js';
 import { fdicInstitutions, fdicStructureChanges } from './fdic.js';
 import { federalRegister } from './federalregister.js';
+import { findhost } from './findhost.js';
 import { freddieMacRates } from './freddiemac.js';
 import { fueleconomyCatalog } from './fueleconomy.js';
 import { gdacs } from './gdacs.js';
@@ -46,7 +47,9 @@ import { imdbRatings } from './imdb.js';
 import { landRegistrySales } from './landregistry.js';
 import { launchLibrary } from './launchlibrary.js';
 import { lichessBroadcasts } from './lichess.js';
+import { linodeTypes } from './linode.js';
 import { livetennis } from './livetennis.js';
+import { lowendbox } from './lowendbox.js';
 import { mcpRegistry } from './mcpregistry.js';
 import { isoMicExchanges } from './mic.js';
 import { musicbrainz } from './musicbrainz.js';
@@ -64,6 +67,8 @@ import { nws } from './nws.js';
 import { ocdsTenders } from './ocds.js';
 import { openfda } from './openfda.js';
 import { openlibrary } from './openlibrary.js';
+import { openserver } from './openserver.js';
+import { ovhVps } from './ovh.js';
 import { p0dcasters } from './p0dcasters.js';
 import { buildingPermits } from './permits.js';
 import { podcasts } from './podcasts.js';
@@ -72,6 +77,7 @@ import { redditDeals } from './redditdeals.js';
 import { rogueIncidents, rogueResearch } from './rogueaitracker.js';
 import { rssamplifier } from './rssamplifier.js';
 import { saasrow } from './saasrow.js';
+import { scalewayInstances } from './scaleway.js';
 import { scryfallCards, scryfallSets } from './scryfall.js';
 import { slickdeals } from './slickdeals.js';
 import { socrataCrime } from './socratacrime.js';
@@ -88,6 +94,7 @@ import { ukPoliceCrime } from './ukpolice.js';
 import { usaspendingAwards } from './usaspending.js';
 import { usgs } from './usgs.js';
 import { vscodeExtensions } from './vscode.js';
+import { vultrPlans } from './vultr.js';
 import { warnLayoffs } from './warn.js';
 
 /** Every adapter this deployment knows, in the order the add-source page lists them. */
@@ -205,6 +212,14 @@ export const ADAPTERS = [
   aiornot,
   agenticjobs,
   tsbb,
+  // Hosting: who sells servers, at what price, and the deals the small ones announce.
+  findhost,
+  vultrPlans,
+  linodeTypes,
+  scalewayInstances,
+  ovhVps,
+  lowendbox,
+  openserver,
 ];
 
 export { isPlatformHosted, PLATFORM_HOSTS } from './podcastplatforms.js';

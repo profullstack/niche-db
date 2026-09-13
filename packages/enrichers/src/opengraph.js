@@ -59,6 +59,7 @@ export const opengraph = defineEnricher({
     'chess',
     'space',
     'research',
+    'hosting',
   ],
   appliesTo: (item) =>
     Boolean(item.url) &&

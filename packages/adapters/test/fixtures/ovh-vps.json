@@ -1,0 +1,1059 @@
+{
+ "catalogId": 3701,
+ "locale": {
+  "currencyCode": "USD",
+  "subsidiary": "US",
+  "taxRate": 0
+ },
+ "plans": [
+  {
+   "planCode": "option-storage-remote-2027-ca",
+   "invoiceName": "Remote Storage 2027",
+   "product": "vps-option-storage-remote-resell",
+   "pricingType": "rental",
+   "consumptionConfiguration": null,
+   "pricings": [
+    {
+     "phase": 0,
+     "capacities": [
+      "installation"
+     ],
+     "commitment": 0,
+     "description": "Installation fees",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": 100
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "default",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "upgrade"
+     ],
+     "commitment": 0,
+     "description": "Upgrade fees",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": 100
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "default",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 1,
+     "capacities": [
+      "renew"
+     ],
+     "commitment": 0,
+     "description": "Monthly fees",
+     "interval": 1,
+     "intervalUnit": "month",
+     "quantity": {
+      "min": 1,
+      "max": 100
+     },
+     "repeat": {
+      "min": 1,
+      "max": null
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "default",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "installation"
+     ],
+     "commitment": 0,
+     "description": "Installation fees",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": 100
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront12",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "upgrade"
+     ],
+     "commitment": 0,
+     "description": "Upgrade fees",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": 100
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront12",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 1,
+     "capacities": [
+      "renew"
+     ],
+     "commitment": 12,
+     "description": "12 months fees",
+     "interval": 1,
+     "intervalUnit": "month",
+     "quantity": {
+      "min": 1,
+      "max": 100
+     },
+     "repeat": {
+      "min": 12,
+      "max": 12
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront12",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": {
+      "defaultEndAction": "REACTIVATE_ENGAGEMENT",
+      "duration": "P12M",
+      "type": "upfront"
+     }
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "upgrade"
+     ],
+     "commitment": 0,
+     "description": "Upgrade fees",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": 100
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront6",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "installation"
+     ],
+     "commitment": 0,
+     "description": "Installation fees",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": 100
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront6",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 1,
+     "capacities": [
+      "renew"
+     ],
+     "commitment": 6,
+     "description": "6 months fees",
+     "interval": 1,
+     "intervalUnit": "month",
+     "quantity": {
+      "min": 1,
+      "max": 100
+     },
+     "repeat": {
+      "min": 6,
+      "max": 6
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront6",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": {
+      "defaultEndAction": "REACTIVATE_ENGAGEMENT",
+      "duration": "P6M",
+      "type": "upfront"
+     }
+    }
+   ],
+   "configurations": [
+    {
+     "name": "region",
+     "isCustom": false,
+     "isMandatory": false,
+     "values": [
+      "canada"
+     ]
+    }
+   ],
+   "family": "option-storage-ca",
+   "blobs": null
+  },
+  {
+   "planCode": "vps-starter-1-2-20",
+   "invoiceName": "VPS Starter 1-2-20",
+   "product": "vps-starter-1-2-20",
+   "pricingType": "rental",
+   "consumptionConfiguration": null,
+   "pricings": [
+    {
+     "phase": 0,
+     "capacities": [
+      "installation"
+     ],
+     "commitment": 0,
+     "description": "Installation fees",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": 100
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "default",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "upgrade"
+     ],
+     "commitment": 0,
+     "description": "Upgrade fees",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": 100
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "default",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 1,
+     "capacities": [
+      "renew"
+     ],
+     "commitment": 0,
+     "description": "Monthly fees",
+     "interval": 1,
+     "intervalUnit": "month",
+     "quantity": {
+      "min": 1,
+      "max": 100
+     },
+     "repeat": {
+      "min": 1,
+      "max": null
+     },
+     "price": 420000000,
+     "formattedPrice": "$4.20 USD",
+     "tax": 0,
+     "mode": "default",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    }
+   ],
+   "configurations": [
+    {
+     "name": "vps_datacenter",
+     "isCustom": false,
+     "isMandatory": true,
+     "values": [
+      "US-EAST-VA",
+      "US-WEST-OR"
+     ]
+    },
+    {
+     "name": "vps_os",
+     "isCustom": false,
+     "isMandatory": false,
+     "values": [
+      "AlmaLinux 8",
+      "Rocky Linux 8",
+      "Debian 11",
+      "Ubuntu 22.04",
+      "Debian 12",
+      "AlmaLinux 9",
+      "Rocky Linux 9",
+      "Debian 12 - Docker",
+      "Ubuntu 24.04",
+      "CloudLinux 9",
+      "Debian 12 - n8n",
+      "FreeBSD-14.3 - UEFI",
+      "Debian 13",
+      "AlmaLinux 10",
+      "Rocky Linux 10",
+      "Fedora 43",
+      "FreeBSD-15-ufs - UEFI",
+      "FreeBSD-15-zfs - UEFI",
+      "Fedora 44",
+      "Ubuntu 26.04"
+     ]
+    },
+    {
+     "name": "region",
+     "isCustom": false,
+     "isMandatory": false,
+     "values": [
+      "united_states"
+     ]
+    },
+    {
+     "name": "vps_install_rtm",
+     "isCustom": false,
+     "isMandatory": false,
+     "values": [
+      "no",
+      "if_available"
+     ]
+    }
+   ],
+   "family": "vps",
+   "blobs": {
+    "commercial": {
+     "features": [
+      {
+       "name": "Anti-DDoS",
+       "value": "Yes"
+      },
+      {
+       "name": "KVM",
+       "value": "Yes"
+      },
+      {
+       "name": "Root access",
+       "value": "Yes"
+      },
+      {
+       "name": "API",
+       "value": "Yes"
+      },
+      {
+       "name": "IPv4 Address",
+       "value": "1"
+      },
+      {
+       "name": "IPv6 Address",
+       "value": "/128"
+      },
+      {
+       "name": "Location",
+       "value": "1"
+      },
+      {
+       "name": "Monitoring and Interventions",
+       "value": "24/7"
+      },
+      {
+       "name": "SLA",
+       "value": "99.5%"
+      }
+     ],
+     "line": "Virtual Private Server",
+     "range": "Starter"
+    },
+    "tags": [
+     "order-funnel:expand",
+     "os:distribution-only",
+     "os:distribution-with-application"
+    ]
+   }
+  },
+  {
+   "planCode": "vps-2025-model1",
+   "invoiceName": "VPS-1 2026",
+   "product": "vps-2025-model1",
+   "pricingType": "rental",
+   "consumptionConfiguration": null,
+   "pricings": [
+    {
+     "phase": 0,
+     "capacities": [
+      "installation"
+     ],
+     "commitment": 0,
+     "description": "Installation fees",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": 100
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "default",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "upgrade"
+     ],
+     "commitment": 0,
+     "description": "Upgrade fees",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": 100
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "default",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 1,
+     "capacities": [
+      "renew"
+     ],
+     "commitment": 0,
+     "description": "Monthly fees",
+     "interval": 1,
+     "intervalUnit": "month",
+     "quantity": {
+      "min": 1,
+      "max": 100
+     },
+     "repeat": {
+      "min": 1,
+      "max": null
+     },
+     "price": 760000000,
+     "formattedPrice": "$7.60 USD",
+     "tax": 0,
+     "mode": "default",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "installation"
+     ],
+     "commitment": 0,
+     "description": "Installation fees",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": 100
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront12",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "upgrade"
+     ],
+     "commitment": 0,
+     "description": "Upgrade fees",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": 100
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront12",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 1,
+     "capacities": [
+      "renew"
+     ],
+     "commitment": 12,
+     "description": "12 months fees",
+     "interval": 1,
+     "intervalUnit": "month",
+     "quantity": {
+      "min": 1,
+      "max": 100
+     },
+     "repeat": {
+      "min": 12,
+      "max": 12
+     },
+     "price": 646000000,
+     "formattedPrice": "$6.46 USD",
+     "tax": 0,
+     "mode": "upfront12",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": {
+      "defaultEndAction": "REACTIVATE_ENGAGEMENT",
+      "duration": "P12M",
+      "type": "upfront"
+     }
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "upgrade"
+     ],
+     "commitment": 0,
+     "description": "Upgrade fees",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": 100
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront6",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "installation"
+     ],
+     "commitment": 0,
+     "description": "Installation fees",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": 100
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront6",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 1,
+     "capacities": [
+      "renew"
+     ],
+     "commitment": 6,
+     "description": "6 months fees",
+     "interval": 1,
+     "intervalUnit": "month",
+     "quantity": {
+      "min": 1,
+      "max": 100
+     },
+     "repeat": {
+      "min": 6,
+      "max": 6
+     },
+     "price": 722000000,
+     "formattedPrice": "$7.22 USD",
+     "tax": 0,
+     "mode": "upfront6",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": {
+      "defaultEndAction": "REACTIVATE_ENGAGEMENT",
+      "duration": "P6M",
+      "type": "upfront"
+     }
+    }
+   ],
+   "configurations": [
+    {
+     "name": "region",
+     "isCustom": false,
+     "isMandatory": false,
+     "values": [
+      "united_states"
+     ]
+    },
+    {
+     "name": "vps_datacenter",
+     "isCustom": false,
+     "isMandatory": true,
+     "values": [
+      "US-EAST-VA",
+      "US-WEST-OR"
+     ]
+    },
+    {
+     "name": "vps_install_rtm",
+     "isCustom": false,
+     "isMandatory": false,
+     "values": [
+      "if_available",
+      "no"
+     ]
+    },
+    {
+     "name": "vps_os",
+     "isCustom": false,
+     "isMandatory": false,
+     "values": [
+      "AlmaLinux 8",
+      "AlmaLinux 8 - cPanel",
+      "AlmaLinux 9",
+      "AlmaLinux 9 - cPanel",
+      "CloudLinux 9",
+      "Debian 11",
+      "Debian 12",
+      "Debian 12 - Docker",
+      "Debian 12 - Plesk",
+      "Rocky Linux 8",
+      "Rocky Linux 9",
+      "Ubuntu 22.04",
+      "Ubuntu 24.04",
+      "Windows Server 2016 Standard (Desktop)",
+      "Windows Server 2019 Standard (Desktop)",
+      "Windows Server 2022 Standard (Desktop)",
+      "Windows Server 2025 Standard (Desktop)",
+      "Debian 12 - n8n",
+      "FreeBSD-14.3 - UEFI",
+      "Debian 13",
+      "AlmaLinux 10",
+      "Rocky Linux 10",
+      "Fedora 43",
+      "FreeBSD-15-ufs - UEFI",
+      "FreeBSD-15-zfs - UEFI",
+      "Fedora 44",
+      "Ubuntu 26.04"
+     ]
+    }
+   ],
+   "family": "vps-2025",
+   "blobs": {
+    "commercial": {
+     "features": [
+      {
+       "name": "Anti-DDoS",
+       "value": "Yes"
+      },
+      {
+       "name": "KVM",
+       "value": "Yes"
+      },
+      {
+       "name": "Root access",
+       "value": "Yes"
+      },
+      {
+       "name": "API",
+       "value": "Yes"
+      },
+      {
+       "name": "IPv4 Address",
+       "value": "1"
+      },
+      {
+       "name": "IPv6 Address",
+       "value": "/128"
+      },
+      {
+       "name": "Monitoring and Interventions",
+       "value": "24/7"
+      },
+      {
+       "name": "SLA",
+       "value": "99.9%"
+      }
+     ],
+     "line": "2025",
+     "range": "2025"
+    },
+    "tags": [
+     "os:distribution-only",
+     "os:distribution-with-application"
+    ]
+   }
+  },
+  {
+   "planCode": "vps-comfort-4-16-160-vps-2025-model3-degressivity12",
+   "invoiceName": "VPS-3 2026",
+   "product": "vps-2020v2-model3",
+   "pricingType": "rental",
+   "consumptionConfiguration": null,
+   "pricings": [
+    {
+     "phase": 0,
+     "capacities": [
+      "installation"
+     ],
+     "commitment": 0,
+     "description": "Installation fees",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": 100
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "default",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "upgrade"
+     ],
+     "commitment": 0,
+     "description": "Upgrade fees",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": 100
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "default",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 1,
+     "capacities": [
+      "renew"
+     ],
+     "commitment": 0,
+     "description": "Monthly fees",
+     "interval": 1,
+     "intervalUnit": "month",
+     "quantity": {
+      "min": 1,
+      "max": 100
+     },
+     "repeat": {
+      "min": 1,
+      "max": null
+     },
+     "price": 4324000000,
+     "formattedPrice": "$43.24 USD",
+     "tax": 0,
+     "mode": "default",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    }
+   ],
+   "configurations": [
+    {
+     "name": "region",
+     "isCustom": false,
+     "isMandatory": false,
+     "values": [
+      "united_states"
+     ]
+    },
+    {
+     "name": "vps_datacenter",
+     "isCustom": false,
+     "isMandatory": true,
+     "values": [
+      "US-EAST-VA",
+      "US-WEST-OR"
+     ]
+    },
+    {
+     "name": "vps_install_rtm",
+     "isCustom": false,
+     "isMandatory": false,
+     "values": [
+      "if_available",
+      "no"
+     ]
+    },
+    {
+     "name": "vps_os",
+     "isCustom": false,
+     "isMandatory": false,
+     "values": [
+      "AlmaLinux 8",
+      "AlmaLinux 8 - cPanel",
+      "AlmaLinux 9",
+      "AlmaLinux 9 - cPanel",
+      "CloudLinux 9",
+      "Debian 11",
+      "Debian 12",
+      "Debian 12 - Docker",
+      "Debian 12 - Plesk",
+      "Debian 12 - n8n",
+      "Rocky Linux 8",
+      "Rocky Linux 9",
+      "Ubuntu 22.04",
+      "Ubuntu 24.04",
+      "Windows Server 2016 Standard (Desktop)",
+      "Windows Server 2019 Standard (Desktop)",
+      "Windows Server 2022 Standard (Desktop)",
+      "Windows Server 2025 Standard (Desktop)",
+      "FreeBSD-14.3 - UEFI",
+      "Debian 13",
+      "AlmaLinux 10",
+      "Rocky Linux 10",
+      "Fedora 43",
+      "FreeBSD-15-ufs - UEFI",
+      "FreeBSD-15-zfs - UEFI",
+      "Fedora 44",
+      "Ubuntu 26.04"
+     ]
+    }
+   ],
+   "family": "vps-comfort-4-16-160-vps-2025-model3-degressivity12",
+   "blobs": null
+  }
+ ],
+ "products": [
+  {
+   "name": "vps-option-storage-remote-resell",
+   "description": "VPS Linux option",
+   "configurations": []
+  },
+  {
+   "name": "vps-2020v2-model3",
+   "description": "VPS 8 vCPU 24 GB RAM 200 GB disk",
+   "configurations": [
+    {
+     "name": "vps_backup_id",
+     "isCustom": true,
+     "isMandatory": false,
+     "values": null
+    },
+    {
+     "name": "vps_backup_region",
+     "isCustom": true,
+     "isMandatory": false,
+     "values": null
+    }
+   ]
+  },
+  {
+   "name": "vps-starter-1-2-20",
+   "description": "VPS Starter 1 vCPU 2 GB RAM 20 GB disk",
+   "configurations": [
+    {
+     "name": "vps_backup_id",
+     "isCustom": true,
+     "isMandatory": false,
+     "values": null
+    },
+    {
+     "name": "vps_backup_region",
+     "isCustom": true,
+     "isMandatory": false,
+     "values": null
+    }
+   ]
+  },
+  {
+   "name": "vps-2025-model1",
+   "description": "VPS 4 vCPU 8 GB RAM 75 GB disk",
+   "configurations": [
+    {
+     "name": "vps_backup_id",
+     "isCustom": true,
+     "isMandatory": false,
+     "values": null
+    },
+    {
+     "name": "vps_backup_region",
+     "isCustom": true,
+     "isMandatory": false,
+     "values": null
+    }
+   ]
+  }
+ ]
+}

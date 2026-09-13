@@ -202,6 +202,12 @@ export const COLLECTIONS = [
       'The whole iptv-org directory: 31,000 television channels worldwide with logo, country, language, category and network, and the public stream where one exists. What a player matches a playlist entry against.',
   },
   {
+    slug: 'hosting',
+    name: 'Hosting',
+    description:
+      'Who sells servers and at what price: the FindHost register of 185 web hosts described by attribute rather than score (data CC BY 4.0, credit FindHost, findhost.app), every VPS and bare metal plan Vultr, Linode, Scaleway and OVHcloud publish with vCPU, RAM, disk and monthly price in one shape, and the deals and industry news LowEndBox files daily. Plans are stored as OpenServer offers, and a provider serving its own /.well-known/openserver.json is read in its own words. Every source is keyless and permits the reading.',
+  },
+  {
     slug: 'saas',
     name: 'SaaS',
     description:
@@ -1258,6 +1264,40 @@ export const DEFAULT_FEEDS = [
     name: 'Every channel',
     query: { kinds: ['channel'] },
   },
+  // Hosting: the register, the catalogues, and the deal desk.
+  {
+    collection: 'hosting',
+    slug: 'hosting-providers',
+    name: 'Hosting providers',
+    description:
+      'Web hosting providers as the FindHost register records them. Data CC BY 4.0: FindHost, findhost.app.',
+    query: { kinds: ['provider'] },
+  },
+  {
+    collection: 'hosting',
+    slug: 'vps-plans',
+    name: 'VPS and bare metal plans',
+    query: { kinds: ['plan'] },
+  },
+  {
+    collection: 'hosting',
+    slug: 'vps-under-5',
+    name: 'Plans under 5 a month',
+    description: 'Every plan whose monthly price is under 5 in the currency the provider bills in.',
+    query: { kinds: ['plan'], tags: ['price:under-5'] },
+  },
+  {
+    collection: 'hosting',
+    slug: 'bare-metal-plans',
+    name: 'Bare metal plans',
+    query: { kinds: ['plan'], tags: ['kind:bare-metal'] },
+  },
+  {
+    collection: 'hosting',
+    slug: 'hosting-deals',
+    name: 'Hosting deals',
+    query: { kinds: ['deal'] },
+  },
   // House aggregators: one feed per directory, board and side.
   {
     collection: 'podcasts',
@@ -1415,7 +1455,10 @@ export async function ensureDefaults({ env = {}, log = console.log } = {}) {
         description: s.description ?? adapter.description,
         config: s.config ?? {},
         cadenceMinutes: s.cadenceMinutes ?? adapter.cadenceMinutes,
-        enabled: missingEnv.length === 0,
+        // A source with no upstream to read yet (OpenServer, until a provider
+        // serves a descriptor) is seeded paused, the way a source missing its
+        // key is: it turns on when someone configures it.
+        enabled: missingEnv.length === 0 && s.enabled !== false,
       });
       if (row.created) created++;
     }
