@@ -215,9 +215,11 @@ describe('gameItem', () => {
     expect(parseTop({ results: { bindings: [] } })).toBeNull();
     expect(parseTop(null)).toBeNull();
     expect(topQuery()).toContain('wd:Q7889');
+    expect(topQuery()).toContain('COUNT(DISTINCT ?item)');
     const q = windowQuery(135_000_000, 136_000_000, 500);
     expect(q).toContain('FILTER(?id >= 135000000 && ?id < 136000000)');
     expect(q).toContain('LIMIT 500');
+    expect(q).toContain('SELECT DISTINCT ?item ?id WHERE');
     expect(q).toContain('wdt:P1733');
     expect(q).toContain('wdt:P5794');
     expect(q).toContain('wikibase:timePrecision');

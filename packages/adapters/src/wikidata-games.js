@@ -41,7 +41,11 @@ export const WINDOW_SPAN = 1_000_000;
 /** Rows per request. 500 is 3 to 15 seconds on the query service; 1,000 came close to its 60 second limit. */
 export const PAGE_ROWS = 500;
 
-/** Requests per run: 40 requests is five to seven minutes, eleven runs for a pass. */
+/**
+ * Requests per run. 40 is five to seven minutes of query time, so eleven runs
+ * make a pass on their own; a deployment run deadline shorter than that (the
+ * default is four minutes) ends a run first and the pass takes more runs.
+ */
 export const REQUESTS_PER_RUN = 40;
 
 /** Pause between requests. The query service asks for a gentle rate; one second is the house pace for Wikidata. */
@@ -75,7 +79,7 @@ export const sparqlUrl = (query) =>
 
 /** The highest game id and the count, one row. */
 export const topQuery = () =>
-  `SELECT (MAX(xsd:integer(STRAFTER(STR(?item), "Q"))) AS ?top) (COUNT(?item) AS ?total) WHERE { ?item wdt:P31 wd:${GAME_CLASS} }`;
+  `SELECT (MAX(xsd:integer(STRAFTER(STR(?item), "Q"))) AS ?top) (COUNT(DISTINCT ?item) AS ?total) WHERE { ?item wdt:P31 wd:${GAME_CLASS} }`;
 
 /**
  * The games with an id in [from, to), in id order, at most `rows` of them,
@@ -83,7 +87,10 @@ export const topQuery = () =>
  * dates keeps the earliest, with its precision riding along after a slash),
  * multi-valued ones are joined with a pipe. Labels are plain rdfs:label
  * lookups rather than the label service, which timed out on the older,
- * claim-rich games.
+ * claim-rich games. The inner select is DISTINCT so a game that states
+ * "instance of video game" twice counts once against the limit; otherwise a
+ * page could come back short of `rows` with games still left in the window
+ * and the walk would step past them.
  */
 export function windowQuery(from, to, rows = PAGE_ROWS) {
   const lo = Math.max(0, Math.floor(Number(from)) || 0);
@@ -104,7 +111,7 @@ export function windowQuery(from, to, rows = PAGE_ROWS) {
     joined('genre'),
     joined('mode'),
     'WHERE {',
-    `{ SELECT ?item ?id WHERE { ?item wdt:P31 wd:${GAME_CLASS} . BIND(xsd:integer(STRAFTER(STR(?item), "Q")) AS ?id) FILTER(?id >= ${lo} && ?id < ${hi}) } ORDER BY ?id LIMIT ${limit} }`,
+    `{ SELECT DISTINCT ?item ?id WHERE { ?item wdt:P31 wd:${GAME_CLASS} . BIND(xsd:integer(STRAFTER(STR(?item), "Q")) AS ?id) FILTER(?id >= ${lo} && ?id < ${hi}) } ORDER BY ?id LIMIT ${limit} }`,
     'OPTIONAL { ?item rdfs:label ?labelEn FILTER(LANG(?labelEn) = "en") }',
     'OPTIONAL { ?item rdfs:label ?labelMul FILTER(LANG(?labelMul) = "mul") }',
     'OPTIONAL { ?item schema:description ?desc FILTER(LANG(?desc) = "en") }',
