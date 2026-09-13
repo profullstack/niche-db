@@ -8,6 +8,7 @@ import { anilistAiring } from './anilist.js';
 import { arxiv } from './arxiv.js';
 import { aviationHazards, aviationMetar } from './aviationweather.js';
 import { bensbargains } from './bensbargains.js';
+import { bittorrentedDht } from './bittorrented.js';
 import { bl0ggers } from './bl0ggers.js';
 import { blsSeries } from './bls.js';
 import { brisk } from './brisk.js';
@@ -282,6 +283,7 @@ export const ADAPTERS = [
   openprofiles,
   opensite,
   outreachgraph,
+  bittorrentedDht,
 ];
 
 export { isPlatformHosted, PLATFORM_HOSTS } from './podcastplatforms.js';

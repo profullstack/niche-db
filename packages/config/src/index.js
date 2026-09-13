@@ -195,6 +195,13 @@ export const config = {
      * private address, never a public one.
      */
     obscuraMcpUrl: opt('OBSCURA_MCP_URL'),
+    /**
+     * bittorrented.com's Supabase, for the dht collection: the project URL and
+     * the publishable (anon) key its own browser bundle ships, which is all
+     * the browse function needs. Never the service role key.
+     */
+    bittorrentedSupabaseUrl: opt('BITTORRENTED_SUPABASE_URL'),
+    bittorrentedSupabaseKey: opt('BITTORRENTED_SUPABASE_KEY'),
   },
 
   /**

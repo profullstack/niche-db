@@ -33,6 +33,8 @@ export function envFor() {
     upcloudUsername: config.adapters.upcloudUsername,
     upcloudPassword: config.adapters.upcloudPassword,
     obscuraMcpUrl: config.adapters.obscuraMcpUrl,
+    bittorrentedSupabaseUrl: config.adapters.bittorrentedSupabaseUrl,
+    bittorrentedSupabaseKey: config.adapters.bittorrentedSupabaseKey,
     contactEmail: config.contactEmail,
   };
 }
