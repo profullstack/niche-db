@@ -69,7 +69,10 @@ function ctx(table, over = {}) {
   const seen = [];
   const answer = async (url) => {
     seen.push(url);
-    const hit = Object.entries(table).find(([prefix]) => url.startsWith(prefix));
+    // The longest matching prefix wins, so a cursor page is not answered by the listing's first page.
+    const hit = Object.entries(table)
+      .filter(([prefix]) => url.startsWith(prefix))
+      .sort((a, b) => b[0].length - a[0].length)[0];
     if (!hit) throw new Error(`404 from ${url}`);
     return hit[1];
   };
@@ -146,6 +149,8 @@ describe('the openprofiles adapter', () => {
     expect(note).toContain('1 off-origin dropped');
     expect(cursor.since[P0D]).toBe('2026-09-13T04:05:00.000Z');
     expect(cursor.since[OG]).toBe('2026-09-13T03:01:00.000Z');
+    expect(cursor.complete).toEqual({ [P0D]: true, [OG]: true });
+    expect(cursor.resume).toEqual({});
     for (const it of items) {
       expect(it.kind).toBe('openprofile');
       expect(it.data.doc).toContain('# ');
@@ -155,6 +160,54 @@ describe('the openprofiles adapter', () => {
     const again = ctx(await routes(), { config: { urls: [P0D] }, cursor });
     await openprofiles.pull(again.ctx);
     expect(again.seen[0]).toContain('since=2026-09-13T04%3A05%3A00.000Z');
+  });
+
+  test('a walk the clock cuts resumes where it stopped, soon, and only a finished walk sets since', async () => {
+    // A listing of two pages; the first run's deadline passes after the first document.
+    const table = await routes();
+    const page1 = JSON.parse(table[P0D]);
+    const page2 = { openprofiles: page1.openprofiles.slice(2), next: null };
+    page1.openprofiles = page1.openprofiles.slice(0, 2);
+    page1.next = 'p2';
+    table[P0D] = JSON.stringify(page1);
+    table[`${P0D}?cursor=p2`] = JSON.stringify(page2);
+    // The deadline is read once when pull starts, so it is set just ahead and the
+    // first document fetch takes longer than that.
+    const cut = ctx(table, { config: { urls: [P0D] } });
+    cut.ctx.deadline = Date.now() + 30;
+    const realText = cut.ctx.http.text;
+    let docs = 0;
+    cut.ctx.http.text = async (u) => {
+      docs += 1;
+      if (docs === 1) await Bun.sleep(50);
+      return realText(u);
+    };
+    const first = await openprofiles.pull(cut.ctx);
+    expect(first.items.length).toBe(1);
+    expect(first.nextInMinutes).toBe(2);
+    expect(first.cursor.since[P0D]).toBeUndefined();
+    expect(first.cursor.complete[P0D]).toBeUndefined();
+    expect(first.cursor.resume[P0D]).toEqual({ at: '', newest: '2026-09-13T04:00:00.000Z' });
+
+    // The second run carries on: first page again (a document twice is a no-op), then page two.
+    const second = ctx(table, { config: { urls: [P0D] }, cursor: first.cursor });
+    const done = await openprofiles.pull(second.ctx);
+    expect(second.seen[0]).not.toContain('since=');
+    expect(done.items.map((i) => i.title)).toEqual(['Pigweed and Crowhill', 'Ada Lovelace']);
+    expect(done.nextInMinutes).toBeUndefined();
+    expect(done.cursor.resume).toEqual({});
+    expect(done.cursor.complete[P0D]).toBe(true);
+    expect(done.cursor.since[P0D]).toBe('2026-09-13T04:05:00.000Z');
+    expect(second.seen.some((u) => u.includes('cursor=p2'))).toBe(true);
+  });
+
+  test('a since recorded before any walk finished is not trusted: the next run walks everything', async () => {
+    const t = ctx(await routes(), {
+      config: { urls: [P0D] },
+      cursor: { since: { [P0D]: '2026-09-13T04:05:00.000Z' } },
+    });
+    await openprofiles.pull(t.ctx);
+    expect(t.seen[0]).not.toContain('since=');
   });
 
   test('a listing that is not there yet is an empty page, not a failure', async () => {
