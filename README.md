@@ -55,6 +55,7 @@ Adapters are one file each in `packages/adapters/src`. Ninety-three ship today a
 | forums | `tsbb` | no |
 | hosting | `findhost`, `vultr-plans`, `linode-types`, `scaleway-instances`, `ovh-vps`, `storefront` (WHMCS, Blesta and WooCommerce order forms), `lowendbox`, `openserver`; `hetzner-plans`, `digitalocean-sizes`, `upcloud-plans` | no for the first eight (FindHost data is CC BY 4.0: credit FindHost, findhost.app; `OBSCURA_MCP_URL` optional for JavaScript-only shops); Hetzner (`HETZNER_API_TOKEN`), DigitalOcean (`DIGITALOCEAN_TOKEN`) and UpCloud (`UPCLOUD_USERNAME`, `UPCLOUD_PASSWORD`) each need a read-only credential and stay paused without one |
 | threats | `openthreat` (ThreatCrush first; any reporter serving `/.well-known/openthreat.json`) | no |
+| directory | `outreachgraph` | no |
 
 ### House aggregators
 
@@ -68,6 +69,7 @@ Eight of the sites we run publish a public feed or API of their own, and each is
 | bl0ggers.com | `/asks/rss.xml`, `/offers/rss.xml` | marketplace | `bl0ggers-marketplace` | `ask`, `offer` |
 | aiornot.vote | `/rss.xml`, `/rss/featured.xml`, `/rss/trending.xml` | ai-media | `aiornot-media` | `submission` |
 | agenticjobs.work | `/api/v1/jobs` (offset paged, 100 a page) | jobs | `agenticjobs-postings` | `job` |
+| outreachgraph.com | `/api/v1/public/directory` (cursor paged, 200 a page; companies and sites by domain, people only when self-published) | directory | `outreachgraph-directory` | `company`, `site`, `person` |
 | tsbb.dev | `/api/v1/forums`, then `/f/{slug}/feed.xml` per forum | forums | `tsbb-topics` | `post` |
 | c0ncerts.com | none yet: `/api/events` answers 501 "coming soon" and `/api/v1/events` 404s | — | — | — |
 

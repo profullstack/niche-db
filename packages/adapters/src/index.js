@@ -71,6 +71,7 @@ import { openfda } from './openfda.js';
 import { openlibrary } from './openlibrary.js';
 import { openserver } from './openserver.js';
 import { openthreat } from './openthreat.js';
+import { outreachgraph } from './outreachgraph.js';
 import { ovhVps } from './ovh.js';
 import { p0dcasters } from './p0dcasters.js';
 import { buildingPermits } from './permits.js';
@@ -231,6 +232,7 @@ export const ADAPTERS = [
   openserver,
   // Threats: what OpenThreat reporters found in the open, read off each one's own descriptor.
   openthreat,
+  outreachgraph,
 ];
 
 export { isPlatformHosted, PLATFORM_HOSTS } from './podcastplatforms.js';
