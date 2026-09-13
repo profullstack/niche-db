@@ -47,7 +47,8 @@ const FAILURE_STOP = 3;
 
 export const USER_AGENT = 'nichedb (https://nichedb.dev; hello@nichedb.dev) steam-catalog';
 
-export const ATTRIBUTION = 'Steam (Valve); store data, for personal use and as is, per the Steam Web API terms';
+export const ATTRIBUTION =
+  'Steam (Valve); store data, for personal use and as is, per the Steam Web API terms';
 
 /**
  * `type` on a store item. Confirmed against the store's own labels on
