@@ -3,6 +3,7 @@ import { createReadStream } from 'node:fs';
 import { mkdir } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { pipeline } from 'node:stream';
 import { createGunzip } from 'node:zlib';
 import { config } from '@nichedb/config';
 
@@ -50,12 +51,20 @@ export async function dumpDir(name) {
  * @param {{ skip?: number }} [opts]
  * @returns {AsyncGenerator<string>}
  */
-export function gzipLines(path, opts = {}) {
-  const gz = createGunzip();
+export async function* gzipLines(path, opts = {}) {
   const rs = createReadStream(path);
-  rs.on('error', (err) => gz.destroy(err));
-  rs.pipe(gz);
-  return splitLines(gz, opts);
+  const gz = createGunzip();
+  // pipeline, not pipe: a reader that stops early (every run that hits its
+  // deadline mid-file) destroys the gunzip side, and pipeline takes the file
+  // stream down with it. `pipe` leaves that stream, and its descriptor, open.
+  // Errors on either side reach the consumer through gz's own 'error'.
+  pipeline(rs, gz, () => {});
+  try {
+    yield* splitLines(gz, opts);
+  } finally {
+    rs.destroy();
+    gz.destroy();
+  }
 }
 
 /**
