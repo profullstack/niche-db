@@ -244,6 +244,12 @@ export const COLLECTIONS = [
       'Posts from the house bulletin boards: every topic on tsbb.dev with its opening post, author and the forum it was posted in.',
   },
   {
+    slug: 'sites',
+    name: 'Sites',
+    description:
+      'One record per page, as OpenSite (logicsrc.com/opensite) reads it: the title, the line, the picture and the kind a careful reader would draw a card from, the canonical address it is keyed by, its author and feeds, and the og:, twitter: and JSON-LD tags verbatim so you can see what each chat app or social network saw. The house sites are walked from their sitemaps; any other address is read the moment somebody pastes it at /c/sites/add, and the page shows the card as X, Slack, iMessage, Discord, LinkedIn and WhatsApp would draw it.',
+  },
+  {
     slug: 'profiles',
     name: 'People',
     description:

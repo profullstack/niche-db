@@ -45,6 +45,7 @@ import { goModules } from './golang.js';
 import { hetznerPlans } from './hetzner.js';
 import { huggingface } from './huggingface.js';
 import { igdb } from './igdb.js';
+import { igdbCatalog } from './igdb-catalog.js';
 import { imdbRatings } from './imdb.js';
 import { landRegistrySales } from './landregistry.js';
 import { launchLibrary } from './launchlibrary.js';
@@ -72,6 +73,7 @@ import { openlibrary } from './openlibrary.js';
 import { openprofiles } from './openprofiles.js';
 import { opensaas } from './opensaas.js';
 import { openserver } from './openserver.js';
+import { opensite } from './opensite.js';
 import { openthreat } from './openthreat.js';
 import { outreachgraph } from './outreachgraph.js';
 import { ovhVps } from './ovh.js';
@@ -113,6 +115,7 @@ export const ADAPTERS = [
   steam,
   steamNews,
   igdb,
+  igdbCatalog,
   npm,
   pypi,
   crates,
@@ -244,6 +247,7 @@ export const ADAPTERS = [
   opensaas,
   // People: one entry per person, read off the apps that serve their OpenProfile.md.
   openprofiles,
+  opensite,
   outreachgraph,
 ];
 

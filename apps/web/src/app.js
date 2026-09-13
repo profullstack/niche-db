@@ -20,6 +20,7 @@ import { registerPages } from './routes/pages.js';
 import { registerPremium } from './routes/premium.js';
 import { registerProfiles } from './routes/profiles.js';
 import { registerRevenue } from './routes/revenue.js';
+import { registerSites } from './routes/sites.js';
 import { registerStatic } from './routes/static.js';
 import { registerSubmit } from './routes/submit.js';
 import { NotFound } from './views/pages.jsx';
@@ -123,6 +124,8 @@ registerSubmit(app);
 registerApi(app);
 /** People: /c/profiles/<slug>-<id>, the file next to it, claim and edit; after the API middleware so /api/v1/profiles is metered like the rest. */
 registerProfiles(app);
+/** Sites: /c/sites/<host>/<path>, one OpenSite record per page, and /c/sites/add, which reads any address now. */
+registerSites(app);
 registerPremium(app);
 registerOpenSaaS(app);
 registerAutomotive(app);
