@@ -9,6 +9,7 @@
 
 import { mkdir, open, stat, unlink } from 'node:fs/promises';
 import { dirname } from 'node:path';
+import { requestMusicBrainz, retryDelay } from './musicbrainz-http.js';
 
 export function makeHttp({ userAgent, log = () => {} }) {
   async function request(url, { headers = {}, timeoutMs = 30_000, method = 'GET', body } = {}) {
@@ -20,10 +21,13 @@ export function makeHttp({ userAgent, log = () => {} }) {
         signal: AbortSignal.timeout(timeoutMs),
         redirect: 'follow',
       });
+    if (new URL(url).hostname === 'musicbrainz.org') return requestMusicBrainz(doFetch, log);
     let res = await doFetch();
     if (res.status === 429 || res.status === 503) {
-      const wait = Math.min(Number(res.headers.get('retry-after') ?? 5) * 1000, 60_000);
+      const wait = retryDelay(res.headers.get('retry-after'));
+      if (wait > 60_000) return res;
       log(`${res.status} from ${new URL(url).host}, waiting ${wait}ms`);
+      await res.body?.cancel().catch(() => {});
       await Bun.sleep(wait);
       res = await doFetch();
     }

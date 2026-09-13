@@ -709,6 +709,14 @@ export const DEFAULT_FEEDS = [
      that happened, and an index is a summary of many of them. */
   {
     collection: 'housing',
+    slug: 'san-jose-homes',
+    name: 'San Jose homes',
+    description:
+      'Homes found by the Ruuster saved search: 2+ bedrooms, 1+ bathrooms, 750+ square feet, 4,500+ square foot lots, built in 2000 or later. Listings retain their last observed status.',
+    query: { sources: ['ruuster-san-jose-homes'], kinds: ['property-listing'] },
+  },
+  {
+    collection: 'housing',
     slug: 'property-sales',
     name: 'Property sales',
     description:

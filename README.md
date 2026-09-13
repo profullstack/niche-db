@@ -36,7 +36,7 @@ Adapters are one file each in `packages/adapters/src`. One hundred and twenty-ei
 | crypto | `coingecko-assets`, `crypto-pairs` | keyless (`COINGECKO_API_KEY` optional; `CRYPTO_PROXY_URL` for Binance.US from a datacenter) |
 | crime | `socrata-crime`, `uk-police-crime`, `fbi-crime-estimates` | FBI only (free api.data.gov key) |
 | public-money | `usaspending-awards`, `ocds-tenders`, `ted-notices` | no |
-| housing | `uk-land-registry`, `freddie-mac-rates`, `building-permits` | no |
+| housing | `uk-land-registry`, `freddie-mac-rates`, `building-permits`, `ruuster` (agent saved searches) | no |
 | jobs | `bls-series`, `eurostat`, `warn-layoffs`, `agenticjobs` | no |
 | ai-incidents | `rogue-ai-incidents`, `rogue-ai-research`, `aiid-reports` | no |
 | news | `newsfeed`, `gdelt`, `rssamplifier`, `brisk`, `news-channels` | no |
@@ -98,6 +98,42 @@ Ten of the sites we run publish a public feed or API of their own, and each is r
 | c0ncerts.com | none yet: `/api/events` answers 501 "coming soon" and `/api/v1/events` 404s | — | — | — |
 
 saasrow's `/api/v1/listings` is per-account and needs a key, so only the public products directory is read. A submission aiornot carries on more than one feed is stored once and tagged with each feed. tsbb's cross-board `/api/v1/latest` does not say which forum a topic is in, which is why the walk is per forum.
+
+## Ruuster housing searches
+
+`ruuster-san-jose-homes` reads the Real Estate Experts / Talar Davoudi saved
+search hourly and feeds `/f/san-jose-homes`. The search asks for San Jose houses
+that are Active or Coming Soon, with 2+ bedrooms, 1+ bathrooms, 750+ square feet,
+a 4,500+ square foot lot and a build year of 2000 or later. Ruuster calls the
+lot filter `lotSizeAcresMin` but accepts **square feet** there; property records
+return **acres**, and NicheDB keeps both units. Results and dimensions are
+upstream observations; conflicting MLS values are not silently corrected.
+
+Create another `ruuster` source with its `savedSearchUrl`, `pages` (20 by
+default, ten records per page) and `currency` (USD or CAD). Tracking parameters
+are removed and repeated status filters are combined. Public detail requests
+add photos, property facts and MLS attribution. Syndicated copies are joined
+by MLS listing number and address. Hidden-address and deleted records are
+omitted. The worker's detail budget and deadline are respected, with a cursor
+for unfinished pages; completed walks start from page one on the next refresh.
+
+Items retain the last status observed while matching the search. A property
+disappearing from a search is not evidence that it sold, and this source does
+not revisit every historical listing after it leaves the search.
+
+Run `bun run ingest ruuster-san-jose-homes` against the configured database, or
+export without a database with `bun scripts/scrape-ruuster.js > properties.json`.
+The export also accepts a saved-search URL and an optional new output filename
+as positional arguments. Ruuster's terms restrict automated access without
+written consent, and its IDX notice limits reuse; deploying this adapter does
+not grant redistribution rights: https://realestateexperts.ruuster.com/terms-of-service.
+
+MusicBrainz web-service requests share a process-wide queue with at least 1.1
+seconds between requests. A 429 or 503 retries up to three times with 5, 15 and
+45 second backoff, honoring longer `Retry-After` values, including HTTP dates.
+A zero retry hint cannot cause an immediate retry. This queue covers one
+worker process; deployments sharing an egress IP across multiple processes
+need coordination across those processes as well.
 
 ## Enrichment
 
