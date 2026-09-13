@@ -13,7 +13,7 @@ The first deployment is [nichedb.dev](https://nichedb.dev). Run your own on anyt
 | **item** | One row a source produced. Title, URL, when (with `time_known` and `precision`), tags, and the adapter's payload in `data`. |
 | **feed** | A saved query over a collection. Has a page, RSS and JSON Feed renderings, an API endpoint, and followers who are told when it changes by push, email or signed webhook. |
 
-Adapters are one file each in `packages/adapters/src`. Eighty-six ship today across thirty-one collections:
+Adapters are one file each in `packages/adapters/src`. Ninety-three ship today across thirty-two collections:
 
 | Collection | Adapters | Key needed |
 | --- | --- | --- |
@@ -53,6 +53,7 @@ Adapters are one file each in `packages/adapters/src`. Eighty-six ship today acr
 | marketplace | `d0rz`, `bl0ggers` | no |
 | ai-media | `aiornot` | no |
 | forums | `tsbb` | no |
+| hosting | `findhost`, `vultr-plans`, `linode-types`, `scaleway-instances`, `ovh-vps`, `lowendbox`, `openserver` | no (FindHost data is CC BY 4.0: credit FindHost, findhost.app) |
 
 ### House aggregators
 
@@ -78,10 +79,11 @@ After ingest, every item is enriched by the enrichers that apply to it (`package
 | Enricher | Adds | Default on for |
 | --- | --- | --- |
 | `youtube` | top videos (trailers, official audio, webcasts); Data API key optional | games, music, tabletop, space, chess, books |
-| `wikipedia` | the article's lead paragraph and picture | games, music, books, space, tabletop |
+| `wikipedia` | the article's lead paragraph and picture | games, music, books, space, tabletop, hosting |
 | `github-repo` | stars, forks, topics, licence, language, last push | packages, extensions |
 | `npm-stats` | last week's downloads | packages |
 | `sec-company` | tickers, exchange, industry, state, website of the filer | filings |
+| `company-ticker` | the listed company behind a hosting provider: ticker and CIK from the SEC's company list, matched on name | hosting |
 | `semantic-scholar` | TL;DR, citation counts, open-access PDF (key optional) | research |
 | `openlibrary-work` | description and subjects | books |
 | `opengraph` | the page's own preview image and description | most collections |

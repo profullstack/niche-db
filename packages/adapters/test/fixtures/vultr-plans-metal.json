@@ -1,0 +1,40 @@
+{
+ "plans_metal": [
+  {
+   "id": "vbm-4c-32gb",
+   "physical_cpus": 1,
+   "cpu_count": 4,
+   "cpu_cores": 4,
+   "cpu_threads": 8,
+   "cpu_manufacturer": "Intel",
+   "cpu_model": "E3-1270",
+   "cpu_mhz": 3800,
+   "ram": 32768,
+   "disk": 240,
+   "disk_count": 2,
+   "bandwidth": 5120,
+   "monthly_cost": 120,
+   "hourly_cost": 0.164,
+   "monthly_cost_preemptible": 120,
+   "hourly_cost_preemptible": 0.164,
+   "invoice_type": "monthly",
+   "type": "SSD",
+   "deploy_ondemand": true,
+   "deploy_preemptible": false,
+   "locations": [
+    "ewr",
+    "lax",
+    "ams",
+    "sjc"
+   ],
+   "gpu_brand": "none"
+  }
+ ],
+ "meta": {
+  "total": 23,
+  "links": {
+   "next": "",
+   "prev": ""
+  }
+ }
+}

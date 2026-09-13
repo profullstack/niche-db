@@ -6,6 +6,7 @@ const SUBJECT = {
   book: (i) => i.data?.authors?.[0] ?? searchTitle(i),
   launch: (i) => i.data?.rocket ?? i.data?.provider ?? null,
   tournament: () => null,
+  provider: (i) => i.data?.name ?? i.title,
 };
 
 function similar(a, b) {
@@ -23,8 +24,8 @@ export const wikipedia = defineEnricher({
   name: 'wikipedia',
   title: 'Wikipedia',
   description: 'The opening paragraph and picture from the matching Wikipedia article.',
-  collections: ['games', 'music', 'books', 'space', 'tabletop'],
-  appliesTo: (item) => ['game', 'release', 'book', 'launch', 'set'].includes(item.kind),
+  collections: ['games', 'music', 'books', 'space', 'tabletop', 'hosting'],
+  appliesTo: (item) => ['game', 'release', 'book', 'launch', 'set', 'provider'].includes(item.kind),
   perRun: 60,
   async enrich(item, { http }) {
     const subject = (SUBJECT[item.kind] ?? searchTitle)(item);

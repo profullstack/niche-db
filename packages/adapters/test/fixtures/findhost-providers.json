@@ -1,0 +1,236 @@
+{
+ "meta": {
+  "name": "FindHost",
+  "url": "https://www.findhost.app/",
+  "license": "https://creativecommons.org/licenses/by/4.0/",
+  "attribution": "FindHost, findhost.app, CC BY 4.0",
+  "checkedAt": "2026-09-10",
+  "modifiedAt": "2026-09-11",
+  "note": "Attributes are recorded, never scored. An absent field means unknown, never zero and never bad."
+ },
+ "providers": [
+  {
+   "id": "1984-hosting",
+   "href": "/1984-hosting/",
+   "name": "1984 Hosting",
+   "description": "Icelandic host founded on a free-speech and privacy position, running on geothermal and hydroelectric power, selling web hosting, VPS and free anycast DNS.",
+   "checkedAt": "2026-08-01T00:00:00.000Z",
+   "modifiedAt": "2026-09-07T00:00:00.000Z",
+   "addedAt": "2026-07-31T00:00:00.000Z",
+   "greenWebId": 1205,
+   "country": "IS",
+   "figure": {
+    "emoji": "\ud83c\udf0b",
+    "color": "rgb(157, 77, 77)",
+    "textColor": "rgb(245, 234, 234)",
+    "text": "Named after that book by Orwell."
+   },
+   "facets": {
+    "software": [
+     "wordpress"
+    ],
+    "category": [
+     "shared-hosting"
+    ],
+    "regions": [
+     "IS"
+    ],
+    "priceFrom": "sm",
+    "runtimes": [
+     "php"
+    ],
+    "deployMethods": [
+     "file-transfer",
+     "control-panel"
+    ],
+    "features": [
+     "green"
+    ],
+    "useCases": [
+     "cms",
+     "portfolio",
+     "campaign-site",
+     "side-project"
+    ],
+    "audience": [
+     "solo",
+     "non-profit",
+     "smb"
+    ],
+    "pricingFeatures": [
+     "upfront"
+    ],
+    "whoManagesOs": "managed",
+    "exitWithin": "a-quarter",
+    "ownership": "independent"
+   },
+   "notApplicable": []
+  },
+  {
+   "id": "fortrabbit",
+   "href": "/fortrabbit/",
+   "name": "fortrabbit",
+   "description": "Managed hosting platform for developers since 2012, runs on AWS capacity in Ireland and the US.",
+   "favorite": true,
+   "checkedAt": "2026-08-01T00:00:00.000Z",
+   "modifiedAt": "2026-09-09T00:00:00.000Z",
+   "addedAt": "2026-07-31T00:00:00.000Z",
+   "greenWebId": 1315,
+   "country": "DE",
+   "figure": {
+    "emoji": "\ud83d\udc30",
+    "color": "rgb(163, 57, 177)",
+    "textColor": "rgb(244, 234, 246)",
+    "text": "As secure as Fort Knox, as fast as a rabbit."
+   },
+   "facets": {
+    "software": [
+     "laravel",
+     "symfony",
+     "craft-cms",
+     "statamic",
+     "kirby",
+     "grav",
+     "wordpress",
+     "joomla",
+     "drupal",
+     "typo3",
+     "shopware",
+     "silverstripe"
+    ],
+    "category": [
+     "paas"
+    ],
+    "regions": [
+     "IE",
+     "US"
+    ],
+    "priceFrom": "xs",
+    "runtimes": [
+     "php"
+    ],
+    "managedDatabases": [
+     "mysql"
+    ],
+    "supportChannels": [
+     "email",
+     "chat"
+    ],
+    "deployMethods": [
+     "git"
+    ],
+    "features": [
+     "collaboration",
+     "staging",
+     "test-domain",
+     "green",
+     "favorite"
+    ],
+    "useCases": [
+     "cms",
+     "e-commerce",
+     "api",
+     "web-app"
+    ],
+    "automation": [
+     "api",
+     "cli",
+     "mcp"
+    ],
+    "audience": [
+     "solo"
+    ],
+    "pricingFeatures": [
+     "free-trial",
+     "in-arrears",
+     "no-minimum",
+     "sla"
+    ],
+    "currencies": [
+     "EUR",
+     "USD"
+    ],
+    "sshAccess": "jailed",
+    "whoManagesOs": "managed",
+    "infraContract": [
+     "resells-iaas"
+    ],
+    "exitWithin": "a-day",
+    "ownership": "independent"
+   },
+   "notApplicable": []
+  },
+  {
+   "id": "hetzner",
+   "href": "/hetzner/",
+   "name": "Hetzner",
+   "description": "Hetzner is an independent German hosting company offering VPS, dedicated servers, cloud and storage infrastructure from its own data centres.",
+   "favorite": true,
+   "checkedAt": "2026-08-01T00:00:00.000Z",
+   "modifiedAt": "2026-09-09T00:00:00.000Z",
+   "addedAt": "2026-07-31T00:00:00.000Z",
+   "greenWebId": 131,
+   "country": "DE",
+   "figure": {
+    "emoji": "\ud83c\udde9\ud83c\uddea",
+    "color": "rgb(183, 145, 52)",
+    "textColor": "rgb(246, 242, 234)",
+    "text": "IT made in Germany."
+   },
+   "facets": {
+    "category": [
+     "vps",
+     "bare-metal"
+    ],
+    "regions": [
+     "DE",
+     "FI",
+     "SG",
+     "US"
+    ],
+    "priceFrom": "xs",
+    "runtimes": [
+     "any"
+    ],
+    "supportChannels": [
+     "phone",
+     "forum"
+    ],
+    "features": [
+     "green",
+     "favorite"
+    ],
+    "automation": [
+     "api",
+     "cli"
+    ],
+    "audience": [
+     "smb",
+     "enterprise"
+    ],
+    "pricingFeatures": [
+     "in-arrears",
+     "no-minimum"
+    ],
+    "currencies": [
+     "EUR",
+     "USD"
+    ],
+    "sshAccess": "root",
+    "whoManagesOs": "self-managed",
+    "infraContract": [
+     "owns-metal"
+    ],
+    "exitWithin": "a-day",
+    "ownership": "independent",
+    "paymentMethods": [
+     "card",
+     "paypal",
+     "bank-transfer",
+     "direct-debit"
+    ]
+   },
+   "notApplicable": []
+  }
+ ]
+}

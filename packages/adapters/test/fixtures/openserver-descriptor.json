@@ -1,0 +1,49 @@
+{
+  "openserver": "0.1",
+  "provider": {
+    "id": "example-host",
+    "name": "Example Host",
+    "web": "https://www.example-host.com/",
+    "operator": "Example Host GmbH",
+    "country": "DE",
+    "support": "https://www.example-host.com/support",
+    "status": "https://status.example-host.com/"
+  },
+  "updated": "2026-09-12T08:00:00Z",
+  "offers": [
+    {
+      "id": "vps-s",
+      "name": "VPS S",
+      "url": "https://www.example-host.com/vps/s",
+      "kind": "vps",
+      "premises": "off-prem",
+      "management": "unmanaged",
+      "tenancy": "shared",
+      "model": "centralized",
+      "location": { "regions": ["fsn1", "nbg1"], "countries": ["DE"] },
+      "compute": { "vcpu": 2, "cores": null, "ram_mb": 4096, "arch": "x86_64", "gpu": null },
+      "storage": [{ "type": "nvme", "size_gb": 40 }],
+      "network": { "bandwidth_mbps": 1000, "transfer_gb": 20000, "ipv4": true, "ipv6": true },
+      "price": { "amount": 4.5, "currency": "EUR", "interval": "month", "setup": 0, "commitment": 0 },
+      "stock": "in_stock",
+      "updated": "2026-09-12T08:00:00Z"
+    },
+    {
+      "id": "metal-ax41",
+      "name": "AX41",
+      "url": "https://www.example-host.com/dedicated/ax41",
+      "kind": "bare-metal",
+      "premises": "off-prem",
+      "management": "unmanaged",
+      "tenancy": "dedicated",
+      "model": "centralized",
+      "location": { "regions": ["fsn1"], "countries": ["DE"] },
+      "compute": { "vcpu": 12, "cores": 6, "ram_mb": 65536, "arch": "x86_64", "gpu": null },
+      "storage": [{ "type": "nvme", "size_gb": 512 }, { "type": "nvme", "size_gb": 512 }],
+      "network": { "bandwidth_mbps": 1000, "transfer_gb": null, "ipv4": true, "ipv6": true },
+      "price": { "amount": 39, "currency": "EUR", "interval": "month", "setup": 39, "commitment": 0 },
+      "stock": "out_of_stock",
+      "updated": "2026-09-12T08:00:00Z"
+    }
+  ]
+}
