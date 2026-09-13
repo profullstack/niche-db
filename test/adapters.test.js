@@ -73,6 +73,7 @@ describe('registry', () => {
         'threats',
         'profiles',
         'directory',
+        'sites',
       ]).toContain(a.collection);
     }
     expect(adapterByName('steam').title).toContain('Steam');

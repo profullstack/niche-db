@@ -75,8 +75,16 @@ export const Layout = (props) => (
       {props.openprofile ? <link rel="openprofile" href={props.openprofile} /> : null}
       <meta property="og:title" content={props.title ?? config.siteName} />
       <meta property="og:type" content="website" />
-      <meta property="og:image" content={`${config.siteUrl}/icons/icon-512x512.png`} />
-      <meta name="twitter:card" content="summary" />
+      {props.description ? <meta property="og:description" content={props.description} /> : null}
+      {/* A page with a picture of its own (a site record's) shows it; every other page shows the mark. */}
+      <meta
+        property="og:image"
+        content={props.image ?? `${config.siteUrl}/icons/icon-512x512.png`}
+      />
+      <meta
+        name="twitter:card"
+        content={props.image && props.imageWide ? 'summary_large_image' : 'summary'}
+      />
       {config.analytics.enabled && currentModules().tracking ? (
         <script
           src="https://crawlproof.com/stats.js"

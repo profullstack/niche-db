@@ -13,7 +13,7 @@ The first deployment is [nichedb.dev](https://nichedb.dev). Run your own on anyt
 | **item** | One row a source produced. Title, URL, when (with `time_known` and `precision`), tags, and the adapter's payload in `data`. |
 | **feed** | A saved query over a collection. Has a page, RSS and JSON Feed renderings, an API endpoint, and followers who are told when it changes by push, email or signed webhook. |
 
-Adapters are one file each in `packages/adapters/src`. Ninety-three ship today across thirty-two collections:
+Adapters are one file each in `packages/adapters/src`. Ninety-four ship today across thirty-four collections:
 
 | Collection | Adapters | Key needed |
 | --- | --- | --- |
@@ -63,6 +63,11 @@ One entry per person, assembled from every app that serves their [OpenProfile.md
 
 A person claims their entry with **This is me** (proven by the email the profile lists, or a link back to the page from their site or show; admins may claim for an email) and edits it from the page, `PUT /api/v1/profiles/<ref>` (JSON overlay or a whole `text/markdown` file), `nichedb profile edit`, or the `update_profile` MCP tool, with a session, an API key, or an OpenAccess token carrying `openprofile:edit`. What the owner writes is an overlay that wins over every source and survives every re-read; a section written as `none` is removed. The `Broadcast` and `Guest` sections ([OpenBroadcast](https://logicsrc.com/openbroadcast), [OpenGuest](https://logicsrc.com/openguest)) are what the `podcasters` and `guests` feeds cut on.
 | directory | `outreachgraph` | no |
+| sites | `opensite` | no |
+
+### Sites (`/c/sites`)
+
+One record per page, read the way [OpenSite](https://logicsrc.com/opensite) says: the title, the line, the picture and the kind a card is drawn from, the canonical address it is keyed by, the author, the feeds, and the `og:`, `twitter:` and JSON-LD tags verbatim. The `opensite` adapter walks each house site from its front page and sitemap, a hundred pages a run, honouring robots.txt and a site's own `/.well-known/opensite.json`. Any other address is read the moment somebody pastes it at `/c/sites/add`, which then shows every tag and the card as X, Slack, iMessage, Discord, LinkedIn and WhatsApp would draw it; the same read is `POST /api/v1/sites { "url" }`, and `GET /api/v1/sites?url=` answers the kept record or reads the page when it is older than an hour. The page is `/c/sites/<host>/<path>`, query string and all, because a page's identity can be in its query.
 
 ### House aggregators
 
