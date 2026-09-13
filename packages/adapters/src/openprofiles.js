@@ -116,7 +116,9 @@ export const openprofiles = defineAdapter({
     'People, read off the apps that serve their OpenProfile.md (logicsrc.com/openprofile): each listing endpoint is paged for what changed, every document is fetched from the same host that listed it, and the documents are merged into one profile per person by account URL, never by name. What an owner has edited here is never overwritten by a pull. Keyless.',
   docs: 'https://logicsrc.com/docs/openprofile',
   kinds: ['person'],
-  cadenceMinutes: 60,
+  cadenceMinutes: 15,
+  /** A run may take this long: a walk of a hundred thousand documents needs more than the four minutes a run usually gets. */
+  budgetMs: 20 * 60_000,
   configFields: [
     {
       key: 'urls',
@@ -126,10 +128,11 @@ export const openprofiles = defineAdapter({
       placeholder: 'https://p0dcasters.com/api/openprofiles',
     },
   ],
-  // Documents are fetched one at a time with a pause between them, because the
-  // apps meter callers by the minute (p0dcasters answers 402 past its
-  // allowance); 700 ms is under a hundred a minute. Tests set it to 0.
-  defaults: { urls: [], paceMs: 700 },
+  // Documents are fetched `concurrency` at a time, each with its own short
+  // timeout, until `budgetMs` runs out; the apps that meter callers by the
+  // minute (p0dcasters answers 402 past its allowance) are the reason for
+  // `paceMs`, a pause per worker between fetches, off by default.
+  defaults: { urls: [], concurrency: 8, timeoutMs: 5_000, budgetMs: 20 * 60_000, paceMs: 0 },
   defaultSources: [
     {
       slug: 'openprofiles',
@@ -140,12 +143,17 @@ export const openprofiles = defineAdapter({
         urls: [
           'https://p0dcasters.com/api/openprofiles',
           'https://outreachgraph.com/api/v1/openprofiles',
+          'https://rssamplifier.com/api/openprofiles',
         ],
       },
+      cadenceMinutes: 15,
       enabled: true,
+      // The listings are house apps and this seed is their source of truth:
+      // a new listing or cadence here reaches the row on the next boot.
+      refresh: true,
     },
   ],
-  async pull({ config, cursor, http, log, deadline }) {
+  async pull({ config, cursor, http, log }) {
     const listings = (
       Array.isArray(config.urls) ? config.urls : String(config.urls ?? '').split(',')
     )
@@ -156,40 +164,44 @@ export const openprofiles = defineAdapter({
       log('no listings configured');
       return { items: [], note: 'no listings configured' };
     }
+    const concurrency = Math.max(1, Math.min(Number(config.concurrency) || 8, 32));
+    const timeoutMs = Math.max(1_000, Number(config.timeoutMs) || 5_000);
+    const budgetMs = Math.max(500, Number(config.budgetMs) || 20 * 60_000);
+    const paceMs = Math.max(0, Number(config.paceMs) || 0);
+    const stop = Date.now() + budgetMs;
+
     /*
-     * Three things the cursor remembers per listing. `since` is the newest
-     * `updatedAt` seen on a walk that finished, and is what the next walk asks
-     * the listing for. `complete` says a walk has ever finished: a listing of a
-     * hundred thousand shows is cut by the run's deadline long before its end,
-     * and asking for changes "since" the newest entry of an unfinished walk
-     * would skip everything the walk never reached. `resume` is where a cut
-     * walk stopped (the page it was on and the newest it had seen), so the next
-     * run, asked for in two minutes rather than an hour, carries on from there.
+     * What the cursor remembers per listing. `resume` is where a cut walk
+     * stopped: the page it was on and when the pass began. `since` is the
+     * start time of the last pass that FINISHED, and is what the next pass
+     * asks the listing for; `complete` says one ever finished. Paging is by
+     * the listing's own cursor, never by `updatedAt`, so a listing whose
+     * entries all carry one timestamp (p0dcasters stamps every show with the
+     * weekly reload) is walked once, page by page, and never re-read in a
+     * loop. A since left behind by an unfinished walk is not trusted: that
+     * listing is walked in full once.
      */
     const since = { ...(cursor?.since ?? {}) };
     const complete = { ...(cursor?.complete ?? {}) };
     const resume = { ...(cursor?.resume ?? {}) };
     const items = [];
     const notes = [];
+    const stats = { fetched: 0, skipped: 0, throttled: 0, pages: 0 };
+
     for (const listing of listings) {
-      if (Date.now() > deadline) break;
+      if (Date.now() > stop) break;
       const app = appOf(listing);
       const resuming = resume[listing] && typeof resume[listing] === 'object';
       const incremental = !resuming && complete[listing] === true && Boolean(since[listing]);
       let pageCursor = resuming ? resume[listing].at || null : null;
-      let newest = resuming
-        ? (resume[listing].newest ?? null)
-        : incremental
-          ? since[listing]
-          : null;
+      const startedAt = resuming ? resume[listing].startedAt : new Date().toISOString();
       let pages = 0;
       let fetched = 0;
-      let rejected = 0;
+      let skipped = 0;
+      let throttled = 0;
       let cut = false;
-      let missing = false;
       let stopped = null;
-      const paceMs = Math.max(0, Number(config.paceMs) || 0);
-      let lastFetch = 0;
+
       try {
         do {
           let body;
@@ -198,15 +210,14 @@ export const openprofiles = defineAdapter({
               pageUrl(listing, {
                 since: incremental ? since[listing] : null,
                 cursor: pageCursor,
-                limit: 200,
+                limit: 500,
               }),
               { timeoutMs: 20_000 },
             );
           } catch (err) {
             // A listing that stops answering mid-walk (a 402 past its
             // allowance, a 5xx) is a cut, not a failure: the walk keeps its
-            // place and asks again soon. Only a listing that never answered
-            // at all is reported as an error.
+            // place and asks again soon. One that never answered is an error.
             if (pages === 0 && fetched === 0) throw err;
             stopped = String(err.message).slice(0, 60);
             cut = true;
@@ -214,71 +225,108 @@ export const openprofiles = defineAdapter({
           }
           if (body === null) {
             notes.push(`${app}: listing not there yet (404)`);
-            missing = true;
+            stopped = 'missing';
             break;
           }
           const page = parseListing(body);
-          for (const entry of page.entries) {
-            if (Date.now() > deadline) {
-              cut = true;
-              break;
-            }
-            if (!sameOrigin(listing, entry.url)) {
-              rejected += 1;
-              continue;
-            }
-            try {
-              const wait = paceMs - (Date.now() - lastFetch);
-              if (wait > 0) await new Promise((r) => setTimeout(r, wait));
-              lastFetch = Date.now();
-              const doc = await http.text(entry.url, {
-                timeoutMs: 15_000,
-                headers: { accept: 'text/markdown, text/plain, */*' },
-              });
-              const fetchedAt = new Date().toISOString();
-              const item = docItem({ listingUrl: listing, entry, doc, fetchedAt });
-              if (item) {
-                items.push(item);
-                fetched += 1;
-                if (entry.updatedAt && (!newest || entry.updatedAt > newest))
-                  newest = entry.updatedAt;
+          const entries = page.entries.filter((e) => {
+            if (sameOrigin(listing, e.url)) return true;
+            skipped += 1;
+            return false;
+          });
+
+          // The page's documents, `concurrency` at a time, until the budget is spent.
+          let next = 0;
+          let pageThrottled = 0;
+          const worker = async () => {
+            while (next < entries.length) {
+              if (Date.now() > stop) return;
+              const entry = entries[next++];
+              try {
+                if (paceMs) await new Promise((r) => setTimeout(r, paceMs));
+                const doc = await http.text(entry.url, {
+                  timeoutMs,
+                  headers: { accept: 'text/markdown, text/plain, */*' },
+                });
+                const item = docItem({
+                  listingUrl: listing,
+                  entry,
+                  doc,
+                  fetchedAt: new Date().toISOString(),
+                });
+                if (item) {
+                  items.push(item);
+                  fetched += 1;
+                } else skipped += 1;
+              } catch (err) {
+                const msg = String(err?.message ?? err);
+                if (/^(402|429) /.test(msg)) {
+                  throttled += 1;
+                  pageThrottled += 1;
+                } else {
+                  skipped += 1;
+                  log(`${app}: ${entry.url} ${msg.slice(0, 60)}`);
+                }
               }
-            } catch (err) {
-              log(`${app}: ${entry.url} ${String(err.message).slice(0, 60)}`);
             }
+          };
+          await Promise.all(
+            Array.from({ length: Math.min(concurrency, entries.length || 1) }, worker),
+          );
+
+          if (next < entries.length) {
+            // The budget ran out inside this page: resume from this page, so the
+            // documents after the cut are fetched next time (twice is a no-op).
+            cut = true;
+            stopped = 'budget';
+            break;
           }
-          if (cut) break;
+          if (pageThrottled > 0 && pageThrottled * 4 >= Math.max(1, entries.length)) {
+            // A quarter of a page refused: the app is metering us. Keep the
+            // page, come back in two minutes rather than burn the allowance.
+            cut = true;
+            stopped = `throttled (${pageThrottled} of ${entries.length})`;
+            break;
+          }
           pages += 1;
           pageCursor = page.next;
-        } while (pageCursor && pages < 50 && Date.now() < deadline);
-        if (missing) continue;
-        // Stopped between pages by the page cap or the clock: that is a cut too.
-        if (!cut && pageCursor) cut = true;
+        } while (pageCursor && Date.now() < stop);
+
+        if (stopped === 'missing') continue;
+        if (!cut && pageCursor) {
+          cut = true;
+          stopped = 'budget';
+        }
+        stats.fetched += fetched;
+        stats.skipped += skipped;
+        stats.throttled += throttled;
+        stats.pages += pages;
         if (cut) {
-          // A cut mid-page resumes from that page, so the entries after the cut
-          // are fetched again next time; absorbing a document twice is a no-op.
-          resume[listing] = { at: pageCursor ?? '', newest };
+          resume[listing] = { at: pageCursor ?? '', startedAt };
           notes.push(
-            `${app}: ${fetched} documents, walk cut${stopped ? ` (${stopped})` : ''}, resuming in 2 minutes`,
+            `${app}: ${fetched} fetched, ${skipped} skipped, ${throttled} throttled, ${pages} pages, cut by ${stopped}, cursor at ${pageCursor ? pageCursor.slice(0, 24) : 'first page'}, resuming in 2 minutes`,
           );
         } else {
           delete resume[listing];
           complete[listing] = true;
-          if (newest) since[listing] = newest;
+          since[listing] = startedAt;
           notes.push(
-            `${app}: ${fetched} documents${rejected ? `, ${rejected} off-origin dropped` : ''}`,
+            `${app}: ${fetched} fetched, ${skipped} skipped, ${throttled} throttled, ${pages} pages, pass complete, since ${startedAt}`,
           );
         }
       } catch (err) {
         notes.push(`${app}: ${String(err.message).slice(0, 60)}`);
       }
     }
-    log(notes.join('; '));
     const pending = Object.keys(resume).length > 0;
+    const note = notes.join('; ');
+    log(
+      `${stats.fetched} fetched, ${stats.skipped} skipped, ${stats.throttled} throttled over ${stats.pages} pages; ${note}`,
+    );
     return {
       items,
       cursor: { since, complete, resume },
-      note: notes.join('; '),
+      note,
       ...(pending ? { nextInMinutes: 2 } : {}),
     };
   },

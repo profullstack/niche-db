@@ -1,5 +1,5 @@
 import { config } from '@nichedb/config';
-import { enrichPending, runSource, scanFeeds } from '@nichedb/core';
+import { ADAPTERS, enrichPending, runSource, scanFeeds } from '@nichedb/core';
 import * as q from '@nichedb/db/queries';
 import { sendEmail, sendPush } from '@nichedb/notify';
 import { buildEvent, sendWebhook } from '@profullstack/autoblog';
@@ -10,13 +10,17 @@ const log = (...a) => console.log('[worker]', ...a);
 
 /* -------------------------------------------------------------------- tick -- */
 
+/** The longest a run may take: the deployment's deadline, or an adapter's own budget when larger. */
+const longestRunMs = () =>
+  Math.max(config.ingest.runDeadlineMs, ...ADAPTERS.map((a) => a.budgetMs ?? 0));
+
 /**
  * Which sources are due? One `run` job each, with a per-minute id so a tick
  * that fires twice cannot double-run a source. startRun pushes next_run_at
  * forward as the job begins, so a long run is not re-enqueued by the next tick.
  */
 async function runTick(job) {
-  await q.reapStaleRuns({ minutes: Math.ceil(config.ingest.runDeadlineMs / 60_000) + 10 });
+  await q.reapStaleRuns({ minutes: Math.ceil(longestRunMs() / 60_000) + 10 });
   const due = await q.dueSources({ limit: 50, force: Boolean(job.data?.force) });
   for (const s of due) {
     await queues.run.add(
@@ -143,7 +147,7 @@ export function startWorkers() {
     new Worker(QUEUES.run, (job) => runSource(job.data.sourceId, { log }), {
       connection,
       concurrency: config.ingest.concurrency,
-      lockDuration: config.ingest.runDeadlineMs + 60_000,
+      lockDuration: longestRunMs() + 60_000,
     }),
     new Worker(QUEUES.scan, runScan, { connection, concurrency: 1 }),
     new Worker(QUEUES.deliver, runDeliver, { connection, concurrency: 8 }),

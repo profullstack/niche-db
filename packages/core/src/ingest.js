@@ -87,7 +87,9 @@ export async function runSource(sourceId, { log = console.log } = {}) {
       http: makeHttp({ userAgent: UA(), log: l }),
       log: l,
       budget: config.ingest.budget,
-      deadline: started + config.ingest.runDeadlineMs,
+      // An adapter that declares a budget (a walk of a hundred thousand
+      // documents) gets it; everything else gets the deployment's deadline.
+      deadline: started + (adapter.budgetMs ?? config.ingest.runDeadlineMs),
       // What this source wrote last time for these ids, so an adapter that
       // keeps a rolling window per item can extend it rather than restate it.
       previous: (externalIds) => q.previousItemData({ sourceId: source.id, externalIds }),

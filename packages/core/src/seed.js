@@ -1590,6 +1590,23 @@ export async function ensureDefaults({ env = {}, log = console.log } = {}) {
         enabled: missingEnv.length === 0 && s.enabled !== false,
       });
       if (row.created) created++;
+      /*
+       * `insertSource` leaves an existing row's config and cadence alone,
+       * because a person may have edited them. A default marked `refresh`
+       * says the seed is the source of truth for both (house listings the
+       * code adds to), so a change here reaches the row on the next boot.
+       */
+      if (!row.created && s.refresh) {
+        const cadence = s.cadenceMinutes ?? adapter.cadenceMinutes;
+        const stored = typeof row.config === 'string' ? JSON.parse(row.config) : row.config;
+        const same =
+          JSON.stringify(stored ?? {}) === JSON.stringify(s.config ?? {}) &&
+          Number(row.cadence_minutes) === Number(cadence);
+        if (!same) {
+          await q.updateSource({ id: row.id, config: s.config ?? {}, cadenceMinutes: cadence });
+          log(`[seed] refreshed ${s.slug}: config and cadence from the seed`);
+        }
+      }
     }
   }
 
