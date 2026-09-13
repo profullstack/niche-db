@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'bun:test';
 import { readFile } from 'node:fs/promises';
 import { EnrichmentBlocks } from '../apps/web/src/views/enrichment.jsx';
+import { providerItem } from '../packages/adapters/src/openserver.js';
 import {
   brewMatches,
   conventionalLinks,
@@ -137,6 +138,96 @@ describe('matching a registry by domain, never by name', () => {
     expect(homeOf({ url: 'https://www.findhost.app/zerops/', data: {} }, {})).toBeNull();
     expect(registrableDomain('my.host.co.uk')).toBe('host.co.uk');
     expect(registrableDomain('client.capconnect.com')).toBe('capconnect.com');
+  });
+});
+
+describe('a provider that serves its own OpenServer 0.2 descriptor', () => {
+  const descriptor = {
+    provider: {
+      name: 'Northwind Hosting',
+      web: 'https://northwind.example',
+      developer: {
+        cli: {
+          name: 'nwctl',
+          install: { brew: 'brew install northwind/tap/nwctl' },
+          docs: 'https://northwind.example/docs/cli',
+          repo: 'https://github.com/northwind/nwctl',
+        },
+        api_docs: 'https://northwind.example/docs/api',
+      },
+    },
+    offers: [{ name: 'ARM 4' }],
+  };
+
+  test('the adapter keeps the developer block as written and tags the row has-cli', () => {
+    const row = providerItem(descriptor, 'https://northwind.example/.well-known/openserver.json');
+    expect(row.data.developer).toEqual(descriptor.provider.developer);
+    expect(row.tags).toContain('has-cli');
+    const none = providerItem(
+      { provider: { name: 'Plain', web: 'https://plain.example' }, offers: [] },
+      'https://plain.example/.well-known/openserver.json',
+    );
+    expect(none.data.developer).toBeNull();
+    expect(none.tags).not.toContain('has-cli');
+  });
+
+  test('the enricher believes the descriptor over the seed and never searches a registry for it', async () => {
+    let calls = 0;
+    const http = {
+      async json() {
+        calls++;
+        throw new Error('no network in this test');
+      },
+      async request() {
+        calls++;
+        return { status: 404, ok: false };
+      },
+    };
+    const out = await developer.enrich(
+      {
+        kind: 'provider',
+        title: 'Hetzner',
+        url: 'https://www.hetzner.com/',
+        data: {
+          provider: 'hetzner',
+          web: 'https://www.hetzner.com/',
+          developer: descriptor.provider.developer,
+        },
+      },
+      { http, env: {}, log: () => {} },
+    );
+    expect(out.cli.name).toBe('nwctl');
+    expect(out.cli.verified).toBe('descriptor');
+    expect(out.cli.install.brew).toBe('brew install northwind/tap/nwctl');
+    expect(out.api_docs).toBe('https://northwind.example/docs/api');
+    expect(out.source_notes[0]).toMatch(/own OpenServer descriptor/);
+    expect(out.tags).toContain('has-cli');
+  });
+
+  test('a descriptor that states "cli": null is believed too, and nothing is searched', async () => {
+    const seen = [];
+    const http = {
+      async json(url) {
+        seen.push(url);
+        throw new Error('no network in this test');
+      },
+      async request(url) {
+        seen.push(url);
+        return { status: 404, ok: false };
+      },
+    };
+    const out = await developer.enrich(
+      {
+        kind: 'provider',
+        title: 'Plain',
+        url: 'https://plain.example/',
+        data: { provider: 'plain', web: 'https://plain.example/', developer: { cli: null } },
+      },
+      { http, env: {}, log: () => {} },
+    );
+    expect(out.cli).toBeNull();
+    expect(out.source_notes).toContain('cli: the provider states it has none');
+    expect(seen.some((u) => /formulae\.brew\.sh|registry\.npmjs/.test(u))).toBe(false);
   });
 });
 

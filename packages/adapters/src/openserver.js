@@ -93,9 +93,14 @@ export function providerItem(descriptor, fetchedFrom, aliases = {}) {
       'openserver',
       p.country ? `country:${String(p.country).toLowerCase()}` : null,
       p.status ? `status:${String(p.status).toLowerCase()}` : null,
+      p.developer?.cli ? 'has-cli' : null,
     ].filter(Boolean),
     data: {
       provider: slug,
+      // OpenServer 0.2: the provider's own statement of its CLI, API docs,
+      // Terraform provider and GitHub org, kept as written so the developer
+      // enricher shows the provider's words instead of the seed's.
+      developer: p.developer && typeof p.developer === 'object' ? p.developer : null,
       openserver: descriptor.openserver ?? null,
       descriptor: fetchedFrom,
       name: p.name,
