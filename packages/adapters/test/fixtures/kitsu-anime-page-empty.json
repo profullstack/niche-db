@@ -1,0 +1,11 @@
+{
+  "data": [],
+  "meta": {
+    "count": 22418
+  },
+  "links": {
+    "first": "https://kitsu.io/api/edge/anime?page%5Blimit%5D=20&page%5Boffset%5D=0&sort=id",
+    "prev": "https://kitsu.io/api/edge/anime?page%5Blimit%5D=20&page%5Boffset%5D=99979&sort=id",
+    "last": "https://kitsu.io/api/edge/anime?page%5Blimit%5D=20&page%5Boffset%5D=22398&sort=id"
+  }
+}
