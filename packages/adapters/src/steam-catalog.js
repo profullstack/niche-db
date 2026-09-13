@@ -47,7 +47,7 @@ const FAILURE_STOP = 3;
 
 export const USER_AGENT = 'nichedb (https://nichedb.dev; hello@nichedb.dev) steam-catalog';
 
-export const ATTRIBUTION = 'Steam (Valve); store data, not for resale';
+export const ATTRIBUTION = 'Steam (Valve); store data, for personal use and as is, per the Steam Web API terms';
 
 /**
  * `type` on a store item. Confirmed against the store's own labels on
@@ -257,7 +257,7 @@ export const steamCatalog = defineAdapter({
   title: 'Steam: every app',
   collection: 'games',
   description:
-    "Every app on Steam, close to 300,000: games, demos, DLC, software, soundtracks, videos and hardware, one row each with its type, short description, release date, platforms, top tags, review summary, price, developers and publishers. Keyless; Valve's store data is shown with attribution and is not for resale, per the Steam Web API terms. Walks the storefront query 500 a page, resumes at the next start, and begins the catalogue over once a pass is complete.",
+    "Every app on Steam, close to 300,000: games, demos, DLC, software, soundtracks, videos and hardware, one row each with its type, short description, release date, platforms, top tags, review summary, price, developers and publishers. Keyless. The Steam Web API terms license Steam Data for redistribution to readers for their personal use, as is, at no more than 100,000 calls a day, and never presented as Valve's own or as endorsed by Valve; there is no open-data licence. Walks the storefront query 500 a page, resumes at the next start, and begins the catalogue over once a pass is complete.",
   docs: 'https://steamapi.xpaw.me/#IStoreQueryService/Query',
   kinds: ['game'],
   cadenceMinutes: 1440,
