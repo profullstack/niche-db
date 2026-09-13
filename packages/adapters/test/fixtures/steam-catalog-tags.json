@@ -1,0 +1,127 @@
+{
+  "response": {
+    "tags": [
+      {
+        "tagid": 19,
+        "name": "Action"
+      },
+      {
+        "tagid": 21,
+        "name": "Adventure"
+      },
+      {
+        "tagid": 84,
+        "name": "Design & Illustration"
+      },
+      {
+        "tagid": 113,
+        "name": "Free to Play"
+      },
+      {
+        "tagid": 122,
+        "name": "RPG"
+      },
+      {
+        "tagid": 492,
+        "name": "Indie"
+      },
+      {
+        "tagid": 597,
+        "name": "Casual"
+      },
+      {
+        "tagid": 699,
+        "name": "Racing"
+      },
+      {
+        "tagid": 701,
+        "name": "Sports"
+      },
+      {
+        "tagid": 1644,
+        "name": "Driving"
+      },
+      {
+        "tagid": 1663,
+        "name": "FPS"
+      },
+      {
+        "tagid": 1664,
+        "name": "Puzzle"
+      },
+      {
+        "tagid": 1718,
+        "name": "MOBA"
+      },
+      {
+        "tagid": 1738,
+        "name": "Hidden Object"
+      },
+      {
+        "tagid": 1742,
+        "name": "Story Rich"
+      },
+      {
+        "tagid": 1773,
+        "name": "Arcade"
+      },
+      {
+        "tagid": 1774,
+        "name": "Shooter"
+      },
+      {
+        "tagid": 3834,
+        "name": "Exploration"
+      },
+      {
+        "tagid": 4085,
+        "name": "Anime"
+      },
+      {
+        "tagid": 4106,
+        "name": "Action-Adventure"
+      },
+      {
+        "tagid": 4305,
+        "name": "Colorful"
+      },
+      {
+        "tagid": 4434,
+        "name": "JRPG"
+      },
+      {
+        "tagid": 4667,
+        "name": "Violent"
+      },
+      {
+        "tagid": 4885,
+        "name": "Bullet Hell"
+      },
+      {
+        "tagid": 5537,
+        "name": "Puzzle Platformer"
+      },
+      {
+        "tagid": 9204,
+        "name": "Immersive Sim"
+      },
+      {
+        "tagid": 13906,
+        "name": "Game Development"
+      },
+      {
+        "tagid": 17894,
+        "name": "Cats"
+      },
+      {
+        "tagid": 560542,
+        "name": "Incremental"
+      },
+      {
+        "tagid": 1100687,
+        "name": "Automobile Sim"
+      }
+    ],
+    "version_hash": "711684454"
+  }
+}

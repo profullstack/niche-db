@@ -1,0 +1,113 @@
+{
+  "response": {
+    "metadata": {
+      "total_matching_records": 298906,
+      "start": 298905,
+      "count": 1
+    },
+    "ids": [
+      {
+        "appid": 2639280
+      }
+    ],
+    "store_items": [
+      {
+        "item_type": 0,
+        "id": 2639280,
+        "success": 1,
+        "visible": true,
+        "name": "𣸩",
+        "store_url_path": "app/2639280/𣸩",
+        "store_url_slug": "𣸩",
+        "appid": 2639280,
+        "type": 0,
+        "tagids": [
+          21,
+          3799,
+          4085,
+          3839,
+          7208
+        ],
+        "categories": {
+          "supported_player_categoryids": [
+            2
+          ],
+          "feature_categoryids": [
+            62
+          ]
+        },
+        "reviews": {
+          "summary_filtered": {
+            "review_count": 16,
+            "percent_positive": 43,
+            "review_score": 5,
+            "review_score_label": "Mixed"
+          }
+        },
+        "basic_info": {
+          "short_description": "《袖珍小说游戏》系列的首部作品，讲述失去了想象能力的作家，和坚持实现梦想的少女之间的故事，玩家将以男主角的视角，结合图像和音乐的演出，阅读剧本并体验和女主角相遇后的经历",
+          "publishers": [
+            {
+              "name": " 箱崎奈绪(Hakozaki Nao)"
+            }
+          ],
+          "developers": [
+            {
+              "name": "箱崎奈绪(Hakozaki Nao)"
+            }
+          ],
+          "franchises": [
+            {
+              "name": "袖珍小说游戏"
+            }
+          ]
+        },
+        "tags": [
+          {
+            "tagid": 21,
+            "weight": 942
+          },
+          {
+            "tagid": 3799,
+            "weight": 883
+          },
+          {
+            "tagid": 4085,
+            "weight": 837
+          },
+          {
+            "tagid": 3839,
+            "weight": 810
+          },
+          {
+            "tagid": 7208,
+            "weight": 778
+          }
+        ],
+        "release": {
+          "steam_release_date": 1703854961
+        },
+        "platforms": {
+          "windows": true,
+          "vr_support": {},
+          "steam_deck_compat_category": 0,
+          "steam_os_compat_category": 0,
+          "steam_frame_compat_category": 0,
+          "steam_machine_compat_category": 0
+        },
+        "best_purchase_option": {
+          "packageid": 946320,
+          "purchase_option_name": "𣸩",
+          "final_price_in_cents": "199",
+          "formatted_final_price": "$1.99",
+          "user_can_purchase_as_gift": true,
+          "hide_discount_pct_for_compliance": false,
+          "included_game_count": 1,
+          "must_purchase_as_set": false,
+          "package_group": "default",
+          "price_cannot_be_displayed_as_discount": false
+        }
+      }
+    ]
+  }
+}

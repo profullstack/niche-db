@@ -1,0 +1,372 @@
+{
+  "data": [
+    {
+      "id": "1",
+      "type": "anime",
+      "links": {
+        "self": "https://kitsu.io/api/edge/anime/1"
+      },
+      "attributes": {
+        "createdAt": "2013-02-20T16:00:13.609Z",
+        "updatedAt": "2026-09-13T06:57:35.629Z",
+        "slug": "cowboy-bebop",
+        "synopsis": "In the year 2071, humanity has colonized several of the planets and moons of the solar system leaving the now uninhabitable surface of planet Earth behind. The Inter Solar System Police attempts to keep peace in the galaxy, aided in part by outlaw bounty hunters, referred to as \"Cowboys\". The ragtag team aboard the spaceship Bebop are two such individuals.\nMellow and carefree Spike Spiegel is balanced by his boisterous, pragmatic partner Jet Black as the pair makes a living chasing bounties and collecting rewards. Thrown off course by the addition of new members that they meet in their travels—Ein, a genetically engineered, highly intelligent Welsh Corgi; femme fatale Faye Valentine, an enigmatic trickster with memory loss; and the strange computer whiz kid Edward Wong—the crew embarks on thrilling adventures that unravel each member's dark and mysterious past little by little. \nWell-balanced with high density action and light-hearted comedy, Cowboy Bebop is a space Western classic and an homage to the smooth and improvised music it is named after.\n\n(Source: MAL Rewrite)",
+        "description": "In the year 2071, humanity has colonized several of the planets and moons of the solar system leaving the now uninhabitable surface of planet Earth behind. The Inter Solar System Police attempts to keep peace in the galaxy, aided in part by outlaw bounty hunters, referred to as \"Cowboys\". The ragtag team aboard the spaceship Bebop are two such individuals.\nMellow and carefree Spike Spiegel is balanced by his boisterous, pragmatic partner Jet Black as the pair makes a living chasing bounties and collecting rewards. Thrown off course by the addition of new members that they meet in their travels—Ein, a genetically engineered, highly intelligent Welsh Corgi; femme fatale Faye Valentine, an enigmatic trickster with memory loss; and the strange computer whiz kid Edward Wong—the crew embarks on thrilling adventures that unravel each member's dark and mysterious past little by little. \nWell-balanced with high density action and light-hearted comedy, Cowboy Bebop is a space Western classic and an homage to the smooth and improvised music it is named after.\n\n(Source: MAL Rewrite)",
+        "titles": {
+          "en": "Cowboy Bebop",
+          "en_jp": "Cowboy Bebop",
+          "ja_jp": "カウボーイビバップ"
+        },
+        "canonicalTitle": "Cowboy Bebop",
+        "abbreviatedTitles": [
+          "COWBOY BEBOP"
+        ],
+        "averageRating": "82.27",
+        "userCount": 162298,
+        "favoritesCount": 5167,
+        "startDate": "1998-04-03",
+        "endDate": "1999-04-24",
+        "nextRelease": null,
+        "popularityRank": 44,
+        "ratingRank": 197,
+        "ageRating": "R",
+        "ageRatingGuide": "17+ (violence & profanity)",
+        "subtype": "TV",
+        "status": "finished",
+        "tba": null,
+        "posterImage": {
+          "tiny": "https://media.kitsu.app/anime/poster_images/1/tiny.jpg",
+          "large": "https://media.kitsu.app/anime/poster_images/1/large.jpg",
+          "small": "https://media.kitsu.app/anime/poster_images/1/small.jpg",
+          "medium": "https://media.kitsu.app/anime/poster_images/1/medium.jpg",
+          "original": "https://media.kitsu.app/anime/poster_images/1/original.jpg",
+          "meta": {
+            "dimensions": {
+              "tiny": {
+                "width": 110,
+                "height": 156
+              },
+              "large": {
+                "width": 550,
+                "height": 780
+              },
+              "small": {
+                "width": 284,
+                "height": 402
+              },
+              "medium": {
+                "width": 390,
+                "height": 554
+              }
+            }
+          }
+        },
+        "coverImage": {
+          "tiny": "https://media.kitsu.app/anime/1/cover_image/tiny-1f92cfe65c1b31d8b47e36f025d32b35.jpeg",
+          "large": "https://media.kitsu.app/anime/1/cover_image/large-88da0208ac7fdd1a978de8b539008bd8.jpeg",
+          "small": "https://media.kitsu.app/anime/1/cover_image/small-33ff2ab0f599bc15ed73856ecd13fe71.jpeg",
+          "original": "https://media.kitsu.app/anime/1/cover_image/fb57e5f25616633a41f0f5f1ded938ee.jpeg",
+          "meta": {
+            "dimensions": {
+              "tiny": {
+                "width": 840,
+                "height": 200
+              },
+              "large": {
+                "width": 3360,
+                "height": 800
+              },
+              "small": {
+                "width": 1680,
+                "height": 400
+              }
+            }
+          }
+        },
+        "episodeCount": 26,
+        "episodeLength": 25,
+        "totalLength": 626,
+        "youtubeVideoId": "qig4KOK2R2g",
+        "showType": "TV",
+        "nsfw": false
+      }
+    },
+    {
+      "id": "2",
+      "type": "anime",
+      "links": {
+        "self": "https://kitsu.io/api/edge/anime/2"
+      },
+      "attributes": {
+        "createdAt": "2013-02-20T16:00:16.085Z",
+        "updatedAt": "2026-09-13T06:57:35.719Z",
+        "slug": "cowboy-bebop-tengoku-no-tobira",
+        "synopsis": "Another day, another bounty—such is the life of the often unlucky crew of the Bebop. However, this routine is interrupted when Faye, who is chasing a fairly worthless target on Mars, witnesses an oil tanker suddenly explode, causing mass hysteria. As casualties mount due to a strange disease spreading through the smoke from the blast, a whopping three hundred million woolong price is placed on the head of the supposed perpetrator.\nWith lives at stake and a solution to their money problems in sight, the Bebop crew springs into action. Spike, Jet, Faye, and Edward, followed closely by Ein, split up to pursue different leads across Alba City. Through their individual investigations, they discover a cover-up scheme involving a pharmaceutical company, revealing a plot that reaches much further than the ragtag team of bounty hunters could have realized.\n[Written by MAL Rewrite]",
+        "description": "Another day, another bounty—such is the life of the often unlucky crew of the Bebop. However, this routine is interrupted when Faye, who is chasing a fairly worthless target on Mars, witnesses an oil tanker suddenly explode, causing mass hysteria. As casualties mount due to a strange disease spreading through the smoke from the blast, a whopping three hundred million woolong price is placed on the head of the supposed perpetrator.\nWith lives at stake and a solution to their money problems in sight, the Bebop crew springs into action. Spike, Jet, Faye, and Edward, followed closely by Ein, split up to pursue different leads across Alba City. Through their individual investigations, they discover a cover-up scheme involving a pharmaceutical company, revealing a plot that reaches much further than the ragtag team of bounty hunters could have realized.\n[Written by MAL Rewrite]",
+        "titles": {
+          "en": "Cowboy Bebop: The Movie",
+          "en_jp": "Cowboy Bebop: Tengoku no Tobira",
+          "en_us": "Cowboy Bebop: Knockin' on Heaven's Door",
+          "ja_jp": "カウボーイビバップ天国の扉"
+        },
+        "canonicalTitle": "Cowboy Bebop: Knockin' on Heaven's Door",
+        "abbreviatedTitles": [],
+        "averageRating": "82.0",
+        "userCount": 42131,
+        "favoritesCount": 325,
+        "startDate": "2001-09-01",
+        "endDate": "2001-09-01",
+        "nextRelease": null,
+        "popularityRank": 352,
+        "ratingRank": 332,
+        "ageRating": "R",
+        "ageRatingGuide": "17+ (violence & profanity)",
+        "subtype": "movie",
+        "status": "finished",
+        "tba": "",
+        "posterImage": {
+          "tiny": "https://media.kitsu.app/anime/poster_images/2/tiny.jpg",
+          "large": "https://media.kitsu.app/anime/poster_images/2/large.jpg",
+          "small": "https://media.kitsu.app/anime/poster_images/2/small.jpg",
+          "medium": "https://media.kitsu.app/anime/poster_images/2/medium.jpg",
+          "original": "https://media.kitsu.app/anime/poster_images/2/original.jpg",
+          "meta": {
+            "dimensions": {
+              "tiny": {
+                "width": 110,
+                "height": 156
+              },
+              "large": {
+                "width": 550,
+                "height": 780
+              },
+              "small": {
+                "width": 284,
+                "height": 402
+              },
+              "medium": {
+                "width": 390,
+                "height": 554
+              }
+            }
+          }
+        },
+        "coverImage": {
+          "tiny": "https://media.kitsu.app/anime/cover_images/2/tiny.jpg",
+          "large": "https://media.kitsu.app/anime/cover_images/2/large.jpg",
+          "small": "https://media.kitsu.app/anime/cover_images/2/small.jpg",
+          "original": "https://media.kitsu.app/anime/cover_images/2/original.png",
+          "meta": {
+            "dimensions": {
+              "tiny": {
+                "width": 840,
+                "height": 200
+              },
+              "large": {
+                "width": 3360,
+                "height": 800
+              },
+              "small": {
+                "width": 1680,
+                "height": 400
+              }
+            }
+          }
+        },
+        "episodeCount": 1,
+        "episodeLength": 114,
+        "totalLength": 114,
+        "youtubeVideoId": "hc7IxJ93jtM",
+        "showType": "movie",
+        "nsfw": false
+      }
+    },
+    {
+      "id": "3",
+      "type": "anime",
+      "links": {
+        "self": "https://kitsu.io/api/edge/anime/3"
+      },
+      "attributes": {
+        "createdAt": "2013-02-20T16:00:17.112Z",
+        "updatedAt": "2026-09-13T06:00:26.062Z",
+        "slug": "trigun",
+        "synopsis": "Vash the Stampede is the man with a $$60,000,000 bounty on his head. The reason: he's a merciless villain who lays waste to all those that oppose him and flattens entire cities for fun, garnering him the title \"The Humanoid Typhoon.\" He leaves a trail of death and destruction wherever he goes, and anyone can count themselves dead if they so much as make eye contact—or so the rumors say. In actuality, Vash is a huge softie who claims to have never taken a life and avoids violence at all costs.\nWith his crazy doughnut obsession and buffoonish attitude in tow, Vash traverses the wasteland of the planet Gunsmoke, all the while followed by two insurance agents, Meryl Stryfe and Milly Thompson, who attempt to minimize his impact on the public. But soon, their misadventures evolve into life-or-death situations as a group of legendary assassins are summoned to bring about suffering to the trio. Vash's agonizing past will be unraveled and his morality and principles pushed to the breaking point.\n[Written by MAL Rewrite]",
+        "description": "Vash the Stampede is the man with a $$60,000,000 bounty on his head. The reason: he's a merciless villain who lays waste to all those that oppose him and flattens entire cities for fun, garnering him the title \"The Humanoid Typhoon.\" He leaves a trail of death and destruction wherever he goes, and anyone can count themselves dead if they so much as make eye contact—or so the rumors say. In actuality, Vash is a huge softie who claims to have never taken a life and avoids violence at all costs.\nWith his crazy doughnut obsession and buffoonish attitude in tow, Vash traverses the wasteland of the planet Gunsmoke, all the while followed by two insurance agents, Meryl Stryfe and Milly Thompson, who attempt to minimize his impact on the public. But soon, their misadventures evolve into life-or-death situations as a group of legendary assassins are summoned to bring about suffering to the trio. Vash's agonizing past will be unraveled and his morality and principles pushed to the breaking point.\n[Written by MAL Rewrite]",
+        "titles": {
+          "en": "Trigun",
+          "en_jp": "Trigun",
+          "ja_jp": "トライガン"
+        },
+        "canonicalTitle": "Trigun",
+        "abbreviatedTitles": [],
+        "averageRating": "81.88",
+        "userCount": 61628,
+        "favoritesCount": 1402,
+        "startDate": "1998-04-01",
+        "endDate": "1998-09-30",
+        "nextRelease": null,
+        "popularityRank": 207,
+        "ratingRank": 387,
+        "ageRating": "PG",
+        "ageRatingGuide": "Teens 13 or older",
+        "subtype": "TV",
+        "status": "finished",
+        "tba": null,
+        "posterImage": {
+          "tiny": "https://media.kitsu.app/anime/3/poster_image/tiny-1e2fce59abe5033c092234bd857cf8a9.jpeg",
+          "large": "https://media.kitsu.app/anime/3/poster_image/large-32a8adb71c80bf616527a1651b92e39f.jpeg",
+          "small": "https://media.kitsu.app/anime/3/poster_image/small-8b8e908c4f3dd2ea581b5c93957fba02.jpeg",
+          "medium": "https://media.kitsu.app/anime/3/poster_image/medium-9b8787b733e308c11f6922a4a24ca59a.jpeg",
+          "original": "https://media.kitsu.app/anime/3/poster_image/d49b13c258b7084769455749ba28d0b4.jpg",
+          "meta": {
+            "dimensions": {
+              "tiny": {
+                "width": 110,
+                "height": 156
+              },
+              "large": {
+                "width": 550,
+                "height": 780
+              },
+              "small": {
+                "width": 284,
+                "height": 402
+              },
+              "medium": {
+                "width": 390,
+                "height": 554
+              }
+            }
+          }
+        },
+        "coverImage": {
+          "tiny": "https://media.kitsu.app/anime/3/cover_image/tiny-a28efea51963e6dc411a7cd5a5b390ba.jpeg",
+          "large": "https://media.kitsu.app/anime/3/cover_image/large-1148d507a8e6d558df766a6889231acd.jpeg",
+          "small": "https://media.kitsu.app/anime/3/cover_image/small-8b5b28a9eb5bc26dce3921b745c22481.jpeg",
+          "original": "https://media.kitsu.app/anime/3/cover_image/a241650d05ac62f0022068355263ba54.jpg",
+          "meta": {
+            "dimensions": {
+              "tiny": {
+                "width": 840,
+                "height": 200
+              },
+              "large": {
+                "width": 3360,
+                "height": 800
+              },
+              "small": {
+                "width": 1680,
+                "height": 400
+              }
+            }
+          }
+        },
+        "episodeCount": 26,
+        "episodeLength": 24,
+        "totalLength": 624,
+        "youtubeVideoId": "bJVyIXeUznY",
+        "showType": "TV",
+        "nsfw": false
+      }
+    },
+    {
+      "id": "6",
+      "type": "anime",
+      "links": {
+        "self": "https://kitsu.io/api/edge/anime/6"
+      },
+      "attributes": {
+        "createdAt": "2013-02-20T16:00:20.071Z",
+        "updatedAt": "2026-09-13T06:00:26.062Z",
+        "slug": "eyeshield-21",
+        "synopsis": "Sena is like any other shy kid starting high school; he's just trying to survive. Constantly bullied, he's accustomed to running away.\nSurviving high school is about to become a lot more difficult after Hiruma, captain of the school's American football team, witnesses Sena's incredible agility and speed during an escape from some bullies. Hiruma schemes to make Sena the running back of his school team, The Devil Bats, hoping that it will turn around the squad's fortunes from being the laughingstock of Japan's high school leagues, to title contender.\nTo protect his precious star player from rivaling recruiters, he enlists Sena as \"team secretary,\" giving him a visored helmet and the nickname \"Eyeshield 21\" to hide his identity.\nThe Devilbats will look to make their way to the Christmas Bowl, an annual tournament attended by the best football teams in Japan, with \"Eyeshield 21\" leading the way. Will they be able to win the Christmas Bowl? Will Sena be able to transform from a timid, undersized freshman to an all-star player? Put on your pads and helmet to find out!",
+        "description": "Sena is like any other shy kid starting high school; he's just trying to survive. Constantly bullied, he's accustomed to running away.\nSurviving high school is about to become a lot more difficult after Hiruma, captain of the school's American football team, witnesses Sena's incredible agility and speed during an escape from some bullies. Hiruma schemes to make Sena the running back of his school team, The Devil Bats, hoping that it will turn around the squad's fortunes from being the laughingstock of Japan's high school leagues, to title contender.\nTo protect his precious star player from rivaling recruiters, he enlists Sena as \"team secretary,\" giving him a visored helmet and the nickname \"Eyeshield 21\" to hide his identity.\nThe Devilbats will look to make their way to the Christmas Bowl, an annual tournament attended by the best football teams in Japan, with \"Eyeshield 21\" leading the way. Will they be able to win the Christmas Bowl? Will Sena be able to transform from a timid, undersized freshman to an all-star player? Put on your pads and helmet to find out!",
+        "titles": {
+          "en_jp": "Eyeshield 21",
+          "ja_jp": "アイシールド21"
+        },
+        "canonicalTitle": "Eyeshield 21",
+        "abbreviatedTitles": [
+          "Eyeshield21"
+        ],
+        "averageRating": "78.81",
+        "userCount": 13528,
+        "favoritesCount": 140,
+        "startDate": "2005-04-06",
+        "endDate": "2008-03-19",
+        "nextRelease": null,
+        "popularityRank": 1265,
+        "ratingRank": 1117,
+        "ageRating": "PG",
+        "ageRatingGuide": "Teens 13 or older",
+        "subtype": "TV",
+        "status": "finished",
+        "tba": "",
+        "posterImage": {
+          "tiny": "https://media.kitsu.app/anime/poster_images/6/tiny.jpg",
+          "large": "https://media.kitsu.app/anime/poster_images/6/large.jpg",
+          "small": "https://media.kitsu.app/anime/poster_images/6/small.jpg",
+          "medium": "https://media.kitsu.app/anime/poster_images/6/medium.jpg",
+          "original": "https://media.kitsu.app/anime/poster_images/6/original.jpg",
+          "meta": {
+            "dimensions": {
+              "tiny": {
+                "width": 110,
+                "height": 156
+              },
+              "large": {
+                "width": 550,
+                "height": 780
+              },
+              "small": {
+                "width": 284,
+                "height": 402
+              },
+              "medium": {
+                "width": 390,
+                "height": 554
+              }
+            }
+          }
+        },
+        "coverImage": {
+          "tiny": "https://media.kitsu.app/anime/cover_images/6/tiny.jpg",
+          "large": "https://media.kitsu.app/anime/cover_images/6/large.jpg",
+          "small": "https://media.kitsu.app/anime/cover_images/6/small.jpg",
+          "original": "https://media.kitsu.app/anime/cover_images/6/original.jpg",
+          "meta": {
+            "dimensions": {
+              "tiny": {
+                "width": 840,
+                "height": 200
+              },
+              "large": {
+                "width": 3360,
+                "height": 800
+              },
+              "small": {
+                "width": 1680,
+                "height": 400
+              }
+            }
+          }
+        },
+        "episodeCount": 145,
+        "episodeLength": 23,
+        "totalLength": 3335,
+        "youtubeVideoId": "",
+        "showType": "TV",
+        "nsfw": false
+      }
+    }
+  ],
+  "meta": {
+    "count": 22418
+  },
+  "links": {
+    "first": "https://kitsu.io/api/edge/anime?page%5Blimit%5D=20&page%5Boffset%5D=0&sort=id",
+    "next": "https://kitsu.io/api/edge/anime?page%5Blimit%5D=20&page%5Boffset%5D=20&sort=id",
+    "last": "https://kitsu.io/api/edge/anime?page%5Blimit%5D=20&page%5Boffset%5D=22398&sort=id"
+  }
+}

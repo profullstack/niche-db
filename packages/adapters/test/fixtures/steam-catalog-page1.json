@@ -1,0 +1,337 @@
+{
+  "response": {
+    "metadata": {
+      "total_matching_records": 298905,
+      "start": 500,
+      "count": 500
+    },
+    "store_items": [
+      {
+        "item_type": 0,
+        "id": 3911820,
+        "success": 1,
+        "visible": true,
+        "name": "100 Cats Lost in Canada 2 Find & Color",
+        "store_url_path": "app/3911820/100_Cats_Lost_in_Canada_2_Find_Color",
+        "store_url_slug": "100_Cats_Lost_in_Canada_2_Find_Color",
+        "appid": 3911820,
+        "type": 0,
+        "related_items": {
+          "demo_appid": [
+            4504090
+          ],
+          "demos": [
+            {
+              "appid": 4504090,
+              "show_above_purchase": true
+            }
+          ]
+        },
+        "tagids": [
+          3834,
+          17894,
+          5537,
+          4305,
+          1738
+        ],
+        "categories": {
+          "supported_player_categoryids": [
+            2,
+            1,
+            9,
+            38
+          ],
+          "feature_categoryids": [
+            22,
+            62
+          ],
+          "controller_categoryids": [
+            28
+          ]
+        },
+        "reviews": {
+          "summary_filtered": {
+            "review_count": 0,
+            "percent_positive": 0,
+            "review_score": 0,
+            "review_score_label": "No user reviews"
+          }
+        },
+        "basic_info": {
+          "short_description": " 🐱 Discover 500 hidden cats across 5 artistic hand-drawn scenes 🖌️. Relax with color-by-numbers 🎨 and add life to every detail. Play solo or in cozy co-op 👯‍♂️, while Meow FM 🎶 sets the perfect creative mood.\r\n",
+          "publishers": [
+            {
+              "name": "Two Cats Games",
+              "creator_clan_account_id": 45619258
+            }
+          ],
+          "developers": [
+            {
+              "name": "Two Cats Games",
+              "creator_clan_account_id": 45619258
+            }
+          ]
+        },
+        "tags": [
+          {
+            "tagid": 3834,
+            "weight": 923
+          },
+          {
+            "tagid": 17894,
+            "weight": 842
+          },
+          {
+            "tagid": 5537,
+            "weight": 761
+          },
+          {
+            "tagid": 4305,
+            "weight": 745
+          },
+          {
+            "tagid": 1738,
+            "weight": 696
+          }
+        ],
+        "release": {
+          "steam_release_date": 1791471600,
+          "is_coming_soon": true,
+          "coming_soon_display": "date_full"
+        },
+        "platforms": {
+          "windows": true,
+          "vr_support": {},
+          "steam_deck_compat_category": 0,
+          "steam_os_compat_category": 0,
+          "steam_frame_compat_category": 0,
+          "steam_machine_compat_category": 0
+        },
+        "is_coming_soon": true
+      },
+      {
+        "item_type": 0,
+        "id": 4504090,
+        "success": 1,
+        "visible": true,
+        "name": "100 Cats Lost in Canada 2 Find & Color Demo",
+        "store_url_path": "app/4504090/100_Cats_Lost_in_Canada_2_Find_Color_Demo",
+        "store_url_slug": "100_Cats_Lost_in_Canada_2_Find_Color_Demo",
+        "appid": 4504090,
+        "type": 1,
+        "is_free": true,
+        "related_items": {
+          "parent_appid": 3911820
+        },
+        "categories": {},
+        "reviews": {
+          "summary_filtered": {
+            "review_count": 0,
+            "percent_positive": 0,
+            "review_score": 0,
+            "review_score_label": "No user reviews"
+          }
+        },
+        "basic_info": {
+          "publishers": [
+            {
+              "name": "Two Cats Games",
+              "creator_clan_account_id": 45619258
+            }
+          ],
+          "developers": [
+            {
+              "name": "Two Cats Games",
+              "creator_clan_account_id": 45619258
+            }
+          ]
+        },
+        "release": {
+          "steam_release_date": 1775744020
+        },
+        "platforms": {
+          "windows": true,
+          "vr_support": {},
+          "steam_deck_compat_category": 0,
+          "steam_os_compat_category": 0,
+          "steam_frame_compat_category": 0,
+          "steam_machine_compat_category": 0
+        }
+      },
+      {
+        "item_type": 0,
+        "id": 3766210,
+        "success": 1,
+        "visible": true,
+        "name": "100 Cats Lost In Canada Find & Color",
+        "store_url_path": "app/3766210/100_Cats_Lost_In_Canada_Find_Color",
+        "store_url_slug": "100_Cats_Lost_In_Canada_Find_Color",
+        "appid": 3766210,
+        "type": 0,
+        "is_free": true,
+        "tagids": [
+          3834,
+          1738,
+          5537,
+          560542,
+          1664
+        ],
+        "categories": {
+          "supported_player_categoryids": [
+            2,
+            1,
+            9,
+            38
+          ],
+          "feature_categoryids": [
+            22,
+            62
+          ],
+          "controller_categoryids": [
+            28
+          ]
+        },
+        "reviews": {
+          "summary_filtered": {
+            "review_count": 263,
+            "percent_positive": 90,
+            "review_score": 8,
+            "review_score_label": "Very Positive"
+          }
+        },
+        "basic_info": {
+          "short_description": "🐱 Discover 100 hidden cats 🌍 in handcrafted scenes that capture the spirit of each country. Relax with color-by-numbers 🎨 and bring illustrations to life. Play solo or in cozy co-op 👯‍♂️, while Meow FM 🎶 sets the mood.",
+          "publishers": [
+            {
+              "name": "Two Cats Games",
+              "creator_clan_account_id": 45619258
+            }
+          ],
+          "developers": [
+            {
+              "name": "Two Cats Games",
+              "creator_clan_account_id": 45619258
+            }
+          ]
+        },
+        "tags": [
+          {
+            "tagid": 3834,
+            "weight": 726
+          },
+          {
+            "tagid": 1738,
+            "weight": 714
+          },
+          {
+            "tagid": 5537,
+            "weight": 705
+          },
+          {
+            "tagid": 560542,
+            "weight": 688
+          },
+          {
+            "tagid": 1664,
+            "weight": 668
+          }
+        ],
+        "release": {
+          "steam_release_date": 1755789146
+        },
+        "platforms": {
+          "windows": true,
+          "vr_support": {},
+          "steam_deck_compat_category": 0,
+          "steam_os_compat_category": 0,
+          "steam_frame_compat_category": 0,
+          "steam_machine_compat_category": 0
+        }
+      },
+      {
+        "item_type": 0,
+        "id": 4045630,
+        "success": 1,
+        "visible": true,
+        "name": "100 Cats Lost In China - Extra Content",
+        "store_url_path": "app/4045630/100_Cats_Lost_In_China_Extra_Content",
+        "store_url_slug": "100_Cats_Lost_In_China_Extra_Content",
+        "appid": 4045630,
+        "type": 4,
+        "related_items": {
+          "parent_appid": 3809590
+        },
+        "tagids": [
+          113,
+          492,
+          597
+        ],
+        "categories": {
+          "supported_player_categoryids": [
+            2,
+            1,
+            9,
+            38
+          ],
+          "feature_categoryids": [
+            62
+          ]
+        },
+        "reviews": {
+          "summary_filtered": {
+            "review_count": 1,
+            "percent_positive": 100,
+            "review_score": 0,
+            "review_score_label": "1 user reviews"
+          }
+        },
+        "basic_info": {
+          "short_description": "Find, color, and explore 100 hidden cats in a brand-new country map!",
+          "developers": [
+            {
+              "name": "Two Cats Games",
+              "creator_clan_account_id": 45619258
+            }
+          ]
+        },
+        "tags": [
+          {
+            "tagid": 113,
+            "weight": 3333
+          },
+          {
+            "tagid": 492,
+            "weight": 3333
+          },
+          {
+            "tagid": 597,
+            "weight": 3333
+          }
+        ],
+        "release": {
+          "steam_release_date": 1766070086
+        },
+        "platforms": {
+          "windows": true,
+          "vr_support": {},
+          "steam_deck_compat_category": 0,
+          "steam_os_compat_category": 0,
+          "steam_frame_compat_category": 0,
+          "steam_machine_compat_category": 0
+        },
+        "best_purchase_option": {
+          "packageid": 1418973,
+          "purchase_option_name": "100 Cats Lost In China - Extra Content",
+          "final_price_in_cents": "99",
+          "formatted_final_price": "$0.99",
+          "user_can_purchase_as_gift": true,
+          "hide_discount_pct_for_compliance": false,
+          "included_game_count": 0,
+          "must_purchase_as_set": false,
+          "package_group": "default",
+          "price_cannot_be_displayed_as_discount": false
+        }
+      }
+    ]
+  }
+}

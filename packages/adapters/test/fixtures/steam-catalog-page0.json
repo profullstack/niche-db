@@ -1,0 +1,706 @@
+{
+  "response": {
+    "metadata": {
+      "total_matching_records": 298905,
+      "start": 0,
+      "count": 500
+    },
+    "store_items": [
+      {
+        "item_type": 0,
+        "id": 317160,
+        "success": 1,
+        "visible": true,
+        "name": "",
+        "store_url_path": "app/317160/",
+        "store_url_slug": "",
+        "appid": 317160,
+        "type": 1,
+        "is_free": true,
+        "related_items": {
+          "parent_appid": 292600
+        },
+        "tagids": [
+          19,
+          492
+        ],
+        "categories": {
+          "supported_player_categoryids": [
+            2
+          ]
+        },
+        "reviews": {
+          "summary_filtered": {
+            "review_count": 21,
+            "percent_positive": 95,
+            "review_score": 7,
+            "review_score_label": "Positive"
+          }
+        },
+        "basic_info": {},
+        "tags": [
+          {
+            "tagid": 19,
+            "weight": 5000
+          },
+          {
+            "tagid": 492,
+            "weight": 5000
+          }
+        ],
+        "release": {
+          "steam_release_date": 1409093699,
+          "original_release_date": 0
+        },
+        "platforms": {
+          "windows": true,
+          "vr_support": {},
+          "steam_deck_compat_category": 0,
+          "steam_os_compat_category": 0,
+          "steam_frame_compat_category": 0,
+          "steam_machine_compat_category": 0
+        }
+      },
+      {
+        "item_type": 0,
+        "id": 2556940,
+        "success": 1,
+        "visible": true,
+        "name": "! Shakabula *",
+        "store_url_path": "app/2556940/_Shakabula",
+        "store_url_slug": "_Shakabula",
+        "appid": 2556940,
+        "type": 0,
+        "is_early_access": true,
+        "related_items": {
+          "demo_appid": [
+            2639110
+          ],
+          "demos": [
+            {
+              "appid": 2639110,
+              "show_above_purchase": false
+            }
+          ]
+        },
+        "content_descriptorids": [
+          5
+        ],
+        "tagids": [
+          19,
+          122,
+          4434,
+          1774,
+          4885
+        ],
+        "categories": {
+          "supported_player_categoryids": [
+            2
+          ],
+          "feature_categoryids": [
+            23,
+            62
+          ],
+          "controller_categoryids": [
+            28
+          ]
+        },
+        "reviews": {
+          "summary_filtered": {
+            "review_count": 2,
+            "percent_positive": 0,
+            "review_score": 0,
+            "review_score_label": "2 user reviews"
+          }
+        },
+        "basic_info": {
+          "short_description": "A South African urban legend called the Shakabula traps you in your house, could it be connected to your problematic past? You will need to find a way out of this horrendous curse. Creepy FMV+2D Art Atmosphere. \"Steer\" 'n Click + Metroidvania navigation system. JRPG + Twin-Stick Bullet Hell battles",
+          "publishers": [
+            {
+              "name": "Skermunkel"
+            }
+          ],
+          "developers": [
+            {
+              "name": "Skermunkel"
+            }
+          ]
+        },
+        "tags": [
+          {
+            "tagid": 19,
+            "weight": 654
+          },
+          {
+            "tagid": 122,
+            "weight": 634
+          },
+          {
+            "tagid": 4434,
+            "weight": 624
+          },
+          {
+            "tagid": 1774,
+            "weight": 613
+          },
+          {
+            "tagid": 4885,
+            "weight": 603
+          }
+        ],
+        "release": {
+          "steam_release_date": 1697220377,
+          "is_early_access": true
+        },
+        "platforms": {
+          "windows": true,
+          "vr_support": {},
+          "steam_deck_compat_category": 0,
+          "steam_os_compat_category": 0,
+          "steam_frame_compat_category": 0,
+          "steam_machine_compat_category": 0
+        },
+        "best_purchase_option": {
+          "packageid": 918480,
+          "purchase_option_name": "! Shakabula *",
+          "final_price_in_cents": "1499",
+          "formatted_final_price": "$14.99",
+          "user_can_purchase_as_gift": true,
+          "hide_discount_pct_for_compliance": false,
+          "included_game_count": 1,
+          "must_purchase_as_set": false,
+          "package_group": "default",
+          "price_cannot_be_displayed_as_discount": false
+        }
+      },
+      {
+        "item_type": 0,
+        "id": 2639110,
+        "success": 1,
+        "visible": true,
+        "name": "! Shakabula ¬ Demo",
+        "store_url_path": "app/2639110/_Shakabula_Demo",
+        "store_url_slug": "_Shakabula_Demo",
+        "appid": 2639110,
+        "type": 1,
+        "is_free": true,
+        "related_items": {
+          "parent_appid": 2556940
+        },
+        "content_descriptorids": [
+          5
+        ],
+        "categories": {
+          "supported_player_categoryids": [
+            2
+          ],
+          "feature_categoryids": [
+            23
+          ],
+          "controller_categoryids": [
+            18
+          ]
+        },
+        "reviews": {
+          "summary_filtered": {
+            "review_count": 0,
+            "percent_positive": 0,
+            "review_score": 0,
+            "review_score_label": "No user reviews"
+          }
+        },
+        "basic_info": {
+          "publishers": [
+            {
+              "name": "Skermunkel"
+            }
+          ],
+          "developers": [
+            {
+              "name": "Skermunkel"
+            }
+          ]
+        },
+        "release": {
+          "steam_release_date": 1698552058
+        },
+        "platforms": {
+          "windows": true,
+          "vr_support": {},
+          "steam_deck_compat_category": 0,
+          "steam_os_compat_category": 0,
+          "steam_frame_compat_category": 0,
+          "steam_machine_compat_category": 0
+        }
+      },
+      {
+        "item_type": 0,
+        "id": 3582290,
+        "success": 1,
+        "visible": true,
+        "name": "!mrak",
+        "store_url_path": "app/3582290/mrak",
+        "store_url_slug": "mrak",
+        "appid": 3582290,
+        "type": 0,
+        "related_items": {
+          "demo_appid": [
+            3794260
+          ],
+          "standalone_demo_appid": [
+            3794260
+          ],
+          "demos": [
+            {
+              "appid": 3794260,
+              "show_above_purchase": true
+            }
+          ],
+          "standalone_demos": [
+            {
+              "appid": 3794260,
+              "show_above_purchase": true
+            }
+          ]
+        },
+        "content_descriptorids": [
+          5
+        ],
+        "tagids": [
+          1663,
+          9204,
+          4106,
+          3834,
+          1774
+        ],
+        "categories": {
+          "supported_player_categoryids": [
+            2
+          ],
+          "feature_categoryids": [
+            62
+          ]
+        },
+        "reviews": {
+          "summary_filtered": {
+            "review_count": 0,
+            "percent_positive": 0,
+            "review_score": 0,
+            "review_score_label": "No user reviews"
+          }
+        },
+        "basic_info": {
+          "short_description": "Immerse yourself in an alternate 2003 Hokkaido, where technology, politics, and criminal intrigue intertwine in the shadows. Use stealth, weapons, and the environment to your advantage to survive in a world where someone is pulling the strings behind your every move.",
+          "publishers": [
+            {
+              "name": "BRE!"
+            }
+          ],
+          "developers": [
+            {
+              "name": "BRE!"
+            }
+          ]
+        },
+        "tags": [
+          {
+            "tagid": 1663,
+            "weight": 712
+          },
+          {
+            "tagid": 9204,
+            "weight": 675
+          },
+          {
+            "tagid": 4106,
+            "weight": 645
+          },
+          {
+            "tagid": 3834,
+            "weight": 622
+          },
+          {
+            "tagid": 1774,
+            "weight": 600
+          }
+        ],
+        "release": {
+          "is_coming_soon": true,
+          "custom_release_date_message": "Coming soon",
+          "coming_soon_display": "text_comingsoon"
+        },
+        "platforms": {
+          "windows": true,
+          "vr_support": {},
+          "steam_deck_compat_category": 0,
+          "steam_os_compat_category": 0,
+          "steam_frame_compat_category": 0,
+          "steam_machine_compat_category": 0
+        },
+        "is_coming_soon": true
+      },
+      {
+        "item_type": 0,
+        "id": 4272590,
+        "success": 1,
+        "visible": true,
+        "name": "\"Buy The Game, I Have a Gun\" -Sheesh-Man Soundtrack",
+        "store_url_path": "app/4272590/Buy_The_Game_I_Have_a_Gun_SheeshMan_Soundtrack",
+        "store_url_slug": "Buy_The_Game_I_Have_a_Gun_SheeshMan_Soundtrack",
+        "appid": 4272590,
+        "type": 11,
+        "related_items": {
+          "parent_appid": 4260770
+        },
+        "content_descriptorids": [
+          5
+        ],
+        "categories": {},
+        "reviews": {
+          "summary_filtered": {
+            "review_count": 1,
+            "percent_positive": 100,
+            "review_score": 0,
+            "review_score_label": "1 user reviews"
+          }
+        },
+        "basic_info": {
+          "short_description": "The soundtrack of \"Buy The Game, I Have a Gun\" -Sheesh-Man",
+          "publishers": [
+            {
+              "name": "Kimulator's Films",
+              "creator_clan_account_id": 45865782
+            }
+          ],
+          "developers": [
+            {
+              "name": "Kimulator's Films",
+              "creator_clan_account_id": 45865782
+            }
+          ]
+        },
+        "release": {
+          "steam_release_date": 1772204512
+        },
+        "platforms": {
+          "windows": true,
+          "mac": true,
+          "steamos_linux": true,
+          "vr_support": {},
+          "steam_deck_compat_category": 0,
+          "steam_os_compat_category": 0,
+          "steam_frame_compat_category": 0,
+          "steam_machine_compat_category": 0
+        },
+        "best_purchase_option": {
+          "packageid": 1494979,
+          "purchase_option_name": "&quot;Buy The Game, I Have a Gun&quot; -Sheesh-Man Soundtrack",
+          "final_price_in_cents": "199",
+          "formatted_final_price": "$1.99",
+          "user_can_purchase_as_gift": true,
+          "hide_discount_pct_for_compliance": false,
+          "included_game_count": 0,
+          "must_purchase_as_set": false,
+          "package_group": "default",
+          "price_cannot_be_displayed_as_discount": false
+        }
+      },
+      {
+        "item_type": 0,
+        "id": 3787220,
+        "success": 1,
+        "visible": true,
+        "name": "\"Tiny bunny\" - Manga Vol. 1",
+        "store_url_path": "app/3787220/Tiny_bunny_Manga_Vol_1",
+        "store_url_slug": "Tiny_bunny_Manga_Vol_1",
+        "appid": 3787220,
+        "type": 4,
+        "related_items": {
+          "parent_appid": 1421250
+        },
+        "content_descriptorids": [
+          2,
+          5
+        ],
+        "tagids": [
+          21,
+          492,
+          4667,
+          1742,
+          4085
+        ],
+        "categories": {
+          "supported_player_categoryids": [
+            2
+          ],
+          "feature_categoryids": [
+            62
+          ]
+        },
+        "reviews": {
+          "summary_filtered": {
+            "review_count": 119,
+            "percent_positive": 82,
+            "review_score": 8,
+            "review_score_label": "Very Positive"
+          }
+        },
+        "basic_info": {
+          "short_description": "\"LOVE, DEATH and STRAWBERRY\" is a story addition for the \"Tiny Bunny\" horror visual novel in the form of a manga. ",
+          "publishers": [
+            {
+              "name": "Saikono"
+            }
+          ],
+          "developers": [
+            {
+              "name": "Saikono"
+            },
+            {
+              "name": "Sokarev"
+            }
+          ]
+        },
+        "tags": [
+          {
+            "tagid": 21,
+            "weight": 2561
+          },
+          {
+            "tagid": 492,
+            "weight": 1818
+          },
+          {
+            "tagid": 4667,
+            "weight": 1818
+          },
+          {
+            "tagid": 1742,
+            "weight": 991
+          },
+          {
+            "tagid": 4085,
+            "weight": 991
+          }
+        ],
+        "release": {
+          "steam_release_date": 1750116924
+        },
+        "platforms": {
+          "windows": true,
+          "mac": true,
+          "steamos_linux": true,
+          "vr_support": {},
+          "steam_deck_compat_category": 0,
+          "steam_os_compat_category": 0,
+          "steam_frame_compat_category": 0,
+          "steam_machine_compat_category": 0
+        },
+        "best_purchase_option": {
+          "packageid": 1332300,
+          "purchase_option_name": "Tiny bunny - Manga Vol. 1",
+          "final_price_in_cents": "500",
+          "formatted_final_price": "$5.00",
+          "user_can_purchase_as_gift": true,
+          "hide_discount_pct_for_compliance": false,
+          "included_game_count": 0,
+          "must_purchase_as_set": false,
+          "package_group": "default",
+          "price_cannot_be_displayed_as_discount": false
+        }
+      },
+      {
+        "item_type": 0,
+        "id": 2494780,
+        "success": 1,
+        "visible": true,
+        "name": "#DRIVE Rally",
+        "store_url_path": "app/2494780/DRIVE_Rally",
+        "store_url_slug": "DRIVE_Rally",
+        "appid": 2494780,
+        "type": 0,
+        "tagids": [
+          699,
+          1644,
+          1773,
+          701,
+          1100687
+        ],
+        "categories": {
+          "supported_player_categoryids": [
+            2
+          ],
+          "feature_categoryids": [
+            22,
+            29,
+            15,
+            25,
+            62
+          ],
+          "controller_categoryids": [
+            28,
+            55,
+            56,
+            57,
+            58
+          ]
+        },
+        "reviews": {
+          "summary_filtered": {
+            "review_count": 740,
+            "percent_positive": 80,
+            "review_score": 8,
+            "review_score_label": "Very Positive"
+          }
+        },
+        "basic_info": {
+          "short_description": "#DRIVE Rally is an arcade-inspired rally-driving experience set in the golden racing era of the ‘90s. Grab your co-driver and burn some rubber on iconic race-winning cars across a variety of terrains in some of the most iconic rallying locations in the world!",
+          "publishers": [
+            {
+              "name": "Pixel Perfect Dude",
+              "creator_clan_account_id": 45139772
+            }
+          ],
+          "developers": [
+            {
+              "name": "Pixel Perfect Dude",
+              "creator_clan_account_id": 45139772
+            }
+          ],
+          "franchises": [
+            {
+              "name": "Pixel Perfect Dude",
+              "creator_clan_account_id": 45139772
+            }
+          ]
+        },
+        "tags": [
+          {
+            "tagid": 699,
+            "weight": 685
+          },
+          {
+            "tagid": 1644,
+            "weight": 616
+          },
+          {
+            "tagid": 1773,
+            "weight": 600
+          },
+          {
+            "tagid": 701,
+            "weight": 590
+          },
+          {
+            "tagid": 1100687,
+            "weight": 571
+          }
+        ],
+        "release": {
+          "steam_release_date": 1744813323,
+          "original_steam_release_date": 1727276323
+        },
+        "platforms": {
+          "windows": true,
+          "mac": true,
+          "steamos_linux": true,
+          "vr_support": {},
+          "steam_deck_compat_category": 3,
+          "steam_os_compat_category": 2,
+          "steam_frame_compat_category": 0,
+          "steam_machine_compat_category": 3
+        },
+        "best_purchase_option": {
+          "packageid": 897769,
+          "purchase_option_name": "#DRIVE Rally",
+          "final_price_in_cents": "1999",
+          "formatted_final_price": "$19.99",
+          "user_can_purchase_as_gift": true,
+          "hide_discount_pct_for_compliance": false,
+          "included_game_count": 1,
+          "must_purchase_as_set": false,
+          "package_group": "default",
+          "price_cannot_be_displayed_as_discount": false
+        }
+      },
+      {
+        "item_type": 0,
+        "id": 3478810,
+        "success": 1,
+        "visible": true,
+        "name": "$MCRT Game Maker",
+        "store_url_path": "app/3478810/$MCRT_Game_Maker",
+        "store_url_slug": "$MCRT_Game_Maker",
+        "appid": 3478810,
+        "type": 6,
+        "is_free": true,
+        "tagids": [
+          19,
+          84,
+          113,
+          13906,
+          1718
+        ],
+        "categories": {
+          "feature_categoryids": [
+            17
+          ]
+        },
+        "reviews": {
+          "summary_filtered": {
+            "review_count": 2,
+            "percent_positive": 100,
+            "review_score": 0,
+            "review_score_label": "2 user reviews"
+          }
+        },
+        "basic_info": {
+          "short_description": "The $MCRT Game Maker is a user-friendly tool for MagicCraft, allowing players to design and customize unique maps. This powerful editor empowers creators to craft epic battlefields and immersive worlds, providing a foundation for future integration within the MagicCraft metaverse.",
+          "publishers": [
+            {
+              "name": "MagicCraft"
+            }
+          ],
+          "developers": [
+            {
+              "name": "MagicCraft"
+            }
+          ]
+        },
+        "tags": [
+          {
+            "tagid": 19,
+            "weight": 2672
+          },
+          {
+            "tagid": 84,
+            "weight": 1810
+          },
+          {
+            "tagid": 113,
+            "weight": 1810
+          },
+          {
+            "tagid": 13906,
+            "weight": 1810
+          },
+          {
+            "tagid": 1718,
+            "weight": 948
+          }
+        ],
+        "release": {
+          "steam_release_date": 1739878019
+        },
+        "platforms": {
+          "windows": true,
+          "vr_support": {},
+          "steam_deck_compat_category": 0,
+          "steam_os_compat_category": 0,
+          "steam_frame_compat_category": 0,
+          "steam_machine_compat_category": 0
+        }
+      }
+    ]
+  }
+}

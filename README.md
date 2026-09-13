@@ -17,11 +17,11 @@ Adapters are one file each in `packages/adapters/src`. One hundred and twenty-ei
 
 | Collection | Adapters | Key needed |
 | --- | --- | --- |
-| games | `steam`, `steam-news`, `igdb`, `igdb-catalog` (every game IGDB knows, walked by id then kept current from updated_at) | IGDB only (Twitch client) |
+| games | `steam`, `steam-news`, `igdb`, `igdb-catalog` (every game IGDB knows, walked by id then kept current from updated_at), `wikidata-games`, `steam-catalog` | IGDB only (Twitch client) |
 | packages | `npm`, `pypi`, `crates`, `go-modules`, `huggingface`, `github-releases` | no (GitHub token optional) |
 | filings | `edgar`, `federal-register`, `courtlistener` | CourtListener only |
 | music | `musicbrainz` | no |
-| books | `openlibrary` | no |
+| books | `openlibrary`, `gutenberg-catalog`, `librivox-catalog` | no |
 | tabletop | `scryfall-sets`, `scryfall-cards` | no |
 | space | `launch-library` | no |
 | chess | `lichess-broadcasts` | no |
@@ -46,8 +46,8 @@ Adapters are one file each in `packages/adapters/src`. One hundred and twenty-ei
 | water | `nwps-river-gauges`, `coops-water-levels`, `drought-monitor`, `ndbc-buoys`, `nws-surf-zone` | no |
 | consumer-finance | `cfpb-complaints`, `fdic-institutions`, `fdic-structure-changes` | no |
 | deals | `slickdeals`, `dealnews`, `dealcatcher`, `bensbargains`, `reddit-deals` | no |
-| sports | `espn-catalogue`, `espn-schedule`, `espn-live`, `espn-plays`, `livetennis`, `sportsdb-tv`, `sportsdb-leagues` | Live Tennis; TheSportsDB (`SPORTSDB_API_KEY`, the shared key `3` returns one row per query); ESPN is keyless (`SPORTS_PROXY_URL` for cloud egress) |
-| screen | `tmdb-releases`, `tvmaze-schedule`, `tvmaze-catalog` (every show TVmaze knows, CC BY-SA, walked once then kept current from /updates/shows), `anilist-airing`, `imdb-ratings` | TMDB only |
+| sports | `espn-catalogue`, `espn-schedule`, `espn-live`, `espn-plays`, `livetennis`, `sportsdb-tv`, `sportsdb-leagues`, `sportsdb-teams` | Live Tennis; TheSportsDB (`SPORTSDB_API_KEY`, the shared key `3` returns one row per query); ESPN is keyless (`SPORTS_PROXY_URL` for cloud egress) |
+| screen | `tmdb-releases`, `tvmaze-schedule`, `tvmaze-catalog` (every show TVmaze knows, CC BY-SA, walked once then kept current from /updates/shows), `anilist-airing`, `imdb-ratings`, `wikidata-films`, `kitsu-anime` | TMDB only |
 | channels | `iptv-org-channels` | no |
 | saas | `saasrow`, `opensaas` (nichedb.dev first; any service serving `/.well-known/opensaas.json`) | no |
 | marketplace | `d0rz`, `bl0ggers` | no |
@@ -55,7 +55,7 @@ Adapters are one file each in `packages/adapters/src`. One hundred and twenty-ei
 | forums | `tsbb` | no |
 | hosting | `findhost`, `buyvps`, `vultr-plans`, `linode-types`, `scaleway-instances`, `ovh-vps`, `storefront` (WHMCS, Blesta and WooCommerce order forms), `lowendbox`, `openserver`; `hetzner-plans`, `digitalocean-sizes`, `upcloud-plans` | no for the first eight (FindHost data is CC BY 4.0: credit FindHost, findhost.app; `OBSCURA_MCP_URL` optional for JavaScript-only shops); Hetzner (`HETZNER_API_TOKEN`), DigitalOcean (`DIGITALOCEAN_TOKEN`) and UpCloud (`UPCLOUD_USERNAME`, `UPCLOUD_PASSWORD`) each need a read-only credential and stay paused without one |
 | threats | `openthreat` (ThreatCrush first; any reporter serving `/.well-known/openthreat.json`) | no |
-| profiles | `openprofiles` (p0dcasters and OutreachGraph listings first; any app that lists the OpenProfile.md files it serves), `sportarr-persons` (Sportarr's 111k names, kept only when Wikidata knows the person as a human with a sport, with their socials) | no |
+| profiles | `openprofiles` (p0dcasters and OutreachGraph listings first; any app that lists the OpenProfile.md files it serves), `sportarr-persons` (Sportarr's 111k names, kept only when Wikidata knows the person as a human with a sport, with their socials), `sportsdb-players` | no |
 
 ### The way out (OpenSaaS)
 
