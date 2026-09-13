@@ -45,6 +45,7 @@ import { goModules } from './golang.js';
 import { hetznerPlans } from './hetzner.js';
 import { huggingface } from './huggingface.js';
 import { igdb } from './igdb.js';
+import { igdbCatalog } from './igdb-catalog.js';
 import { imdbRatings } from './imdb.js';
 import { landRegistrySales } from './landregistry.js';
 import { launchLibrary } from './launchlibrary.js';
@@ -112,6 +113,7 @@ export const ADAPTERS = [
   steam,
   steamNews,
   igdb,
+  igdbCatalog,
   npm,
   pypi,
   crates,

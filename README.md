@@ -17,7 +17,7 @@ Adapters are one file each in `packages/adapters/src`. Ninety-three ship today a
 
 | Collection | Adapters | Key needed |
 | --- | --- | --- |
-| games | `steam`, `steam-news`, `igdb` | IGDB only (Twitch client) |
+| games | `steam`, `steam-news`, `igdb`, `igdb-catalog` (every game IGDB knows, walked by id then kept current from updated_at) | IGDB only (Twitch client) |
 | packages | `npm`, `pypi`, `crates`, `go-modules`, `huggingface`, `github-releases` | no (GitHub token optional) |
 | filings | `edgar`, `federal-register`, `courtlistener` | CourtListener only |
 | music | `musicbrainz` | no |
