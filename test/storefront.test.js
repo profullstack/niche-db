@@ -21,6 +21,7 @@ import {
   parseWhmcs,
   parseWoocommerce,
   whmcsGroups,
+  withPageCurrency,
   woocommerceGroups,
 } from '../packages/adapters/src/storefront-parsers.js';
 import {
@@ -178,6 +179,114 @@ describe('reading prices, cycles and specs', () => {
     expect(kindOf('linux-shared-hosting')).toBe('shared');
     expect(kindOf('kvm-vps', 'KVM-2')).toBe('vps');
     expect(kindOf('cpanel-fully-managed-vps')).toBe('vps');
+  });
+});
+
+describe('what the first live run got wrong', () => {
+  test('a currency written as a suffix word, or only in the page selector, and never a guessed USD', () => {
+    expect(parsePrice('120.00dhs')).toEqual({ amount: 120, currency: 'MAD' });
+    expect(parsePrice('199 KSh')).toEqual({ amount: 199, currency: 'KES' });
+    expect(parsePrice('RM 29.90')).toEqual({ amount: 29.9, currency: 'MYR' });
+    expect(parsePrice('49 lei')).toEqual({ amount: 49, currency: 'RON' });
+    expect(parsePrice('coding 5')).toEqual({ amount: 5, currency: null });
+    expect(withPageCurrency({ amount: 120, currency: null }, 'MAD')).toEqual({
+      amount: 120,
+      currency: 'MAD',
+    });
+    expect(withPageCurrency({ amount: 120, currency: 'EUR' }, 'MAD')).toEqual({
+      amount: 120,
+      currency: 'EUR',
+    });
+    expect(withPageCurrency({ amount: 120, currency: null }, null)).toEqual({
+      amount: 120,
+      currency: null,
+    });
+    const item = productItem(
+      {
+        id: 'pid-1',
+        name: 'Box',
+        group: 'vps',
+        description: '',
+        price: { amount: 9, currency: null },
+        cycle: null,
+        url: 'https://x.example/',
+      },
+      {
+        platform: 'whmcs',
+        domain: 'x.example',
+        provider: 'x',
+        providerName: 'X',
+        fetchedAt: '2026-09-13T00:00:00Z',
+      },
+    );
+    expect(item.data.offer.price.currency).toBeNull();
+  });
+
+  test('cycle words in the languages hosts write', () => {
+    expect(parseCycle('Annuel')?.interval).toBe('year');
+    expect(parseCycle('120.00dhs Annuel')).toMatchObject({ interval: 'year', divisor: 1 });
+    expect(parseCycle('Mensuel')?.interval).toBe('month');
+    expect(parseCycle('Trimestriel')).toMatchObject({ interval: 'month', divisor: 3 });
+    expect(parseCycle('R$ 29,90 Mensal')?.interval).toBe('month');
+    expect(parseCycle('Anual')?.interval).toBe('year');
+    expect(parseCycle('9,99 € monatlich')?.interval).toBe('month');
+    expect(parseCycle('Jährlich')?.interval).toBe('year');
+    expect(parseCycle('Aylık')?.interval).toBe('month');
+    expect(parseCycle('Miesięcznie')?.interval).toBe('month');
+    expect(parseCycle('£4 p/m')?.interval).toBe('month');
+    expect(parseCycle('120.00dhs')).toBeNull();
+  });
+
+  test('capconnect: standard_cart with a selected MAD and "Annuel" under the price', () => {
+    const html = `
+      <select name="currency"><option value="">Sélectionnez la devise</option><option value="1" selected>MAD</option><option value="2">USD</option></select>
+      <div class="product clearfix" id="product27">
+        <header><span id="product27-name">Pack ECO</span></header>
+        <div class="product-desc"><ul><li>10 Go Disk Space NVMe SSD</li><li>100 Go /mois Bandwidth</li></ul></div>
+        <footer>
+          <div class="product-pricing" id="product27-price"><span class="price">120.00dhs</span><br />Annuel<br></div>
+          <a id="product27-order-button" href="/index.php/store/hebergement-web/pack-eco" class="btn">Commander</a>
+        </footer>
+      </div>`;
+    const [p] = parseWhmcs(html, 'https://client.capconnect.com/index.php/store/hebergement-web');
+    expect(p.name).toBe('Pack ECO');
+    expect(p.price).toEqual({ amount: 120, currency: 'MAD' });
+    expect(p.cycle).toMatchObject({ interval: 'year', divisor: 1 });
+    const price = normalisePrice(p.price, p.cycle);
+    expect(price).toMatchObject({ amount: 120, interval: 'year' });
+  });
+
+  test('a Microsoft 365 seat is an addon, not a VPS, and stays out of the plan feeds', () => {
+    expect(kindOf('Microsoft 365', 'Microsoft 365 Business Premium (NCE) Monthly')).toBe('addon');
+    expect(kindOf('Licences', 'Exchange online Plan 1')).toBe('addon');
+    expect(kindOf('SSL', 'Sectigo PositiveSSL certificate')).toBe('addon');
+    expect(kindOf('Domains', 'Domain registration .co.uk')).toBe('addon');
+    expect(kindOf('VPS', 'KVM VPS 2 with SSL')).toBe('vps');
+    expect(kindOf('Email', 'Email Hosting Pro')).toBe('shared');
+    const item = productItem(
+      {
+        id: 'pid-9',
+        name: 'Microsoft 365 Business Premium (NCE) Monthly',
+        group: 'Microsoft 365',
+        description: '',
+        price: { amount: 20, currency: 'GBP' },
+        cycle: { interval: 'month', divisor: 1, cycle: 'monthly' },
+        url: 'https://x.example/',
+      },
+      {
+        platform: 'whmcs',
+        domain: 'x.example',
+        provider: 'x',
+        providerName: 'X',
+        fetchedAt: '2026-09-13T00:00:00Z',
+      },
+    );
+    expect(item.kind).toBe('addon');
+    expect(item.tags).toContain('addon');
+    expect(item.tags).not.toContain('plan');
+    expect(item.tags.some((t) => t.startsWith('kind:'))).toBe(false);
+    expect(item.data.offer.kind).toBeNull();
+    expect(storefront.kinds).toEqual(['plan', 'addon']);
   });
 });
 

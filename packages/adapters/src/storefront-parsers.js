@@ -61,6 +61,48 @@ export const CYCLES = {
   'pro jahr': { interval: 'year', divisor: 1 },
   'per maand': { interval: 'month', divisor: 1 },
   'per jaar': { interval: 'year', divisor: 1 },
+  // The words hosts write outside English. capconnect (MA) prints "Annuel"
+  // under a price and it was stored with no cycle; alphimedia (BR) "Mensal".
+  mensuel: { interval: 'month', divisor: 1 },
+  mensuelle: { interval: 'month', divisor: 1 },
+  trimestriel: { interval: 'month', divisor: 3 },
+  semestriel: { interval: 'month', divisor: 6 },
+  annuel: { interval: 'year', divisor: 1 },
+  annuelle: { interval: 'year', divisor: 1 },
+  biennal: { interval: 'year', divisor: 2 },
+  triennal: { interval: 'year', divisor: 3 },
+  '/an': { interval: 'year', divisor: 1 },
+  mensual: { interval: 'month', divisor: 1 },
+  trimestral: { interval: 'month', divisor: 3 },
+  semestral: { interval: 'month', divisor: 6 },
+  anual: { interval: 'year', divisor: 1 },
+  bienal: { interval: 'year', divisor: 2 },
+  trienal: { interval: 'year', divisor: 3 },
+  '/mes': { interval: 'month', divisor: 1 },
+  '/año': { interval: 'year', divisor: 1 },
+  mensal: { interval: 'month', divisor: 1 },
+  '/mês': { interval: 'month', divisor: 1 },
+  '/ano': { interval: 'year', divisor: 1 },
+  monatlich: { interval: 'month', divisor: 1 },
+  vierteljährlich: { interval: 'month', divisor: 3 },
+  halbjährlich: { interval: 'month', divisor: 6 },
+  jährlich: { interval: 'year', divisor: 1 },
+  '/monat': { interval: 'month', divisor: 1 },
+  '/jahr': { interval: 'year', divisor: 1 },
+  mensile: { interval: 'month', divisor: 1 },
+  trimestrale: { interval: 'month', divisor: 3 },
+  annuale: { interval: 'year', divisor: 1 },
+  maandelijks: { interval: 'month', divisor: 1 },
+  jaarlijks: { interval: 'year', divisor: 1 },
+  aylık: { interval: 'month', divisor: 1 },
+  yıllık: { interval: 'year', divisor: 1 },
+  miesięcznie: { interval: 'month', divisor: 1 },
+  rocznie: { interval: 'year', divisor: 1 },
+  'p/m': { interval: 'month', divisor: 1 },
+  'every month': { interval: 'month', divisor: 1 },
+  'every year': { interval: 'year', divisor: 1 },
+  'a month': { interval: 'month', divisor: 1 },
+  'a year': { interval: 'year', divisor: 1 },
 };
 
 const CURRENCY_SYMBOLS = {
@@ -80,7 +122,45 @@ const CURRENCY_SYMBOLS = {
   'Rs.': 'INR',
   '₽': 'RUB',
   '₺': 'TRY',
+  '₦': 'NGN',
+  '₱': 'PHP',
+  '₫': 'VND',
+  '₩': 'KRW',
+  '₴': 'UAH',
+  '₪': 'ILS',
+  '₸': 'KZT',
+  '৳': 'BDT',
+  Kč: 'CZK',
+  Ft: 'HUF',
 };
+/**
+ * A currency written as a word next to the amount, the way WHMCS prints a
+ * currency whose "prefix" or "suffix" the host typed by hand: "120.00dhs"
+ * (Morocco), "199 KSh", "49 lei", "RM 29". Matched as a whole word, case
+ * insensitively, so "din" never fires inside "coding".
+ */
+const w = (alts) => new RegExp(`(?<![a-z])(?:${alts})(?![a-z])`, 'i');
+const CURRENCY_WORDS = [
+  [w('dhs?|dh|drh|mad'), 'MAD'],
+  [w('ksh'), 'KES'],
+  [w('rm'), 'MYR'],
+  [w('lei'), 'RON'],
+  [w('din'), 'RSD'],
+  [w('tl'), 'TRY'],
+  [w('lv|лв'), 'BGN'],
+  [w('kč'), 'CZK'],
+  [w('ft'), 'HUF'],
+  [w('ugx|ush'), 'UGX'],
+  [w('tsh'), 'TZS'],
+  [w('ghs|gh₵'), 'GHS'],
+  [w('cfa'), 'XOF'],
+  [w('sr'), 'SAR'],
+  [w('aed|dirham'), 'AED'],
+  [w('egp|le'), 'EGP'],
+  [w('tk'), 'BDT'],
+  [w('npr'), 'NPR'],
+  [/(?<![a-z])s\/\.?\s*\d/i, 'PEN'],
+];
 /** The currency a WHMCS page is showing, from its currency selector; null when it has none. */
 export function pageCurrency(html) {
   const select = String(html ?? '').match(
@@ -90,6 +170,18 @@ export function pageCurrency(html) {
   const selected = select.match(/<option[^>]*\bselected\b[^>]*>([\s\S]*?)<\/option>/i)?.[1];
   const code = stripHtml(selected ?? '').match(/\b([A-Z]{3})\b/)?.[1];
   return code ?? null;
+}
+
+/**
+ * The page's selected currency fills in a price that names none, and the
+ * price's own code wins when it names one. A price with neither stays null:
+ * a directory that guesses USD for "120.00" shows a Moroccan host's dirhams
+ * as dollars, which is worse than showing no currency.
+ */
+export function withPageCurrency(parsed, shown) {
+  if (!parsed) return parsed;
+  if (parsed.currency) return parsed;
+  return shown ? { ...parsed, currency: shown } : parsed;
 }
 
 export const CURRENCY_CODES =
@@ -115,7 +207,8 @@ export function parsePrice(text) {
   else n = n.replace(/,/g, '');
   const amount = num(n);
   if (amount === null) return null;
-  return { amount, currency: code ?? (symbol ? CURRENCY_SYMBOLS[symbol] : null) };
+  const word = code || symbol ? null : (CURRENCY_WORDS.find(([re]) => re.test(s))?.[1] ?? null);
+  return { amount, currency: code ?? (symbol ? CURRENCY_SYMBOLS[symbol] : word) };
 }
 
 /** A billing cycle word to an OpenServer interval, with the divisor that brings the amount to it. */
@@ -223,8 +316,20 @@ function diskType(word) {
 }
 
 /** The OpenServer kind a product group or name implies. */
+/**
+ * A product a host sells beside its servers that is not hosting: a
+ * Microsoft 365 seat, an SSL certificate, a domain, a licence, an SEO
+ * package. hostinguk.net's WHMCS store lists 61 of these and the first run
+ * filed every one as a VPS plan. They are kept as `addon` rows so the store
+ * is read whole, and left out of every plan feed.
+ */
+export const ADDON_RE =
+  /microsoft ?365|office ?365|\bm365\b|exchange online|\bteams\b|audio conferencing|business voice|\blicen[cs]e|\bssl\b|certificate|domain (?:registration|name|transfer|renewal)|\bdomains?\b|\bseo\b|site ?builder|website builder|antivirus|spam (?:filter|expert)|\bcopilot\b|\bvisio\b|\bproject plan\b|\bpower bi\b|\bdynamics\b|\bwindows (?:10|11)\b/i;
+
 export function kindOf(...names) {
   const s = names.filter(Boolean).join(' ').toLowerCase();
+  if (ADDON_RE.test(s) && !/vps|vds|dedicated|bare.?metal|cloud server|hosting/.test(s))
+    return 'addon';
   if (/colocation|colo\b/.test(s)) return 'colocation';
   if (/bare.?metal/.test(s)) return 'bare-metal';
   if (/dedicated/.test(s)) return 'dedicated';
@@ -398,6 +503,7 @@ export function parseWhmcs(html, pageUrl) {
   const products = [];
   const src = String(html ?? '');
   const group = whmcsGroupOf(pageUrl, src);
+  const shown = pageCurrency(src);
   const re = /<div[^>]*class="[^"]*\bproduct\b[^"]*"[^>]*>([\s\S]*?)<\/footer>\s*<\/div>/gi;
   for (const m of src.matchAll(re)) {
     const block = m[1];
@@ -430,7 +536,7 @@ export function parseWhmcs(html, pageUrl) {
       name,
       group,
       description,
-      price: parsePrice(priceText),
+      price: withPageCurrency(parsePrice(priceText), shown),
       cycle: parseCycle(cycleText),
       startingFrom: /starting (?:from|at)/i.test(cycleText),
       stock: outOfStock ? 'out_of_stock' : 'unknown',

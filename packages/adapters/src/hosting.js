@@ -121,9 +121,10 @@ export function offerItem(p) {
   ];
   const name = offer.name && offer.name !== offer.id ? `${offer.name} (${offer.id})` : offer.id;
   const monthly = offer.price?.interval === 'month' ? num(offer.price.amount) : null;
+  const kind = p.kind ?? 'plan';
   return {
     externalId: `${p.provider}:plan:${offer.id}`,
-    kind: 'plan',
+    kind,
     title: `${p.providerName} ${name}`,
     summary: describeOffer(offer) || null,
     url: offer.url,
@@ -131,9 +132,9 @@ export function offerItem(p) {
     timeKnown: false,
     precision: 'day',
     tags: [
-      'plan',
+      kind,
       `provider:${p.provider}`,
-      `kind:${offer.kind}`,
+      offer.kind ? `kind:${offer.kind}` : null,
       priceBucket(monthly),
       offer.price?.currency ? `currency:${String(offer.price.currency).toLowerCase()}` : null,
       offer.compute?.arch ? `arch:${String(offer.compute.arch).toLowerCase()}` : null,

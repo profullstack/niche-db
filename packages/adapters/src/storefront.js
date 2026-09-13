@@ -113,11 +113,15 @@ export function productItem(product, { platform, domain, provider, providerName,
   const countries = parseCountries(`${product.name} ${product.group ?? ''} ${product.description}`);
   const price = normalisePrice(product.price, product.cycle);
   const kind = kindOf(product.group, product.name);
+  const addon = kind === 'addon';
   const o = offer({
     id: product.id,
     name: product.name,
     url: product.url,
-    kind,
+    // An addon (a Microsoft 365 seat, an SSL certificate) is not a server, so
+    // it carries no OpenServer kind; the item kind below keeps it out of the
+    // plan feeds while the store is still read whole.
+    kind: addon ? null : kind,
     tenancy:
       kind === 'dedicated' || kind === 'bare-metal' || kind === 'colocation'
         ? 'dedicated'
@@ -133,7 +137,9 @@ export function productItem(product, { platform, domain, provider, providerName,
     ipv6: specs.ipv6,
     gpu: specs.gpu ? { model: specs.gpu, count: null, vramMb: null } : null,
     amount: price.amount,
-    currency: product.price?.currency ?? 'USD',
+    // Never a guessed currency: a page that names none stays null, or a
+    // Moroccan host's dirhams read as dollars (capconnect, first run).
+    currency: product.price?.currency ?? null,
     interval: price.interval,
     stock: product.stock,
     updated: fetchedAt,
@@ -142,8 +148,10 @@ export function productItem(product, { platform, domain, provider, providerName,
     provider,
     providerName,
     offer: o,
+    kind: addon ? 'addon' : 'plan',
     extraTags: [
       `platform:${platform}`,
+      addon ? 'addon' : null,
       product.group ? `group:${slugify(product.group)}` : null,
       product.startingFrom ? 'starting-from' : null,
       specs.transfer === 'unmetered' ? 'unmetered' : null,
@@ -346,7 +354,7 @@ export const storefront = defineAdapter({
   description:
     'The catalogues of the small hosts, read off the billing platform each runs: WHMCS, Blesta and WooCommerce order forms parsed into OpenServer offers with name, price and cycle, and the vCPU, RAM, disk, transfer and locations the description states. One polite visit a day per host, robots.txt honoured, bot challenges left alone. Keyless; an Obscura MCP server (OBSCURA_MCP_URL) renders the few shops that need JavaScript.',
   docs: 'https://docs.whmcs.com/8.x/products-and-services/',
-  kinds: ['plan'],
+  kinds: ['plan', 'addon'],
   cadenceMinutes: 1440,
   configFields: [
     {
