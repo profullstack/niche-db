@@ -5,7 +5,8 @@ import * as q from '@nichedb/db/queries';
 import { sendEmail, sendPush } from '@nichedb/notify';
 import { buildEvent, sendWebhook } from '@profullstack/autoblog';
 import { Worker } from 'bullmq';
-import { connection, minuteStamp, QUEUES, queues } from './index.js';
+import { connection, QUEUES, queues } from './index.js';
+import { scheduleDueRuns } from './ingest-scheduling.js';
 
 const log = (...a) => console.log('[worker]', ...a);
 
@@ -16,25 +17,22 @@ const longestRunMs = () =>
   Math.max(config.ingest.runDeadlineMs, ...ADAPTERS.map((a) => a.budgetMs ?? 0));
 
 /**
- * Which sources are due? One `run` job each, with a per-minute id so a tick
- * that fires twice cannot double-run a source. startRun pushes next_run_at
- * forward as the job begins, so a long run is not re-enqueued by the next tick.
+ * Which sources are due? Deduplicate through the entire wait and execution,
+ * and page past queued sources so new sources can enter a busy queue.
  */
 async function runTick(job) {
   // One window for both: a run younger than this is in flight and must not be
   // enqueued again; one older than it was just marked abandoned and may be.
   const runningMinutes = Math.ceil(longestRunMs() / 60_000) + 10;
   await q.reapStaleRuns({ minutes: runningMinutes });
-  const due = await q.dueSources({ limit: 50, force: Boolean(job.data?.force), runningMinutes });
-  for (const s of due) {
-    await queues.run.add(
-      'run',
-      { sourceId: s.id },
-      { jobId: `run-${s.id}-${minuteStamp()}`, attempts: 1 },
-    );
-  }
-  if (due.length) log(`tick: ${due.length} source(s) due`);
-  return { due: due.length };
+  const result = await scheduleDueRuns({
+    queue: queues.run,
+    readDue: q.dueSources,
+    force: Boolean(job.data?.force),
+    runningMinutes,
+  });
+  if (result.added) log(`tick: queued ${result.added} source(s); checked ${result.scanned}`);
+  return { due: result.added };
 }
 
 /* -------------------------------------------------------------------- scan -- */

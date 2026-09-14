@@ -1,6 +1,7 @@
 import { config } from '@nichedb/config';
 import { Queue } from 'bullmq';
 import IORedis from 'ioredis';
+import { enqueueSourceRun } from './ingest-scheduling.js';
 
 /**
  * BullMQ needs `maxRetriesPerRequest: null` on the connection it blocks on.
@@ -89,11 +90,7 @@ export async function installSchedules({ log = console.log } = {}) {
 
 /** Ask for one source to run now, from a button or the API. */
 export async function enqueueRun(sourceId, { force = false } = {}) {
-  return queues.run.add(
-    'run',
-    { sourceId, force },
-    { jobId: `run-${sourceId}-${minuteStamp()}`, attempts: 1 },
-  );
+  return enqueueSourceRun(queues.run, sourceId, { force });
 }
 
 export async function closeQueues() {

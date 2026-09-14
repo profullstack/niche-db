@@ -391,7 +391,12 @@ export async function requestRun(id) {
  * The sources whose turn it is. Ordered by how overdue, so a starved one is
  * served first after an outage.
  */
-export async function dueSources({ limit = 20, force = false, runningMinutes = 30 } = {}) {
+export async function dueSources({
+  limit = 20,
+  offset = 0,
+  force = false,
+  runningMinutes = 30,
+} = {}) {
   /*
    * A source whose run is still in flight is not due, whatever its clock says.
    *
@@ -413,7 +418,7 @@ export async function dueSources({ limit = 20, force = false, runningMinutes = 3
         where r.source_id = s.id and r.status = 'running'
           and r.started_at > now() - (${`${runningMinutes} minutes`})::interval
       )
-    order by next_run_at limit ${limit}
+    order by next_run_at, s.id limit ${limit} offset ${offset}
   `;
 }
 
