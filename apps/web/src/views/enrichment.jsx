@@ -14,6 +14,7 @@ export const Badges = ({ enrichment }) => {
   if (e.developer?.cli) out.push(`CLI ${e.developer.cli.name}`);
   if (e['npm-stats']) out.push(`⇩ ${fmt(e['npm-stats'].weeklyDownloads)}/wk`);
   if (e['semantic-scholar']) out.push(`${fmt(e['semantic-scholar'].citations)} cites`);
+  if (e.corpusdata) out.push('NOW Corpus');
   if (e['sec-company']?.tickers?.length) out.push(e['sec-company'].tickers.slice(0, 2).join(' '));
   if (out.length === 0) return null;
   return (
@@ -128,6 +129,37 @@ export const EnrichmentBlocks = ({ enrichment }) => {
           <a href={s.url} rel="noopener">
             on Semantic Scholar ↗
           </a>
+        </p>
+      </section>,
+    );
+  }
+  if (e.corpusdata) {
+    const c = e.corpusdata;
+    blocks.push(
+      <section class="enrich" key="corpusdata">
+        <h2>CorpusData</h2>
+        {c.match ? (
+          <>
+            <p>
+              Matched NOW article ({Math.round(c.confidence * 100)}% confidence):{' '}
+              <strong>{c.match.title ?? c.match.headline}</strong>
+            </p>
+            {c.reasons?.length ? <p class="small muted">Signals: {c.reasons.join(', ')}</p> : null}
+          </>
+        ) : (
+          <p>
+            Search{' '}
+            <a href={c.url} rel="noopener nofollow">
+              {c.corpus} Corpus
+            </a>{' '}
+            for <strong>{c.query}</strong>.
+          </p>
+        )}
+        <p class="small muted">
+          <a href={c.source} rel="noopener nofollow">
+            About the downloadable data ↗
+          </a>{' '}
+          · {c.note}
         </p>
       </section>,
     );

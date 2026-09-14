@@ -152,6 +152,7 @@ After ingest, every item is enriched by the enrichers that apply to it (`package
 | `openlibrary-work` | description and subjects | books |
 | `opengraph` | the page's own preview image and description | most collections |
 | `tmdb-artwork` | poster, backdrop, synopsis, rating and TMDB id for a title that came in from the IMDb dumps with none (`TMDB_API_KEY`) | screen |
+| `corpusdata` | Verified NOW article match when `data.corpusdata.articles` is supplied, using title/body/date/entity signals; otherwise a lookup link | news, research, books, ai-media, hosting, packages |
 
 A feed's `enrichers` list picks which of these it shows; absent means the collection's defaults. The feed builder exposes them as checkboxes. Items are enriched once, newest first with a fair share per collection (`ENRICH_PER_RUN` a tick, `ENRICH_PER_COLLECTION` of them from any one collection), and a missing image, summary or tags are filled from whatever the enrichers found while the source's own words always win.
 

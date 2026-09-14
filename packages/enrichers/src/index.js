@@ -1,4 +1,5 @@
 import { companyTicker } from './company-ticker.js';
+import { corpusdata } from './corpusdata.js';
 import { developer } from './developer.js';
 import { githubRepo } from './github.js';
 import { npmStats } from './npm.js';
@@ -23,6 +24,7 @@ export const ENRICHERS = [
   openlibraryWork,
   opengraph,
   tmdbArtwork,
+  corpusdata,
 ];
 
 const byName = new Map(ENRICHERS.map((e) => [e.name, e]));
@@ -43,4 +45,5 @@ export function enrichersFor(collectionSlug) {
   }));
 }
 
+export { matchCorpusArticles } from './corpusdata-match.js';
 export { defineEnricher, searchTitle } from './enricher.js';
