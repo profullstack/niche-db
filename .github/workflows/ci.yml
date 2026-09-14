@@ -7,6 +7,15 @@ jobs:
   test:
     runs-on: ubuntu-latest
     services:
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
       postgres:
         image: postgres:17-alpine
         env:
@@ -30,4 +39,5 @@ jobs:
         env:
           DATABASE_URL: postgres://unused:unused@localhost:5432/unused
           MIGRATION_TEST_DATABASE_URL: postgres://postgres@localhost:5432/postgres
+          REDIS_TEST_URL: redis://localhost:6379
           SITE_URL: http://localhost:3000
