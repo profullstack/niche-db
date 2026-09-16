@@ -1686,3 +1686,21 @@ table.kv td {
   color: var(--accent);
   text-transform: uppercase;
 }
+
+.crawl-page pre {
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 1rem;
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+  background: var(--panel);
+  font-size: 0.85rem;
+}
+.crawl-page pre code {
+  padding: 0;
+  background: transparent;
+}
+.crawl-page details {
+  margin: 1.25rem 0;
+  overflow-wrap: anywhere;
+}

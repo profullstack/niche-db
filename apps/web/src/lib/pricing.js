@@ -14,7 +14,7 @@
 import { config } from '@nichedb/config';
 import * as q from '@nichedb/db/queries';
 import { createGateway, decodePayment } from '@profullstack/x402-gateway';
-
+import { renderCrawlPage } from '../views/crawl.jsx';
 import { attributeCrawlSale } from './attribution.js';
 import { splitSale } from './partners.js';
 
@@ -96,6 +96,7 @@ export function gatewayOptions(priceCents) {
   return {
     siteUrl: config.siteUrl,
     siteName: config.siteName,
+    page: renderCrawlPage,
     coinpay: { apiKey: config.x402.coinpayKey },
     payTo: config.x402.payTo,
     priceCents,
