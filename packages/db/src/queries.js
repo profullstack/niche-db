@@ -1215,12 +1215,17 @@ export async function itemsPage({ afterId = 0, limit = 5000 } = {}) {
  * Newest items nobody has enriched yet, a fair share per collection: one
  * source that lands a thousand rows at once must not starve the others.
  */
-export async function itemsNeedingEnrichment({ limit = 50, perCollection = 8 } = {}) {
-  return sql`
-    select ${itemColumns}
-    from (
-      select id, row_number() over (partition by collection_id order by id desc) as rn
-      from items where enriched_at is null
+export async function itemsNeedingEnrichment({ limit = 50, perCollection = 8, db = sql } = {}) {
+  return db`
+    select ${itemSelection(db)}
+    from collections candidate_collection
+    cross join lateral (
+      select id, row_number() over (order by id desc) as rn
+      from (
+        select id from items
+        where collection_id = candidate_collection.id and enriched_at is null
+        order by id desc limit ${perCollection}
+      ) newest
     ) p
     join items i on i.id = p.id
     join sources s on s.id = i.source_id join collections c on c.id = i.collection_id

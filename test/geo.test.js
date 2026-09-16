@@ -378,3 +378,18 @@ describe('permissioned scanner adapter', () => {
     expect(toItem({ ...row, coverage: null, lat: 1, long: 2 }).data.coverage).toBeNull();
   });
 });
+
+test('bounded enrichment preserves round-robin selection across collections', async () => {
+  await item({}, { collection: crime });
+  await item({}, { collection: weather });
+  await item({}, { collection: weather });
+  const { rows: expected } = await db.query(`
+    select id from (
+      select id, row_number() over (partition by collection_id order by id desc) rn
+      from items where enriched_at is null
+    ) ranked where rn <= 2 order by rn, id desc limit 5
+  `);
+  const actual = await q.itemsNeedingEnrichment({ limit: 5, perCollection: 2, db: sql });
+  expect(actual.map((row) => String(row.id))).toEqual(expected.map((row) => String(row.id)));
+  expect(await q.itemsNeedingEnrichment({ limit: 0, db: sql })).toEqual([]);
+});

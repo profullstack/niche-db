@@ -4,7 +4,10 @@ import * as knowledge from '@nichedb/db/knowledge';
 import * as q from '@nichedb/db/queries';
 import { connection } from '@nichedb/queue';
 import { getCookie } from 'hono/cookie';
+import { pageCache } from './page-cache.js';
 import { Denied } from './service.js';
+
+const publicPage = pageCache(connection);
 
 /** Every HTML response goes through here so no page is ever served without a doctype. */
 export const render = async (node) => `<!doctype html>${await node.toString()}`;
@@ -75,16 +78,8 @@ export async function loadUser(c, next) {
  */
 export async function cached(c, key, produce, ttl = config.cache.ttlSeconds) {
   if (!config.cache.enabled || c.get('user')) return c.html(await produce());
-  try {
-    const hit = await connection.get(`page:${key}`);
-    if (hit) {
-      c.header('x-cache', 'hit');
-      return c.html(hit);
-    }
-  } catch {}
-  const body = await produce();
-  connection.set(`page:${key}`, body, 'EX', ttl).catch(() => {});
-  c.header('x-cache', 'miss');
+  const { body, status } = await publicPage(key, produce, ttl);
+  c.header('x-cache', status);
   return c.html(body);
 }
 
