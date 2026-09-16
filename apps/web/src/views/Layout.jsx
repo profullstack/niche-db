@@ -39,6 +39,7 @@ export const Layout = (props) => (
         }
       />
       <meta name="theme-color" content="#12161f" />
+      {props.noindex ? <meta name="robots" content="noindex" /> : null}
       <link rel="manifest" href="/manifest.webmanifest" />
       <link
         rel="icon"

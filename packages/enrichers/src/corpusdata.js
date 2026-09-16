@@ -10,7 +10,7 @@ export const corpusdata = defineEnricher({
   name: 'corpusdata',
   title: 'CorpusData',
   description: 'A NOW Corpus lookup for the item title or primary term.',
-  collections: ['news', 'research', 'books', 'ai-media', 'hosting', 'packages'],
+  collections: ['news', 'research', 'books', 'ai-media', 'packages'],
   appliesTo: (item) => Boolean(searchTitle(item)),
   perRun: 100,
   async enrich(item) {
