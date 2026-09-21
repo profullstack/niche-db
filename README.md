@@ -13,12 +13,12 @@ The first deployment is [nichedb.dev](https://nichedb.dev). Run your own on anyt
 | **item** | One row a source produced. Title, URL, when (with `time_known` and `precision`), tags, and the adapter's payload in `data`. |
 | **feed** | A saved query over a collection. Has a page, RSS and JSON Feed renderings, an API endpoint, and followers who are told when it changes by push, email or signed webhook. |
 
-Adapters are one file each in `packages/adapters/src`. One hundred and twenty-eight ship today across forty-one collections:
+Adapters are one file each in `packages/adapters/src`. One hundred and thirty-two ship today across forty-one collections:
 
 | Collection | Adapters | Key needed |
 | --- | --- | --- |
 | games | `steam`, `steam-news`, `igdb`, `igdb-catalog` (every game IGDB knows, walked by id then kept current from updated_at), `wikidata-games`, `steam-catalog` | IGDB only (Twitch client) |
-| packages | `npm`, `pypi`, `crates`, `go-modules`, `huggingface`, `github-releases` | no (GitHub token optional) |
+| packages | `npm`, `pypi`, `crates`, `go-modules`, `huggingface`, `github-releases` (runtimes and frameworks, and NIST's own software under usnistgov as `github-releases-nist`) | no (GitHub token optional) |
 | filings | `edgar`, `federal-register`, `courtlistener` | CourtListener only |
 | music | `musicbrainz`, `musicbrainz-catalog`, `discogs-catalog` | no |
 | books | `openlibrary`, `gutenberg-catalog`, `librivox-catalog`, `openlibrary-catalog` | no |
@@ -30,7 +30,7 @@ Adapters are one file each in `packages/adapters/src`. One hundred and twenty-ei
 | outages | `statuspage` (any Statuspage host) | no |
 | extensions | `firefox-addons`, `vscode-extensions`, `mcp-registry` | no |
 | health | `openfda-recalls`, `clinical-trials` | no |
-| research | `arxiv`, `crossref` | no |
+| research | `arxiv`, `crossref`, `nist-datasets` (every dataset on data.nist.gov, by last revision), `nist-csrc-drafts` (NIST security drafts open for comment, marked closed in place) | no |
 | automotive | `fueleconomy-catalog`, `nhtsa-recalls`, `nhtsa-complaints`, `nhtsa-safety-ratings` | no |
 | markets | `iso-mic-exchanges`, `alpaca-corporate-actions`, `alpaca-news`, `alpaca-assets`, `equity-history`, `nasdaq-halts`, `ecb-fx-rates`, `sec-fundamentals` | Alpaca (`APCA_API_KEY_ID`, `APCA_API_SECRET_KEY`, `APCA_FEED` iex or sip); SEC wants `CONTACT_EMAIL` in the user agent |
 | crypto | `coingecko-assets`, `crypto-pairs` | keyless (`COINGECKO_API_KEY` optional; `CRYPTO_PROXY_URL` for Binance.US from a datacenter) |
@@ -39,7 +39,7 @@ Adapters are one file each in `packages/adapters/src`. One hundred and twenty-ei
 | housing | `uk-land-registry`, `freddie-mac-rates`, `building-permits`, `ruuster` (agent saved searches) | no |
 | jobs | `bls-series`, `eurostat`, `warn-layoffs`, `agenticjobs` | no |
 | ai-incidents | `rogue-ai-incidents`, `rogue-ai-research`, `aiid-reports` | no |
-| news | `newsfeed`, `gdelt`, `rssamplifier`, `brisk`, `news-channels` | no |
+| news | `newsfeed` (newsroom desks, and NIST's 28 topic, event and blog feeds as `nist-news`), `gdelt`, `rssamplifier`, `brisk`, `news-channels` | no |
 | domains | `ntld-totals`, `ntld-tlds`, `ntld-launches`, `ntld-changes` | no |
 | podcasts | `podcasts`, `p0dcasters`, `podcastindex-catalog` | no |
 | aviation | `faa-nas-status`, `aviation-hazards`, `aviation-metar`, `ntsb-accidents`, `adsb-flights` | no (NTSB needs mdbtools + unzip, in the Dockerfile) |
@@ -56,7 +56,7 @@ Adapters are one file each in `packages/adapters/src`. One hundred and twenty-ei
 | coupons | `c0upons` (what c0upons.com took in on its own: submitted codes and its r/couponcodes listings; rows it copied from `deals` are not read back) | no |
 | dht | `bittorrented-dht` (adult material left out) | bittorrented.com's Supabase URL and publishable key (`BITTORRENTED_SUPABASE_URL`, `BITTORRENTED_SUPABASE_KEY`); paused without them |
 | hosting | `findhost`, `buyvps`, `vultr-plans`, `linode-types`, `scaleway-instances`, `ovh-vps`, `storefront` (WHMCS, Blesta and WooCommerce order forms), `lowendbox`, `openserver`; `hetzner-plans`, `digitalocean-sizes`, `upcloud-plans` | no for the first eight (FindHost data is CC BY 4.0: credit FindHost, findhost.app; `OBSCURA_MCP_URL` optional for JavaScript-only shops); Hetzner (`HETZNER_API_TOKEN`), DigitalOcean (`DIGITALOCEAN_TOKEN`) and UpCloud (`UPCLOUD_USERNAME`, `UPCLOUD_PASSWORD`) each need a read-only credential and stay paused without one |
-| threats | `openthreat` (ThreatCrush first; any reporter serving `/.well-known/openthreat.json`) | no |
+| threats | `openthreat` (ThreatCrush first; any reporter serving `/.well-known/openthreat.json`), `nvd` (every CVE, by lastModified every 15 minutes; "This product uses the NVD API but is not endorsed or certified by the NVD"), `surbl` (the SURBL lists as a catalogue, and the domains you name looked up in multi.surbl.org; free DNS lookups under SURBL's usage policy, the whole list is only sold as a feed) | no (`NVD_API_KEY` optional, ten times the rate) |
 | profiles | `openprofiles` (p0dcasters and OutreachGraph listings first; any app that lists the OpenProfile.md files it serves), `sportarr-persons` (Sportarr's 111k names, kept only when Wikidata knows the person as a human with a sport, with their socials), `sportsdb-players` | no |
 
 ### The way out (OpenSaaS)

@@ -91,7 +91,8 @@ export const COLLECTIONS = [
   {
     slug: 'research',
     name: 'Research',
-    description: 'New preprints and DOIs with abstracts, authors, TL;DRs and citation counts.',
+    description:
+      'New preprints and DOIs with abstracts, authors, TL;DRs and citation counts; every dataset NIST publishes at data.nist.gov by last revision, with DOI, themes and authors; and the NIST security and privacy drafts (SP 800, FIPS, IR, AI) open for public comment, each with its closing date, marked closed in place when the period ends. All keyless; the NIST data is public domain.',
   },
   {
     slug: 'automotive',
@@ -217,7 +218,7 @@ export const COLLECTIONS = [
     slug: 'threats',
     name: 'Threats',
     description:
-      'What ThreatCrush and other OpenThreat reporters identified in the open: findings in public repositories, attacks observed against the reporter’s own hosts, indicators worth blocking, advisories. Each row is read from the reporter’s own /.well-known/openthreat.json, in the reporter’s words, with the reporter named and the subject linked, and re-read hourly so a threat goes fixed, blocked or withdrawn in place. Never from a private scan: a reporter publishes only what was already visible to anyone who looked, a secret is published unlocated, and a paying user’s scan never appears.',
+      'What ThreatCrush and other OpenThreat reporters identified in the open: findings in public repositories, attacks observed against the reporter’s own hosts, indicators worth blocking, advisories. Each row is read from the reporter’s own /.well-known/openthreat.json, in the reporter’s words, with the reporter named and the subject linked, and re-read hourly so a threat goes fixed, blocked or withdrawn in place. Never from a private scan: a reporter publishes only what was already visible to anyone who looked, a secret is published unlocated, and a paying user’s scan never appears. Beside them, every CVE the NVD publishes and revises, read every fifteen minutes with CVSS, CWE, affected products and CISA KEV dates (this product uses the NVD API but is not endorsed or certified by the NVD), and SURBL’s public reputation lists as a catalogue with the house domains checked against them by DNS every half hour, each row moving only when its standing does.',
   },
   {
     slug: 'webrings',
@@ -323,6 +324,14 @@ export const DEFAULT_FEEDS = [
     slug: 'mcp-packages',
     name: 'MCP servers on npm and PyPI',
     query: { q: 'mcp', sources: ['npm', 'pypi'] },
+  },
+  {
+    collection: 'packages',
+    slug: 'nist-software-releases',
+    name: 'NIST software releases',
+    description:
+      'New releases of the software NIST publishes on GitHub under usnistgov: OSCAL, FiPy, NEMO, JARVIS-Tools, the SP 800-90B entropy assessment and the rest.',
+    query: { sources: ['github-releases-nist'] },
   },
   {
     collection: 'filings',
@@ -436,6 +445,22 @@ export const DEFAULT_FEEDS = [
     slug: 'security-papers',
     name: 'New security papers',
     query: { sources: ['arxiv-security'] },
+  },
+  {
+    collection: 'research',
+    slug: 'nist-datasets',
+    name: 'NIST datasets, by last revision',
+    description:
+      'Every dataset on the NIST Science Data Portal as it is published or revised: title, abstract, DOI, version, research themes and authors. Public domain.',
+    query: { sources: ['nist-datasets'] },
+  },
+  {
+    collection: 'research',
+    slug: 'nist-drafts-open-for-comment',
+    name: 'NIST security drafts open for comment',
+    description:
+      'The SP 800, FIPS, IR, white paper and AI drafts NIST is taking public comment on right now, with the date each closes. A draft leaves when its period ends.',
+    query: { sources: ['nist-csrc-drafts'], tags: ['status:open'] },
   },
   {
     collection: 'packages',
@@ -904,6 +929,14 @@ export const DEFAULT_FEEDS = [
     slug: 'world-headlines',
     name: 'World headlines',
     query: { sources: ['news-world'] },
+  },
+  {
+    collection: 'news',
+    slug: 'nist-news',
+    name: 'NIST news, events and blogs',
+    description:
+      'Everything NIST’s newsroom publishes, filed by the topic desk it came from: standards, metrology, physics, chemistry, materials, cybersecurity and IT, manufacturing, energy and environment, health, and the four NIST blogs.',
+    query: { sources: ['nist-news'] },
   },
   {
     collection: 'news',
@@ -1407,6 +1440,54 @@ export const DEFAULT_FEEDS = [
     description:
       'Threats not yet fixed, mitigated, blocked or withdrawn. No status reads as open, as the spec says.',
     query: { kinds: ['finding', 'attack', 'indicator', 'advisory'], tags: ['status:open'] },
+  },
+  // NVD: the CVE catalogue, and the cuts a defender reads first.
+  {
+    collection: 'threats',
+    slug: 'cves',
+    name: 'CVEs: every one the NVD publishes or revises',
+    description:
+      'The National Vulnerability Database, kept current every fifteen minutes: each CVE with its description, CVSS score, weakness and affected products, updated in place as NIST analyses it. This product uses the NVD API but is not endorsed or certified by the NVD.',
+    query: { kinds: ['cve'] },
+  },
+  {
+    collection: 'threats',
+    slug: 'critical-cves',
+    name: 'Critical CVEs',
+    description: 'CVEs scored critical (CVSS 9.0 and above) by NIST or the reporting CNA.',
+    query: { kinds: ['cve'], tags: ['severity:critical'] },
+  },
+  {
+    collection: 'threats',
+    slug: 'known-exploited-cves',
+    name: 'Known exploited vulnerabilities (CISA KEV)',
+    description:
+      'CVEs CISA has seen exploited in the wild and added to its Known Exploited Vulnerabilities catalogue, with the date federal agencies must act by.',
+    query: { kinds: ['cve'], tags: ['kev'] },
+  },
+  // SURBL: the lists as a catalogue, and the watched domains' standing.
+  {
+    collection: 'threats',
+    slug: 'surbl-lists',
+    name: 'SURBL lists',
+    description:
+      'The public SURBL URI reputation lists (phishing, malware, abuse, cracked, click trackers, disposable mail) with the zone and bit of each, as surbl.org documents them.',
+    query: { kinds: ['list'] },
+  },
+  {
+    collection: 'threats',
+    slug: 'surbl-watch',
+    name: 'SURBL watch: the house domains',
+    description:
+      'Each watched domain’s standing on SURBL, checked by DNS every half hour and dated by when it last changed. test.surbl.org is the always-listed canary.',
+    query: { kinds: ['reputation'] },
+  },
+  {
+    collection: 'threats',
+    slug: 'surbl-listed',
+    name: 'Listed on SURBL',
+    description: 'Watched domains that SURBL currently lists, with the lists they are on.',
+    query: { kinds: ['reputation'], tags: ['status:listed'] },
   },
   // Webrings: the rings, the members, and the members by who makes them.
   {

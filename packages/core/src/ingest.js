@@ -20,6 +20,7 @@ export function envFor() {
     igdbClientId: config.adapters.igdbClientId,
     igdbClientSecret: config.adapters.igdbClientSecret,
     githubToken: config.adapters.githubToken,
+    nvdApiKey: config.adapters.nvdApiKey,
     courtlistenerToken: config.adapters.courtlistenerToken,
     alpacaKeyId: config.adapters.alpacaKeyId,
     alpacaSecretKey: config.adapters.alpacaSecretKey,

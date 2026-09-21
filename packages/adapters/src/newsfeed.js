@@ -58,6 +58,55 @@ export const DEFAULT_FEEDS = [
   'climate=https://www.theguardian.com/us/environment/rss',
 ];
 
+/**
+ * NIST's newsroom, by topic desk. NIST publishes one RSS feed per research
+ * area (www.nist.gov/coo/nist-rss-feeds), plus events and four blogs; each is
+ * mapped to the nearest shipped section, since a reader following `science`
+ * or `technology` should meet NIST there and not in a section of its own.
+ *
+ * The all-news feed comes FIRST on purpose: a story reaching a topic desk as
+ * well is one row (the section is not in the id), and the later spec wins the
+ * section, so the topic desk's section is the one stored. Every URL below
+ * was fetched on 2026-09-21 and carried forty items; `bioscience` and
+ * `cybersecurity` were fetched too and were empty, so they are not listed
+ * (cybersecurity news arrives through the Cybersecurity Insights blog and the
+ * IT desk).
+ */
+export const NIST_FEEDS = [
+  'science=https://www.nist.gov/news-events/news/rss.xml',
+  'science=https://www.nist.gov/news-events/events/rss.xml',
+  'science=https://www.nist.gov/blogs/taking-measure/rss.xml',
+  'science=https://www.nist.gov/news-events/standards/rss.xml',
+  'science=https://www.nist.gov/news-events/metrology/rss.xml',
+  'science=https://www.nist.gov/news-events/physics/rss.xml',
+  'science=https://www.nist.gov/news-events/chemistry/rss.xml',
+  'science=https://www.nist.gov/news-events/materials/rss.xml',
+  'science=https://www.nist.gov/news-events/nanotechnology/rss.xml',
+  'science=https://www.nist.gov/news-events/Mathematics%20and%20Statistics/rss.xml',
+  'science=https://www.nist.gov/news-events/Neutron%20research/rss.xml',
+  'science=https://www.nist.gov/news-events/forensic%20science/rss.xml',
+  'science=https://www.nist.gov/news-events/Buildings%20and%20Construction/rss.xml',
+  'science=https://www.nist.gov/news-events/fire/rss.xml',
+  'science=https://www.nist.gov/news-events/Public%20safety/rss.xml',
+  'science=https://www.nist.gov/news-events/resilience/rss.xml',
+  'science=https://www.nist.gov/news-events/transportation/rss.xml',
+
+  'technology=https://www.nist.gov/news-events/information%20technology/rss.xml',
+  'technology=https://www.nist.gov/news-events/Advanced%20communications/rss.xml',
+  'technology=https://www.nist.gov/news-events/electronics/rss.xml',
+  'technology=https://www.nist.gov/blogs/cybersecurity-insights/rss.xml',
+
+  'business=https://www.nist.gov/news-events/manufacturing/rss.xml',
+  'business=https://www.nist.gov/news-events/Performance%20excellence/rss.xml',
+  'business=https://www.nist.gov/blogs/manufacturing-innovation-blog/rss.xml',
+  'business=https://www.nist.gov/blogs/blogrige/rss.xml',
+
+  'climate=https://www.nist.gov/news-events/energy/rss.xml',
+  'climate=https://www.nist.gov/news-events/environment/rss.xml',
+
+  'health=https://www.nist.gov/news-events/health/rss.xml',
+];
+
 /** The sections the shipped feeds cover, in the order a reader should meet them. */
 export const SECTIONS = [
   'world',
@@ -107,7 +156,9 @@ export function outletOf(feedUrl) {
   const parts = host
     .replace(/^(www|feeds?|rss|news)\./, '')
     .split('.')
-    .filter((p) => !['com', 'org', 'net', 'co', 'uk', 'de', 'fr', 'us', 'io'].includes(p));
+    .filter(
+      (p) => !['com', 'org', 'net', 'co', 'uk', 'de', 'fr', 'us', 'io', 'gov', 'edu'].includes(p),
+    );
   // feeds.a.dj.com leaves ["a","dj"]; the last remaining label is the outlet.
   return parts[parts.length - 1] ?? host;
 }
@@ -218,6 +269,14 @@ export const newsfeed = defineAdapter({
       slug: 'news-world',
       name: 'News: newsroom desks',
       config: { feeds: DEFAULT_FEEDS },
+    },
+    {
+      slug: 'nist-news',
+      name: 'NIST: news, events and blogs by topic',
+      description:
+        'Everything NIST’s newsroom publishes, read hourly from its topic feeds and filed under the nearest desk: standards, metrology and the sciences under science; IT, communications, electronics and the Cybersecurity Insights blog under technology; manufacturing and Baldrige under business; energy and environment under climate; health under health.',
+      config: { feeds: NIST_FEEDS },
+      cadenceMinutes: 60,
     },
   ],
   async pull({ config, http, log, deadline }) {

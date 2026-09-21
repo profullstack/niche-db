@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:foaf="http://xmlns.com/foaf/0.1/" xmlns:og="http://ogp.me/ns#" xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#" xmlns:schema="http://schema.org/" xmlns:sioc="http://rdfs.org/sioc/ns#" xmlns:sioct="http://rdfs.org/sioc/types#" xmlns:skos="http://www.w3.org/2004/02/skos/core#" xmlns:xsd="http://www.w3.org/2001/XMLSchema#" version="2.0" xml:base="https://www.nist.gov/">
+  <channel>
+    <title>NIST News</title>
+    <link>https://www.nist.gov/news-events/news</link>
+    <description/>
+    <language>en</language>
+    <atom:link href="https://www.nist.gov/news-events/news/rss.xml" rel="self" type="application/rss+xml"/>
+
+    <item>
+  <title>NIST Awards More Than $1.7 Million to Support Cybersecurity Workforce Development Across 8 States</title>
+  <link>https://www.nist.gov/news-events/news/2026/09/nist-awards-more-17-million-support-cybersecurity-workforce-development</link>
+  <description>  Projects will address local cybersecurity workforce needs and will offer practical learning opportunities including internships, apprenticeships and hands-on projects.
+
+</description>
+  <pubDate>Fri, 18 Sep 2026 12:00:00 +0000</pubDate>
+    <dc:creator>Sarah Henderson</dc:creator>
+    <guid isPermaLink="true">https://www.nist.gov/node/1920201</guid>
+    </item>
+<item>
+  <title>NIST Awards More Than $30 Million for MEP Centers in 11 States and Puerto Rico</title>
+  <link>https://www.nist.gov/news-events/news/2026/09/nist-awards-more-30-million-mep-centers-11-states-and-puerto-rico</link>
+  <description>  The awards will help small and medium-sized manufacturers increase the adoption of advanced manufacturing technology.
+
+</description>
+  <pubDate>Tue, 15 Sep 2026 12:00:00 +0000</pubDate>
+    <dc:creator>Sarah Henderson</dc:creator>
+    <guid isPermaLink="true">https://www.nist.gov/node/1920296</guid>
+    </item>
+<item>
+  <title>NIST Finalizes Guidelines on Protecting Online Identity and Access Tokens From Misuse</title>
+  <link>https://www.nist.gov/news-events/news/2026/09/nist-finalizes-guidelines-protecting-online-identity-and-access-tokens</link>
+  <description>  The finalized publication is designed to help organizations take effective steps to avoid exposing tokens to attackers.
+
+</description>
+  <pubDate>Tue, 15 Sep 2026 12:00:00 +0000</pubDate>
+    <dc:creator>Sarah Henderson</dc:creator>
+    <guid isPermaLink="true">https://www.nist.gov/node/1919726</guid>
+    </item>
+  </channel>
+</rss>
