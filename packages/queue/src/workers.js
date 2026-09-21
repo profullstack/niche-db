@@ -1,5 +1,11 @@
 import { config } from '@nichedb/config';
-import { ADAPTERS, enrichPending, runSource, scanFeeds } from '@nichedb/core';
+import {
+  ADAPTERS,
+  enrichPending,
+  refreshCollectionStats,
+  runSource,
+  scanFeeds,
+} from '@nichedb/core';
 import { generateDump } from '@nichedb/core/data-dumps';
 import * as q from '@nichedb/db/queries';
 import { sendEmail, sendPush } from '@nichedb/notify';
@@ -159,6 +165,12 @@ export function startWorkers() {
       connection,
       concurrency: 1,
       lockDuration: 10 * 60_000,
+    }),
+    // One at a time: each collection's recount is a scan of that collection.
+    new Worker(QUEUES.stats, () => refreshCollectionStats({ log }), {
+      connection,
+      concurrency: 1,
+      lockDuration: config.stats.budgetMs + config.stats.statementTimeoutMs + 60_000,
     }),
   ];
   if (config.dataDumps.enabled)

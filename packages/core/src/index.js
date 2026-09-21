@@ -1,4 +1,5 @@
 export * from './adapter.js';
+export { computeCollectionStats, refreshCollectionStats } from './collection-stats.js';
 export * from './dump.js';
 export { describeEnrichers, enrichPending } from './enrich.js';
 export { scanFeeds } from './feedscan.js';
