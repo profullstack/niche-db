@@ -1,0 +1,110 @@
+{
+  "provider": {
+    "name": "Exos Technologies",
+    "web": "https://exos.tech",
+    "country": "US"
+  },
+  "updated": "2026-09-21T01:55:58Z",
+  "offers": [
+    {
+      "id": "dual-xeon-gold-6134/base",
+      "name": "Base",
+      "kind": "dedicated",
+      "premises": "off-prem",
+      "management": "unmanaged",
+      "tenancy": "dedicated",
+      "model": "centralized",
+      "location": {
+        "regions": [
+          "NJ"
+        ],
+        "countries": [
+          "US"
+        ]
+      },
+      "compute": {
+        "cores": 16,
+        "threads_per_core": 2,
+        "sockets": 2,
+        "arch": "x86_64",
+        "vendor": "Intel",
+        "model": "Xeon Gold 6134",
+        "allocation": "dedicated"
+      },
+      "memory": {
+        "ram_mb": 131072,
+        "type": "DDR4",
+        "allocation": "reserved"
+      },
+      "storage": [
+        {
+          "type": "nvme",
+          "size_gb": 960
+        },
+        {
+          "type": "nvme",
+          "size_gb": 960
+        }
+      ],
+      "network": {
+        "bandwidth_mbps": 10000
+      },
+      "price": {
+        "amount": 369.00,
+        "currency": "USD",
+        "interval": "month"
+      },
+      "stock": "in_stock"
+    },
+    {
+      "id": "dual-xeon-gold-6246/base",
+      "name": "Base",
+      "kind": "dedicated",
+      "premises": "off-prem",
+      "management": "unmanaged",
+      "tenancy": "dedicated",
+      "model": "centralized",
+      "location": {
+        "regions": [
+          "NJ"
+        ],
+        "countries": [
+          "US"
+        ]
+      },
+      "compute": {
+        "cores": 24,
+        "threads_per_core": 2,
+        "sockets": 2,
+        "arch": "x86_64",
+        "vendor": "Intel",
+        "model": "Xeon Gold 6246",
+        "allocation": "dedicated"
+      },
+      "memory": {
+        "ram_mb": 131072,
+        "type": "DDR4",
+        "allocation": "reserved"
+      },
+      "storage": [
+        {
+          "type": "nvme",
+          "size_gb": 960
+        },
+        {
+          "type": "nvme",
+          "size_gb": 960
+        }
+      ],
+      "network": {
+        "bandwidth_mbps": 10000
+      },
+      "price": {
+        "amount": 399.00,
+        "currency": "USD",
+        "interval": "month"
+      },
+      "stock": "in_stock"
+    }
+  ]
+}

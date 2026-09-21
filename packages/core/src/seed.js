@@ -1356,7 +1356,9 @@ export const DEFAULT_FEEDS = [
     collection: 'hosting',
     slug: 'bare-metal-plans',
     name: 'Bare metal plans',
-    query: { kinds: ['plan'], tags: ['kind:bare-metal'] },
+    // OpenServer names a whole box either way: `dedicated` in the spec's own
+    // example, `bare-metal` in Vultr's catalogue. A feed tag list matches ANY.
+    query: { kinds: ['plan'], tags: ['kind:bare-metal', 'kind:dedicated'] },
   },
   {
     collection: 'hosting',

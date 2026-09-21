@@ -30,8 +30,17 @@ import { describeOffer, priceBucket } from './hosting.js';
  * lists the company under another id, the register's wins, so a deployment
  * may map the two in the source config (`providers`: `host=slug`).
  *
- * There is no live descriptor today, so the seeded source starts with no
- * URLs and paused; add an origin and enable it.
+ * The first live descriptor is exos.tech (bare metal in New Jersey,
+ * published 2026-09-19), so the seeded source starts with that origin and
+ * enabled; add more origins as providers publish theirs.
+ *
+ * ONE TOLERANCE
+ *
+ * The spec keeps RAM in `compute.ram_mb`. A provider that writes a separate
+ * `memory` block instead (Exos did) would otherwise show no RAM anywhere, so
+ * when `compute.ram_mb` is absent and `memory.ram_mb` is present the value is
+ * lifted into `compute` and the `memory` block is kept as written. Nothing
+ * else is rewritten.
  */
 export const WELL_KNOWN = '/.well-known/openserver.json';
 
@@ -116,8 +125,19 @@ export function providerItem(descriptor, fetchedFrom, aliases = {}) {
   };
 }
 
-export function offerItem(descriptor, o, fetchedFrom, aliases = {}) {
+/**
+ * `compute.ram_mb` from a `memory.ram_mb` the provider wrote instead; the
+ * offer is returned unchanged when the spec's field is already there.
+ */
+export function liftMemory(o) {
+  const ram = o?.memory?.ram_mb;
+  if (!o || o.compute?.ram_mb !== undefined || ram === undefined || ram === null) return o;
+  return { ...o, compute: { ...(o.compute ?? {}), ram_mb: ram } };
+}
+
+export function offerItem(descriptor, raw, fetchedFrom, aliases = {}) {
   const p = descriptor?.provider;
+  const o = liftMemory(raw);
   if (!o?.id || !p?.name) return null;
   const host = hostOf(fetchedFrom);
   const slug = providerSlug(descriptor, fetchedFrom, aliases);
@@ -206,8 +226,8 @@ export const openserver = defineAdapter({
     {
       slug: 'openserver',
       name: 'Hosting: OpenServer descriptors',
-      config: { urls: [], providers: [] },
-      enabled: false,
+      config: { urls: ['https://exos.tech'], providers: [] },
+      enabled: true,
     },
   ],
   async pull({ config, http, log, deadline }) {

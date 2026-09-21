@@ -736,7 +736,9 @@ describe('tvmaze', () => {
       http: {
         json: async (url, opts) => {
           seen = { url, opts };
-          return [EPISODE];
+          // pull() windows on the real clock, so the fixture's fixed 2026-09-16
+          // airstamp aged out of the day of grace; air it tomorrow instead.
+          return [{ ...EPISODE, airstamp: new Date(Date.now() + 86_400_000).toISOString() }];
         },
       },
     });
