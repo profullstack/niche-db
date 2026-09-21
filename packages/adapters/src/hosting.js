@@ -85,6 +85,7 @@ export function describeOffer(offer) {
   const c = offer.compute ?? {};
   const parts = [];
   if (c.vcpu !== null && c.vcpu !== undefined) parts.push(`${c.vcpu} vCPU`);
+  else if (c.cores) parts.push(`${c.cores} cores`);
   if (c.ram_mb) parts.push(c.ram_mb >= 1024 ? `${mbToGb(c.ram_mb)} GB RAM` : `${c.ram_mb} MB RAM`);
   const disk = (offer.storage ?? []).reduce((a, s) => a + (num(s.size_gb) ?? 0), 0);
   if (disk) parts.push(`${disk} GB ${offer.storage?.[0]?.type ?? 'disk'}`);

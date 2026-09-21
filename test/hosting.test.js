@@ -11,6 +11,7 @@ import {
 } from '../packages/adapters/src/lowendbox.js';
 import {
   descriptorUrl,
+  liftMemory,
   openserver,
   parseAliases,
   parseDescriptor,
@@ -322,11 +323,36 @@ describe('OpenServer descriptors', () => {
     expect(items[1].tags).toContain('provider:examplehost');
   });
 
-  test('seeded paused with no descriptors, daily, in the hosting collection', () => {
+  test('a separate memory block is lifted into compute.ram_mb; a dedicated box is tagged as written', async () => {
+    const doc = await json('openserver-exos.json');
+    const { items, rejected } = parseDescriptor(
+      doc,
+      'https://exos.tech/.well-known/openserver.json',
+    );
+    expect(rejected).toBeNull();
+    expect(items.map((i) => i.externalId)).toEqual([
+      'openserver:provider:exos.tech',
+      'openserver:offer:exos.tech:dual-xeon-gold-6134/base',
+      'openserver:offer:exos.tech:dual-xeon-gold-6246/base',
+    ]);
+    expect(items[0].data.provider).toBe('exos.tech');
+    const box = items[1];
+    expect(box.data.offer.compute.ram_mb).toBe(131072);
+    expect(box.data.offer.memory).toEqual(doc.offers[0].memory);
+    expect(box.summary).toContain('128 GB RAM');
+    expect(box.tags).toContain('kind:dedicated');
+    expect(box.tags).toContain('region:nj');
+    expect(box.tags).toContain('country:us');
+    // The spec's field wins when both are present.
+    expect(liftMemory({ compute: { ram_mb: 1 }, memory: { ram_mb: 2 } }).compute.ram_mb).toBe(1);
+    expect(liftMemory({ id: 'x' })).toEqual({ id: 'x' });
+  });
+
+  test('seeded enabled with exos.tech, daily, in the hosting collection', () => {
     expect(openserver.collection).toBe('hosting');
     expect(openserver.cadenceMinutes).toBe(1440);
-    expect(openserver.defaultSources[0].enabled).toBe(false);
-    expect(openserver.defaultSources[0].config.urls).toEqual([]);
+    expect(openserver.defaultSources[0].enabled).toBe(true);
+    expect(openserver.defaultSources[0].config.urls).toEqual(['https://exos.tech']);
   });
 });
 
