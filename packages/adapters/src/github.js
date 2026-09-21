@@ -63,6 +63,25 @@ export const githubReleases = defineAdapter({
         ],
       },
     },
+    {
+      slug: 'github-releases-nist',
+      name: 'GitHub: NIST software releases',
+      description:
+        'Releases of the software NIST publishes under github.com/usnistgov: OSCAL and its CLI, FiPy, NEMO, PyHyperScattering, JARVIS-Tools, the SP 800-90B entropy assessment and metaschema-java (the usnistgov repositories that cut releases, checked 2026-09-21). Read every three hours to stay inside the keyless allowance.',
+      config: {
+        repos: [
+          'usnistgov/OSCAL',
+          'usnistgov/oscal-cli',
+          'usnistgov/fipy',
+          'usnistgov/NEMO',
+          'usnistgov/PyHyperScattering',
+          'usnistgov/jarvis',
+          'usnistgov/SP800-90B_EntropyAssessment',
+          'usnistgov/metaschema-java',
+        ],
+      },
+      cadenceMinutes: 180,
+    },
   ],
   async pull({ config, env, http, budget, deadline, log }) {
     const repos = (

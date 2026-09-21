@@ -1,0 +1,790 @@
+{
+ "ResultCount": 1458,
+ "ResultData": [
+  {
+   "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.7#",
+   "@context": [
+    "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
+    {
+     "@base": "ark:/88434/mds2-3978"
+    }
+   ],
+   "@type": [
+    "nrdp:DataPublication",
+    "nrdp:PublicDataResource",
+    "dcat:Dataset"
+   ],
+   "_extensionSchemas": [
+    "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.7#/definitions/PublicDataResource"
+   ],
+   "@id": "ark:/88434/mds2-3978",
+   "ediid": "ark:/88434/mds2-3978",
+   "version": "1.2.0",
+   "doi": "doi:10.18434/mds2-3978",
+   "title": "Tracking Community Resilience (TraCR) Database",
+   "contactPoint": {
+    "fn": "Tiffany Cousins",
+    "hasEmail": "mailto:tiffany.cousins@nist.gov"
+   },
+   "modified": "2026-09-14 00:00:00",
+   "status": "available",
+   "landingPage": "https://data.nist.gov/od/id/mds2-3978",
+   "description": [
+    "Community resilience is the ability to prepare, adapt, withstand, and recover from disruptions. There is a growing field of research that focuses on community-level resilience. Many have developed and studied methods for measuring resilience quantitatively and qualitatively. The Tracking Community Resilience (TraCR) database is a tool for developing and testing analytical methods for computing county-level indicators for community resilience. TraCR can be used by local communities, researchers, and decision makers at various levels to assess and measure longitudinal community resilience. TraCR is part of the Community Resilience Assessment Methodology, which aims to develop a first-generation methodology to assess resilience at the community scale based on community functions, supported by buildings and infrastructure systems, and the recovery of those functions following a disruptive hazard event."
+   ],
+   "keyword": [
+    "community resilience",
+    "resilience",
+    "metrics",
+    "methodology",
+    "physical system",
+    "social system",
+    "economic system",
+    "socio-technical system",
+    "database",
+    "indicators"
+   ],
+   "topic": [
+    {
+     "@type": "Concept",
+     "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+     "tag": "Resilience: Community resilience"
+    },
+    {
+     "@type": "Concept",
+     "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+     "tag": "Resilience: Disaster and failure studies"
+    },
+    {
+     "@type": "Concept",
+     "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+     "tag": "Standards: Frameworks"
+    },
+    {
+     "@type": "Concept",
+     "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+     "tag": "Metrology: Metric"
+    }
+   ],
+   "accessLevel": "public",
+   "license": "https://www.nist.gov/open/license",
+   "publisher": {
+    "name": "National Institute of Standards and Technology",
+    "@type": "org:Organization"
+   },
+   "language": [
+    "en"
+   ],
+   "bureauCode": [
+    "006:55"
+   ],
+   "programCode": [
+    "006:052"
+   ],
+   "theme": [
+    "Resilience: Community resilience",
+    "Resilience: Disaster and failure studies",
+    "Standards: Frameworks",
+    "Metrology: Metric"
+   ],
+   "components": [
+    {
+     "@id": "cmps/TraCR_MetadataPublic_v111.xlsx",
+     "@type": [
+      "nrdp:DataFile",
+      "nrdp:DownloadableFile",
+      "dcat:Distribution"
+     ],
+     "_extensionSchemas": [
+      "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.7#/definitions/DataFile"
+     ],
+     "filepath": "TraCR_MetadataPublic_v111.xlsx",
+     "downloadURL": "https://data.nist.gov/od/ds/mds2-3978/TraCR_MetadataPublic_v111.xlsx",
+     "mediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+     "title": "TraCR_MetadataPublic_v111",
+     "size": 27674,
+     "checksum": {
+      "hash": "79f36fd04020fbe6368f9d1830ac8b48e02549c9c374f5d39230f16e3f1c4a1d",
+      "algorithm": {
+       "tag": "sha256",
+       "@type": "Thing"
+      }
+     }
+    },
+    {
+     "@id": "cmps/TraCR_README_v111.txt",
+     "@type": [
+      "nrdp:DataFile",
+      "nrdp:DownloadableFile",
+      "dcat:Distribution"
+     ],
+     "_extensionSchemas": [
+      "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.7#/definitions/DataFile"
+     ],
+     "filepath": "TraCR_README_v111.txt",
+     "downloadURL": "https://data.nist.gov/od/ds/mds2-3978/TraCR_README_v111.txt",
+     "mediaType": "text/plain",
+     "title": "TraCR_README_v111",
+     "size": 5368,
+     "checksum": {
+      "hash": "2c4a98c51303baac50348bb4d3384731b86a2b6e356d4c51497a145e39e08920",
+      "algorithm": {
+       "tag": "sha256",
+       "@type": "Thing"
+      }
+     }
+    },
+    {
+     "@id": "cmps/TraCR_flatfile_v111.xlsx",
+     "@type": [
+      "nrdp:DataFile",
+      "nrdp:DownloadableFile",
+      "dcat:Distribution"
+     ],
+     "_extensionSchemas": [
+      "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.7#/definitions/DataFile"
+     ],
+     "filepath": "TraCR_flatfile_v111.xlsx",
+     "downloadURL": "https://data.nist.gov/od/ds/mds2-3978/TraCR_flatfile_v111.xlsx",
+     "mediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+     "title": "TraCR_flatfile_v111",
+     "size": 65729591,
+     "checksum": {
+      "hash": "8fd34d0c96dca074779bdd26eacb871784c9ed04528ff0ba215870d9a09eb38e",
+      "algorithm": {
+       "tag": "sha256",
+       "@type": "Thing"
+      }
+     }
+    },
+    {
+     "@id": "cmps/TraCR_Metadata.xlsx",
+     "@type": [
+      "nrdp:DataFile",
+      "nrdp:DownloadableFile",
+      "dcat:Distribution"
+     ],
+     "_extensionSchemas": [
+      "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.7#/definitions/DataFile"
+     ],
+     "filepath": "TraCR_Metadata.xlsx",
+     "downloadURL": "https://data.nist.gov/od/ds/mds2-3978/TraCR_Metadata.xlsx",
+     "mediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+     "description": "This is the metadata for the database",
+     "title": "Metadata Workbook",
+     "size": 365697,
+     "checksum": {
+      "hash": "ba78999897de25ed7ba5bedf6fddbdbf4f7cdca8b4ca593020952cccdf544fac",
+      "algorithm": {
+       "tag": "sha256",
+       "@type": "Thing"
+      }
+     }
+    },
+    {
+     "@id": "cmps/TraCR_DataCoverageMatrix_v111.xlsx",
+     "@type": [
+      "nrdp:DataFile",
+      "nrdp:DownloadableFile",
+      "dcat:Distribution"
+     ],
+     "_extensionSchemas": [
+      "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.7#/definitions/DataFile"
+     ],
+     "filepath": "TraCR_DataCoverageMatrix_v111.xlsx",
+     "downloadURL": "https://data.nist.gov/od/ds/mds2-3978/TraCR_DataCoverageMatrix_v111.xlsx",
+     "mediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+     "title": "TraCR_DataCoverageMatrix_v111",
+     "size": 23354,
+     "checksum": {
+      "hash": "28fa619659ac198b370eeeb060dc40efbbabb309a70e9a09931a633b8c7cbc85",
+      "algorithm": {
+       "tag": "sha256",
+       "@type": "Thing"
+      }
+     }
+    },
+    {
+     "@id": "cmps/README.txt",
+     "@type": [
+      "nrdp:DataFile",
+      "nrdp:DownloadableFile",
+      "dcat:Distribution"
+     ],
+     "_extensionSchemas": [
+      "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.7#/definitions/DataFile"
+     ],
+     "filepath": "README.txt",
+     "downloadURL": "https://data.nist.gov/od/ds/mds2-3978/README.txt",
+     "mediaType": "text/plain",
+     "description": "This README file is the standard README file that describes the dataset and associated files. ",
+     "title": "README",
+     "size": 5368,
+     "checksum": {
+      "hash": "2c4a98c51303baac50348bb4d3384731b86a2b6e356d4c51497a145e39e08920",
+      "algorithm": {
+       "tag": "sha256",
+       "@type": "Thing"
+      }
+     }
+    },
+    {
+     "@id": "cmps/TraCR_TechnicalSupportDocument_v111.pdf",
+     "@type": [
+      "nrdp:DataFile",
+      "nrdp:DownloadableFile",
+      "dcat:Distribution"
+     ],
+     "_extensionSchemas": [
+      "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.7#/definitions/DataFile"
+     ],
+     "filepath": "TraCR_TechnicalSupportDocument_v111.pdf",
+     "downloadURL": "https://data.nist.gov/od/ds/mds2-3978/TraCR_TechnicalSupportDocument_v111.pdf",
+     "mediaType": "application/pdf",
+     "title": "TraCR_TechnicalSupportDocument_v111",
+     "size": 540954,
+     "checksum": {
+      "hash": "b63e9da5494faec560fd6e913c51c5bc5daab4c3511b5504b566b70490e7ccc3",
+      "algorithm": {
+       "tag": "sha256",
+       "@type": "Thing"
+      }
+     }
+    },
+    {
+     "@id": "cmps/TraCR_ TechnicalSupportDocument.pdf",
+     "@type": [
+      "nrdp:DataFile",
+      "nrdp:DownloadableFile",
+      "dcat:Distribution"
+     ],
+     "_extensionSchemas": [
+      "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.7#/definitions/DataFile"
+     ],
+     "filepath": "TraCR_ TechnicalSupportDocument.pdf",
+     "downloadURL": "https://data.nist.gov/od/ds/mds2-3978/TraCR_%20TechnicalSupportDocument.pdf",
+     "mediaType": "application/pdf",
+     "description": "This document gives background information for the development of the database. ",
+     "title": "Technical Support Document",
+     "size": 271936,
+     "checksum": {
+      "hash": "6ad862276db9cf4627d0f1fac8086bbe35078840395e07768e13fd04b5c53085",
+      "algorithm": {
+       "tag": "sha256",
+       "@type": "Thing"
+      }
+     }
+    },
+    {
+     "@id": "cmps/TraCR_v1_database.csv",
+     "@type": [
+      "nrdp:DataFile",
+      "nrdp:DownloadableFile",
+      "dcat:Distribution"
+     ],
+     "_extensionSchemas": [
+      "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.7#/definitions/DataFile"
+     ],
+     "filepath": "TraCR_v1_database.csv",
+     "downloadURL": "https://data.nist.gov/od/ds/mds2-3978/TraCR_v1_database.csv",
+     "mediaType": "text/csv",
+     "description": "This is the database. ",
+     "title": "TraCR database",
+     "size": 18733651,
+     "checksum": {
+      "hash": "a285d35507313b231565756868454e9ef9da6785809d1a4b572bf78452119901",
+      "algorithm": {
+       "tag": "sha256",
+       "@type": "Thing"
+      }
+     }
+    },
+    {
+     "@id": "cmps/TraCR_DataCoverageMatrix.xlsx",
+     "@type": [
+      "nrdp:DataFile",
+      "nrdp:DownloadableFile",
+      "dcat:Distribution"
+     ],
+     "_extensionSchemas": [
+      "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.7#/definitions/DataFile"
+     ],
+     "filepath": "TraCR_DataCoverageMatrix.xlsx",
+     "downloadURL": "https://data.nist.gov/od/ds/mds2-3978/TraCR_DataCoverageMatrix.xlsx",
+     "mediaType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+     "description": "This is a matrix of the data availability for the metrics in a given time period. ",
+     "title": "TraCR Data Coverage Matrix",
+     "size": 17508,
+     "checksum": {
+      "hash": "81cc98c5f4c3f1fa540ee0edbe2891359a25b2802b8a612ea070437d568dbfd6",
+      "algorithm": {
+       "tag": "sha256",
+       "@type": "Thing"
+      }
+     }
+    }
+   ],
+   "_editStatus": "done",
+   "rights": "Guidelines about data use are available from each original source and provided in the data documentation file.",
+   "references": [
+    {
+     "@type": [
+      "deo:BibliographicReference"
+     ],
+     "@id": "#ref:doi/full/10.1061/NHREFO.NHENG-1642",
+     "refType": "IsSupplementTo",
+     "location": "https://ascelibrary.org/doi/full/10.1061/NHREFO.NHENG-1642",
+     "_extensionSchemas": [
+      "https://data.nist.gov/od/dm/nerdm-schema/bib/v0.7#/definitions/DCiteReference"
+     ]
+    },
+    {
+     "@type": [
+      "deo:BibliographicReference"
+     ],
+     "@id": "#ref:doi/10.1061/NHREFO.NHENG-2224",
+     "refType": "IsSupplementTo",
+     "location": "https://ascelibrary.org/doi/10.1061/NHREFO.NHENG-2224",
+     "_extensionSchemas": [
+      "https://data.nist.gov/od/dm/nerdm-schema/bib/v0.7#/definitions/DCiteReference"
+     ]
+    }
+   ],
+   "authors": [
+    {
+     "familyName": "Dillard",
+     "fn": "Maria Dillard",
+     "givenName": "Maria",
+     "middleName": "",
+     "affiliation": [
+      {
+       "title": "National Institute of Standards and Technology",
+       "@type": "org:Organization",
+       "@id": "ror:05xpvk416"
+      }
+     ],
+     "orcid": "0000-0003-1772-8914",
+     "@type": "foaf:Person"
+    },
+    {
+     "familyName": "Loerzel",
+     "fn": "Jarrod Loerzel",
+     "givenName": "Jarrod",
+     "middleName": "",
+     "affiliation": [],
+     "orcid": "0000-0002-2025-6842",
+     "@type": "foaf:Person"
+    },
+    {
+     "familyName": "Gu",
+     "fn": "Donghwan Gu",
+     "givenName": "Donghwan",
+     "middleName": "",
+     "affiliation": [
+      {
+       "title": "National Institute of Standards and Technology",
+       "@type": "org:Organization",
+       "@id": "ror:05xpvk416"
+      },
+      {
+       "title": "University of Maryland, College Park",
+       "@type": "org:Organization"
+      }
+     ],
+     "orcid": "0000-0002-8189-2455",
+     "@type": "foaf:Person"
+    },
+    {
+     "familyName": "Cousins",
+     "fn": "Tiffany Cousins",
+     "givenName": "Tiffany",
+     "middleName": "",
+     "affiliation": [
+      {
+       "title": "National Institute of Standards and Technology",
+       "@type": "org:Organization",
+       "@id": "ror:05xpvk416"
+      }
+     ],
+     "orcid": "0000-0002-6854-3533",
+     "@type": "foaf:Person"
+    },
+    {
+     "familyName": "Chen",
+     "fn": "Tzong Hao Chen",
+     "givenName": "Tzong Hao",
+     "middleName": "",
+     "affiliation": [
+      {
+       "title": "National Institute of Standards and Technology",
+       "@type": "org:Organization",
+       "@id": "ror:05xpvk416"
+      }
+     ],
+     "orcid": "0000-0003-3297-2077",
+     "@type": "foaf:Person"
+    }
+   ],
+   "annotated": "2026-09-14T20:33:42.974260",
+   "revised": "2026-09-14T20:33:42.974260",
+   "issued": null,
+   "firstIssued": "2025-11-18T20:20:03.927316",
+   "releaseHistory": {
+    "@id": "ark:/88434/mds2-3978.rel",
+    "@type": [
+     "nrdr:ReleaseHistory"
+    ],
+    "hasRelease": [
+     {
+      "version": "1.0.0",
+      "issued": "2025-09-02",
+      "@id": "ark:/88434/mds2-3978/pdr:v/1.0.0",
+      "location": "https://data.nist.gov/od/id/ark:/88434/mds2-3978/pdr:v/1.0.0",
+      "description": "initial release"
+     },
+     {
+      "version": "1.1.0",
+      "issued": "2026-09-14 00:00:00",
+      "@id": "ark:/88434/mds2-3978/pdr:v/1.1.0",
+      "location": "https://data.nist.gov/od/id/ark:/88434/mds2-3978/pdr:v/1.1.0",
+      "description": "data update"
+     },
+     {
+      "version": "1.2.0",
+      "issued": "2026-09-14 00:00:00",
+      "@id": "ark:/88434/mds2-3978/pdr:v/1.2.0",
+      "location": "https://data.nist.gov/od/id/ark:/88434/mds2-3978/pdr:v/1.2.0",
+      "description": "data update"
+     }
+    ]
+   }
+  },
+  {
+   "_schema": "https://data.nist.gov/od/dm/nerdm-schema/v0.7#",
+   "@context": [
+    "https://data.nist.gov/od/dm/nerdm-pub-context.jsonld",
+    {
+     "@base": "ark:/88434/mds2-4320"
+    }
+   ],
+   "@type": [
+    "nrdp:DataPublication",
+    "nrdp:PublicDataResource",
+    "dcat:Dataset"
+   ],
+   "_extensionSchemas": [
+    "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.7#/definitions/PublicDataResource"
+   ],
+   "@id": "ark:/88434/mds2-4320",
+   "ediid": "ark:/88434/mds2-4320",
+   "version": "1.2.0",
+   "doi": "doi:10.18434/mds2-4320",
+   "title": "Thermoreflectance (TR) Analysis Software",
+   "contactPoint": {
+    "fn": "Joshua B. Martin",
+    "hasEmail": "mailto:joshua.martin@nist.gov"
+   },
+   "modified": "2026-09-11 00:00:00",
+   "status": "available",
+   "landingPage": "https://data.nist.gov/od/id/mds2-4320",
+   "description": [
+    "TR Analysis is a custom software application developed for thermoreflectance (TR) based data analysis and visualization that integrates traditional radially symmetric thermal model fitting routines with robust uncertainty analysis. TR pump-probe laser-based measurement techniques use modulated laser heating and thermal models to probe thermal properties by relating a material\u2019s change in temperature to the resulting change in optical reflectance (coefficient of TR) of an applied transducer film. TR techniques can measure the thermal properties of multilayer structures, embedded materials, substrates, thin films, and interfaces. TR can be categorized as Frequency Domain Thermoreflectance (FDTR), Time Domain Thermoreflectance (TDTR), or Steady State Thermoreflectance (SSTR). These techniques leverage sensitivity to different thermal properties and materials based on their characteristic thermal excitations and corresponding responses. This application incorporates thermal model fitting code, non-linear regression fitting models, and Monte Carlo simulation. The primary features of the TR Analysis application are: thermal model fitting for FDTR and TDTR (additional modalities in future releases), user-friendly GUI and workflow, Monte Carlo (MC) simulation, input uncertainty propagation, asymmetric uncertainty analysis, parallel computing, sensitivity explorer, temperature rise calculation, Markov Chain Monte Carlo (MCMC) parameter correlation analysis, savable preset layer properties, and file format interpreter. The TR Analysis application is a standalone deployed executable, coded using MATLAB App Designer. No MATLAB or other license is required to run the software. TR Analysis is intended to be an easy-to-use, reliable, and free resource for the thermal community, especially for researchers building new instruments and/or those who require more robust uncertainty analysis.\u00a0Certain commercial equipment, instruments, or materials are identified in this document. Such identification does not imply recommendation or endorsement by the National Institute of Standards and Technology, nor does it imply that the products identified are necessarily the best available for the purpose."
+   ],
+   "keyword": [
+    "thermoreflectance",
+    "frequency domain thermoreflectance (FDTR)",
+    "time domain thermoreflectance (TDTR)",
+    "steady state thermoreflectance (SSTR)",
+    "thermal conductivity",
+    "thermal transport properties",
+    "thermal analysis",
+    "films",
+    "multilayer",
+    "Monte Carlo simulation",
+    "numerical integration",
+    "uncertainty"
+   ],
+   "topic": [
+    {
+     "@type": "Concept",
+     "tag": "Physics:Optical physics and communications"
+    },
+    {
+     "@type": "Concept",
+     "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+     "tag": "Physics: Thermodynamics"
+    },
+    {
+     "@type": "Concept",
+     "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+     "tag": "Nanotechnology: Nanoelectronics"
+    },
+    {
+     "@type": "Concept",
+     "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+     "tag": "Metrology: Thermometry metrology"
+    },
+    {
+     "@type": "Concept",
+     "tag": "Metrology:Optical, photometry, and laser metrology"
+    },
+    {
+     "@type": "Concept",
+     "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+     "tag": "Mathematics and Statistics: Uncertainty quantification"
+    },
+    {
+     "@type": "Concept",
+     "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+     "tag": "Mathematics and Statistics: Statistical analysis"
+    },
+    {
+     "@type": "Concept",
+     "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+     "tag": "Mathematics and Statistics: Numerical methods and software"
+    },
+    {
+     "@type": "Concept",
+     "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+     "tag": "Mathematics and Statistics: Modeling and simulation research"
+    },
+    {
+     "@type": "Concept",
+     "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+     "tag": "Materials: Modeling and computational material science"
+    },
+    {
+     "@type": "Concept",
+     "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+     "tag": "Materials: Metals"
+    },
+    {
+     "@type": "Concept",
+     "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+     "tag": "Materials: Materials characterization"
+    },
+    {
+     "@type": "Concept",
+     "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+     "tag": "Electronics: Thin-film electronics"
+    },
+    {
+     "@type": "Concept",
+     "scheme": "https://data.nist.gov/od/dm/nist-themes/v1.1",
+     "tag": "Electronics: Semiconductors"
+    }
+   ],
+   "accessLevel": "public",
+   "license": "https://www.nist.gov/open/license",
+   "publisher": {
+    "name": "National Institute of Standards and Technology",
+    "@type": "org:Organization"
+   },
+   "language": [
+    "en"
+   ],
+   "bureauCode": [
+    "006:55"
+   ],
+   "programCode": [
+    "006:052"
+   ],
+   "_editStatus": "done",
+   "theme": [
+    "Physics:Optical physics and communications",
+    "Physics: Thermodynamics",
+    "Nanotechnology: Nanoelectronics",
+    "Metrology: Thermometry metrology",
+    "Metrology:Optical, photometry, and laser metrology",
+    "Mathematics and Statistics: Uncertainty quantification",
+    "Mathematics and Statistics: Statistical analysis",
+    "Mathematics and Statistics: Numerical methods and software",
+    "Mathematics and Statistics: Modeling and simulation research",
+    "Materials: Modeling and computational material science",
+    "Materials: Metals",
+    "Materials: Materials characterization",
+    "Electronics: Thin-film electronics",
+    "Electronics: Semiconductors"
+   ],
+   "references": [
+    {
+     "@type": [
+      "npg:Document"
+     ],
+     "@id": "#ref:10.1063/5.0213738",
+     "refType": "IsSupplementTo",
+     "location": "https://doi.org/10.1063/5.0213738",
+     "_extensionSchemas": [
+      "https://data.nist.gov/od/dm/nerdm-schema/bib/v0.7#/definitions/DCiteReference"
+     ],
+     "title": "An instrumentation guide to measuring thermal conductivity using frequency domain thermoreflectance (FDTR)",
+     "issued": "2024-10-01",
+     "citation": "Kirsch, D. J., Martin, J., Warzoha, R., McLean, M., Windover, D., & Takeuchi, I. (2024). An instrumentation guide to measuring thermal conductivity using frequency domain thermoreflectance (FDTR). Review of Scientific Instruments, 95(10). https://doi.org/10.1063/5.0213738\n"
+    }
+   ],
+   "components": [
+    {
+     "@id": "cmps/TR Analysis vBeta Installer.zip",
+     "@type": [
+      "nrdp:DataFile",
+      "nrdp:DownloadableFile",
+      "dcat:Distribution"
+     ],
+     "_extensionSchemas": [
+      "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.7#/definitions/DataFile"
+     ],
+     "filepath": "TR Analysis vBeta Installer.zip",
+     "downloadURL": "https://data.nist.gov/od/ds/mds2-4320/TR%20Analysis%20vBeta%20Installer.zip",
+     "mediaType": "application/x-zip-compressed",
+     "title": "TR Analysis Installer",
+     "size": 8911605,
+     "checksum": {
+      "hash": "24eddb2e500a7ee336cafd3d49b3875f6faf8f7f9f0c5e64b90c31bc95b58c38",
+      "algorithm": {
+       "tag": "sha256",
+       "@type": "Thing"
+      }
+     }
+    },
+    {
+     "@id": "cmps/README.md",
+     "@type": [
+      "nrdp:DataFile",
+      "nrdp:DownloadableFile",
+      "dcat:Distribution"
+     ],
+     "_extensionSchemas": [
+      "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.7#/definitions/DataFile"
+     ],
+     "filepath": "README.md",
+     "downloadURL": "https://data.nist.gov/od/ds/mds2-4320/README.md",
+     "mediaType": "text/markdown",
+     "title": "README",
+     "size": 10186,
+     "checksum": {
+      "hash": "0c9d40487199d295cd768525db8059b4789f623e8dfe12c804a662728fd6e433",
+      "algorithm": {
+       "tag": "sha256",
+       "@type": "Thing"
+      }
+     }
+    },
+    {
+     "@id": "cmps/TR Analysis Guide.pdf",
+     "@type": [
+      "nrdp:DataFile",
+      "nrdp:DownloadableFile",
+      "dcat:Distribution"
+     ],
+     "_extensionSchemas": [
+      "https://data.nist.gov/od/dm/nerdm-schema/pub/v0.7#/definitions/DataFile"
+     ],
+     "filepath": "TR Analysis Guide.pdf",
+     "downloadURL": "https://data.nist.gov/od/ds/mds2-4320/TR%20Analysis%20Guide.pdf",
+     "mediaType": "application/pdf",
+     "title": "TR Analysis Guide",
+     "size": 3132112,
+     "checksum": {
+      "hash": "54ecd1f1e9bf7f1ade2594762492624c51a40ee957d7e0913b1b0034b1be8da6",
+      "algorithm": {
+       "tag": "sha256",
+       "@type": "Thing"
+      }
+     }
+    }
+   ],
+   "authors": [
+    {
+     "familyName": "Kirsch",
+     "fn": "Dylan Kirsch",
+     "givenName": "Dylan",
+     "middleName": "",
+     "affiliation": [
+      {
+       "title": "National Institute of Standards and Technology",
+       "subunits": [
+        "Material Measurement Laboratory"
+       ],
+       "@type": "org:Organization",
+       "@id": "ror:05xpvk416"
+      }
+     ],
+     "orcid": "0000-0001-5132-3457",
+     "@type": "foaf:Person"
+    },
+    {
+     "familyName": "Martin",
+     "fn": "Joshua Martin",
+     "givenName": "Joshua",
+     "middleName": "",
+     "affiliation": [
+      {
+       "title": "National Institute of Standards and Technology",
+       "subunits": [
+        "Material Measurement Laboratory"
+       ],
+       "@type": "org:Organization",
+       "@id": "ror:05xpvk416"
+      }
+     ],
+     "orcid": "0000-0003-2214-0955",
+     "@type": "foaf:Person"
+    },
+    {
+     "familyName": "Warzoha",
+     "fn": "Ronald Warzoha",
+     "givenName": "Ronald",
+     "middleName": "",
+     "affiliation": [
+      {
+       "title": "United States Naval Academy",
+       "subunits": [
+        "Department of Mechanical and Nuclear Engineering"
+       ],
+       "@type": "org:Organization"
+      }
+     ],
+     "orcid": "0000-0002-5454-4551",
+     "@type": "foaf:Person"
+    }
+   ],
+   "annotated": "2026-09-17T17:34:28.083521",
+   "revised": "2026-09-17T17:34:28.083521",
+   "issued": null,
+   "firstIssued": "2026-09-16T18:46:34.757072",
+   "releaseHistory": {
+    "@id": "ark:/88434/mds2-4320.rel",
+    "@type": [
+     "nrdr:ReleaseHistory"
+    ],
+    "hasRelease": [
+     {
+      "version": "1.0.0",
+      "issued": "2026-09-11",
+      "@id": "ark:/88434/mds2-4320/pdr:v/1.0.0",
+      "location": "https://data.nist.gov/od/id/ark:/88434/mds2-4320/pdr:v/1.0.0",
+      "description": "initial release"
+     },
+     {
+      "version": "1.1.0",
+      "issued": "2026-09-11 00:00:00",
+      "@id": "ark:/88434/mds2-4320/pdr:v/1.1.0",
+      "location": "https://data.nist.gov/od/id/ark:/88434/mds2-4320/pdr:v/1.1.0",
+      "description": "data update"
+     },
+     {
+      "version": "1.2.0",
+      "issued": "2026-09-11 00:00:00",
+      "@id": "ark:/88434/mds2-4320/pdr:v/1.2.0",
+      "location": "https://data.nist.gov/od/id/ark:/88434/mds2-4320/pdr:v/1.2.0",
+      "description": "data update"
+     }
+    ]
+   }
+  }
+ ],
+ "PageSize": 2,
+ "Metrics": {
+  "ElapsedTime": 0.01110696792602539
+ }
+}

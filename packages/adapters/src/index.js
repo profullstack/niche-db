@@ -70,9 +70,12 @@ import { newsChannels } from './newschannels.js';
 import { newsfeed } from './newsfeed.js';
 import { nhcCyclones } from './nhc.js';
 import { nhtsaComplaints, nhtsaRatings, nhtsaRecalls } from './nhtsa.js';
+import { nistCsrcDrafts } from './nist-csrc.js';
+import { nistDatasets } from './nist-data.js';
 import { npm } from './npm.js';
 import { ntldChanges, ntldLaunches, ntldTlds, ntldTotals } from './ntlddata.js';
 import { ntsbAccidents } from './ntsb.js';
+import { nvd } from './nvd.js';
 import { nwpsRiverGauges } from './nwps.js';
 import { nws } from './nws.js';
 import { ocdsTenders } from './ocds.js';
@@ -113,6 +116,7 @@ import { statuspage } from './statuspage.js';
 import { steam, steamNews } from './steam.js';
 import { steamCatalog } from './steam-catalog.js';
 import { storefront } from './storefront.js';
+import { surbl } from './surbl.js';
 import { nwsSurfZone } from './surfzone.js';
 import { swpcSpaceWeather } from './swpc.js';
 import { tedNotices } from './ted.js';
@@ -217,6 +221,9 @@ export const ADAPTERS = [
   clinicalTrials,
   arxiv,
   crossref,
+  // NIST: the datasets it publishes and the security drafts it has out for comment.
+  nistDatasets,
+  nistCsrcDrafts,
   blsSeries,
   eurostat,
   warnLayoffs,
@@ -283,6 +290,9 @@ export const ADAPTERS = [
   openserver,
   // Threats: what OpenThreat reporters found in the open, read off each one's own descriptor.
   openthreat,
+  // The NVD's CVE catalogue, and SURBL's lists with watched domains checked against them.
+  nvd,
+  surbl,
   // Webrings: the rings a host runs and who is in them, read off the host's own descriptor.
   openwebring,
   // SaaS: the way in and the way out of a service's plans, read off its own OpenSaaS descriptor.

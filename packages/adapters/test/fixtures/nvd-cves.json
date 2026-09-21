@@ -1,0 +1,321 @@
+{
+ "resultsPerPage": 3,
+ "startIndex": 0,
+ "totalResults": 3,
+ "format": "NVD_CVE",
+ "version": "2.0",
+ "timestamp": "2026-09-21T08:45:45.017",
+ "vulnerabilities": [
+  {
+   "cve": {
+    "id": "CVE-2026-18649",
+    "sourceIdentifier": "secalert@redhat.com",
+    "published": "2026-08-06T08:16:29.780",
+    "lastModified": "2026-09-21T08:16:34.610",
+    "vulnStatus": "Awaiting Analysis",
+    "cveTags": [],
+    "descriptions": [
+     {
+      "lang": "en",
+      "value": "A flaw was found in the GStreamer gst-plugins-good package. The rtph264depay and rtph265depay RTP depayloader elements do not enforce a maximum size limit on the reassembly buffer used during fragmented RTP packet processing. A remote, unauthenticated attacker can send a continuous stream of RTP fragments without ever transmitting an end-of-fragment marker, causing the reassembly buffer to grow without bound until process memory is exhausted. This results in a denial of service through process termination."
+     }
+    ],
+    "metrics": {
+     "cvssMetricV31": [
+      {
+       "source": "secalert@redhat.com",
+       "type": "Secondary",
+       "cvssData": {
+        "version": "3.1",
+        "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+        "baseScore": 7.5,
+        "baseSeverity": "HIGH",
+        "attackVector": "NETWORK",
+        "attackComplexity": "LOW",
+        "privilegesRequired": "NONE",
+        "userInteraction": "NONE",
+        "scope": "UNCHANGED",
+        "confidentialityImpact": "NONE",
+        "integrityImpact": "NONE",
+        "availabilityImpact": "HIGH"
+       },
+       "exploitabilityScore": 3.9,
+       "impactScore": 3.6
+      }
+     ],
+     "ssvcV203": [
+      {
+       "source": "134c704f-9b21-4f2e-91b3-4a467353bcc0",
+       "ssvcData": {
+        "timestamp": "2026-08-06T13:42:01.159055Z",
+        "id": "CVE-2026-18649",
+        "options": [
+         {
+          "exploitation": "none"
+         },
+         {
+          "automatable": "yes"
+         },
+         {
+          "technicalImpact": "partial"
+         }
+        ],
+        "role": "CISA Coordinator",
+        "version": "2.0.3"
+       }
+      }
+     ]
+    },
+    "weaknesses": [
+     {
+      "source": "secalert@redhat.com",
+      "type": "Secondary",
+      "description": [
+       {
+        "lang": "en",
+        "value": "CWE-770"
+       }
+      ]
+     }
+    ],
+    "references": [
+     {
+      "url": "https://0xsemizzz.vercel.app/projects/cve-2026-18649-gstreamer-rtp-dos/",
+      "source": "secalert@redhat.com"
+     },
+     {
+      "url": "https://access.redhat.com/errata/RHSA-2026:53451",
+      "source": "secalert@redhat.com"
+     },
+     {
+      "url": "https://access.redhat.com/errata/RHSA-2026:53452",
+      "source": "secalert@redhat.com"
+     }
+    ]
+   }
+  },
+  {
+   "cve": {
+    "id": "CVE-2026-73433",
+    "sourceIdentifier": "secalert@redhat.com",
+    "published": "2026-08-12T20:17:56.810",
+    "lastModified": "2026-09-21T08:16:37.713",
+    "vulnStatus": "Undergoing Analysis",
+    "cveTags": [],
+    "descriptions": [
+     {
+      "lang": "en",
+      "value": "A flaw was found in GStreamer gst-plugins-good (avidemux). When parsing FUJIFILM metadata in an AVI strd chunk, gst_avi_demux_parse_strd() decrements a remaining-length counter by fixed offsets (98 and 10 bytes) without verifying sufficient data remains. For crafted strd payloads of exactly 106 or 107 bytes, the counter underflows to a very large unsigned value, causing subsequent null-terminated string scanning to read far beyond the allocated heap buffer. Date-format normalization may also write beyond the buffer end. Confirmed impacts include heap out-of-bounds read, out-of-bounds write, heap information disclosure (adjacent data appearing in parsed metadata), and application crash/denial of service. The avidemux element is auto-plugged by playbin, decodebin, and gst-discoverer, so opening or previewing a crafted AVI is sufficient to trigger the issue. Fixed upstream in gst-plugins-good 1.28.6 (GStreamer-SA-2026-0072)."
+     }
+    ],
+    "metrics": {
+     "cvssMetricV31": [
+      {
+       "source": "secalert@redhat.com",
+       "type": "Secondary",
+       "cvssData": {
+        "version": "3.1",
+        "vectorString": "CVSS:3.1/AV:L/AC:L/PR:N/UI:R/S:U/C:L/I:L/A:H",
+        "baseScore": 6.6,
+        "baseSeverity": "MEDIUM",
+        "attackVector": "LOCAL",
+        "attackComplexity": "LOW",
+        "privilegesRequired": "NONE",
+        "userInteraction": "REQUIRED",
+        "scope": "UNCHANGED",
+        "confidentialityImpact": "LOW",
+        "integrityImpact": "LOW",
+        "availabilityImpact": "HIGH"
+       },
+       "exploitabilityScore": 1.8,
+       "impactScore": 4.7
+      }
+     ],
+     "ssvcV203": [
+      {
+       "source": "134c704f-9b21-4f2e-91b3-4a467353bcc0",
+       "ssvcData": {
+        "timestamp": "2026-08-14T21:57:51.529936Z",
+        "id": "CVE-2026-73433",
+        "options": [
+         {
+          "exploitation": "none"
+         },
+         {
+          "automatable": "no"
+         },
+         {
+          "technicalImpact": "partial"
+         }
+        ],
+        "role": "CISA Coordinator",
+        "version": "2.0.3"
+       }
+      }
+     ]
+    },
+    "weaknesses": [
+     {
+      "source": "secalert@redhat.com",
+      "type": "Secondary",
+      "description": [
+       {
+        "lang": "en",
+        "value": "CWE-191"
+       }
+      ]
+     }
+    ],
+    "configurations": [
+     {
+      "nodes": [
+       {
+        "operator": "OR",
+        "negate": false,
+        "cpeMatch": [
+         {
+          "vulnerable": true,
+          "criteria": "cpe:2.3:a:gstreamer:gstreamer:*:*:*:*:*:*:*:*",
+          "versionEndIncluding": "1.28.6",
+          "matchCriteriaId": "7C8FD5A1-A153-4A03-90F4-01598983E76D"
+         },
+         {
+          "vulnerable": true,
+          "criteria": "cpe:2.3:o:redhat:enterprise_linux:7.0:*:*:*:*:*:*:*",
+          "matchCriteriaId": "142AD0DD-4CF3-4D74-9442-459CE3347E3A"
+         },
+         {
+          "vulnerable": true,
+          "criteria": "cpe:2.3:o:redhat:enterprise_linux:8.0:*:*:*:*:*:*:*",
+          "matchCriteriaId": "F4CFF558-3C47-480D-A2F0-BABF26042943"
+         },
+         {
+          "vulnerable": true,
+          "criteria": "cpe:2.3:o:redhat:enterprise_linux:9.0:*:*:*:*:*:*:*",
+          "matchCriteriaId": "7F6FB57C-2BC7-487C-96DD-132683AEB35D"
+         },
+         {
+          "vulnerable": true,
+          "criteria": "cpe:2.3:o:redhat:enterprise_linux:10.0:*:*:*:*:*:*:*",
+          "matchCriteriaId": "D65C2163-CFC2-4ABB-8F4E-CB09CEBD006C"
+         }
+        ]
+       }
+      ]
+     }
+    ],
+    "references": [
+     {
+      "url": "https://access.redhat.com/errata/RHSA-2026:55434",
+      "source": "secalert@redhat.com",
+      "tags": [
+       "Third Party Advisory"
+      ]
+     },
+     {
+      "url": "https://access.redhat.com/errata/RHSA-2026:55436",
+      "source": "secalert@redhat.com",
+      "tags": [
+       "Third Party Advisory"
+      ]
+     },
+     {
+      "url": "https://access.redhat.com/errata/RHSA-2026:56966",
+      "source": "secalert@redhat.com"
+     }
+    ]
+   }
+  },
+  {
+   "cve": {
+    "id": "CVE-2026-99999",
+    "sourceIdentifier": "secalert@redhat.com",
+    "published": "2026-09-19T14:00:00.000",
+    "lastModified": "2026-09-21T07:00:00.000",
+    "vulnStatus": "Analyzed",
+    "cveTags": [],
+    "descriptions": [
+     {
+      "lang": "en",
+      "value": "Example Router before 2.1 allows remote command injection via the ping endpoint. A remote attacker can run commands as root."
+     }
+    ],
+    "metrics": {
+     "cvssMetricV40": [
+      {
+       "source": "nvd@nist.gov",
+       "type": "Primary",
+       "cvssData": {
+        "version": "4.0",
+        "vectorString": "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:H/VI:H/VA:H/SC:N/SI:N/SA:N",
+        "baseScore": 9.3,
+        "baseSeverity": "CRITICAL"
+       }
+      }
+     ],
+     "cvssMetricV31": [
+      {
+       "source": "nvd@nist.gov",
+       "type": "Primary",
+       "cvssData": {
+        "version": "3.1",
+        "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H",
+        "baseScore": 9.8,
+        "baseSeverity": "CRITICAL"
+       }
+      }
+     ]
+    },
+    "weaknesses": [
+     {
+      "source": "nvd@nist.gov",
+      "type": "Primary",
+      "description": [
+       {
+        "lang": "en",
+        "value": "CWE-78"
+       }
+      ]
+     }
+    ],
+    "references": [
+     {
+      "url": "https://0xsemizzz.vercel.app/projects/cve-2026-18649-gstreamer-rtp-dos/",
+      "source": "secalert@redhat.com"
+     },
+     {
+      "url": "https://access.redhat.com/errata/RHSA-2026:53451",
+      "source": "secalert@redhat.com"
+     },
+     {
+      "url": "https://access.redhat.com/errata/RHSA-2026:53452",
+      "source": "secalert@redhat.com"
+     }
+    ],
+    "cisaExploitAdd": "2026-09-20",
+    "cisaActionDue": "2026-10-11",
+    "cisaRequiredAction": "Apply mitigations per vendor instructions.",
+    "cisaVulnerabilityName": "Example Router Command Injection Vulnerability",
+    "configurations": [
+     {
+      "nodes": [
+       {
+        "operator": "OR",
+        "negate": false,
+        "cpeMatch": [
+         {
+          "vulnerable": true,
+          "criteria": "cpe:2.3:o:example:router_firmware:*:*:*:*:*:*:*:*",
+          "versionEndExcluding": "2.1",
+          "matchCriteriaId": "x"
+         }
+        ]
+       }
+      ]
+     }
+    ],
+    "affected": []
+   }
+  }
+ ]
+}

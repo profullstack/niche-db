@@ -133,6 +133,8 @@ export const config = {
     igdbClientId: opt('IGDB_CLIENT_ID'),
     igdbClientSecret: opt('IGDB_CLIENT_SECRET'),
     githubToken: opt('GITHUB_TOKEN'),
+    /** NVD CVE API: keyless at 5 requests per 30 s; a free key (nvd.nist.gov/developers/request-an-api-key) allows 50. */
+    nvdApiKey: opt('NVD_API_KEY'),
     courtlistenerToken: opt('COURTLISTENER_TOKEN'),
     /**
      * Alpaca, for US corporate actions and the market news wire.

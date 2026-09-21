@@ -235,26 +235,32 @@ describe('OpenThreat descriptors: the rows', () => {
 });
 
 describe('the threats collection is registered', () => {
-  test('one adapter, hourly, keyless, seeded on threatcrush.com and enabled', () => {
+  test('the OpenThreat adapter: hourly, keyless, seeded on threatcrush.com and enabled', () => {
     expect(adapterByName('openthreat')).toBe(openthreat);
     expect(openthreat.collection).toBe('threats');
     expect(openthreat.cadenceMinutes).toBe(60);
     expect(openthreat.needsEnv).toBeUndefined();
     expect(openthreat.kinds).toEqual(['reporter', ...KINDS]);
-    expect(ADAPTERS.filter((a) => a.collection === 'threats')).toHaveLength(1);
+    // Beside it, the NVD's CVE catalogue and SURBL's lists (test/nist.test.js, test/surbl.test.js).
+    expect(ADAPTERS.filter((a) => a.collection === 'threats').map((a) => a.name)).toEqual([
+      'openthreat',
+      'nvd',
+      'surbl',
+    ]);
     const [src] = openthreat.defaultSources;
     expect(src.slug).toBe('threatcrush-discovery');
     expect(src.config.urls).toEqual(['https://threatcrush.com']);
     expect(src.enabled).toBe(true);
   });
 
-  test('the collection and its five feeds are seeded', () => {
+  test('the collection and its five OpenThreat feeds are seeded', () => {
     const c = COLLECTIONS.find((c) => c.slug === 'threats');
     expect(c.name).toBe('Threats');
     expect(c.description).toContain('ThreatCrush');
     expect(c.description).toContain('/.well-known/openthreat.json');
     expect(c.description).toContain('Never from a private scan');
-    const feeds = DEFAULT_FEEDS.filter((f) => f.collection === 'threats');
+    // The OpenThreat feeds come first; the NVD and SURBL feeds follow and name their own kinds.
+    const feeds = DEFAULT_FEEDS.filter((f) => f.collection === 'threats').slice(0, 5);
     expect(feeds.map((f) => f.slug)).toEqual([
       'all-threats',
       'critical-and-high-threats',
