@@ -214,10 +214,12 @@ export function registerManage(app) {
     const collection = collections.find((x) => x.slug === collectionSlug) ?? collections[0];
     if (!collection)
       return { collections, collection: null, sources: [], kinds: [], enrichers: [] };
-    const [sources, kinds] = await Promise.all([
+    const [sources, stored] = await Promise.all([
       q.listSources({ collectionId: collection.id }),
-      q.kindsForCollection(collection.id),
+      q.storedCollectionStats(collection.id),
     ]);
+    // The worker's stored kinds; counted live only before its first pass.
+    const kinds = stored ? stored.kinds : await q.kindsForCollection(collection.id);
     return { collections, collection, sources, kinds, enrichers: enrichersFor(collection.slug) };
   }
 

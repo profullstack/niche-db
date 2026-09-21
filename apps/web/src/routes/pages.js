@@ -111,16 +111,21 @@ export function registerPages(app) {
         collection_id: collection.id,
         query: { ...geo, tags: tag ? [tag] : [], kinds: kind ? [kind] : [] },
       };
+      // The counts, kinds and tags are the worker's stored row: counting a
+      // large collection live took ten seconds and held the pool for every
+      // crawler page. Only a collection the worker has not reached yet is
+      // counted here.
+      const stored = await q.storedCollectionStats(collection.id);
       const [stats, sources, feeds, latest, upcoming, kinds, tags] = await Promise.all([
-        q.collectionStats(collection.id),
+        stored ?? q.collectionStats(collection.id),
         q.listSources({ collectionId: collection.id }),
         q.listFeeds({ collectionId: collection.id }),
         q.feedItems(pseudo, { limit: 50, beforeId: before, offset }),
         before || tag || kind || Object.keys(geo).length
           ? []
           : q.upcomingItems({ collectionId: collection.id, days: 14, limit: 8 }),
-        q.kindsForCollection(collection.id),
-        q.topTags(collection.id),
+        stored ? stored.kinds : q.kindsForCollection(collection.id),
+        stored ? stored.tags : q.topTags(collection.id),
       ]);
       return render(
         <CollectionPage

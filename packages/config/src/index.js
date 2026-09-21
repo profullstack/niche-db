@@ -98,6 +98,17 @@ export const config = {
     s2Key: opt('S2_API_KEY'),
   },
 
+  stats: {
+    /** How often the worker looks for collections whose stored counts have gone stale. */
+    tickSeconds: num('STATS_TICK_SECONDS', 300),
+    /** A collection's counts are recomputed once they are this old. */
+    staleSeconds: num('STATS_STALE_SECONDS', 1800),
+    /** A pass takes on no new collection after this long. */
+    budgetMs: num('STATS_BUDGET_MS', 8 * 60_000),
+    /** One collection's counts are abandoned after this long, so a pass never wedges. */
+    statementTimeoutMs: num('STATS_STATEMENT_TIMEOUT_MS', 180_000),
+  },
+
   feeds: {
     /** How often followed feeds are checked for new items. */
     scanSeconds: num('FEED_SCAN_SECONDS', 60),

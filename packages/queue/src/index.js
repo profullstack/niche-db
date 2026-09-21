@@ -24,6 +24,8 @@ export const QUEUES = {
   /** Every couple of minutes: enrich the newest items nobody has enriched. */
   enrich: 'enrich',
   dumps: 'data-dumps',
+  /** Every few minutes: recount the collections whose stored statistics went stale. */
+  stats: 'collection-stats',
 };
 
 const defaults = {
@@ -52,9 +54,15 @@ export const minuteStamp = () => new Date().toISOString().slice(0, 16).replace(/
  * (next_run_at, last_scanned_item_id) decides whether they do anything.
  */
 export async function installSchedules({ log = console.log } = {}) {
-  for (const queue of [queues.tick, queues.scan, queues.enrich, queues.dumps]) {
+  for (const queue of [queues.tick, queues.scan, queues.enrich, queues.dumps, queues.stats]) {
     for (const r of await queue.getRepeatableJobs()) await queue.removeRepeatableByKey(r.key);
   }
+  await queues.stats.add(
+    'stats',
+    {},
+    { repeat: { every: config.stats.tickSeconds * 1000 }, jobId: 'stats' },
+  );
+  await queues.stats.add('stats', {}, { jobId: `stats-boot-${minuteStamp()}`, delay: 10_000 });
   await queues.tick.add(
     'tick',
     {},

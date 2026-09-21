@@ -268,8 +268,13 @@ export async function upsertCollection({ slug, name, description = null, ownerId
   return row;
 }
 
-export async function collectionStats(collectionId) {
-  const [row] = await sql`
+/**
+ * A collection's counts, counted live. Scans the whole collection, so on a
+ * large one this is the worker's to run (core/collection-stats.js); a page
+ * reads `storedCollectionStats` and falls back here only before the first pass.
+ */
+export async function collectionStats(collectionId, { db = sql } = {}) {
+  const [row] = await db`
     select
       (select count(*)::int from sources where collection_id = ${collectionId} and enabled) as sources,
       (select count(*)::int from items where collection_id = ${collectionId}) as items,
@@ -280,17 +285,69 @@ export async function collectionStats(collectionId) {
   return row;
 }
 
-export async function siteStats() {
-  const [row] = await sql`
+const jsonValue = (v) => (typeof v === 'string' ? JSON.parse(v) : (v ?? []));
+
+/** The worker's stored counts for a collection, or null before its first pass. */
+export async function storedCollectionStats(collectionId, { db = sql } = {}) {
+  const [row] = await db`select * from collection_stats where collection_id = ${collectionId}`;
+  if (!row) return null;
+  return { ...row, kinds: jsonValue(row.kinds), tags: jsonValue(row.tags) };
+}
+
+export async function upsertCollectionStats(
+  { collectionId, items, itemsToday, sources, feeds, kinds, tags, ms = 0 },
+  { db = sql } = {},
+) {
+  await db`
+    insert into collection_stats (collection_id, items, items_today, sources, feeds, kinds, tags, computed_at, ms)
+    values (${collectionId}, ${items}, ${itemsToday}, ${sources}, ${feeds},
+            ${JSON.stringify(kinds)}::jsonb, ${JSON.stringify(tags)}::jsonb, now(), ${ms})
+    on conflict (collection_id) do update set
+      items = excluded.items,
+      items_today = excluded.items_today,
+      sources = excluded.sources,
+      feeds = excluded.feeds,
+      kinds = excluded.kinds,
+      tags = excluded.tags,
+      computed_at = now(),
+      ms = excluded.ms
+  `;
+}
+
+/** Every collection with when its counts were last stored, least recent first. */
+export async function collectionsByStatsAge({ db = sql } = {}) {
+  return db`
+    select c.id, c.slug, cs.computed_at
+    from collections c left join collection_stats cs on cs.collection_id = c.id
+    order by cs.computed_at asc nulls first, c.id
+  `;
+}
+
+/**
+ * Site-wide totals. The item counts are summed from the stored per-collection
+ * rows rather than counted across the whole table (twenty million rows, on
+ * every cache miss of the front page); the small tables are counted live.
+ * Before the first pass, on a fresh database, the items are counted live once.
+ */
+export async function siteStats({ db = sql } = {}) {
+  const [row] = await db`
     select
       (select count(*)::int from collections where public) as collections,
       (select count(*)::int from sources where enabled) as sources,
-      (select count(*)::int from items) as items,
-      (select count(*)::int from items where first_seen_at > now() - interval '1 day') as items_today,
+      (select coalesce(sum(items), 0)::int from collection_stats) as items,
+      (select coalesce(sum(items_today), 0)::int from collection_stats) as items_today,
+      (select count(*)::int from collection_stats) as counted,
       (select count(*)::int from feeds where public) as feeds,
       (select count(*)::int from users) as users
   `;
-  return row;
+  const { counted, ...stats } = row;
+  if (Number(counted) > 0) return stats;
+  const [live] = await db`
+    select
+      (select count(*)::int from items) as items,
+      (select count(*)::int from items where first_seen_at > now() - interval '1 day') as items_today
+  `;
+  return { ...stats, ...live };
 }
 
 /* ----------------------------------------------------------------- sources -- */
@@ -876,19 +933,21 @@ export async function searchItems(
   `;
 }
 
-export async function kindsForCollection(collectionId) {
-  return sql`
+/* Both scan the whole collection: the worker runs them into collection_stats
+   (core/collection-stats.js) and a page reads the stored row. */
+export async function kindsForCollection(collectionId, { db = sql } = {}) {
+  return db`
     select kind, count(*)::int as n from items where collection_id = ${collectionId}
-    group by kind order by n desc
+    group by kind order by n desc, kind
   `;
 }
 
-export async function topTags(collectionId, { limit = 40 } = {}) {
-  return sql`
+export async function topTags(collectionId, { limit = 40, db = sql } = {}) {
+  return db`
     select tag, count(*)::int as n
     from items i, unnest(i.tags) as tag
     where i.collection_id = ${collectionId}
-    group by tag order by n desc limit ${limit}
+    group by tag order by n desc, tag limit ${limit}
   `;
 }
 
