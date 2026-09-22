@@ -28,7 +28,13 @@ export const COLLECTIONS = [
     slug: 'filings',
     name: 'Filings',
     description:
-      'SEC EDGAR filings as they land (Form D raises, insider trades, 8-K events), Federal Register documents, and court opinions.',
+      'SEC EDGAR filings as they land (Form D raises, insider trades, 8-K events) and Federal Register documents.',
+  },
+  {
+    slug: 'law',
+    name: 'Courts & case law',
+    description:
+      'Court opinions as they are published, oral argument recordings, federal dockets, judges and their financial disclosures, and the courts themselves, from CourtListener (Free Law Project). The catalogue is walked from the quarterly bulk dumps, public domain; the newest rows arrive by feed within the hour and by the API a few times a day.',
   },
   {
     slug: 'music',
@@ -363,6 +369,71 @@ export const DEFAULT_FEEDS = [
     slug: 'federal-register',
     name: 'Federal Register: newest documents',
     query: { sources: ['federal-register'] },
+  },
+  {
+    collection: 'law',
+    slug: 'court-opinions',
+    name: 'Court opinions',
+    description:
+      'Every opinion, as it is published and from the catalogue: the case name, the court, the date filed and the syllabus where there is one.',
+    query: { kinds: ['opinion'] },
+  },
+  {
+    collection: 'law',
+    slug: 'scotus-opinions',
+    name: 'Supreme Court opinions',
+    description:
+      'Opinions of the Supreme Court of the United States, from its own feed as they are published and from the catalogue for every case in the Supreme Court Database.',
+    // A feed query ANDs its clauses, so this is the tag alone: the SCOTUS
+    // feed source tags every row with its court id, and the catalogue tags a
+    // cluster `scotus` when the Supreme Court Database knows it.
+    query: { kinds: ['opinion'], tags: ['scotus'] },
+  },
+  {
+    collection: 'law',
+    slug: 'precedential-opinions',
+    name: 'Precedential opinions',
+    description: 'Opinions marked precedential (published), which are the ones that bind.',
+    query: { kinds: ['opinion'], tags: ['precedential'] },
+  },
+  {
+    collection: 'law',
+    slug: 'oral-arguments',
+    name: 'Oral arguments',
+    description: 'Oral argument recordings, each with its MP3 and duration.',
+    query: { kinds: ['oral-argument'] },
+  },
+  {
+    collection: 'law',
+    slug: 'federal-dockets',
+    name: 'Federal dockets',
+    description:
+      'Dockets from PACER as CourtListener sees them: case name, docket number, court, nature of suit, cause, dates filed and terminated.',
+    query: { kinds: ['docket'] },
+  },
+  {
+    collection: 'law',
+    slug: 'federal-judges',
+    name: 'Judges',
+    description:
+      'Judges and other people in the CourtListener people database, with their positions.',
+    query: { kinds: ['judge'] },
+  },
+  {
+    collection: 'law',
+    slug: 'judicial-financial-disclosures',
+    name: 'Judicial financial disclosures',
+    description:
+      'Financial disclosure reports federal judges file, one row per report, with the PDF.',
+    query: { kinds: ['financial-disclosure'] },
+  },
+  {
+    collection: 'law',
+    slug: 'courts',
+    name: 'Courts',
+    description:
+      'Every court CourtListener knows, with its jurisdiction, citation string and dates.',
+    query: { kinds: ['court'] },
   },
   {
     collection: 'music',

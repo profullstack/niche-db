@@ -13,13 +13,14 @@ The first deployment is [nichedb.dev](https://nichedb.dev). Run your own on anyt
 | **item** | One row a source produced. Title, URL, when (with `time_known` and `precision`), tags, and the adapter's payload in `data`. |
 | **feed** | A saved query over a collection. Has a page, RSS and JSON Feed renderings, an API endpoint, and followers who are told when it changes by push, email or signed webhook. |
 
-Adapters are one file each in `packages/adapters/src`. One hundred and thirty-eight ship today across forty-two collections:
+Adapters are one file each in `packages/adapters/src`. One hundred and sixty-one ship today across forty-six collections:
 
 | Collection | Adapters | Key needed |
 | --- | --- | --- |
 | games | `steam`, `steam-news`, `igdb`, `igdb-catalog` (every game IGDB knows, walked by id then kept current from updated_at), `wikidata-games`, `steam-catalog` | IGDB only (Twitch client) |
 | packages | `npm`, `pypi`, `crates`, `go-modules`, `huggingface`, `github-releases` (runtimes and frameworks, and NIST's own software under usnistgov as `github-releases-nist`) | no (GitHub token optional) |
-| filings | `edgar`, `federal-register`, `courtlistener` | CourtListener only |
+| filings | `edgar`, `federal-register` | no |
+| law | `courtlistener` (the newest opinions from the Atom feed, all courts or one), `courtlistener-oral-arguments` (the podcast, with the MP3), `courtlistener-api` (dockets, judges and financial disclosures, one request a run inside the free tier's 125 a day), `courtlistener-catalog` (every court, judge, disclosure, oral argument and opinion cluster from the quarterly bulk dumps; dockets and the FJC database opt-in) | `COURTLISTENER_TOKEN` for the API sources only; the feeds and the dumps are keyless and public domain |
 | music | `musicbrainz`, `musicbrainz-catalog`, `discogs-catalog` | no |
 | books | `openlibrary`, `gutenberg-catalog`, `librivox-catalog`, `openlibrary-catalog` | no |
 | tabletop | `scryfall-sets`, `scryfall-cards` | no |
@@ -328,7 +329,7 @@ The rules:
 - **`return`** the final `{ cursor, note, nextInMinutes }`. `nextInMinutes: 1` keeps an unfinished walk moving between cadences; `done: true` in the cursor lets the next run short-circuit when the upstream file has not changed.
 - **`http.download(url, path, { timeoutMs, headers, onProgress })`** streams to disk and resumes with `Range` from whatever is already there (append on 206, restart on 200, 416 means whole). It returns `{ path, bytes, complete }`; on `complete: false`, return and call it again next run. The user agent is sent; Podcast Index refuses requests without one. Discogs ignores `Range` and rate-limits hard: expect a restart and keep requests to a handful an hour.
 - **`dumpDir(name)`** is where the file goes: under `INGEST_DATA_DIR` when set (mount a volume there), else the OS temp dir, which a redeploy wipes. The cursor is the walk; the directory is a cache.
-- **Readers**: `gzipLines(path, { skip })`, `xzLines(path, { member, skip })` (MusicBrainz: `member: 'mbdump/artist'`, needs `xz` on the host), `tsvJsonLines(path, { skip })` for Open Library's five-column rows (each record carries its `lineNo`), `lineOffsetReader(path, { offset })` for a plain file you want to seek in, `untar(path, dir)` and `sqliteRows(dbPath, sql)` for Podcast Index. Every reader yields every line, so `skip + lines read` is the file position. Skipping into a compressed file re-inflates from the top (seconds per gigabyte for gzip, slower for xz); a plain-file `offset` is a seek.
+- **Readers**: `gzipLines(path, { skip })`, `xzLines(path, { member, skip })` (MusicBrainz: `member: 'mbdump/artist'`, needs `xz` on the host), `tsvJsonLines(path, { skip })` for Open Library's five-column rows (each record carries its `lineNo`), `lineOffsetReader(path, { offset })` for a plain file you want to seek in, `untar(path, dir)` and `sqliteRows(dbPath, sql)` for Podcast Index, and `bzip2CsvRows(path, { skip, escape })` for CourtListener's bzip2 CSV tables (pure JS decoder, no bzip2 binary; records span lines, an unquoted empty field is `null` and `""` is the empty string; `csvRecords(chunks, opts)` underneath reads RFC 4180 or COPY's `ESCAPE '\'`). Every reader yields every line, so `skip + lines read` is the file position. Skipping into a compressed file re-inflates from the top (seconds per gigabyte for gzip, slower for xz, slower still for bzip2 at about 10 MB/s); a plain-file `offset` is a seek. A bzip2 file cut short ends the iteration cleanly after its last whole record and reports through `onTruncated`; a corrupt one throws.
 
 ## License
 
