@@ -103,6 +103,7 @@ export const TOOLS = [
         offset,
         limit: Math.min(Number(limit) || 30, 200),
         beforeId: before_id ?? null,
+        timeoutMs: config.web.queryTimeoutMs,
       });
       return {
         feed: feedOut(f, site()),

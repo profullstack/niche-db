@@ -120,7 +120,12 @@ export function registerPages(app) {
         stored ?? q.collectionStats(collection.id),
         q.listSources({ collectionId: collection.id }),
         q.listFeeds({ collectionId: collection.id }),
-        q.feedItems(pseudo, { limit: 50, beforeId: before, offset }),
+        q.feedItems(pseudo, {
+          limit: 50,
+          beforeId: before,
+          offset,
+          timeoutMs: config.web.queryTimeoutMs,
+        }),
         before || tag || kind || Object.keys(geo).length
           ? []
           : q.upcomingItems({ collectionId: collection.id, days: 14, limit: 8 }),
@@ -173,7 +178,13 @@ export function registerPages(app) {
     const items =
       feed.id === 0
         ? await q.recentItems({ ...geo, limit: 100, beforeId: before, offset })
-        : await q.feedItems(feed, { ...geo, limit: m ? 100 : 50, beforeId: before, offset });
+        : await q.feedItems(feed, {
+            ...geo,
+            limit: m ? 100 : 50,
+            beforeId: before,
+            offset,
+            timeoutMs: config.web.queryTimeoutMs,
+          });
 
     if (m) {
       // A free feed carries one sponsored item at the top; Pro and paid
@@ -269,13 +280,22 @@ export function registerPages(app) {
     const collectionSlug = c.req.query('collection') || null;
     const collections = await q.listCollections();
     const col = collectionSlug ? collections.find((x) => x.slug === collectionSlug) : null;
-    const results = term
-      ? await q.searchItems(term, {
+    let results = [];
+    let timedOut = false;
+    if (term) {
+      try {
+        results = await q.searchItems(term, {
           ...geoQueryFields(c.req.query()),
           collectionId: col?.id ?? null,
           limit: 50,
-        })
-      : [];
+          timeoutMs: config.web.queryTimeoutMs,
+        });
+      } catch (err) {
+        // The page still renders, with the form and a word on what to change.
+        if (!q.isStatementTimeout(err)) throw err;
+        timedOut = true;
+      }
+    }
     return c.html(
       await render(
         <SearchPage
@@ -284,6 +304,7 @@ export function registerPages(app) {
           results={results}
           collections={collections}
           collection={collectionSlug}
+          timedOut={timedOut}
         />,
       ),
     );

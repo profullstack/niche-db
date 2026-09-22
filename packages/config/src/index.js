@@ -421,6 +421,16 @@ export const config = {
     enabled: bool('CACHE_ENABLED', true),
   },
 
+  web: {
+    /**
+     * The longest a page or API read may hold a database connection. A search
+     * the planner gets wrong is cancelled here and the route says so, instead
+     * of one crawler hit holding the pool for the eighteen minutes it took on
+     * 2026-09-22.
+     */
+    queryTimeoutMs: num('WEB_QUERY_TIMEOUT_MS', 20_000),
+  },
+
   // Verification tokens for the partner program are HMACs under this. It has
   // no default: a guessable token would let anyone claim anyone's domain and
   // be paid for their work, and a weak fallback is how that ships by accident.
