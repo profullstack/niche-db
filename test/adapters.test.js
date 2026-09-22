@@ -42,6 +42,7 @@ describe('registry', () => {
         'games',
         'packages',
         'filings',
+        'law',
         'music',
         'books',
         'tabletop',
