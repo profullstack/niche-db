@@ -83,6 +83,7 @@ describe('registry', () => {
         'sites',
         'coupons',
         'dht',
+        'algorithms',
       ]).toContain(a.collection);
     }
     expect(adapterByName('steam').title).toContain('Steam');

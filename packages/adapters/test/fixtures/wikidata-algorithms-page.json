@@ -1,0 +1,115 @@
+{
+ "head": {
+  "vars": [
+   "item",
+   "label",
+   "description",
+   "classes",
+   "classIds",
+   "wikipedia",
+   "since",
+   "discoverers",
+   "worstTime",
+   "averageTime",
+   "bestTime",
+   "worstSpace",
+   "image"
+  ]
+ },
+ "results": {
+  "bindings": [
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q1001112"
+    },
+    "label": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Buddy memory allocation"
+    },
+    "description": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "memory allocation algorithm"
+    },
+    "classes": {
+     "type": "literal",
+     "value": "algorithm"
+    },
+    "classIds": {
+     "type": "literal",
+     "value": "Q8366"
+    },
+    "wikipedia": {
+     "type": "uri",
+     "value": "https://en.wikipedia.org/wiki/Buddy_memory_allocation"
+    },
+    "discoverers": {
+     "type": "literal",
+     "value": "Harry Markowitz"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q1004415"
+    },
+    "label": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "run-time system"
+    },
+    "description": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "system that provides behavior needed by running code; primarily implements portions of an execution model"
+    },
+    "classes": {
+     "type": "literal",
+     "value": "abstraction layer"
+    },
+    "classIds": {
+     "type": "literal",
+     "value": "Q1200992"
+    },
+    "wikipedia": {
+     "type": "uri",
+     "value": "https://en.wikipedia.org/wiki/Runtime_system"
+    },
+    "discoverers": {
+     "type": "literal",
+     "value": ""
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q100452164"
+    },
+    "label": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "InChIKey match"
+    },
+    "description": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "heuristic based on a exact string match of the InChIKey"
+    },
+    "classes": {
+     "type": "literal",
+     "value": "heuristic"
+    },
+    "classIds": {
+     "type": "literal",
+     "value": "Q201413"
+    },
+    "discoverers": {
+     "type": "literal",
+     "value": ""
+    }
+   }
+  ]
+ }
+}
