@@ -16,11 +16,12 @@ process.env.DATABASE_URL ??= 'postgres://test:test@localhost:5432/test';
 process.env.SITE_URL ??= 'https://nichedb.test';
 
 const calls = [];
-const state = { source: null, dedupes: false };
+const state = { source: null, dedupes: false, errorsBefore: 0 };
 const realQueries = await import('../packages/db/src/queries.js');
 mock.module('../packages/db/src/queries.js', () => ({
   ...realQueries,
   getSourceById: async () => state.source,
+  consecutiveErrors: async () => state.errorsBefore,
   startRun: async () => 7,
   finishRun: async (args) => {
     calls.push(['finishRun', args]);
@@ -215,5 +216,69 @@ describe('the array form', () => {
     expect(finish.note).toBe('5 things');
     expect(finish.seen).toBe(5);
     expect(out).toEqual({ seen: 5, added: 5, updated: 0 });
+  });
+});
+
+/*
+ * `startRun` pushes `next_run_at` a full cadence out; a failed run used to
+ * leave it there, so one bad answer from an upstream parked a daily source for
+ * a day and a monthly dump reader for a month. Now a failure asks for a short
+ * retry that doubles per consecutive failure, up to the cadence.
+ */
+describe('a failed run', () => {
+  const failing = (cadence, errorsBefore) => {
+    useAdapter({
+      pull: async () => {
+        throw new Error('upstream 429');
+      },
+    });
+    state.source.cadence_minutes = cadence;
+    state.errorsBefore = errorsBefore;
+  };
+  const minutesOut = (finish, from) => Math.round((finish.nextRunAt.getTime() - from) / 60_000);
+
+  test('is retried in fifteen minutes the first time, not a cadence later', async () => {
+    failing(1440, 0);
+    const from = Date.now();
+    await runSource(42, { log: () => {} });
+    const [finish] = only('finishRun');
+    expect(finish.status).toBe('error');
+    expect(finish.error).toBe('upstream 429');
+    expect(minutesOut(finish, from)).toBe(15);
+  });
+
+  test('doubles per consecutive failure', async () => {
+    for (const [before, minutes] of [
+      [1, 30],
+      [2, 60],
+      [3, 120],
+    ]) {
+      failing(1440, before);
+      const from = Date.now();
+      await runSource(42, { log: () => {} });
+      expect(minutesOut(only('finishRun')[0], from)).toBe(minutes);
+    }
+  });
+
+  test('never waits longer than the cadence, and never overflows', async () => {
+    failing(60, 5);
+    let from = Date.now();
+    await runSource(42, { log: () => {} });
+    expect(minutesOut(only('finishRun')[0], from)).toBe(60);
+
+    failing(43200, 40);
+    from = Date.now();
+    await runSource(42, { log: () => {} });
+    expect(minutesOut(only('finishRun')[0], from)).toBe(43200);
+  });
+
+  test('a successful run does not carry a retry', async () => {
+    useAdapter({ pull: async () => ({ items: batch(1, 2) }) });
+    state.source.cadence_minutes = 1440;
+    state.errorsBefore = 3;
+    await runSource(42, { log: () => {} });
+    const [finish] = only('finishRun');
+    expect(finish.status).toBe('ok');
+    expect(finish.nextRunAt).toBeNull();
   });
 });

@@ -128,22 +128,44 @@ export function makeHttp({ userAgent, log = () => {} }) {
     download,
     async json(url, opts) {
       const res = await request(url, opts);
-      if (!res.ok) throw new Error(`${res.status} from ${url.slice(0, 120)}`);
+      if (!res.ok) throw await httpError(res, url);
       return res.json();
     },
     async text(url, opts) {
       const res = await request(url, opts);
-      if (!res.ok) throw new Error(`${res.status} from ${url.slice(0, 120)}`);
+      if (!res.ok) throw await httpError(res, url);
       return res.text();
     },
     /** Same but null on a miss, for lookups where absence is normal. */
     async jsonOrNull(url, opts) {
       const res = await request(url, opts);
       if (res.status === 404) return null;
-      if (!res.ok) throw new Error(`${res.status} from ${url.slice(0, 120)}`);
+      if (!res.ok) throw await httpError(res, url);
       return res.json();
     },
   };
+}
+
+/**
+ * The error for a non-2xx answer: status, the whole query, and the start of
+ * the body. The body is what says why -- the CFPB search answered a plain
+ * `400` for ten days over one state code it does not know, and the message
+ * as it was (status plus a URL cut at 120 characters, before the query that
+ * mattered) gave nothing to go on. A body that is HTML (an edge's block page)
+ * is collapsed to one line so the run's error stays readable.
+ */
+async function httpError(res, url) {
+  let detail = '';
+  try {
+    const text = (await res.text())
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    if (text) detail = `: ${text.slice(0, 200)}`;
+  } catch {
+    // An unreadable body is no worse than the message without it.
+  }
+  return new Error(`${res.status} from ${String(url).slice(0, 400)}${detail}`);
 }
 
 /** The total out of `Content-Range: bytes 0-99/1000` (or the `bytes` star form of a 416), or null. */

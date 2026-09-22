@@ -76,8 +76,11 @@ export const launchLibrary = defineAdapter({
   configFields: [],
   defaultSources: [{ slug: 'launches-upcoming', name: 'Rocket launches: upcoming' }],
   async pull({ http, log }) {
+    // A detailed page of a hundred launches is several megabytes and the free
+    // tier answers it slowly; the default 30 s was timing out an hourly run.
     const res = await http.json(
       'https://ll.thespacedevs.com/2.3.0/launches/upcoming/?limit=100&mode=detailed',
+      { timeoutMs: 120_000 },
     );
     const items = (res.results ?? []).map(toItem);
     log(`${items.length} launches of ${res.count ?? '?'}`);

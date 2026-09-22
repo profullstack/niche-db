@@ -264,3 +264,68 @@ describe('FDIC', () => {
     expect(changeItem({ data: { TRANSNUM: 1, INSTNAME: 'A Bank' } })).toBeNull();
   });
 });
+
+/*
+ * A day over the ten-thousand-row window is re-read state by state. The
+ * search answered 400 for FM, MH and PW, and one such answer failed the whole
+ * day -- every hourly run for ten days, since every day is over the window.
+ */
+describe('reading a day state by state', () => {
+  const cfpb = adapterByName('cfpb-complaints');
+  const search = 'https://www.consumerfinance.gov/data-research/consumer-complaints/search/api/v1/';
+
+  const walk = async ({ reject = () => false } = {}) => {
+    const asked = [];
+    const logged = [];
+    const http = {
+      json: async (url) => {
+        const u = new URL(url);
+        expect(`${u.origin}${u.pathname}`).toBe(search);
+        const state = u.searchParams.get('state');
+        asked.push(state);
+        if (reject(state)) throw new Error(`400 from ${url}: {"state":["not a valid choice"]}`);
+        if (!state) {
+          return {
+            hits: { total: { value: 28_982 }, hits: [hit({ complaint_id: 'top-1', state: 'IN' })] },
+          };
+        }
+        return {
+          hits: { total: { value: 1 }, hits: [hit({ complaint_id: `in-${state}`, state })] },
+        };
+      },
+    };
+    const out = await cfpb.pull({
+      config: { ...cfpb.defaults, maxDays: 1 },
+      cursor: { since: '2026-09-08T00:00:00.000Z' },
+      http,
+      log: (m) => logged.push(m),
+      deadline: Date.now() + 60_000,
+    });
+    return { out, asked, logged };
+  };
+
+  test('asks once unsplit, then once per state, and never for a state the search rejects', async () => {
+    const { out, asked } = await walk();
+    expect(asked[0]).toBeNull();
+    const states = asked.slice(1);
+    expect(states.length).toBeGreaterThan(50);
+    expect(states).toContain('CA');
+    expect(states).toContain('AA');
+    expect(states).not.toContain('FM');
+    expect(states).not.toContain('MH');
+    expect(states).not.toContain('PW');
+    expect(out.items.length).toBe(1 + states.length);
+  });
+
+  test('one state the search will not answer for costs that state, not the day', async () => {
+    const { out, asked, logged } = await walk({ reject: (s) => s === 'TX' });
+    expect(asked).toContain('TX');
+    expect(out.items.some((i) => i.externalId.includes('in-TX'))).toBe(false);
+    expect(out.items.length).toBe(asked.length - 1);
+    expect(logged.some((m) => /2026-09-\d\d TX: 400 from/.test(m))).toBe(true);
+  });
+
+  test('every state failing is still a failed day', async () => {
+    await expect(walk({ reject: (s) => s !== null })).rejects.toThrow(/400 from/);
+  });
+});

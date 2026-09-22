@@ -221,6 +221,9 @@ export const igdbCatalog = defineAdapter({
   docs: 'https://api-docs.igdb.com/',
   kinds: ['game'],
   cadenceMinutes: 720,
+  // Seeded paused until the deployment has the Twitch app, like `igdb`; without
+  // this the catalogue was seeded enabled and failed every run on the missing key.
+  needsEnv: ['igdbClientId', 'igdbClientSecret'],
   configFields: [
     {
       key: 'requestsPerRun',

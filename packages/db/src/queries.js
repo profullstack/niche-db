@@ -572,6 +572,65 @@ export async function saveCursor(sourceId, cursor) {
   `;
 }
 
+/**
+ * Bring forward every enabled source parked on an error further out than the
+ * first retry. Before a failed run asked for a retry, one bad answer left the
+ * source where `startRun` had pushed it, a whole cadence out; this is the
+ * repair for the rows written under that rule, and it runs at boot, which is
+ * when the fix that made them retry arrives. Returns the slugs moved.
+ */
+export async function rescheduleFailedSources({ retryMinutes = 15 } = {}) {
+  const rows = await sql`
+    update sources set next_run_at = now() + make_interval(mins => ${retryMinutes}),
+      updated_at = now()
+    where enabled
+      and last_error is not null
+      and next_run_at > now() + make_interval(mins => ${retryMinutes})
+    returning slug
+  `;
+  return rows.map((r) => r.slug);
+}
+
+/**
+ * Pause the enabled sources of these adapters that have never once succeeded.
+ * For an adapter whose key the deployment does not have: a source that has
+ * only ever failed on the missing key is not anyone's choice to keep running,
+ * whatever its run count says. One that has succeeded is left alone, since
+ * the key may have been removed on purpose. Returns the slugs paused.
+ */
+export async function pauseNeverSucceeded(adapterNames) {
+  const names = [...new Set((adapterNames ?? []).map(String))];
+  if (names.length === 0) return [];
+  const rows = await sql`
+    update sources set enabled = false, updated_at = now()
+    where enabled
+      and last_ok_at is null
+      and adapter = any(${pgArray(names)}::text[])
+    returning slug
+  `;
+  return rows.map((r) => r.slug);
+}
+
+/**
+ * How many of this source's most recent finished runs, counting back from the
+ * newest, are errors in a row. The run in progress (status `running`) is not
+ * finished and is skipped, so a caller deciding when to retry the run it is
+ * about to record adds one for it.
+ */
+export async function consecutiveErrors(sourceId, { limit = 12 } = {}) {
+  const rows = await sql`
+    select status from runs
+    where source_id = ${sourceId} and status <> 'running'
+    order by started_at desc, id desc limit ${limit}
+  `;
+  let n = 0;
+  for (const r of rows) {
+    if (r.status !== 'error') break;
+    n += 1;
+  }
+  return n;
+}
+
 export async function listRuns(sourceId, { limit = 20 } = {}) {
   return sql`
     select * from runs where source_id = ${sourceId} order by started_at desc limit ${limit}
