@@ -110,6 +110,39 @@ describe('a feed page narrowed by a word or a tag', () => {
   });
 });
 
+describe('a collection page and the items API', () => {
+  test('the newest rows of one collection, both directions, with before and a kind', async () => {
+    const all = ids(await q.recentItems({ collectionId: music, db: sql, timeoutMs: 5000 }));
+    expect(all.length).toBe(4);
+    expect([...all].sort((a, b) => b - a)).toEqual(all);
+    const oldest = ids(await q.recentItems({ collectionId: music, order: 'asc', db: sql }));
+    expect(oldest).toEqual([...all].reverse());
+    expect(ids(await q.recentItems({ collectionId: music, beforeId: all[0], db: sql }))).toEqual(
+      all.slice(1),
+    );
+    expect(ids(await q.recentItems({ collectionId: books, kind: 'release', db: sql })).length).toBe(
+      1,
+    );
+    expect(ids(await q.recentItems({ collectionId: books, kind: 'book', db: sql }))).toEqual([]);
+  });
+
+  test('a walk from a cursor and the date sorts keep their shape', async () => {
+    const all = ids(await q.recentItems({ collectionId: music, db: sql }));
+    const walked = ids(await q.recentItems({ collectionId: music, afterId: all[3], db: sql }));
+    expect(walked.length).toBe(3);
+    expect(walked).not.toContain(all[3]);
+    const byUpdated = await q.recentItems({ collectionId: music, sort: 'updated', db: sql });
+    expect(byUpdated.length).toBe(4);
+  });
+
+  test('a feed narrowed to sources resolves them without a join', async () => {
+    const feed = { collection_id: music, query: { sources: ['test-music'] } };
+    expect(ids(await q.feedItems(feed, { db: sql })).length).toBe(4);
+    const none = { collection_id: music, query: { sources: ['no-such-source'] } };
+    expect(await q.feedItems(none, { db: sql })).toEqual([]);
+  });
+});
+
 describe('search', () => {
   test('ranks the gathered matches, everywhere or in one collection', async () => {
     const everywhere = ids(await q.searchItems('love', { db: sql, timeoutMs: 5000 }));

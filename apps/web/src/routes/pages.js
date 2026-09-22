@@ -177,7 +177,13 @@ export function registerPages(app) {
     const before = Number(c.req.query('before')) || null;
     const items =
       feed.id === 0
-        ? await q.recentItems({ ...geo, limit: 100, beforeId: before, offset })
+        ? await q.recentItems({
+            ...geo,
+            limit: 100,
+            beforeId: before,
+            offset,
+            timeoutMs: config.web.queryTimeoutMs,
+          })
         : await q.feedItems(feed, {
             ...geo,
             limit: m ? 100 : 50,

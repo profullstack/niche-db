@@ -132,6 +132,7 @@ export const TOOLS = [
       const src = source ? await q.getSource(source) : null;
       if (source && !src) throw toolError(`No source named ${source}`);
       const items = await q.recentItems({
+        timeoutMs: config.web.queryTimeoutMs,
         offset,
         ...geoQueryFields(location),
         collectionId: col?.id ?? null,
