@@ -10,9 +10,13 @@ import { matchFixtures } from './matchups.js';
  * test each row until 50 pass. It picks the walk whenever it believes the word
  * is common, and when the word is common everywhere except in this collection
  * that walk reads all twenty million rows: eighteen minutes on 2026-09-22, with
- * two of them holding the pool while the site timed out. A materialised CTE
- * that gathers at most this many matches first cannot be planned as a walk,
- * so a page costs one index probe and one sort, whatever the word.
+ * two of them holding the pool while the site timed out. The same walk is
+ * chosen with no word at all as soon as the statement needs a heap column or
+ * a join (an id-only probe stays on the collection index), which the music
+ * page hit once the Open Library dump had put millions of books at the top of
+ * the id range. A materialised CTE that gathers at most this many ids first,
+ * from the items table alone, cannot be planned as a walk, so a page costs one
+ * index probe and one sort, whatever the word and whatever was inserted last.
  */
 export const MATCH_CAP = 2000;
 
@@ -888,10 +892,10 @@ export async function recentItems({
   afterId = null,
   limit = 50,
   offset = 0,
+  timeoutMs = 0,
   db = sql,
   ...location
 } = {}) {
-  const geo = geoSql(db, { ...location, sort });
   const byDistance = sort === 'distance';
   if (byDistance && (beforeId !== null || afterId !== null))
     throw new GeoQueryError('sort=distance uses offset, not before/after');
@@ -899,10 +903,14 @@ export async function recentItems({
   const byPublished = sort === 'published';
   const byUpdated = sort === 'updated';
   const asc = order === 'asc';
-  return db`
-    select ${itemSelection(db)}, ${geo.distance} as distance_m
-    from items i join sources s on s.id = i.source_id join collections c on c.id = i.collection_id
-    where (${collectionId === null} or i.collection_id = ${collectionId})
+  // An id-ordered page gathers its ids first, for the reason feedItems does;
+  // a walk from a cursor and the date orderings have indexes of their own.
+  const gathered = !byDistance && !byPublished && !byUpdated && afterId === null;
+  const rows = Math.min(Math.max(1, limit), 500);
+  return bounded(db, timeoutMs, (d) => {
+    const geo = geoSql(d, { ...location, sort });
+    const where = d`
+      (${collectionId === null} or i.collection_id = ${collectionId})
       and (${sourceId === null} or i.source_id = ${sourceId})
       and (${kind === null} or i.kind = ${kind})
       and (${wantedTags.length === 0} or i.tags @> ${pgArray(wantedTags)}::text[])
@@ -911,18 +919,37 @@ export async function recentItems({
       and (${since === null} or i.updated_at >= ${since})
       and (${beforeId === null} or i.id < ${beforeId ?? 0})
       and (${afterId === null} or i.id > ${afterId ?? 0})
-      and ${geo.where}
-    order by
-      case when ${byDistance} then ${geo.distance} end asc,
-      case when ${byPublished && asc} then i.published_at end asc nulls last,
-      case when ${byPublished && !asc} then i.published_at end desc nulls last,
-      case when ${byUpdated && asc} then i.updated_at end asc,
-      case when ${byUpdated && !asc} then i.updated_at end desc,
-      case when ${!byDistance && !byPublished && !byUpdated && asc} then i.id end asc,
-      i.id desc
-    limit ${Math.min(Math.max(1, limit), 500)}
-    offset ${byDistance ? Math.min(Math.max(0, Math.floor(Number(offset) || 0)), 10000) : 0}
-  `;
+      and ${geo.where}`;
+    if (gathered)
+      return d`
+        with m as materialized (
+          select i.id from items i
+          where ${where}
+          order by case when ${asc} then i.id end asc, i.id desc
+          limit ${MATCH_CAP}
+        )
+        select ${itemSelection(d)}, ${geo.distance} as distance_m
+        from m join items i on i.id = m.id
+          join sources s on s.id = i.source_id join collections c on c.id = i.collection_id
+        order by case when ${asc} then i.id end asc, i.id desc
+        limit ${rows}
+      `;
+    return d`
+      select ${itemSelection(d)}, ${geo.distance} as distance_m
+      from items i join sources s on s.id = i.source_id join collections c on c.id = i.collection_id
+      where ${where}
+      order by
+        case when ${byDistance} then ${geo.distance} end asc,
+        case when ${byPublished && asc} then i.published_at end asc nulls last,
+        case when ${byPublished && !asc} then i.published_at end desc nulls last,
+        case when ${byUpdated && asc} then i.updated_at end asc,
+        case when ${byUpdated && !asc} then i.updated_at end desc,
+        case when ${!byDistance && !byPublished && !byUpdated && asc} then i.id end asc,
+        i.id desc
+      limit ${rows}
+      offset ${byDistance ? Math.min(Math.max(0, Math.floor(Number(offset) || 0)), 10000) : 0}
+    `;
+  });
 }
 
 /**
@@ -1201,8 +1228,11 @@ export async function feedItems(
   const byDistance = afterId === null && (location.sort ?? fq.sort) === 'distance';
   if (byDistance && beforeId !== null)
     throw new GeoQueryError('sort=distance uses offset, not before');
-  const gathered =
-    (fq.q !== '' || fq.tags.length > 0) && afterId === null && !byDistance && !fq.upcoming;
+  // Every page gathers: a join or a heap column in the statement is enough for
+  // the planner to prefer the primary-key walk (see MATCH_CAP), even with no
+  // word at all, once a dump has filled the top of the id range with rows of
+  // another collection. The id-only probe below stays on the collection index.
+  const gathered = afterId === null && !byDistance && !fq.upcoming;
   const rows = Math.min(Math.max(1, limit), 500);
   return bounded(db, timeoutMs, (d) => {
     const savedGeo = geoSql(d, fq);
@@ -1211,7 +1241,8 @@ export async function feedItems(
     const geo = requestGeo.geo && !requestGeo.geo.bbox ? requestGeo : savedGeo;
     const where = d`
       i.collection_id = ${feed.collection_id}
-      and (${fq.sources.length === 0} or s.slug = any(${pgArray(fq.sources)}::text[]))
+      and (${fq.sources.length === 0}
+           or i.source_id in (select id from sources where slug = any(${pgArray(fq.sources)}::text[])))
       and (${fq.kinds.length === 0} or i.kind = any(${pgArray(fq.kinds)}::text[]))
       and (${fq.tags.length === 0} or i.tags && ${pgArray(fq.tags)}::text[])
       and (${fq.q === ''} or i.search @@ websearch_to_tsquery('simple', ${fq.q})
@@ -1223,7 +1254,7 @@ export async function feedItems(
     if (gathered)
       return d`
         with m as materialized (
-          select i.id from items i join sources s on s.id = i.source_id
+          select i.id from items i
           where ${where}
           order by i.id desc
           limit ${MATCH_CAP}

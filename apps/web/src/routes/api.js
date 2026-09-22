@@ -334,6 +334,7 @@ export function registerApi(app) {
       : 'id';
     const items = await q.recentItems({
       ...geoQueryFields(c.req.query()),
+      timeoutMs: config.web.queryTimeoutMs,
       collectionId: col?.id ?? null,
       sourceId: src?.id ?? null,
       kind: c.req.query('kind') ?? null,
