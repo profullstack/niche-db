@@ -13,7 +13,7 @@ The first deployment is [nichedb.dev](https://nichedb.dev). Run your own on anyt
 | **item** | One row a source produced. Title, URL, when (with `time_known` and `precision`), tags, and the adapter's payload in `data`. |
 | **feed** | A saved query over a collection. Has a page, RSS and JSON Feed renderings, an API endpoint, and followers who are told when it changes by push, email or signed webhook. |
 
-Adapters are one file each in `packages/adapters/src`. One hundred and thirty-two ship today across forty-one collections:
+Adapters are one file each in `packages/adapters/src`. One hundred and thirty-eight ship today across forty-two collections:
 
 | Collection | Adapters | Key needed |
 | --- | --- | --- |
@@ -30,7 +30,7 @@ Adapters are one file each in `packages/adapters/src`. One hundred and thirty-tw
 | outages | `statuspage` (any Statuspage host) | no |
 | extensions | `firefox-addons`, `vscode-extensions`, `mcp-registry` | no |
 | health | `openfda-recalls`, `clinical-trials` | no |
-| research | `arxiv`, `crossref`, `nist-datasets` (every dataset on data.nist.gov, by last revision), `nist-csrc-drafts` (NIST security drafts open for comment, marked closed in place) | no |
+| research | `arxiv`, `crossref`, `openalex` (works newest first under a topic or a search; `openalex-algorithms` seeded), `nist-datasets` (every dataset on data.nist.gov, by last revision), `nist-csrc-drafts` (NIST security drafts open for comment, marked closed in place) | no |
 | automotive | `fueleconomy-catalog`, `nhtsa-recalls`, `nhtsa-complaints`, `nhtsa-safety-ratings` | no |
 | markets | `iso-mic-exchanges`, `alpaca-corporate-actions`, `alpaca-news`, `alpaca-assets`, `equity-history`, `nasdaq-halts`, `ecb-fx-rates`, `sec-fundamentals` | Alpaca (`APCA_API_KEY_ID`, `APCA_API_SECRET_KEY`, `APCA_FEED` iex or sip); SEC wants `CONTACT_EMAIL` in the user agent |
 | crypto | `coingecko-assets`, `crypto-pairs` | keyless (`COINGECKO_API_KEY` optional; `CRYPTO_PROXY_URL` for Binance.US from a datacenter) |
@@ -70,6 +70,7 @@ One entry per person, assembled from every app that serves their [OpenProfile.md
 A person claims their entry with **This is me** (proven by the email the profile lists, or a link back to the page from their site or show; admins may claim for an email) and edits it from the page, `PUT /api/v1/profiles/<ref>` (JSON overlay or a whole `text/markdown` file), `nichedb profile edit`, or the `update_profile` MCP tool, with a session, an API key, or an OpenAccess token carrying `openprofile:edit`. What the owner writes is an overlay that wins over every source and survives every re-read; a section written as `none` is removed. The `Broadcast` and `Guest` sections ([OpenBroadcast](https://logicsrc.com/openbroadcast), [OpenGuest](https://logicsrc.com/openguest)) are what the `podcasters` and `guests` feeds cut on.
 | directory | `outreachgraph` | no |
 | sites | `opensite` | no |
+| algorithms | `nist-dads` (NIST's Dictionary of Algorithms and Data Structures, every entry with its definition and relations; public domain), `wikidata-algorithms` (every algorithm and data structure on Wikidata, with who devised it, when, and its complexity; CC0), `pwc-archive` (the Papers With Code methods and datasets catalogues as archived on Hugging Face, call-centre spam dropped; CC BY-SA 4.0), `rosetta-code` (every programming task with the languages it is solved in; GFDL), `thealgorithms` (The Algorithms' implementations by language from each repo's DIRECTORY.md; MIT). [docs/algorithms.md](docs/algorithms.md) | no |
 
 ### Moderators
 

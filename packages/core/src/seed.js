@@ -275,6 +275,12 @@ export const COLLECTIONS = [
     description:
       'Torrents as they appear on the BitTorrent DHT, observed by the bittorrented.com crawler and read from its own database: infohash, name, size, file count, the swarm as it stood when crawled and the content class the crawler gave it. Adult material is left out. Follow the newest, the seeded, or one class of content.',
   },
+  {
+    slug: 'algorithms',
+    name: 'Algorithms',
+    description:
+      "A reference shelf of algorithms, data structures and methods, assembled from the open catalogues that carry them whole: every entry in NIST's Dictionary of Algorithms and Data Structures with its definition and the relations between entries (public domain); every algorithm and data structure Wikidata files, with who devised it, when, and its stated complexity (CC0); the Papers With Code methods and datasets catalogues as archived when the site closed, spam removed (CC BY-SA 4.0); Rosetta Code's programming tasks with the languages each is solved in (GFDL); and The Algorithms' implementations by language (MIT). Every row names its source and licence. Built for a knowledge base: follow one shelf as a feed, or read the collection by API, CLI or MCP.",
+  },
 ];
 
 export const DEFAULT_FEEDS = [
@@ -446,6 +452,48 @@ export const DEFAULT_FEEDS = [
     slug: 'security-papers',
     name: 'New security papers',
     query: { sources: ['arxiv-security'] },
+  },
+  {
+    collection: 'algorithms',
+    slug: 'algorithm-dictionary',
+    name: 'NIST dictionary of algorithms and data structures',
+    query: { sources: ['nist-dads'] },
+  },
+  {
+    collection: 'algorithms',
+    slug: 'algorithms-on-wikidata',
+    name: 'Algorithms and data structures on Wikidata',
+    query: { sources: ['wikidata-algorithms'] },
+  },
+  {
+    collection: 'algorithms',
+    slug: 'ml-methods',
+    name: 'Machine-learning methods (Papers With Code archive)',
+    query: { sources: ['pwc-methods'] },
+  },
+  {
+    collection: 'algorithms',
+    slug: 'ml-datasets',
+    name: 'Machine-learning datasets (Papers With Code archive)',
+    query: { sources: ['pwc-datasets'] },
+  },
+  {
+    collection: 'algorithms',
+    slug: 'rosetta-tasks',
+    name: 'Rosetta Code programming tasks',
+    query: { sources: ['rosetta-code'] },
+  },
+  {
+    collection: 'algorithms',
+    slug: 'algorithm-implementations',
+    name: 'Algorithm implementations by language (The Algorithms)',
+    query: { sources: ['thealgorithms'] },
+  },
+  {
+    collection: 'research',
+    slug: 'algorithm-papers',
+    name: 'New algorithm papers (OpenAlex)',
+    query: { sources: ['openalex-algorithms'] },
   },
   {
     collection: 'research',

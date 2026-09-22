@@ -71,6 +71,7 @@ import { newsfeed } from './newsfeed.js';
 import { nhcCyclones } from './nhc.js';
 import { nhtsaComplaints, nhtsaRatings, nhtsaRecalls } from './nhtsa.js';
 import { nistCsrcDrafts } from './nist-csrc.js';
+import { nistDads } from './nist-dads.js';
 import { nistDatasets } from './nist-data.js';
 import { npm } from './npm.js';
 import { ntldChanges, ntldLaunches, ntldTlds, ntldTotals } from './ntlddata.js';
@@ -79,6 +80,7 @@ import { nvd } from './nvd.js';
 import { nwpsRiverGauges } from './nwps.js';
 import { nws } from './nws.js';
 import { ocdsTenders } from './ocds.js';
+import { openalex } from './openalex.js';
 import { openfda } from './openfda.js';
 import { openlibrary } from './openlibrary.js';
 import { openlibraryCatalog } from './openlibrary-catalog.js';
@@ -96,9 +98,11 @@ import { podcastindexCatalog } from './podcastindex-catalog.js';
 import { podcasts } from './podcasts.js';
 import { policeUpdates } from './police-updates.js';
 import { proscanDirectory } from './proscan.js';
+import { pwcArchive } from './pwc-archive.js';
 import { pypi } from './pypi.js';
 import { redditDeals } from './redditdeals.js';
 import { rogueIncidents, rogueResearch } from './rogueaitracker.js';
+import { rosettaCode } from './rosetta-code.js';
 import { rssamplifier } from './rssamplifier.js';
 import { ruuster } from './ruuster.js';
 import { saasrow } from './saasrow.js';
@@ -120,6 +124,7 @@ import { surbl } from './surbl.js';
 import { nwsSurfZone } from './surfzone.js';
 import { swpcSpaceWeather } from './swpc.js';
 import { tedNotices } from './ted.js';
+import { theAlgorithms } from './thealgorithms.js';
 import { thetvdbCatalog } from './thetvdb-catalog.js';
 import { tmdbReleases } from './tmdb.js';
 import { tsbb } from './tsbb.js';
@@ -132,6 +137,7 @@ import { usgs } from './usgs.js';
 import { vscodeExtensions } from './vscode.js';
 import { vultrPlans } from './vultr.js';
 import { warnLayoffs } from './warn.js';
+import { wikidataAlgorithms } from './wikidata-algorithms.js';
 import { wikidataFilms } from './wikidata-films.js';
 import { wikidataGames } from './wikidata-games.js';
 
@@ -302,6 +308,15 @@ export const ADAPTERS = [
   opensite,
   outreachgraph,
   bittorrentedDht,
+  // Research: OpenAlex works, newest first, under a topic or a search.
+  openalex,
+  // Algorithms: the NIST dictionary, Wikidata's algorithms and data structures, the Papers With Code
+  // archive, Rosetta Code's tasks and The Algorithms' implementations.
+  nistDads,
+  wikidataAlgorithms,
+  pwcArchive,
+  rosettaCode,
+  theAlgorithms,
 ];
 
 export { isPlatformHosted, PLATFORM_HOSTS } from './podcastplatforms.js';
