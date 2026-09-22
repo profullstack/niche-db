@@ -110,9 +110,12 @@ const STATES = [
   'AE',
   'AP',
   'AA',
-  'FM',
-  'MH',
-  'PW',
+  /*
+   * Not FM, MH or PW: the search rejects the freely associated states with
+   * `400 {"state": ["\"FM\" is not a valid choice."]}`, and one such answer
+   * took down every read of a day too big for the window -- which, at nearly
+   * thirty thousand complaints a day, is every day.
+   */
 ];
 
 /** The UTC day, as the date filters want it. */
@@ -380,9 +383,21 @@ export const cfpbComplaints = defineAdapter({
         `${dayString} has ${total} complaints, over the ${MAX_SIZE} result window; splitting by state`,
       );
       const byState = [...hits];
+      let failed = 0;
       for (const state of STATES) {
         if (Date.now() > deadline) break;
-        const part = await query({ state });
+        let part;
+        try {
+          part = await query({ state });
+        } catch (err) {
+          /* One state the search will not answer for costs that state, not
+           * the day: the unsplit read above already holds the newest ten
+           * thousand rows, and every other state is still read. */
+          failed += 1;
+          log(`${dayString} ${state}: ${err?.message ?? err}`);
+          if (failed === STATES.length) throw err;
+          continue;
+        }
         const partHits = part?.hits?.hits;
         if (Array.isArray(partHits)) byState.push(...partHits);
       }

@@ -5,6 +5,7 @@ import * as q from '@nichedb/db/queries';
 import { normaliseItem } from './adapter.js';
 import { makeHttp } from './http.js';
 import { profileItem } from './profiles.js';
+import { retryMinutes } from './retry.js';
 
 const UA = () =>
   `niche-db/0.1 (+${config.siteUrl}${config.contactEmail ? `; ${config.contactEmail}` : ''})`;
@@ -152,10 +153,21 @@ export async function runSource(
     return { ...totals };
   } catch (err) {
     const message = String(err?.message ?? err).slice(0, 1000);
-    await q.finishRun({ runId, sourceId: source.id, status: 'error', error: message });
-    l(`failed: ${message}`);
+    const nextRunAt = await retryAt(source).catch(() => null);
+    await q.finishRun({ runId, sourceId: source.id, status: 'error', error: message, nextRunAt });
+    l(`failed: ${message}${nextRunAt ? `; retrying at ${nextRunAt.toISOString()}` : ''}`);
     return { error: message };
   }
+}
+
+/**
+ * When the run that just failed is tried again: see `retryMinutes`. The
+ * failures before this one are counted from the runs table, since the run
+ * being recorded is not finished yet.
+ */
+export async function retryAt(source, now = Date.now()) {
+  const before = await q.consecutiveErrors(source.id);
+  return new Date(now + retryMinutes(before, source.cadence_minutes) * 60_000);
 }
 
 /**

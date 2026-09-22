@@ -1,6 +1,7 @@
 import { ADAPTERS, CRIME_CITIES, UK_CRIME_PLACES } from '@nichedb/adapters';
 import { createNiche, upsertOpportunity } from '@nichedb/db/knowledge';
 import * as q from '@nichedb/db/queries';
+import { RETRY_MINUTES } from './retry.js';
 
 /**
  * The three collections this deployment ships with, their default sources and
@@ -1790,11 +1791,13 @@ export async function ensureDefaults({ env = {}, log = console.log } = {}) {
   for (const c of COLLECTIONS) byCollection[c.slug] = await q.upsertCollection(c);
 
   let created = 0;
+  const keyless = new Set();
   for (const adapter of ADAPTERS) {
     for (const s of adapter.defaultSources ?? []) {
       const collection = byCollection[s.collection ?? adapter.collection];
       if (!collection) continue;
       const missingEnv = (adapter.needsEnv ?? []).filter((k) => !env[k]);
+      if (missingEnv.length > 0) keyless.add(adapter.name);
       const row = await q.insertSource({
         collectionId: collection.id,
         adapter: adapter.name,
@@ -1853,6 +1856,25 @@ export async function ensureDefaults({ env = {}, log = console.log } = {}) {
    */
   const revived = await q.rescheduleKnownAdapters(ADAPTERS.map((a) => a.name));
   if (revived) log(`[seed] brought ${revived} source(s) forward after a rollout`);
+
+  /*
+   * A source that has only ever failed for want of a key the deployment does
+   * not have is paused, the way it would have been seeded had the adapter
+   * declared `needsEnv` from the start (igdb-catalog did not, and ran twice a
+   * day into the same error). Setting the key and re-enabling it is the way
+   * back, as for any paused source.
+   */
+  const paused = await q.pauseNeverSucceeded([...keyless]);
+  if (paused.length) log(`[seed] paused ${paused.join(', ')}: missing a key this deployment lacks`);
+
+  /*
+   * Sources parked a whole cadence out by a failed run under the old rule (a
+   * failure left `next_run_at` where `startRun` had pushed it) are brought
+   * forward to the first retry; from here on a failed run asks for its own.
+   */
+  const retried = await q.rescheduleFailedSources({ retryMinutes: RETRY_MINUTES });
+  if (retried.length)
+    log(`[seed] retrying ${retried.length} failed source(s) in ${RETRY_MINUTES} min`);
 
   const niches = await ensureNiches(byCollection, log);
   return { created, niches, revived };

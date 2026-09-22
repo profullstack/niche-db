@@ -94,20 +94,21 @@ export function defineAdapter(spec) {
 export function normaliseItem(raw) {
   if (!raw?.externalId || !raw?.title) return null;
   const publishedAt = toDate(raw.publishedAt);
+  const text = (v) => storable(String(v));
   const item = {
-    externalId: String(raw.externalId).slice(0, 500),
-    kind: String(raw.kind ?? 'item').slice(0, 40),
-    title: String(raw.title).trim().slice(0, 500),
-    summary: raw.summary ? String(raw.summary).trim().slice(0, 4000) : null,
-    url: raw.url ? String(raw.url).slice(0, 2000) : null,
-    imageUrl: raw.imageUrl ? String(raw.imageUrl).slice(0, 2000) : null,
+    externalId: text(raw.externalId).slice(0, 500),
+    kind: text(raw.kind ?? 'item').slice(0, 40),
+    title: text(raw.title).trim().slice(0, 500),
+    summary: raw.summary ? text(raw.summary).trim().slice(0, 4000) : null,
+    url: raw.url ? text(raw.url).slice(0, 2000) : null,
+    imageUrl: raw.imageUrl ? text(raw.imageUrl).slice(0, 2000) : null,
     publishedAt,
     timeKnown: raw.timeKnown ?? true,
     precision: KINDS.has(raw.precision) ? raw.precision : 'minute',
     tags: [
-      ...new Set((raw.tags ?? []).map((t) => String(t).trim().toLowerCase()).filter(Boolean)),
+      ...new Set((raw.tags ?? []).map((t) => text(t).trim().toLowerCase()).filter(Boolean)),
     ].slice(0, 40),
-    data: raw.data ?? {},
+    data: storableDeep(raw.data ?? {}),
     /*
      * Which story this is, as opposed to which row. `(source_id, external_id)`
      * answers "has this source said this before"; this answers "do we have this
@@ -134,6 +135,41 @@ export function normaliseItem(raw) {
     )
     .digest('hex');
   return item;
+}
+
+/*
+ * A lone surrogate half, or a NUL. `JSON.stringify` writes a lone half as
+ * `\ud83d` and Postgres refuses the document ("invalid input syntax for type
+ * json") -- the whole batch, not the row -- and a NUL it refuses as
+ * "unsupported Unicode escape sequence". Neither can be stored, and neither
+ * means anything: a lone half is a string cut through a character (the Podcast
+ * Index dump carries titles truncated that way, and it failed every weekly run
+ * on them), a NUL is a C string's end that leaked. Both go.
+ *
+ * No `u` flag on purpose: with it the class would match whole code points and
+ * a paired surrogate would not be visible to the lookarounds.
+ */
+// biome-ignore lint/suspicious/noControlCharactersInRegex: the NUL is the point
+const UNSTORABLE = /[\ud800-\udbff](?![\udc00-\udfff])|(?<![\ud800-\udbff])[\udc00-\udfff]|\u0000/g;
+
+/** The string with anything Postgres cannot hold in a jsonb or text removed. */
+export function storable(s) {
+  return s.replace(UNSTORABLE, '');
+}
+
+/**
+ * `storable` over every string in a value, however nested. Arrays and plain
+ * objects are walked; anything else (a Date, a number) is kept as it is.
+ */
+export function storableDeep(value) {
+  if (typeof value === 'string') return storable(value);
+  if (Array.isArray(value)) return value.map(storableDeep);
+  if (value && typeof value === 'object' && Object.getPrototypeOf(value) === Object.prototype) {
+    const out = {};
+    for (const [k, v] of Object.entries(value)) out[storable(k)] = storableDeep(v);
+    return out;
+  }
+  return value;
 }
 
 function toDate(v) {
