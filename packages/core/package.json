@@ -19,6 +19,7 @@
     "@nichedb/config": "workspace:*",
     "@nichedb/db": "workspace:*",
     "@nichedb/enrichers": "workspace:*",
-    "@profullstack/openprofile": "^0.1.0"
+    "@profullstack/openprofile": "^0.1.0",
+    "unbzip2-stream": "^1.4.3"
   }
 }

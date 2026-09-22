@@ -18,7 +18,8 @@ import { cfpbComplaints } from './cfpb.js';
 import { channels } from './channels.js';
 import { clinicalTrials } from './clinicaltrials.js';
 import { coopsWaterLevels } from './coops.js';
-import { courtlistener } from './courtlistener.js';
+import { courtlistener, courtlistenerApi, courtlistenerOralArguments } from './courtlistener.js';
+import { courtlistenerCatalog } from './courtlistener-catalog.js';
 import { crates } from './crates.js';
 import { crossref } from './crossref.js';
 import { coingeckoAssets, cryptoPairs } from './crypto.js';
@@ -157,7 +158,11 @@ export const ADAPTERS = [
   githubReleases,
   edgar,
   federalRegister,
+  // Law: CourtListener's feeds and API for what is new, and its bulk dumps for the rest.
   courtlistener,
+  courtlistenerOralArguments,
+  courtlistenerApi,
+  courtlistenerCatalog,
   isoMicExchanges,
   alpacaCorporateActions,
   alpacaNews,
