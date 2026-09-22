@@ -238,6 +238,7 @@ export function registerApi(app) {
       limit: lim(c.req.query('limit'), 50, 200),
       beforeId: Number(c.req.query('before')) || null,
       offset: Math.max(0, Math.floor(Number(c.req.query('offset')) || 0)),
+      timeoutMs: config.web.queryTimeoutMs,
     });
     c.header('cache-control', 'public, max-age=60');
     return c.json({
@@ -434,6 +435,7 @@ export function registerApi(app) {
       collectionId: col?.id ?? null,
       kind: c.req.query('kind') ?? null,
       limit: lim(c.req.query('limit'), 30, 100),
+      timeoutMs: config.web.queryTimeoutMs,
     });
     return c.json({ q: term, count: items.length, items: items.map((i) => itemOut(i, site())) });
   });

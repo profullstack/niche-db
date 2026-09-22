@@ -4,6 +4,51 @@ import { sql } from './index.js';
 import { matchFixtures } from './matchups.js';
 
 /**
+ * How many matches a text or tag search gathers before it orders them. The
+ * planner has two ways to answer "the newest 50 rows matching a word": read the
+ * GIN index and sort the matches, or walk the whole table backwards by id and
+ * test each row until 50 pass. It picks the walk whenever it believes the word
+ * is common, and when the word is common everywhere except in this collection
+ * that walk reads all twenty million rows: eighteen minutes on 2026-09-22, with
+ * two of them holding the pool while the site timed out. A materialised CTE
+ * that gathers at most this many matches first cannot be planned as a walk,
+ * so a page costs one index probe and one sort, whatever the word.
+ */
+export const MATCH_CAP = 2000;
+
+/**
+ * Below this many items a source is recounted when a run finishes; above it
+ * the run's own `added` is applied. A count over a dump source of six million
+ * rows walked the index for seconds after every ten-minute run, and under
+ * vacuum contention held a connection for minutes.
+ */
+export const RECOUNT_BELOW = 200_000;
+
+/**
+ * Bound one read by `statement_timeout`. A web page must never hold a pool
+ * connection for minutes, so a route passes the seconds it is willing to wait
+ * and the statement is cancelled at that point; `isStatementTimeout` tells the
+ * route what happened. `begin` is Bun's; the PGlite shim in the tests has none,
+ * so there the read runs unbounded, which is what a test wants.
+ */
+async function bounded(db, timeoutMs, fn) {
+  if (!timeoutMs || typeof db.begin !== 'function') return fn(db);
+  return db.begin(async (tx) => {
+    await tx.unsafe(`set local statement_timeout = ${Math.floor(timeoutMs)}`);
+    return fn(tx);
+  });
+}
+
+/** The error Postgres raises when `statement_timeout` cancels a read. */
+export function isStatementTimeout(err) {
+  return (
+    err?.code === '57014' ||
+    err?.errno === '57014' ||
+    /statement timeout/i.test(String(err?.message ?? ''))
+  );
+}
+
+/**
  * Every query the app runs lives here. Routes, workers and MCP tools import from
  * this module and never write SQL themselves.
  */
@@ -552,7 +597,11 @@ export async function finishRun({
       last_error = ${status === 'ok' ? null : error},
       cursor = coalesce(${cursor === undefined ? null : JSON.stringify(cursor)}::jsonb, cursor),
       next_run_at = coalesce(${nextRunAt ?? null}, next_run_at),
-      item_count = (select count(*)::int from items where source_id = ${sourceId}),
+      item_count = case
+        when coalesce(item_count, 0) < ${RECOUNT_BELOW}
+          then (select count(*)::int from items where source_id = ${sourceId})
+        else item_count + ${Math.max(0, Number(added) || 0)}
+      end,
       updated_at = now()
     where id = ${sourceId}
   `;
@@ -971,25 +1020,38 @@ export async function upcomingItems({
 /**
  * Full-text over title, summary and tags, with a trigram fallback so a query for
  * a fragment of a package name still lands.
+ *
+ * The newest MATCH_CAP matches are gathered first and ranked among themselves:
+ * ranking every match of a common word meant fetching a hundred thousand rows
+ * to show thirty, and a live database wants its newest matches anyway.
+ * `timeoutMs` bounds the statement; see `bounded`.
  */
 export async function searchItems(
   term,
-  { collectionId = null, kind = null, limit = 30, db = sql, ...location } = {},
+  { collectionId = null, kind = null, limit = 30, timeoutMs = 0, db = sql, ...location } = {},
 ) {
-  const geo = geoSql(db, location);
   const t = String(term ?? '').trim();
   if (!t) return [];
-  return db`
-    select ${itemSelection(db)}, ${geo.distance} as distance_m,
-      ts_rank(i.search, websearch_to_tsquery('simple', ${t})) as rank
-    from items i join sources s on s.id = i.source_id join collections c on c.id = i.collection_id
-    where (${collectionId === null} or i.collection_id = ${collectionId})
-      and (${kind === null} or i.kind = ${kind})
-      and (i.search @@ websearch_to_tsquery('simple', ${t}) or i.title ilike ${`%${t}%`})
-      and ${geo.where}
-    order by case when ${location.sort === 'distance'} then ${geo.distance} end asc, rank desc, i.id desc
-    limit ${Math.min(Math.max(1, limit), 200)}
-  `;
+  return bounded(db, timeoutMs, (d) => {
+    const geo = geoSql(d, location);
+    return d`
+      with m as materialized (
+        select i.id from items i
+        where (${collectionId === null} or i.collection_id = ${collectionId})
+          and (${kind === null} or i.kind = ${kind})
+          and (i.search @@ websearch_to_tsquery('simple', ${t}) or i.title ilike ${`%${t}%`})
+          and ${geo.where}
+        order by i.id desc
+        limit ${MATCH_CAP}
+      )
+      select ${itemSelection(d)}, ${geo.distance} as distance_m,
+        ts_rank(i.search, websearch_to_tsquery('simple', ${t})) as rank
+      from m join items i on i.id = m.id
+        join sources s on s.id = i.source_id join collections c on c.id = i.collection_id
+      order by case when ${location.sort === 'distance'} then ${geo.distance} end asc, rank desc, i.id desc
+      limit ${Math.min(Math.max(1, limit), 200)}
+    `;
+  });
 }
 
 /* Both scan the whole collection: the worker runs them into collection_stats
@@ -1115,24 +1177,40 @@ export function feedQuery(feed) {
  *
  * `afterId` is the delivery scanner's cursor (ascending); `beforeId` is the
  * page's (descending). Upcoming feeds order by date rather than arrival.
+ *
+ * A page of a feed narrowed by a word or a tag gathers its newest MATCH_CAP
+ * matches in a materialised CTE first (see MATCH_CAP for why); the scanner's
+ * ascending walk from a cursor, a distance sort and an upcoming feed keep the
+ * one-statement shape, which their orderings serve well. `timeoutMs` bounds
+ * the statement; see `bounded`.
  */
 export async function feedItems(
   feed,
-  { afterId = null, beforeId = null, limit = 50, offset = 0, db = sql, ...location } = {},
+  {
+    afterId = null,
+    beforeId = null,
+    limit = 50,
+    offset = 0,
+    timeoutMs = 0,
+    db = sql,
+    ...location
+  } = {},
 ) {
   const fq = feedQuery(feed);
-  const savedGeo = geoSql(db, fq);
-  const requestGeo = geoSql(db, location);
-  // URL filters narrow a saved feed; they cannot replace its geographic scope.
-  const geo = requestGeo.geo && !requestGeo.geo.bbox ? requestGeo : savedGeo;
   // The delivery scanner always walks id order, even for a distance-sorted feed.
   const byDistance = afterId === null && (location.sort ?? fq.sort) === 'distance';
   if (byDistance && beforeId !== null)
     throw new GeoQueryError('sort=distance uses offset, not before');
-  return db`
-    select ${itemSelection(db)}, ${geo.distance} as distance_m
-    from items i join sources s on s.id = i.source_id join collections c on c.id = i.collection_id
-    where i.collection_id = ${feed.collection_id}
+  const gathered =
+    (fq.q !== '' || fq.tags.length > 0) && afterId === null && !byDistance && !fq.upcoming;
+  const rows = Math.min(Math.max(1, limit), 500);
+  return bounded(db, timeoutMs, (d) => {
+    const savedGeo = geoSql(d, fq);
+    const requestGeo = geoSql(d, location);
+    // URL filters narrow a saved feed; they cannot replace its geographic scope.
+    const geo = requestGeo.geo && !requestGeo.geo.bbox ? requestGeo : savedGeo;
+    const where = d`
+      i.collection_id = ${feed.collection_id}
       and (${fq.sources.length === 0} or s.slug = any(${pgArray(fq.sources)}::text[]))
       and (${fq.kinds.length === 0} or i.kind = any(${pgArray(fq.kinds)}::text[]))
       and (${fq.tags.length === 0} or i.tags && ${pgArray(fq.tags)}::text[])
@@ -1141,15 +1219,34 @@ export async function feedItems(
       and (${!fq.upcoming} or i.published_at > now())
       and (${afterId === null} or i.id > ${afterId ?? 0})
       and (${beforeId === null} or i.id < ${beforeId ?? 0})
-      and ${savedGeo.where} and ${requestGeo.where}
-    order by
-      case when ${byDistance} then ${geo.distance} end asc,
-      case when ${fq.upcoming && afterId === null} then i.published_at end asc,
-      case when ${afterId !== null} then i.id end asc,
-      i.id desc
-    limit ${Math.min(Math.max(1, limit), 500)}
-    offset ${byDistance ? Math.min(Math.max(0, Math.floor(Number(offset) || 0)), 10000) : 0}
-  `;
+      and ${savedGeo.where} and ${requestGeo.where}`;
+    if (gathered)
+      return d`
+        with m as materialized (
+          select i.id from items i join sources s on s.id = i.source_id
+          where ${where}
+          order by i.id desc
+          limit ${MATCH_CAP}
+        )
+        select ${itemSelection(d)}, ${geo.distance} as distance_m
+        from m join items i on i.id = m.id
+          join sources s on s.id = i.source_id join collections c on c.id = i.collection_id
+        order by i.id desc
+        limit ${rows}
+      `;
+    return d`
+      select ${itemSelection(d)}, ${geo.distance} as distance_m
+      from items i join sources s on s.id = i.source_id join collections c on c.id = i.collection_id
+      where ${where}
+      order by
+        case when ${byDistance} then ${geo.distance} end asc,
+        case when ${fq.upcoming && afterId === null} then i.published_at end asc,
+        case when ${afterId !== null} then i.id end asc,
+        i.id desc
+      limit ${rows}
+      offset ${byDistance ? Math.min(Math.max(0, Math.floor(Number(offset) || 0)), 10000) : 0}
+    `;
+  });
 }
 
 export async function followFeed({

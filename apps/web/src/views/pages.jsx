@@ -575,7 +575,7 @@ function safeHost(u) {
   }
 }
 
-export const SearchPage = ({ user, q, results, collections, collection }) => (
+export const SearchPage = ({ user, q, results, collections, collection, timedOut = false }) => (
   <Layout user={user} title={q ? `“${q}”` : 'Search'} q={q}>
     <h1>{q ? `Results for “${q}”` : 'Search'}</h1>
     <form method="get" action="/search" class="row">
@@ -592,7 +592,13 @@ export const SearchPage = ({ user, q, results, collections, collection }) => (
         Search
       </button>
     </form>
-    {q ? (
+    {q && timedOut ? (
+      <p class="feedback">
+        That search took too long and was stopped. Pick a collection, or use more specific words,
+        and try again.
+      </p>
+    ) : null}
+    {q && !timedOut ? (
       <>
         <p class="small muted">
           {results.length} result{results.length === 1 ? '' : 's'} ·{' '}

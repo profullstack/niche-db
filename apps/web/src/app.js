@@ -1,4 +1,5 @@
 import { config } from '@nichedb/config';
+import { isStatementTimeout } from '@nichedb/db/queries';
 import { Hono } from 'hono';
 import { loadUser, render, wantsJson } from './lib/http.js';
 import { leaderboard } from './lib/leaderboard.js';
@@ -113,6 +114,15 @@ app.onError((err, c) => {
     const back = new URL(c.req.header('referer') ?? '/', config.siteUrl);
     back.searchParams.set('error', err.message);
     return c.redirect(back.pathname + back.search, 303);
+  }
+  if (isStatementTimeout(err)) {
+    // A read the planner got wrong was cancelled at config.web.queryTimeoutMs
+    // rather than holding the pool; the reader can narrow it and try again.
+    c.header('retry-after', '30');
+    const message =
+      'That query took too long. Narrow it (a collection, a tag, more words) and try again.';
+    if (wantsJson(c)) return c.json({ error: message }, 503);
+    return c.text(message, 503);
   }
   console.error('[web]', err);
   if (wantsJson(c)) return c.json({ error: 'internal' }, 500);
