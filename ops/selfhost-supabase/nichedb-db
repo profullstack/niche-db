@@ -66,7 +66,14 @@ confirm() { # confirm "question"  (skipped by --yes)
 }
 
 # --------------------------------------------------------------- railway API
-rw_token() { jq -r '.user.accessToken' "$HOME/.railway/config.json"; }
+rw_token() {
+  # The CLI's access token lives about an hour; every API call then answers
+  # "Not Authorized". Any CLI command refreshes it, so refresh when close.
+  local exp
+  exp=$(jq -r '.user.tokenExpiresAt // 0' "$HOME/.railway/config.json")
+  if [ "$exp" -lt $(($(date +%s) + 300)) ]; then railway whoami >/dev/null 2>&1 || die "railway login expired: run 'railway login'"; fi
+  jq -r '.user.accessToken' "$HOME/.railway/config.json"
+}
 
 gql() { # gql QUERY [VARIABLES_JSON]
   local body
