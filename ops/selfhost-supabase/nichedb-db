@@ -1,0 +1,648 @@
+#!/usr/bin/env bash
+#
+# nichedb-db: move nichedb's Postgres off Railway onto self-hosted Supabase
+# with logical replication, so the cutover costs minutes of failed writes
+# instead of hours of downtime. Run from the dev box. See README.md for the
+# runbook; `nichedb-db help` for the commands.
+#
+set -euo pipefail
+
+HERE=$(cd "$(dirname "$(readlink -f "$0")")" && pwd)
+STATE_DIR=${STATE_DIR:-$HOME/.local/state/nichedb-selfhost}
+STATE=$STATE_DIR/state.env
+mkdir -p "$STATE_DIR"
+chmod 700 "$STATE_DIR"
+# shellcheck disable=SC1090
+[ -f "$STATE" ] && . "$STATE"
+
+# ------------------------------------------------------------------ config
+# Railway: project nichedb.dev, environment production.
+RW_PROJECT=${RW_PROJECT:-fb518b20-ed8b-4066-a485-85c1b627063f}
+RW_ENV=${RW_ENV:-dc6d3af4-c0b6-48bf-b93e-4ba0808209f1}
+RW_PG_SERVICE=${RW_PG_SERVICE:-0e3bac56-c390-4afd-b9a2-6a98f5b66321}
+RW_APP_SERVICE=${RW_APP_SERVICE:-fd8ab4c1-3787-461a-a9a6-3564603deee3}
+RW_PG_SERVICE_NAME=${RW_PG_SERVICE_NAME:-Postgres}
+SOURCE_DB=${SOURCE_DB:-railway}
+# SOURCE_MODE=railway (production) or docker (rehearsal: SOURCE_CONTAINER).
+SOURCE_MODE=${SOURCE_MODE:-railway}
+SOURCE_CONTAINER=${SOURCE_CONTAINER:-}
+# TARGET_SSH=user@host of the new server, or `local` for a rehearsal.
+TARGET_SSH=${TARGET_SSH:-}
+TARGET_DIR=${TARGET_DIR:-/opt/nichedb-supabase}
+TARGET_DB=${TARGET_DB:-postgres}
+PUB=${PUB:-nichedb_migrate}
+SUB=${SUB:-nichedb_migrate}
+APP_HEALTH_URL=${APP_HEALTH_URL:-https://nichedb.dev/healthz}
+DB_DOMAIN=${DB_DOMAIN:-db.nichedb.dev}
+STUDIO_DOMAIN=${STUDIO_DOMAIN:-supabase.nichedb.dev}
+DNS_ZONE=${DNS_ZONE:-nichedb.dev}
+VAULT_TEAM=${VAULT_TEAM:-profullstack}
+SSH_KEY=${SSH_KEY:-$HOME/.ssh/id_ed25519}
+# Cap on WAL the source keeps for a stalled subscriber. Past it the slot is
+# invalidated (re-run `subscribe`) instead of the Railway volume filling up.
+SLOT_KEEP_GB=${SLOT_KEEP_GB:-8}
+
+log() { printf '\n===> %s\n' "$*" >&2; }
+note() { printf '     %s\n' "$*" >&2; }
+warn() { printf 'WARNING: %s\n' "$*" >&2; }
+die() { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
+
+save_state() { # save_state KEY VALUE
+  touch "$STATE"
+  chmod 600 "$STATE"
+  grep -v "^$1=" "$STATE" > "$STATE.tmp" || true
+  printf '%s=%q\n' "$1" "$2" >> "$STATE.tmp"
+  mv "$STATE.tmp" "$STATE"
+  eval "$1=\$2"
+}
+
+confirm() { # confirm "question"  (skipped by --yes)
+  [ "${YES:-0}" = 1 ] && return 0
+  [ -t 0 ] || die "$1 -- rerun with --yes to proceed non-interactively"
+  printf '%s [y/N] ' "$1" >&2
+  local a
+  read -r a
+  [ "$a" = y ] || [ "$a" = Y ] || die "aborted"
+}
+
+# --------------------------------------------------------------- railway API
+rw_token() { jq -r '.user.accessToken' "$HOME/.railway/config.json"; }
+
+gql() { # gql QUERY [VARIABLES_JSON]
+  local body
+  body=$(jq -nc --arg q "$1" --argjson v "${2:-{\}}" '{query:$q, variables:$v}')
+  local out
+  out=$(curl -fsS https://backboard.railway.com/graphql/v2 \
+    -H "Authorization: Bearer $(rw_token)" -H 'Content-Type: application/json' \
+    -H 'User-Agent: nichedb-db' --data "$body")
+  if [ "$(jq '.errors // [] | length' <<<"$out")" != 0 ]; then
+    printf '%s\n' "$out" >&2
+    return 1
+  fi
+  printf '%s' "$out"
+}
+
+rw_vars() { # rw_vars SERVICE_ID [unrendered]
+  gql 'query($p:String!,$e:String!,$s:String!,$u:Boolean){variables(projectId:$p,environmentId:$e,serviceId:$s,unrendered:$u)}' \
+    "$(jq -nc --arg p "$RW_PROJECT" --arg e "$RW_ENV" --arg s "$1" --argjson u "${2:-false}" '{p:$p,e:$e,s:$s,u:$u}')" |
+    jq '.data.variables'
+}
+
+rw_set_var() { # rw_set_var SERVICE_ID NAME VALUE  (triggers a deploy)
+  gql 'mutation($i:VariableUpsertInput!){variableUpsert(input:$i)}' \
+    "$(jq -nc --arg p "$RW_PROJECT" --arg e "$RW_ENV" --arg s "$1" --arg n "$2" --arg v "$3" \
+      '{i:{projectId:$p,environmentId:$e,serviceId:$s,name:$n,value:$v}}')" >/dev/null
+}
+
+rw_latest_deployment() { # rw_latest_deployment SERVICE_ID -> "id status createdAt"
+  gql 'query($p:String!,$e:String!,$s:String!){deployments(first:1,input:{projectId:$p,environmentId:$e,serviceId:$s}){edges{node{id status createdAt}}}}' \
+    "$(jq -nc --arg p "$RW_PROJECT" --arg e "$RW_ENV" --arg s "$1" '{p:$p,e:$e,s:$s}')" |
+    jq -r '.data.deployments.edges[0].node | "\(.id) \(.status) \(.createdAt)"'
+}
+
+rw_tcp_proxy() { # -> "domain port id" or empty
+  gql 'query($s:String!,$e:String!){tcpProxies(serviceId:$s,environmentId:$e){id domain proxyPort applicationPort}}' \
+    "$(jq -nc --arg s "$RW_PG_SERVICE" --arg e "$RW_ENV" '{s:$s,e:$e}')" |
+    jq -r '.data.tcpProxies[] | select(.applicationPort==5432) | "\(.domain) \(.proxyPort) \(.id)"' | head -n1
+}
+
+# ------------------------------------------------------------ SQL transports
+railway_ssh_user() {
+  if [ -z "${RW_PG_SSH_USER:-}" ]; then
+    local u
+    u=$(railway ssh config --dry-run -i "$SSH_KEY" --project "$RW_PROJECT" --environment "$RW_ENV" \
+      --service "$RW_PG_SERVICE_NAME" 2>/dev/null | awk '$1=="User" {print $2; exit}')
+    [ -n "$u" ] || die "could not read the Railway ssh user for $RW_PG_SERVICE_NAME (railway login?)"
+    save_state RW_PG_SSH_USER "$u"
+  fi
+  printf '%s' "$RW_PG_SSH_USER"
+}
+
+src_exec() { # run a command inside the source Postgres container, stdin passed through
+  case "$SOURCE_MODE" in
+    docker) docker exec -i "$SOURCE_CONTAINER" "$@" ;;
+    railway)
+      # `railway ssh` itself fails host-key verification; plain ssh works.
+      ssh -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile="$HOME/.ssh/known_hosts_railway" \
+        -o ServerAliveInterval=30 -o LogLevel=ERROR -i "$SSH_KEY" -l "$(railway_ssh_user)" ssh.railway.com "$@"
+      ;;
+    *) die "SOURCE_MODE must be railway or docker" ;;
+  esac
+}
+
+# Source SQL always runs with read-only off: after `cutover` the database
+# default is read-only, and rollback/cleanup still have to write.
+src_sql() { # SQL on stdin
+  { echo "set default_transaction_read_only = off;"; cat; } |
+    src_exec psql -U postgres -d "$SOURCE_DB" -v ON_ERROR_STOP=1 -X -q -At
+}
+src_q() { src_sql <<<"$1"; }
+
+tgt_exec() { # run a shell command string on the target host
+  if [ "$TARGET_SSH" = local ]; then
+    bash -c "$1"
+  else
+    [ -n "$TARGET_SSH" ] || die "no target: run 'nichedb-db provision user@host' first (or set TARGET_SSH)"
+    ssh -o BatchMode=yes -o ServerAliveInterval=30 "$TARGET_SSH" "$1"
+  fi
+}
+tgt_sudo() { if [ "$TARGET_SSH" = local ]; then printf ''; else printf 'sudo -n '; fi; }
+
+tgt_sql() { # tgt_sql ROLE  (SQL on stdin) - ROLE is supabase_admin or postgres
+  tgt_exec "$(tgt_sudo)docker exec -i supabase-db psql -h localhost -U $1 -d $TARGET_DB -v ON_ERROR_STOP=1 -X -q -At"
+}
+tgt_q() { tgt_sql supabase_admin <<<"$1"; }
+
+tgt_copy() { # tgt_copy LOCAL_FILE REMOTE_PATH
+  if [ "$TARGET_SSH" = local ]; then cp "$1" "$2"; else scp -q "$1" "$TARGET_SSH:$2"; fi
+}
+
+# --------------------------------------------------------------- helpers
+source_conninfo() { # libpq conninfo the subscriber uses to reach the source
+  if [ "$SOURCE_MODE" = docker ]; then
+    printf 'host=%s port=5432 dbname=%s user=postgres password=%s' \
+      "${SOURCE_HOST:-$SOURCE_CONTAINER}" "$SOURCE_DB" "${SOURCE_PASSWORD:?set SOURCE_PASSWORD}"
+    return
+  fi
+  local proxy pw
+  proxy=$(rw_tcp_proxy)
+  [ -n "$proxy" ] || die "the Railway Postgres has no TCP proxy yet: run 'nichedb-db source-prep'"
+  pw=$(rw_vars "$RW_PG_SERVICE" | jq -r '.PGPASSWORD // .POSTGRES_PASSWORD')
+  set -- $proxy
+  printf 'host=%s port=%s dbname=%s user=postgres password=%s sslmode=require' "$1" "$2" "$SOURCE_DB" "$pw"
+}
+
+target_url() {
+  [ -n "${SELFHOST_DATABASE_URL:-}" ] || die "no SELFHOST_DATABASE_URL in state: run 'nichedb-db provision' (or fetch-connection)"
+  printf '%s' "$SELFHOST_DATABASE_URL"
+}
+
+slot_lag_bytes() {
+  src_q "select coalesce(pg_wal_lsn_diff(pg_current_wal_lsn(), confirmed_flush_lsn), -1)::bigint from pg_replication_slots where slot_name = '$SUB'"
+}
+
+sync_states() { # "r 53" etc.
+  tgt_q "select srsubstate, count(*) from pg_subscription_rel r join pg_subscription s on s.oid = r.srsubid where s.subname = '$SUB' group by 1 order by 1" | tr '|' ' '
+}
+
+all_ready() {
+  local notready
+  notready=$(tgt_q "select count(*) from pg_subscription_rel r join pg_subscription s on s.oid = r.srsubid where s.subname = '$SUB' and srsubstate <> 'r'")
+  [ "$notready" = 0 ]
+}
+
+schema_fingerprint() { # normalised public schema of one side: src|tgt
+  local dump
+  if [ "$1" = src ]; then
+    dump=$(src_exec pg_dump -U postgres -d "$SOURCE_DB" --schema-only --no-owner --no-privileges -n public)
+  else
+    dump=$(tgt_exec "$(tgt_sudo)docker exec supabase-db pg_dump -h localhost -U supabase_admin -d $TARGET_DB --schema-only --no-owner --no-privileges -n public")
+  fi
+  # Drop comments, session SETs, \restrict keys and version banners.
+  grep -Ev '^(--|SET |SELECT pg_catalog.set_config|\\(un)?restrict|CREATE SCHEMA public;|COMMENT ON SCHEMA public)' <<<"$dump" |
+    sed -e 's/[[:space:]]*$//' | grep -v '^$'
+}
+
+# ---------------------------------------------------------------- commands
+cmd_provision() { # provision user@host
+  local host=${1:-$TARGET_SSH}
+  [ -n "$host" ] || die "usage: nichedb-db provision user@host"
+  save_state TARGET_SSH "$host"
+  log "Provisioning $host"
+  tgt_exec 'mkdir -p /tmp/nichedb-selfhost'
+  tgt_copy "$HERE/server/setup-server.sh" /tmp/nichedb-selfhost/setup-server.sh
+  local envs="DB_DOMAIN=$DB_DOMAIN STUDIO_DOMAIN=$STUDIO_DOMAIN"
+  local k
+  for k in SUPABASE_REF INSTALL_ROOT PROJECT SITE_URL DB_PORT PGDATA_DIR MEM_MB CPUS WITH_PROXY; do
+    [ -n "${!k:-}" ] && envs="$envs $k=${!k}"
+  done
+  tgt_exec "sudo -n env $envs bash /tmp/nichedb-selfhost/setup-server.sh"
+  cmd_fetch_connection
+}
+
+cmd_fetch_connection() {
+  log "Fetching the connection details from the server"
+  local f=$STATE_DIR/connection.env
+  umask 077
+  tgt_exec "$(tgt_sudo)cat $TARGET_DIR/nichedb-connection.env" > "$f"
+  local line
+  while IFS= read -r line; do
+    case "$line" in SELFHOST_*=*) save_state "${line%%=*}" "${line#*=}" ;; esac
+  done < "$f"
+  local ip
+  ip=$(tgt_exec "curl -fsS4 https://api.ipify.org" 2>/dev/null || true)
+  [ -n "$ip" ] && save_state TARGET_IP "$ip"
+  note "target ${TARGET_SSH} (${TARGET_IP:-ip unknown}); secrets saved in $STATE (0600)"
+}
+
+cmd_vault() {
+  log "Saving the Supabase secrets to the team vault"
+  local work
+  work=$(mktemp -d)
+  trap 'rm -rf "$work"' RETURN
+  # 1) the server's whole Supabase .env as its own vault
+  tgt_exec "$(tgt_sudo)cat $TARGET_DIR/.env" > "$work/supabase.env"
+  logicsrc teams push "$VAULT_TEAM" nichedb-supabase prod --env "$work/supabase.env"
+  # 2) SELFHOST_* next to the app's own secrets, merged, never replacing them
+  if logicsrc teams pull "$VAULT_TEAM" nichedb prod --env "$work/app.env" >/dev/null 2>&1 && [ -s "$work/app.env" ]; then
+    local n=1
+    while [ -e "$STATE_DIR/nichedb--prod.bak-$(printf %03d $n).env" ]; do n=$((n + 1)); done
+    cp "$work/app.env" "$STATE_DIR/nichedb--prod.bak-$(printf %03d $n).env"
+    chmod 600 "$STATE_DIR"/nichedb--prod.bak-*.env
+    grep -v '^SELFHOST_' "$work/app.env" > "$work/merged.env" || true
+    grep '^SELFHOST_' "$STATE_DIR/connection.env" >> "$work/merged.env"
+    logicsrc teams push "$VAULT_TEAM" nichedb prod --env "$work/merged.env"
+    note "nichedb--prod backup: $STATE_DIR/nichedb--prod.bak-$(printf %03d $n).env"
+  else
+    die "could not pull vault nichedb--prod; nothing pushed to it (the nichedb-supabase vault was saved)"
+  fi
+}
+
+cmd_dns() {
+  local ip=${1:-${TARGET_IP:-}}
+  [ -n "$ip" ] || die "usage: nichedb-db dns <server-ipv4>"
+  log "DNS: $DB_DOMAIN and $STUDIO_DOMAIN -> $ip"
+  porkbun set "$DNS_ZONE" "${DB_DOMAIN%%.$DNS_ZONE}" A "$ip" --ttl 600
+  porkbun set "$DNS_ZONE" "${STUDIO_DOMAIN%%.$DNS_ZONE}" A "$ip" --ttl 600
+  [ -n "${TARGET_IPV6:-}" ] && porkbun set "$DNS_ZONE" "${DB_DOMAIN%%.$DNS_ZONE}" AAAA "$TARGET_IPV6" --ttl 600
+  [ -n "${TARGET_IPV6:-}" ] && porkbun set "$DNS_ZONE" "${STUDIO_DOMAIN%%.$DNS_ZONE}" AAAA "$TARGET_IPV6" --ttl 600
+  return 0
+}
+
+cmd_check() {
+  log "Source"
+  src_q "select 'version '||current_setting('server_version')||', wal_level '||current_setting('wal_level')||', size '||pg_size_pretty(pg_database_size(current_database()))||', max_slot_wal_keep_size '||current_setting('max_slot_wal_keep_size')" | sed 's/^/     /'
+  src_exec df -h /var/lib/postgresql/data 2>/dev/null | tail -1 | awk '{print "     disk: "$3" used, "$4" free of "$2}' || true
+  log "Target"
+  tgt_q "select 'version '||current_setting('server_version')||', ssl '||current_setting('ssl')||', shared_buffers '||current_setting('shared_buffers')||', size '||pg_size_pretty(pg_database_size(current_database()))" | sed 's/^/     /'
+  tgt_exec "df -h $TARGET_DIR | tail -1" | awk '{print "     disk: "$3" used, "$4" free of "$2}'
+  local srcsize tgtfree
+  srcsize=$(src_q "select pg_database_size(current_database())")
+  tgtfree=$(tgt_exec "df -B1 --output=avail $TARGET_DIR | tail -1")
+  if [ "$tgtfree" -lt $((srcsize * 2)) ]; then
+    warn "target has less than 2x the source size free; the copy plus index builds may not fit"
+  fi
+}
+
+cmd_source_prep() {
+  [ "$SOURCE_MODE" = railway ] || { note "SOURCE_MODE=$SOURCE_MODE: only the publication is created"; cmd_publication; return; }
+  log "Preparing the Railway source"
+  local wal
+  wal=$(src_q "show wal_level")
+  if [ "$wal" != logical ]; then
+    confirm "Set wal_level=logical and RESTART Railway's Postgres (the app loses its DB for ~30-60 s)?"
+    src_q "alter system set wal_level = logical; alter system set max_slot_wal_keep_size = '${SLOT_KEEP_GB}GB';"
+    local dep
+    dep=$(rw_latest_deployment "$RW_PG_SERVICE" | awk '{print $1}')
+    gql 'mutation($id:String!){deploymentRestart(id:$id)}' "$(jq -nc --arg id "$dep" '{id:$id}')" >/dev/null
+    note "restart requested for deployment $dep; waiting for Postgres"
+
+    for _ in $(seq 1 60); do
+      sleep 5
+      wal=$(src_q "show wal_level" 2>/dev/null || true)
+      [ "$wal" = logical ] && break
+    done
+    [ "$wal" = logical ] || die "wal_level is still '$wal' after the restart"
+    note "wal_level=logical"
+  else
+    note "wal_level already logical"
+    src_q "alter system set max_slot_wal_keep_size = '${SLOT_KEEP_GB}GB'; select pg_reload_conf();" >/dev/null
+  fi
+
+  local proxy
+  proxy=$(rw_tcp_proxy)
+  if [ -z "$proxy" ]; then
+    confirm "Expose Railway's Postgres on a public TCP proxy (password + TLS) for the replication?"
+    if ! gql 'mutation($i:TCPProxyCreateInput!){tcpProxyCreate(input:$i){id domain proxyPort}}' \
+      "$(jq -nc --arg s "$RW_PG_SERVICE" --arg e "$RW_ENV" '{i:{serviceId:$s,environmentId:$e,applicationPort:5432}}')" >/dev/null; then
+      die "tcpProxyCreate failed. Add it by hand: Railway > nichedb.dev > Postgres > Settings > Networking > TCP Proxy, port 5432; then rerun."
+    fi
+    for _ in $(seq 1 30); do proxy=$(rw_tcp_proxy); [ -n "$proxy" ] && break; sleep 5; done
+  fi
+  note "TCP proxy: $(awk '{print $1":"$2}' <<<"$proxy")"
+  cmd_publication
+}
+
+cmd_publication() {
+  local missing
+  missing=$(src_q "select string_agg(c.relname, ', ') from pg_class c join pg_namespace n on n.oid = c.relnamespace where n.nspname = 'public' and c.relkind in ('r','p') and c.relreplident = 'd' and not exists (select 1 from pg_index i where i.indrelid = c.oid and i.indisprimary)")
+  # With FOR ALL TABLES, an UPDATE on a table with no replica identity FAILS on
+  # the source. Every table has a primary key today; refuse if that changes.
+  [ -z "$missing" ] || die "tables without a primary key would break writes on the source: $missing"
+  if [ "$(src_q "select count(*) from pg_publication where pubname = '$PUB'")" = 0 ]; then
+    src_q "create publication $PUB for all tables"
+    note "publication $PUB created (all tables)"
+  else
+    note "publication $PUB already exists"
+  fi
+}
+
+cmd_schema() {
+  log "Copying the schema (tables + primary keys; indexes come after the data)"
+  local n
+  n=$(tgt_q "select count(*) from pg_tables where schemaname = 'public'")
+  if [ "$n" != 0 ] && [ "${FORCE:-0}" != 1 ]; then
+    die "target already has $n tables in public; FORCE=1 to apply on top anyway"
+  fi
+  local d=$STATE_DIR/schema
+  mkdir -p "$d"
+  src_exec pg_dump -U postgres -d "$SOURCE_DB" --schema-only --no-owner --no-privileges --section=pre-data > "$d/pre.sql"
+  src_exec pg_dump -U postgres -d "$SOURCE_DB" --schema-only --no-owner --no-privileges --section=post-data > "$d/post.sql"
+  python3 "$HERE/lib/split_post_data.py" "$d/post.sql" "$d/pk.sql" "$d/rest.sql" >&2
+  note "pre-data $(grep -c 'CREATE TABLE' "$d/pre.sql") tables; saved in $d"
+  # Extensions need supabase_admin; everything else is owned by postgres, the
+  # role the app connects as and runs its migrations with.
+  grep -E '^CREATE EXTENSION' "$d/pre.sql" | tgt_sql supabase_admin
+  tgt_sql postgres < "$d/pre.sql"
+  tgt_sql postgres < "$d/pk.sql"
+  tgt_sql supabase_admin <<'EOF'
+revoke all on all tables in schema public from anon, authenticated;
+revoke all on all sequences in schema public from anon, authenticated;
+revoke all on all functions in schema public from anon, authenticated;
+revoke usage on schema public from public, anon, authenticated;
+grant usage on schema public to postgres, service_role;
+EOF
+  note "target now has $(tgt_q "select count(*) from pg_tables where schemaname = 'public'") tables in public"
+}
+
+cmd_subscribe() {
+  log "Subscribing the target to the source"
+  if [ "$(tgt_q "select count(*) from pg_subscription where subname = '$SUB'")" != 0 ]; then
+    note "subscription $SUB already exists"
+    return
+  fi
+  local conn
+  conn=$(source_conninfo)
+  # disable_on_error: a schema mismatch (a migration deployed mid-copy) parks
+  # the subscription instead of retrying forever; `status` shows it.
+  tgt_sql supabase_admin <<EOF
+create subscription $SUB
+  connection '$(sed "s/'/''/g" <<<"$conn")'
+  publication $PUB
+  with (copy_data = true, streaming = on, disable_on_error = true);
+EOF
+  note "initial copy started; follow it with: nichedb-db status"
+}
+
+cmd_status() {
+  log "Replication"
+  local st
+  st=$(sync_states)
+  note "tables by state (i=init d=copying f/s=syncing r=ready): ${st:-none}"
+  tgt_q "select 'enabled='||subenabled from pg_subscription where subname='$SUB'" | sed 's/^/     /'
+  tgt_q "select 'copying '||relid::regclass||': '||pg_size_pretty(bytes_processed) from pg_stat_progress_copy" | sed 's/^/     /'
+  tgt_q "select 'worker '||coalesce(relid::regclass::text,'apply')||' received '||coalesce(received_lsn::text,'-')||' last msg '||coalesce(to_char(last_msg_receipt_time,'HH24:MI:SS'),'-') from pg_stat_subscription where subname='$SUB'" | sed 's/^/     /'
+  local errs
+  errs=$(tgt_q "select apply_error_count||' apply / '||sync_error_count||' sync errors' from pg_stat_subscription_stats where subname='$SUB'")
+  note "${errs:-no stats}"
+  local lag
+  lag=$(slot_lag_bytes)
+  note "source slot lag: $( [ -n "$lag" ] && numfmt --to=iec "$lag" 2>/dev/null || echo none)"
+  src_q "select 'source slot '||slot_name||' wal_status='||wal_status||' safe_wal_size='||coalesce(pg_size_pretty(safe_wal_size),'unlimited') from pg_replication_slots where slot_name='$SUB'" | sed 's/^/     /'
+  note "sizes: source $(src_q "select pg_size_pretty(pg_database_size(current_database()))"), target $(tgt_q "select pg_size_pretty(pg_database_size(current_database()))")"
+  if [ -n "$(tgt_exec "test -f $TARGET_DIR/indexes.log && echo y" 2>/dev/null || true)" ]; then
+    note "index build: $(tgt_exec "$(tgt_sudo)tail -n 2 $TARGET_DIR/indexes.log" | tr '\n' ' ')"
+  fi
+}
+
+cmd_indexes() {
+  local d=$STATE_DIR/schema
+  [ -s "$d/rest.sql" ] || die "no $d/rest.sql: run 'nichedb-db schema' first"
+  if ! all_ready && [ "${FORCE:-0}" != 1 ]; then
+    die "the initial copy is not finished ($(sync_states | tr '\n' ' ')); FORCE=1 to build now"
+  fi
+  log "Building indexes, unique and foreign keys on the target (detached; replication keeps streaming)"
+  local mwm work
+  mwm=$(tgt_q "show maintenance_work_mem")
+  work=$(mktemp -d)
+  {
+    printf "set maintenance_work_mem = '%s';\n" "$mwm"
+    cat "$d/rest.sql"
+    printf "select 'INDEXES DONE';\n"
+  } > "$work/indexes.sql"
+  cat > "$work/indexes.sh" <<EOF
+#!/bin/sh
+docker exec -i supabase-db psql -h localhost -U postgres -d $TARGET_DB -v ON_ERROR_STOP=1 -X -q -At -e < /tmp/nichedb-indexes.sql
+EOF
+  tgt_copy "$work/indexes.sql" /tmp/nichedb-indexes.sql
+  tgt_copy "$work/indexes.sh" /tmp/nichedb-indexes.sh
+  rm -rf "$work"
+  if [ "$TARGET_SSH" = local ]; then
+    sh /tmp/nichedb-indexes.sh > "$TARGET_DIR/indexes.log" 2>&1 || { tail -n 5 "$TARGET_DIR/indexes.log" >&2; die "index build failed"; }
+    tail -n 1 "$TARGET_DIR/indexes.log" >&2
+  else
+    # Detached: 26 GB of indexes outlives an ssh session.
+    tgt_exec "$(tgt_sudo)nohup sh /tmp/nichedb-indexes.sh > /tmp/nichedb-indexes.log 2>&1 < /dev/null & sleep 1; $(tgt_sudo)ln -sf /tmp/nichedb-indexes.log $TARGET_DIR/indexes.log"
+    note "running on the server; progress in $TARGET_DIR/indexes.log (nichedb-db status shows the tail)"
+  fi
+}
+
+cmd_verify() {
+  log "Schema diff (public), source vs target"
+  local a b
+  a=$(mktemp)
+  b=$(mktemp)
+  schema_fingerprint src > "$a"
+  schema_fingerprint tgt > "$b"
+  if diff -u "$a" "$b" > "$STATE_DIR/schema.diff"; then
+    note "identical"
+  else
+    warn "schemas differ (full diff: $STATE_DIR/schema.diff):"
+    head -n 40 "$STATE_DIR/schema.diff" >&2
+    SCHEMA_DIFFERS=1
+  fi
+  rm -f "$a" "$b"
+
+  log "Row counts (source, target)"
+  # One query per side. The big tables compare max(id) unless FULL=1: an exact
+  # count of 35M rows is a minute of I/O on each side.
+  local big=${BIG_TABLES:-items} q
+  q=$(src_q "select string_agg(format('select %L, %s from public.%I', tablename, case when tablename = any(string_to_array('$big', ' ')) and ${FULL:-0} = 0 then 'coalesce(max(id),0)::text' else 'count(*)::text' end, tablename), ' union all ' order by tablename) from pg_tables where schemaname = 'public'")
+  local s g
+  s=$(src_q "$q")
+  g=$(tgt_q "$q")
+  local bad
+  bad=$(join -t'|' -a1 -a2 -e MISSING -o 0,1.2,2.2 <(sort <<<"$s") <(sort <<<"$g") |
+    awk -F'|' '{st = ($2 == $3) ? "ok" : "DIFF"; if (st != "ok") n++; printf "     %-30s %12s %12s %s\n", $1, $2, $3, st} END {print n + 0 > "/dev/fd/3"}' 3>&1 1>&2)
+  note "$bad table(s) differ (expected while writes are still flowing; items compares max(id))"
+  [ "${SCHEMA_DIFFERS:-0}" = 0 ]
+}
+
+sync_sequences() {
+  log "Copying sequence positions"
+  local sql
+  sql=$(src_q "select format('select setval(%L, %s, %L);', quote_ident(schemaname)||'.'||quote_ident(sequencename), coalesce(last_value, start_value), last_value is not null) from pg_sequences where schemaname = 'public'")
+  tgt_sql supabase_admin <<<"$sql" >/dev/null
+  note "$(wc -l <<<"$sql") sequences set"
+}
+
+cmd_cutover() {
+  log "Preflight"
+  all_ready || die "not every table is in state r: $(sync_states | tr '\n' ' ')"
+  [ "$(tgt_q "select subenabled from pg_subscription where subname = '$SUB'")" = t ] || die "subscription is disabled: see 'nichedb-db status'"
+  local si ti
+  si=$(src_q "select count(*) from pg_indexes where schemaname = 'public'")
+  ti=$(tgt_q "select count(*) from pg_indexes where schemaname = 'public'")
+  [ "$si" = "$ti" ] || die "indexes: source $si, target $ti. Run/finish 'nichedb-db indexes' first"
+  cmd_verify >/dev/null 2>&1 || die "schemas differ: run 'nichedb-db verify' and reconcile first"
+  local lag
+  lag=$(slot_lag_bytes)
+  [ "$lag" -lt $((64 * 1024 * 1024)) ] || die "slot lag is $(numfmt --to=iec "$lag"); wait for it to drain"
+  [ "$SOURCE_MODE" = docker ] || target_url >/dev/null
+  confirm "Cut over now? Writes fail for a few minutes; reads keep working from the old DB."
+
+  log "1/6 Source read-only, sessions closed"
+  src_q "alter database $SOURCE_DB set default_transaction_read_only = on"
+  src_q "select count(pg_terminate_backend(pid)) from pg_stat_activity where datname = '$SOURCE_DB' and backend_type = 'client backend' and pid <> pg_backend_pid()" >/dev/null
+  save_state CUTOVER_STARTED "$(date -u +%FT%TZ)"
+
+  log "2/6 Waiting for the target to confirm every source write"
+  local lsn done_=0
+  lsn=$(src_q "select pg_current_wal_lsn()")
+  for _ in $(seq 1 120); do
+    if [ "$(src_q "select confirmed_flush_lsn >= '$lsn' from pg_replication_slots where slot_name = '$SUB'")" = t ]; then done_=1; break; fi
+    sleep 2
+  done
+  [ "$done_" = 1 ] || die "target did not catch up to $lsn in 4 minutes. Source is still READ-ONLY: fix, or 'nichedb-db rollback'"
+  note "caught up to $lsn"
+
+  sync_sequences
+  log "3/6 Final counts"
+  cmd_verify || warn "verify reported differences; check before trusting the target"
+
+  log "4/6 Dropping the subscription (also drops the slot on the source)"
+  tgt_q "drop subscription $SUB"
+
+  if [ "$SOURCE_MODE" = railway ]; then
+    log "5/6 Pointing the app at the new database"
+    local old
+    old=$(rw_vars "$RW_APP_SERVICE" true | jq -r '.DATABASE_URL')
+    [ "${OLD_DATABASE_URL:-}" ] || save_state OLD_DATABASE_URL "$old"
+    rw_set_var "$RW_APP_SERVICE" DATABASE_URL "$(target_url)"
+    note "DATABASE_URL updated (was $old); Railway is deploying"
+    wait_for_deploy "$RW_APP_SERVICE"
+    log "6/6 Smoke test"
+    curl -fsS --max-time 20 "$APP_HEALTH_URL" && echo >&2 || warn "$APP_HEALTH_URL did not answer ok"
+    note "app connections on the target: $(tgt_q "select count(*) from pg_stat_activity where usename = 'postgres' and client_addr is not null and client_addr <> '127.0.0.1'")"
+  else
+    note "5/6 and 6/6 skipped (rehearsal: no app to repoint)"
+  fi
+  save_state CUTOVER_DONE "$(date -u +%FT%TZ)"
+  log "Cut over. The Railway DB stays READ-ONLY as the fallback; 'nichedb-db rollback' undoes the switch."
+}
+
+wait_for_deploy() {
+  local before status id _
+  before=$(date -u +%FT%TZ)
+  for _ in $(seq 1 90); do
+    sleep 10
+    read -r id status _ <<<"$(rw_latest_deployment "$1")"
+    note "deployment $id: $status"
+    case "$status" in
+      SUCCESS) return 0 ;;
+      FAILED | CRASHED) die "deployment $id $status: consider 'nichedb-db rollback'" ;;
+    esac
+  done
+  die "deployment still not SUCCESS after 15 minutes (started $before)"
+}
+
+cmd_rollback() {
+  warn "Rollback points the app back at Railway. Writes made on the new server since the cutover are NOT copied back."
+  confirm "Roll back to the Railway database?"
+  if [ "$SOURCE_MODE" = railway ]; then
+    rw_set_var "$RW_APP_SERVICE" DATABASE_URL "${OLD_DATABASE_URL:-\${{Postgres.DATABASE_URL\}}}"
+    note "DATABASE_URL restored"
+  fi
+  src_q "alter database $SOURCE_DB reset default_transaction_read_only"
+  src_q "select count(pg_terminate_backend(pid)) from pg_stat_activity where datname = '$SOURCE_DB' and backend_type = 'client backend' and pid <> pg_backend_pid()" >/dev/null
+  note "source is writable again"
+  [ "$SOURCE_MODE" = railway ] && wait_for_deploy "$RW_APP_SERVICE"
+  return 0
+}
+
+cmd_cleanup() {
+  confirm "Drop the publication and any leftover slot on the source, and remove the TCP proxy?"
+  src_q "drop publication if exists $PUB"
+  src_q "select pg_drop_replication_slot(slot_name) from pg_replication_slots where slot_name = '$SUB' and not active" >/dev/null
+  if [ "$SOURCE_MODE" = railway ]; then
+    local proxy
+    proxy=$(rw_tcp_proxy)
+    if [ -n "$proxy" ]; then
+      gql 'mutation($id:String!){tcpProxyDelete(id:$id)}' "$(jq -nc --arg id "$(awk '{print $3}' <<<"$proxy")" '{id:$id}')" >/dev/null
+      note "TCP proxy removed"
+    fi
+  fi
+  note "The Railway Postgres service itself is left in place (read-only). Delete it by hand once you no longer want the fallback."
+}
+
+cmd_apply_migration() { # apply-migration packages/db/migrations/00xx_name.sql
+  local f=${1:?usage: nichedb-db apply-migration <migration.sql>}
+  log "Applying $(basename "$f") to the target (schema only; its schema_migrations row arrives through replication)"
+  tgt_sql postgres < "$f"
+  tgt_q "alter subscription $SUB enable" 2>/dev/null || true
+  note "subscription re-enabled"
+}
+
+usage() {
+  cat <<'EOF'
+nichedb-db: move nichedb's Postgres from Railway to self-hosted Supabase.
+
+In order:
+  provision user@host   install Supabase on the new server (setup-server.sh)
+  dns [ipv4]            db.nichedb.dev + supabase.nichedb.dev A records (Porkbun)
+  vault                 push the server's secrets to the logicsrc team vaults
+  check                 versions, sizes and free disk on both sides
+  source-prep           Railway: wal_level=logical (RESTART), TCP proxy, publication
+  schema                copy tables + primary keys to the target
+  subscribe             start logical replication (initial copy, then streaming)
+  status                copy progress, slot lag, errors
+  indexes               build indexes/unique/foreign keys once the copy is done
+  verify                schema diff + row counts (FULL=1 counts items too)
+  cutover               source read-only, drain, sequences, switch DATABASE_URL
+  rollback              point the app back at Railway and make it writable
+  cleanup               drop publication/slot and the TCP proxy (after you're sure)
+
+Other:
+  fetch-connection      re-read nichedb-connection.env from the server
+  apply-migration FILE  a migration shipped mid-copy: apply its SQL to the target
+                        and re-enable the subscription
+
+Flags: --yes skips confirmations. State lives in ~/.local/state/nichedb-selfhost.
+EOF
+}
+
+main() {
+  local args=()
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --yes | -y) YES=1 ;;
+      *) args+=("$1") ;;
+    esac
+    shift
+  done
+  set -- "${args[@]:-help}"
+  local cmd=$1
+  shift || true
+  case "$cmd" in
+    provision) cmd_provision "$@" ;;
+    fetch-connection) cmd_fetch_connection ;;
+    vault) cmd_vault ;;
+    dns) cmd_dns "$@" ;;
+    check) cmd_check ;;
+    source-prep) cmd_source_prep ;;
+    schema) cmd_schema ;;
+    subscribe) cmd_subscribe ;;
+    status) cmd_status ;;
+    indexes) cmd_indexes ;;
+    verify) cmd_verify ;;
+    cutover) cmd_cutover ;;
+    rollback) cmd_rollback ;;
+    cleanup) cmd_cleanup ;;
+    apply-migration) cmd_apply_migration "$@" ;;
+    help | -h | --help) usage ;;
+    *) usage; exit 1 ;;
+  esac
+}
+
+# NICHEDB_DB_LIB=1 lets test/make-fixture.sh source the helpers without main.
+[ "${NICHEDB_DB_LIB:-0}" = 1 ] || main "$@"
