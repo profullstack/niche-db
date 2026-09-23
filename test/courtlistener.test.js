@@ -28,6 +28,7 @@ const { ADAPTERS, adapterByName } = await import('../packages/adapters/src/index
 const { COLLECTIONS, DEFAULT_FEEDS } = await import('../packages/core/src/seed.js');
 const live = await import('../packages/adapters/src/courtlistener.js');
 const cat = await import('../packages/adapters/src/courtlistener-catalog.js');
+const { PATCH_ITEMS_SQL, patchRows } = await import('../packages/db/src/queries.js');
 
 const fixture = (name) =>
   readFile(new URL(`../packages/adapters/test/fixtures/${name}`, import.meta.url), 'utf8');
@@ -77,7 +78,10 @@ describe('registry and seed', () => {
       'courtlistener-oral-arguments',
     ]);
     expect(bySlug['courtlistener-opinions-scotus'].config).toEqual({ court: 'scotus' });
-    expect(bySlug['courtlistener-opinions'].cadence).toBe(30);
+    // The all-courts source rotates through the courts' own feeds, so it runs often.
+    expect(bySlug['courtlistener-opinions'].cadence).toBe(live.ALL_COURTS_CADENCE_MINUTES);
+    expect(bySlug['courtlistener-opinions'].refresh).toBe(true);
+    expect(bySlug['courtlistener-opinions-scotus'].cadence).toBe(30);
     expect(bySlug['courtlistener-oral-arguments'].cadence).toBe(60);
     expect(bySlug['courtlistener-dockets'].cadence).toBe(120);
     expect(bySlug['courtlistener-judges'].cadence).toBe(1440);
@@ -223,6 +227,134 @@ describe('feeds', () => {
     expect(live.statusTags('Unpublished')).toEqual(['unpublished']);
     expect(live.statusTags('Unknown')).toEqual([]);
     expect(live.statusTags('')).toEqual([]);
+  });
+});
+
+describe('all courts: the rotation through each court feed in turn', () => {
+  test('the courts scraped for opinions, sorted; the rotation wraps', () => {
+    const rows = [
+      { id: 'nc', in_use: 't', has_opinion_scraper: 't' },
+      { id: 'ca9', in_use: 't', has_opinion_scraper: 't' },
+      { id: 'minnag', in_use: 't', has_opinion_scraper: 'f' },
+      { id: 'old', in_use: 'f', has_opinion_scraper: 't' },
+      { id: '../x', in_use: 't', has_opinion_scraper: 't' },
+    ];
+    expect(live.scrapedCourts(rows)).toEqual(['ca9', 'nc']);
+    const courts = ['a', 'b', 'c', 'd', 'e'];
+    expect(live.rotation(courts, undefined, 2)).toEqual({ picked: ['a', 'b'], next: 2 });
+    expect(live.rotation(courts, 4, 3)).toEqual({ picked: ['e', 'a', 'b'], next: 2 });
+    expect(live.rotation(courts, 12, 2)).toEqual({ picked: ['c', 'd'], next: 4 });
+    // Asking for more than there are reads each once.
+    expect(live.rotation(courts, 1, 9)).toEqual({ picked: ['b', 'c', 'd', 'e', 'a'], next: 1 });
+    expect(live.rotation([], 3, 2)).toEqual({ picked: [], next: 0 });
+  });
+
+  /** A fake CourtListener: the all-courts feed, each court's feed, the bucket and the courts file. */
+  function site({ fail = [] } = {}) {
+    const calls = [];
+    const atom = (court, id) =>
+      `<feed xmlns="http://www.w3.org/2005/Atom"><entry><title>Case ${id}</title><link href="https://www.courtlistener.com/opinion/${id}/case/"/><author><name>${court}</name></author><published>2026-09-22T00:00:00-07:00</published><category term="Published"/></entry></feed>`;
+    const http = {
+      async text(url) {
+        calls.push(url);
+        const m = url.match(/\/feed\/court\/([a-z0-9_-]+)\//);
+        if (m) {
+          if (fail.includes(m[1])) throw new Error('503');
+          return atom(m[1], m[1] === 'all' ? 1 : 100 + calls.length);
+        }
+        return '<r><IsTruncated>false</IsTruncated><Contents><Key>bulk-data/courts-2026-06-30.csv.bz2</Key><Size>900</Size></Contents></r>';
+      },
+      async download(url, path) {
+        calls.push(url);
+        await writeFile(path, courtsFile);
+        return { path, bytes: courtsFile.length, complete: true };
+      },
+    };
+    return { http, calls };
+  }
+  let courtsFile;
+  let dir;
+  let savedDataDir;
+  beforeAll(async () => {
+    dir = await mkdtemp(join(tmpdir(), 'nichedb-cl-courts-'));
+    savedDataDir = config.ingest.dataDir;
+    config.ingest.dataDir = dir;
+    const plain = join(dir, 'courts.csv');
+    await writeFile(
+      plain,
+      'id,in_use,has_opinion_scraper\n"nc","t","t"\n"ca9","t","t"\n"cal","t","t"\n"minnag","t","f"\n',
+    );
+    const proc = Bun.spawn(['bzip2', '-f', plain], { stderr: 'pipe' });
+    expect(await proc.exited).toBe(0);
+    courtsFile = await readFile(`${plain}.bz2`);
+  });
+  afterAll(async () => {
+    config.ingest.dataDir = savedDataDir;
+    if (dir) await rm(dir, { recursive: true, force: true });
+  });
+
+  const pullAll = (ctx) =>
+    live.courtlistener.pull({
+      config: { ...live.courtlistener.defaults, pauseMs: 0, ...(ctx.config ?? {}) },
+      cursor: ctx.cursor ?? {},
+      http: ctx.http,
+      log: () => {},
+      now: ctx.now ?? NOW,
+    });
+
+  test.skipIf(!Bun.which('bzip2'))(
+    'a first run lists the courts from the dump, reads the all-courts feed and the next courts',
+    async () => {
+      const { http, calls } = site();
+      const r = await pullAll({ http, config: { perRun: 2 } });
+      expect(r.cursor).toEqual({
+        courts: ['ca9', 'cal', 'nc'],
+        listedAt: new Date(NOW).toISOString(),
+        next: 2,
+      });
+      const feeds = calls.filter((u) => u.includes('/feed/court/'));
+      expect(feeds).toEqual([
+        'https://www.courtlistener.com/feed/court/all/',
+        'https://www.courtlistener.com/feed/court/ca9/',
+        'https://www.courtlistener.com/feed/court/cal/',
+      ]);
+      expect(r.items.map((i) => i.data.courtId)).toEqual([null, 'ca9', 'cal']);
+      expect(r.items[1].tags).toContain('ca9');
+      expect(r.note).toContain('2 courts (ca9 to cal)');
+
+      // The next run keeps the list (a day has not passed) and carries on, wrapping.
+      const { http: http2, calls: calls2 } = site();
+      const r2 = await pullAll({ http: http2, config: { perRun: 2 }, cursor: r.cursor });
+      expect(calls2.filter((u) => u.endsWith('.bz2') || u.includes('list-type'))).toEqual([]);
+      expect(calls2.slice(1)).toEqual([
+        'https://www.courtlistener.com/feed/court/nc/',
+        'https://www.courtlistener.com/feed/court/ca9/',
+      ]);
+      expect(r2.cursor.next).toBe(1);
+    },
+  );
+
+  test('a feed that fails is logged and skipped; only every feed failing fails the run', async () => {
+    const cursor = { courts: ['ca9', 'nc'], listedAt: new Date(NOW).toISOString(), next: 0 };
+    const some = await pullAll({ http: site({ fail: ['ca9'] }).http, cursor });
+    expect(some.items).toHaveLength(2);
+    expect(some.note).toContain('1 feed(s) failed');
+    await expect(
+      pullAll({ http: site({ fail: ['all', 'ca9', 'nc'] }).http, cursor }),
+    ).rejects.toThrow(/every feed failed/);
+  });
+
+  test('one court by id, or `all` alone, reads one feed and keeps no rotation', async () => {
+    for (const court of ['scotus', 'all']) {
+      const { http, calls } = site();
+      const r = await pullAll({ http, config: { court } });
+      expect(calls).toEqual([`https://www.courtlistener.com/feed/court/${court}/`]);
+      expect(r.cursor).toBeUndefined();
+    }
+    const { http, calls } = site();
+    const off = await pullAll({ http, config: { perRun: 0 }, cursor: { next: 3 } });
+    expect(calls).toEqual(['https://www.courtlistener.com/feed/court/all/']);
+    expect(off.cursor).toEqual({ next: 3 });
   });
 });
 
@@ -440,6 +572,28 @@ const HEADERS = {
     'id,date_created,date_modified,source,appeal_from_str,assigned_to_str,referred_to_str,panel_str,date_last_index,date_cert_granted,date_cert_denied,date_argued,date_reargued,date_reargument_denied,date_filed,date_terminated,date_last_filing,case_name_short,case_name,case_name_full,slug,docket_number,docket_number_core,pacer_case_id,cause,nature_of_suit,jury_demand,jurisdiction_type,appellate_fee_status,appellate_case_type_information,mdl_status,filepath_local,filepath_ia,filepath_ia_json,ia_upload_failure_count,ia_needs_upload,ia_date_first_change,view_count,date_blocked,blocked,appeal_from_id,assigned_to_id,court_id,idb_data_id,originating_court_information_id,referred_to_id,federal_dn_case_type,federal_dn_office_code,federal_dn_judge_initials_assigned,federal_dn_judge_initials_referred,federal_defendant_number,parent_docket_id,docket_number_raw,docket_number_source',
   'fjc-integrated-database':
     'id,date_created,date_modified,dataset_source,office,docket_number,origin,date_filed,jurisdiction,nature_of_suit,title,section,subsection,diversity_of_residence,class_action,monetary_demand,county_of_residence,arbitration_at_filing,arbitration_at_termination,multidistrict_litigation_docket_number,plaintiff,defendant,date_transfer,transfer_office,transfer_docket_number,transfer_origin,date_terminated,termination_class_action_status,procedural_progress,disposition,nature_of_judgement,amount_received,judgment,pro_se,year_of_tape,nature_of_offense,version,circuit_id,district_id',
+  citations: 'id,volume,reporter,page,type,cluster_id,date_created,date_modified',
+  'people-db-schools': 'id,date_created,date_modified,name,ein,is_alias_of_id',
+  'people-db-educations':
+    'id,date_created,date_modified,degree_level,degree_detail,degree_year,person_id,school_id',
+  'people-db-political-affiliations':
+    'id,date_created,date_modified,political_party,source,date_start,date_granularity_start,date_end,date_granularity_end,person_id',
+  'financial-disclosure-investments':
+    'id,date_created,date_modified,page_number,description,redacted,income_during_reporting_period_code,income_during_reporting_period_type,gross_value_code,gross_value_method,transaction_during_reporting_period,transaction_date_raw,transaction_date,transaction_value_code,transaction_gain_code,transaction_partner,has_inferred_values,financial_disclosure_id',
+  'financial-disclosures-gifts':
+    'id,date_created,date_modified,source,description,value,redacted,financial_disclosure_id',
+  'financial-disclosures-debts':
+    'id,date_created,date_modified,creditor_name,description,value_code,redacted,financial_disclosure_id',
+  'financial-disclosures-positions':
+    'id,date_created,date_modified,position,organization_name,redacted,financial_disclosure_id',
+  'financial-disclosures-agreements':
+    'id,date_created,date_modified,date_raw,parties_and_terms,redacted,financial_disclosure_id',
+  'financial-disclosures-reimbursements':
+    'id,date_created,date_modified,source,date_raw,location,purpose,items_paid_or_provided,redacted,financial_disclosure_id',
+  'financial-disclosures-spousal-income':
+    'id,date_created,date_modified,source_type,date_raw,redacted,financial_disclosure_id',
+  'financial-disclosures-non-investment-income':
+    'id,date_created,date_modified,date_raw,source_type,income_amount,redacted,financial_disclosure_id',
 };
 
 /** A row object with every column of the table null except the ones given. */
@@ -662,6 +816,118 @@ const ROWS = {
       district_id: 'paed',
     }),
   ],
+  // Cut from the 2026-06-30 dump; Brown carries two cites, one row has no reporter.
+  citations: [
+    rowOf('citations', {
+      id: '1',
+      volume: '347',
+      reporter: 'U.S.',
+      page: '483',
+      type: '1',
+      cluster_id: '108713',
+      date_modified: '2022-03-01 00:00:00.000000+00',
+    }),
+    rowOf('citations', {
+      id: '2',
+      volume: '74',
+      reporter: 'S. Ct.',
+      page: '686',
+      type: '3',
+      cluster_id: '108713',
+      date_modified: '2022-03-01 00:00:00.000000+00',
+    }),
+    rowOf('citations', {
+      id: '3',
+      volume: '2002',
+      reporter: 'Ohio',
+      page: '2851',
+      type: '8',
+      cluster_id: '7290305',
+      date_modified: '2022-03-01 00:00:00.000000+00',
+    }),
+    rowOf('citations', { id: '4', volume: '1', reporter: '', page: '1', cluster_id: '9' }),
+  ],
+  'people-db-schools': [
+    rowOf('people-db-schools', { id: '4697', name: 'Howard University', ein: '530204707' }),
+  ],
+  'people-db-educations': [
+    rowOf('people-db-educations', {
+      id: '1',
+      degree_level: 'llb',
+      degree_detail: 'LL.B.',
+      degree_year: '1939',
+      person_id: '2749',
+      school_id: '4697',
+    }),
+  ],
+  'people-db-political-affiliations': [
+    rowOf('people-db-political-affiliations', {
+      id: '1',
+      political_party: 'd',
+      source: 'a',
+      person_id: '2749',
+    }),
+  ],
+  'financial-disclosure-investments': [
+    rowOf('financial-disclosure-investments', {
+      id: '4558608',
+      date_modified: '2021-01-04 00:00:00.000000+00',
+      description: 'Fidelity Cash Reserves',
+      redacted: 'f',
+      income_during_reporting_period_code: 'A',
+      income_during_reporting_period_type: 'Int/Div',
+      gross_value_code: 'K',
+      financial_disclosure_id: '1108',
+    }),
+    rowOf('financial-disclosure-investments', {
+      id: '4558609',
+      date_modified: '2021-01-04 00:00:00.000000+00',
+      description: '',
+      redacted: 't',
+      financial_disclosure_id: '1108',
+    }),
+  ],
+  'financial-disclosures-gifts': [
+    rowOf('financial-disclosures-gifts', {
+      id: '11',
+      source: 'Bar Association',
+      description: 'Books',
+      redacted: 'f',
+      financial_disclosure_id: '1108',
+    }),
+  ],
+  'financial-disclosures-debts': [
+    rowOf('financial-disclosures-debts', {
+      id: '20',
+      creditor_name: 'Goldman, Sachs',
+      description: 'Margin Account',
+      value_code: 'J',
+      redacted: 'f',
+      financial_disclosure_id: '1108',
+    }),
+  ],
+  'financial-disclosures-positions': [
+    rowOf('financial-disclosures-positions', {
+      id: '19',
+      position: 'Trustee',
+      organization_name: 'Family Trust',
+      redacted: 'f',
+      financial_disclosure_id: '1108',
+    }),
+  ],
+  'financial-disclosures-agreements': [],
+  'financial-disclosures-reimbursements': [],
+  'financial-disclosures-spousal-income': [],
+  'financial-disclosures-non-investment-income': [
+    rowOf('financial-disclosures-non-investment-income', {
+      id: '9',
+      date_raw: '2009',
+      source_type: 'Law school, adjunct teaching',
+      income_amount: '$10,000.00',
+      redacted: 'f',
+      financial_disclosure_id: '1108',
+    }),
+  ],
 };
 
 describe('catalogue: listing and cursor', () => {
@@ -675,13 +941,14 @@ describe('catalogue: listing and cursor', () => {
     );
     // 2026-09-30 lists courts, people and disclosures but an empty clusters
     // file and no oral arguments or positions yet: not a dump, so June wins.
-    expect(cat.newestCompleteDate(page.entries, cat.neededFiles({}))).toBe('2026-06-30');
+    const before = [...cat.LEGACY_FILES.slice(0, 5), 'people-db-positions'];
+    expect(cat.newestCompleteDate(page.entries, before)).toBe('2026-06-30');
+    // The fixture listing predates the tables the walk has since taken on.
+    expect(cat.newestCompleteDate(page.entries, cat.neededFiles({}))).toBeNull();
     expect(cat.newestCompleteDate(page.entries, ['courts'])).toBe('2026-09-30');
     expect(cat.newestCompleteDate(page.entries, ['courts', 'opinion-clusters'])).toBe('2026-06-30');
-    expect(cat.newestCompleteDate(page.entries, cat.neededFiles({ dockets: 'true' }))).toBe(
-      '2026-06-30',
-    );
-    expect(cat.newestCompleteDate(page.entries, cat.neededFiles({ fjc: 'true' }))).toBeNull();
+    expect(cat.newestCompleteDate(page.entries, [...before, 'dockets'])).toBe('2026-06-30');
+    expect(cat.newestCompleteDate(page.entries, [...before, 'fjc-integrated-database'])).toBeNull();
     expect(cat.newestCompleteDate([], ['courts'])).toBeNull();
   });
 
@@ -720,16 +987,22 @@ describe('catalogue: listing and cursor', () => {
     await expect(cat.resolveVersion(http, ['courts', 'dockets'])).rejects.toThrow(/no date/);
   });
 
-  test('files: the five by default, dockets and the FJC by config, side files always needed', () => {
+  test('files: six always, the FJC on by default, dockets by config, side files always needed', () => {
     expect(cat.filesFor({})).toEqual(cat.FILES);
     expect(cat.filesFor({ dockets: 'false', fjc: false })).toEqual(cat.FILES);
     expect(cat.filesFor({ dockets: 'true' })).toEqual([...cat.FILES, 'dockets']);
     expect(cat.filesFor({ dockets: true, fjc: '1' })).toEqual([
       ...cat.FILES,
+      'fjc-integrated-database',
       'dockets',
+    ]);
+    expect(cat.filesFor(cat.courtlistenerCatalog.defaults)).toEqual([
+      ...cat.FILES,
       'fjc-integrated-database',
     ]);
-    expect(cat.neededFiles({})).toEqual([...cat.FILES, 'people-db-positions']);
+    expect(cat.neededFiles({})).toEqual([...cat.FILES, ...cat.SIDE_FILES]);
+    // Citations patch the clusters, so they come after them.
+    expect(cat.FILES.indexOf('citations')).toBe(cat.FILES.indexOf('opinion-clusters') + 1);
     expect(cat.fileUrl('courts', '2026-06-30')).toBe(
       'https://com-courtlistener-storage.s3-us-west-2.amazonaws.com/bulk-data/courts-2026-06-30.csv.bz2',
     );
@@ -744,6 +1017,7 @@ describe('catalogue: listing and cursor', () => {
   test('the cursor: where to resume, and what is stale on a second pass', () => {
     expect(cat.resumeFrom(undefined)).toEqual({
       version: null,
+      walked: [],
       file: 'courts',
       record: 0,
       modifiedWatermark: null,
@@ -759,14 +1033,19 @@ describe('catalogue: listing and cursor', () => {
       }),
     ).toMatchObject({
       version: '2026-06-30',
+      // A cursor from before the id scheme: of the tables before its file,
+      // only the courts keep their rows; the re-keyed three are walked again.
+      walked: ['courts'],
       file: 'opinion-clusters',
       record: 12000,
+      done: false,
     });
-    // A cursor in a table that was turned off starts the first table over.
+    // A cursor in a table that was turned off starts the first table not walked.
     expect(
       cat.resumeFrom({ version: '2026-06-30', file: 'dockets', record: 500 }, cat.FILES),
     ).toMatchObject({
-      file: 'courts',
+      walked: ['courts', 'opinion-clusters'],
+      file: 'people-db-people',
       record: 0,
     });
     expect(
@@ -779,6 +1058,8 @@ describe('catalogue: listing and cursor', () => {
       record: 500,
     });
     expect(cat.resumeFrom({ version: 'june', done: true }).done).toBe(false);
+    // A pass completed before the id scheme is not complete now, and its
+    // watermark goes: the re-keyed tables must be walked whole.
     expect(
       cat.resumeFrom({
         version: '2026-06-30',
@@ -786,8 +1067,29 @@ describe('catalogue: listing and cursor', () => {
         modifiedWatermark: '2026-06-01 00:00:00+00',
       }),
     ).toMatchObject({
+      walked: ['courts', 'opinion-clusters'],
+      file: 'people-db-people',
+      done: false,
+      modifiedWatermark: null,
+    });
+    const complete = {
+      idScheme: cat.ID_SCHEME,
+      version: '2026-06-30',
+      walked: cat.FILES,
       done: true,
       modifiedWatermark: '2026-06-01 00:00:00+00',
+    };
+    expect(cat.resumeFrom(complete)).toMatchObject({
+      file: null,
+      done: true,
+      modifiedWatermark: '2026-06-01 00:00:00+00',
+    });
+    // A table turned on after a pass completed is walked on its own.
+    expect(cat.resumeFrom(complete, cat.filesFor({ fjc: 'true' }))).toMatchObject({
+      walked: cat.FILES,
+      file: 'fjc-integrated-database',
+      record: 0,
+      done: false,
     });
     expect(cat.isStale('2024-11-05 19:51:49.079046+00', '2026-06-01 00:00:00+00')).toBe(true);
     expect(cat.isStale('2026-06-02 00:00:00+00', '2026-06-01 00:00:00+00')).toBe(false);
@@ -831,7 +1133,7 @@ describe('catalogue: rows', () => {
     const [robinson, alias] = ROWS['people-db-people'].map((r) => cat.judgeItem(r, positions));
     expect(alias).toBeNull();
     expect(robinson).toMatchObject({
-      externalId: '2749',
+      externalId: 'judge:2749',
       kind: 'judge',
       title: 'Spottswood William Robinson 3',
       url: 'https://www.courtlistener.com/person/2749/spottswood-william-robinson-iii/',
@@ -877,7 +1179,8 @@ describe('catalogue: rows', () => {
     const row = ROWS['financial-disclosures'][0];
     const named = cat.disclosureItem(row, new Map([['2084', 'Harry Sandlin Mattice Jr.']]));
     expect(named).toMatchObject({
-      externalId: '1108',
+      externalId: 'disclosure:1108',
+      summary: null,
       kind: 'financial-disclosure',
       title: 'Harry Sandlin Mattice Jr. financial disclosure 2009',
       url: 'https://storage.courtlistener.com/us/federal/judicial/financial-disclosures/2084/harry-sandlin-mattice-jr-disclosure.2009.pdf',
@@ -902,11 +1205,87 @@ describe('catalogue: rows', () => {
     expect(normaliseItem(named)).not.toBeNull();
   });
 
+  test('a judge with education and party, summarised and tagged', () => {
+    const positions = new Map([['2749', ROWS['people-db-positions'].map(cat.positionOf)]]);
+    const schools = new Map([['4697', 'Howard University']]);
+    const educations = new Map([
+      ['2749', ROWS['people-db-educations'].map((r) => cat.educationOf(r, schools))],
+    ]);
+    const affiliations = new Map([
+      ['2749', ROWS['people-db-political-affiliations'].map(cat.affiliationOf)],
+    ]);
+    const judge = cat.judgeItem(ROWS['people-db-people'][0], positions, {
+      educations,
+      affiliations,
+    });
+    expect(judge.summary).toBe(
+      'jud, cadc (1966 to 1998); Private practice (1943 to 1966). Education: Howard University (LL.B., 1939)',
+    );
+    expect(judge.tags).toEqual(['courtlistener', 'judge', 'party:democratic', 'cadc']);
+    expect(judge.data.politicalAffiliations).toEqual([
+      { party: 'Democratic', source: 'a', dateStart: null, dateEnd: null },
+    ]);
+    expect(cat.affiliationOf({ political_party: 'q' }).party).toBe('q');
+    expect(cat.educationOf({ school_id: '1' }).school).toBeNull();
+  });
+
+  test('a disclosure with what the report says; redacted rows counted, never quoted', () => {
+    const detail = new Map([
+      [
+        '1108',
+        {
+          investments: {
+            count: 2,
+            items: ROWS['financial-disclosure-investments'].map((r) =>
+              cat.detailOf('investments', r),
+            ),
+          },
+          positions: {
+            count: 1,
+            items: ROWS['financial-disclosures-positions'].map((r) => cat.detailOf('positions', r)),
+          },
+        },
+      ],
+    ]);
+    const item = cat.disclosureItem(ROWS['financial-disclosures'][0], new Map(), detail);
+    expect(item.summary).toBe(
+      'Positions (1): Trustee, Family Trust; Investments (2): Fidelity Cash Reserves',
+    );
+    expect(item.data.investments[0]).toEqual({
+      description: 'Fidelity Cash Reserves',
+      incomeCode: 'A',
+      incomeType: 'Int/Div',
+      grossValueCode: 'K',
+      transaction: null,
+      transactionDate: null,
+      transactionValueCode: null,
+      redacted: false,
+    });
+    expect(item.data.investments[1].redacted).toBe(true);
+    expect(item.data.counts.investments).toBe(2);
+    expect(item.data.gifts).toEqual([]);
+    expect(cat.detailOf('nope', {})).toBeNull();
+    expect(normaliseItem(item)).not.toBeNull();
+  });
+
+  test('a citation is a patch to its opinion, never a row', () => {
+    expect(cat.citationPatch(ROWS.citations[0])).toEqual({
+      externalId: '108713',
+      tags: ['347 U.S. 483'],
+      append: { citations: ['347 U.S. 483'] },
+    });
+    expect(cat.citationPatch(ROWS.citations[3])).toBeNull();
+    expect(cat.citationPatch({ ...ROWS.citations[0], cluster_id: 'x' })).toBeNull();
+    expect(cat.rowItem('citations', ROWS.citations[1])).toEqual({
+      patch: cat.citationPatch(ROWS.citations[1]),
+    });
+  });
+
   test('an oral argument with its MP3, a blocked one left out', () => {
     const [ayala, sealed] = ROWS['oral-arguments'].map(cat.audioItem);
     expect(sealed).toBeNull();
     expect(ayala).toMatchObject({
-      externalId: '17',
+      externalId: 'audio:17',
       kind: 'oral-argument',
       title: 'Ayala v. Shinseki',
       url: 'https://www.courtlistener.com/audio/17/ayala-v-shinseki/',
@@ -965,7 +1344,7 @@ describe('catalogue: rows', () => {
   test('a docket row is the shape the API source writes, and an FJC case has no page', () => {
     const docket = cat.docketRowItem(ROWS.dockets[0]);
     expect(docket).toMatchObject({
-      externalId: '29439169',
+      externalId: 'docket:29439169',
       kind: 'docket',
       title: 'Huaranca v. Internal Revenue Service (8-98-08457)',
       url: 'https://www.courtlistener.com/docket/29439169/huaranca-v-internal-revenue-service/',
@@ -986,7 +1365,7 @@ describe('catalogue: rows', () => {
 
     const fjc = cat.fjcItem(ROWS['fjc-integrated-database'][0]);
     expect(fjc).toMatchObject({
-      externalId: '17442742',
+      externalId: 'fjc:17442742',
       kind: 'case',
       title: 'A.T. CHADWICK CO., INC. v. DEZCON CONTRACTORS, INC. (8907217)',
       url: null,
@@ -1099,26 +1478,62 @@ describe.skipIf(!haveBzip2)('catalogue: the walk', () => {
       'financial-disclosure': 1,
       'oral-argument': 1,
       opinion: 2,
+      case: 1,
     });
-    // The judge carries positions from the side file, the disclosure a name from the people file.
-    expect(items.find((i) => i.kind === 'judge').data.positions).toHaveLength(2);
+    // Every id unique across the tables that share the source.
+    expect(new Set(items.map((i) => i.externalId)).size).toBe(items.length);
+    // The judge carries positions, education and party from the side files.
+    const judge = items.find((i) => i.kind === 'judge');
+    expect(judge.data.positions).toHaveLength(2);
+    expect(judge.data.educations).toEqual([
+      {
+        school: 'Howard University',
+        schoolId: '4697',
+        degreeLevel: 'llb',
+        degree: 'LL.B.',
+        year: 1939,
+      },
+    ]);
+    expect(judge.tags).toContain('party:democratic');
+    // The disclosure carries what the report says from the eight detail tables.
+    const disclosure = items.find((i) => i.kind === 'financial-disclosure');
+    expect(disclosure.data.counts).toEqual({
+      investments: 2,
+      gifts: 1,
+      debts: 1,
+      positions: 1,
+      agreements: 0,
+      reimbursements: 0,
+      spousalIncome: 0,
+      nonInvestmentIncome: 1,
+    });
+    expect(disclosure.summary).toContain('Investments (2): Fidelity Cash Reserves');
+    // Citations are patches to the opinions, never rows; the one with no reporter is skipped.
+    const patches = batches.flatMap((b) => b.patches ?? []);
+    expect(patches.map((p) => `${p.externalId} ${p.tags[0]}`)).toEqual([
+      '108713 347 U.S. 483',
+      '108713 74 S. Ct. 686',
+      '7290305 2002 Ohio 2851',
+    ]);
     // The disclosure's person (2084) is not in the people fixture, so the fallback title.
     expect(items.find((i) => i.kind === 'financial-disclosure').title).toBe(
       'Financial disclosure 2009 (person 2084)',
     );
     expect(result.cursor).toMatchObject({
+      idScheme: cat.ID_SCHEME,
       version: VERSION,
+      walked: [...cat.FILES, 'fjc-integrated-database'],
       file: null,
       record: 0,
       done: true,
       modifiedWatermark: '2024-11-08 17:44:17.193082+00',
     });
     expect(result.note).toContain('complete');
-    // The listing, then a download call per table needed: the people file is
-    // asked for twice (as a table, then beside the disclosures), and the second
-    // time `http.download` finds it whole on disk and costs one Range request.
+    // The listing, then a download call per table needed: seven walked, four
+    // beside the judges, nine beside the disclosures (the people file again,
+    // which `http.download` finds whole on disk: one Range request).
     expect(calls.filter((u) => u.includes('list-type')).length).toBe(1);
-    expect(calls.filter((u) => u.endsWith('.csv.bz2')).length).toBe(7);
+    expect(calls.filter((u) => u.endsWith('.csv.bz2')).length).toBe(20);
     // The walked copies are gone from the shared disk.
     expect((await readdir(join(dir, cat.DUMP_DIR))).filter((n) => n.endsWith('.bz2'))).toEqual([]);
 
@@ -1170,14 +1585,15 @@ describe.skipIf(!haveBzip2)('catalogue: the walk', () => {
     expect(first.result.nextInMinutes).toBe(cat.RESUME_MINUTES);
 
     const rest = await drain(pull({ http, config: { batchRows: 1 }, cursor: first.result.cursor }));
-    const ids = rest.batches.flatMap((b) => b.items.map((i) => `${i.kind}:${i.externalId}`));
+    const ids = rest.batches.flatMap((b) => b.items.map((i) => i.externalId));
     expect(ids).toEqual([
-      'court:minnag',
+      'minnag',
       'judge:2749',
-      'financial-disclosure:1108',
-      'oral-argument:17',
-      'opinion:7290305',
-      'opinion:108713',
+      'disclosure:1108',
+      'audio:17',
+      '7290305',
+      '108713',
+      'fjc:17442742',
     ]);
     expect(rest.result.cursor.done).toBe(true);
   });
@@ -1185,7 +1601,9 @@ describe.skipIf(!haveBzip2)('catalogue: the walk', () => {
   test('a second pass on a new dump skips rows modified before the watermark', async () => {
     const { http } = bucket();
     const prev = {
+      idScheme: cat.ID_SCHEME,
       version: '2026-03-31',
+      walked: [...cat.FILES, 'fjc-integrated-database'],
       file: null,
       record: 0,
       done: true,
@@ -1195,8 +1613,41 @@ describe.skipIf(!haveBzip2)('catalogue: the walk', () => {
     const ids = batches.flatMap((b) => b.items.map((i) => i.externalId));
     // Only the cluster modified on 2024-11-08 is newer than the watermark.
     expect(ids).toEqual(['108713']);
+    // Citations are walked whole every pass: a patch already applied costs nothing.
+    expect(batches.flatMap((b) => b.patches ?? [])).toHaveLength(3);
     expect(result.note).toContain('unchanged skipped');
     expect(result.cursor.modifiedWatermark).toBe('2024-11-08 17:44:17.193082+00');
+  });
+
+  test('a cursor from before the id scheme finishes its table, then walks the re-keyed ones', async () => {
+    const { http } = bucket();
+    // The production cursor on 2026-09-23, in the clusters with no `walked`.
+    const cursor = {
+      version: VERSION,
+      file: 'opinion-clusters',
+      record: 0,
+      modifiedWatermark: null,
+      maxModified: '2026-06-30 08:17:05.895051+00',
+      done: false,
+    };
+    const { batches, result } = await drain(pull({ http, cursor }));
+    const order = [];
+    for (const b of batches) {
+      for (const i of b.items) if (order.at(-1) !== i.kind) order.push(i.kind);
+      if (b.patches?.length && order.at(-1) !== 'citations') order.push('citations');
+    }
+    expect(order).toEqual([
+      'opinion',
+      'judge',
+      'financial-disclosure',
+      'oral-argument',
+      'citations',
+      'case',
+    ]);
+    // The table in progress first, then the rest in FILES order; the courts are not walked again.
+    expect(batches.flatMap((b) => b.items).some((i) => i.kind === 'court')).toBe(false);
+    expect(result.cursor).toMatchObject({ idScheme: cat.ID_SCHEME, done: true });
+    expect(result.cursor.walked.sort()).toEqual([...cat.FILES, 'fjc-integrated-database'].sort());
   });
 
   test('dockets and the FJC join the walk only when turned on', async () => {
@@ -1205,6 +1656,10 @@ describe.skipIf(!haveBzip2)('catalogue: the walk', () => {
     const kinds = new Set(batches.flatMap((b) => b.items.map((i) => i.kind)));
     expect(kinds.has('docket')).toBe(true);
     expect(kinds.has('case')).toBe(true);
+    const off = await drain(pull({ http, config: { dockets: 'false', fjc: 'false' } }));
+    const offKinds = new Set(off.batches.flatMap((b) => b.items.map((i) => i.kind)));
+    expect(offKinds.has('docket')).toBe(false);
+    expect(offKinds.has('case')).toBe(false);
   });
 
   test('a bucket that cannot be listed: a first run fails, a walk in progress carries on', async () => {
@@ -1223,12 +1678,20 @@ describe.skipIf(!haveBzip2)('catalogue: the walk', () => {
     );
     expect(listings).toBe(cat.FAILURE_STOP);
     // A walk in progress does not need to know what is newest.
-    const cursor = { version: VERSION, file: 'oral-arguments', record: 0, done: false };
+    const cursor = {
+      idScheme: cat.ID_SCHEME,
+      version: VERSION,
+      walked: ['courts', 'people-db-people', 'financial-disclosures'],
+      file: 'oral-arguments',
+      record: 0,
+      done: false,
+    };
     const { batches, result } = await drain(pull({ http, config: { pauseMs: 0 }, cursor }));
     expect(batches.flatMap((b) => b.items.map((i) => i.kind))).toEqual([
       'oral-argument',
       'opinion',
       'opinion',
+      'case',
     ]);
     expect(result.cursor.done).toBe(true);
   });
@@ -1236,7 +1699,7 @@ describe.skipIf(!haveBzip2)('catalogue: the walk', () => {
 
 // ── The migration ────────────────────────────────────────────────────────────
 
-describe('migration 0027', () => {
+describe('migrations 0027 and 0028, and the patch query', () => {
   let db;
   const dir = new URL('../packages/db/migrations/', import.meta.url).pathname;
   beforeAll(async () => {
@@ -1292,5 +1755,95 @@ describe('migration 0027', () => {
     expect(
       (await one(`select count(*)::int as n from sources where adapter like 'courtlistener%'`)).n,
     ).toBe(1);
+  });
+
+  test('0028 deletes the bare-id rows the collision left, keeps clusters, turns the FJC on', async () => {
+    const one = async (sql, params) => (await db.query(sql, params)).rows[0];
+    const law = await one(`select id from collections where slug = 'law'`);
+    const catalog = await one(
+      `insert into sources (collection_id, adapter, slug, name, config, item_count)
+       values ($1, 'courtlistener-catalog', 'courtlistener-catalog', 'catalog',
+               '{"dockets":"false","fjc":"false","batchRows":500}', 7) returning id`,
+      [law.id],
+    );
+    const api = await one(
+      `insert into sources (collection_id, adapter, slug, name) values ($1, 'courtlistener-api', 'courtlistener-judges', 'api') returning id`,
+      [law.id],
+    );
+    const rows = [
+      [catalog.id, '17', 'oral-argument'],
+      [catalog.id, '2749', 'judge'],
+      [catalog.id, '1108', 'financial-disclosure'],
+      [catalog.id, '108713', 'opinion'],
+      [catalog.id, 'judge:2749', 'judge'],
+      [catalog.id, 'nc', 'court'],
+      [api.id, '2749', 'judge'],
+    ];
+    for (const [src, id, kind] of rows) {
+      await db.query(
+        `insert into items (collection_id, source_id, external_id, kind, title) values ($1, $2, $3, $4, 'x')`,
+        [law.id, src, id, kind],
+      );
+    }
+    const migration = await readFile(`${dir}0028_courtlistener_catalog_ids.sql`, 'utf8');
+    await db.exec(migration);
+    const left = (
+      await db.query(
+        `select source_id, external_id from items where source_id in ($1, $2) order by source_id, external_id`,
+        [catalog.id, api.id],
+      )
+    ).rows.map((r) => `${r.source_id === catalog.id ? 'catalog' : 'api'} ${r.external_id}`);
+    expect(left).toEqual(['catalog 108713', 'catalog judge:2749', 'catalog nc', 'api 2749']);
+    const src = await one(`select config, item_count from sources where id = $1`, [catalog.id]);
+    expect(src.config).toEqual({ dockets: 'false', fjc: 'true', batchRows: 500 });
+    expect(src.item_count).toBe(4);
+    // Idempotent, and a config someone set by hand is theirs.
+    await db.query(`update sources set config = '{"fjc":"no"}' where id = $1`, [catalog.id]);
+    await db.exec(migration);
+    expect((await one(`select config from sources where id = $1`, [catalog.id])).config).toEqual({
+      fjc: 'no',
+    });
+  });
+
+  test('patchItems: tags and data arrays appended once, missing rows and full rows untouched', async () => {
+    const one = async (sql, params) => (await db.query(sql, params)).rows[0];
+    const law = await one(`select id from collections where slug = 'law'`);
+    const src = await one(
+      `insert into sources (collection_id, adapter, slug, name) values ($1, 'courtlistener-catalog', 'patch-test', 'p') returning id`,
+      [law.id],
+    );
+    await db.query(
+      `insert into items (collection_id, source_id, external_id, kind, title, tags, data)
+       values ($1, $2, '108713', 'opinion', 'Brown v. Board of Education', '{courtlistener,scotus}', '{"judges":"Warren"}')`,
+      [law.id, src.id],
+    );
+    const rows = patchRows(
+      ROWS.citations
+        .map(cat.citationPatch)
+        .filter(Boolean)
+        .concat([
+          { externalId: '108713', tags: ['347 U.S. 483'], append: { citations: ['347 U.S. 483'] } },
+        ]),
+    );
+    // One row per id: Postgres applies only one FROM row per target.
+    expect(rows.map((r) => r.external_id)).toEqual(['108713', '7290305']);
+    expect(rows[0].append.citations).toEqual(['347 U.S. 483', '74 S. Ct. 686']);
+    const run = async () =>
+      (await db.query(PATCH_ITEMS_SQL, [JSON.stringify(rows), src.id])).rows.length;
+    // The cluster 7290305 has no row here, so only Brown changes.
+    expect(await run()).toBe(1);
+    const brown = await one(`select tags, data from items where source_id = $1`, [src.id]);
+    expect(brown.tags).toEqual(['courtlistener', 'scotus', '347 U.S. 483', '74 S. Ct. 686']);
+    expect(brown.data).toEqual({ judges: 'Warren', citations: ['347 U.S. 483', '74 S. Ct. 686'] });
+    // Applied again it touches nothing.
+    expect(await run()).toBe(0);
+    // A rewritten row (a changed cluster drops what patches added) takes them again.
+    await db.query(`update items set tags = '{courtlistener}', data = '{}' where source_id = $1`, [
+      src.id,
+    ]);
+    expect(await run()).toBe(1);
+    expect((await one(`select data from items where source_id = $1`, [src.id])).data).toEqual({
+      citations: ['347 U.S. 483', '74 S. Ct. 686'],
+    });
   });
 });

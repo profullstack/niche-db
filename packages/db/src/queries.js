@@ -773,6 +773,71 @@ export async function upsertItems({ collectionId, sourceId, items }) {
 }
 
 /**
+ * Add to rows a source already wrote, without writing the rows: tags appended
+ * and, under each key of `append`, values appended to that key's array in
+ * `data`, each only if it is not there yet. A patch for a row that does not
+ * exist does nothing, and a row that already holds everything a patch names is
+ * not touched (the WHERE), so re-applying a whole table of patches rewrites
+ * only the rows that were missing something.
+ *
+ * For a table that describes rows of another table (CourtListener's citations
+ * are the reporter cites of opinions already written): the row stays one row,
+ * and what it gains is searchable when it lands in tags.
+ *
+ * $1 is the patches as JSON, `[{ external_id, tags, append }]`, one per
+ * external_id; $2 the source.
+ */
+export const PATCH_ITEMS_SQL = `
+  update items i set
+    tags = i.tags || array(
+      select distinct t from unnest(coalesce(p.tags, '{}')) t where not t = any(i.tags)),
+    data = i.data || coalesce((
+      select jsonb_object_agg(a.key,
+        (case when jsonb_typeof(i.data -> a.key) = 'array' then i.data -> a.key else '[]'::jsonb end)
+        || coalesce((
+          select jsonb_agg(distinct e) from jsonb_array_elements(a.value) e
+          where not coalesce(i.data -> a.key, '[]'::jsonb) @> jsonb_build_array(e)), '[]'::jsonb))
+      from jsonb_each(coalesce(p.append, '{}'::jsonb)) a
+      where jsonb_typeof(a.value) = 'array'), '{}'::jsonb),
+    updated_at = now()
+  from jsonb_to_recordset($1::text::jsonb) as p(external_id text, tags text[], append jsonb)
+  where i.source_id = $2::text::bigint
+    and i.external_id = p.external_id
+    and not (i.tags @> coalesce(p.tags, '{}') and i.data @> coalesce(p.append, '{}'::jsonb))
+  returning i.id`;
+
+/**
+ * Fold a batch's patches into one per external_id (Postgres applies only one
+ * of several FROM rows matching the same target row), as the rows $1 wants.
+ */
+export function patchRows(patches) {
+  const by = new Map();
+  for (const p of patches ?? []) {
+    const id = p?.externalId == null ? '' : String(p.externalId);
+    if (!id) continue;
+    const row = by.get(id) ?? { external_id: id, tags: [], append: {} };
+    for (const t of p.tags ?? []) if (t && !row.tags.includes(t)) row.tags.push(String(t));
+    for (const [k, vs] of Object.entries(p.append ?? {})) {
+      if (!Array.isArray(vs)) continue;
+      row.append[k] ??= [];
+      for (const v of vs)
+        if (!row.append[k].some((x) => JSON.stringify(x) === JSON.stringify(v)))
+          row.append[k].push(v);
+    }
+    by.set(id, row);
+  }
+  return [...by.values()];
+}
+
+/** Apply patches to one source's rows; see PATCH_ITEMS_SQL. Returns how many rows changed. */
+export async function patchItems({ sourceId, patches }) {
+  const rows = patchRows(patches);
+  if (rows.length === 0) return { updated: 0 };
+  const out = await sql.unsafe(PATCH_ITEMS_SQL, [JSON.stringify(rows), sourceId]);
+  return { updated: out.length };
+}
+
+/**
  * Of these keys, which does another source in this collection already hold?
  *
  * The collection flag is checked inside the query on purpose. A collection that

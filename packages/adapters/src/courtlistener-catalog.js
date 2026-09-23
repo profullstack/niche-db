@@ -34,12 +34,39 @@ import {
  *                                                  titled by the judge's name
  *   oral-arguments          ~100k rows, 0.7 GB     kind oral-argument
  *   opinion-clusters        ~10M rows, 2.5 GB      kind opinion
+ *   citations               ~10M rows, 127 MB      no rows of its own: each
+ *                                                  reporter cite ("410 U.S.
+ *                                                  113") is added to its
+ *                                                  opinion as a tag and to
+ *                                                  data.citations, so the case
+ *                                                  is found by the cite people
+ *                                                  type (see patchItems)
+ *   fjc-integrated-database ~ a few million, 280 MB kind case
  *   dockets                 tens of millions, 5 GB kind docket, OFF by default
- *   fjc-integrated-database ~ a few million, 280 MB kind case, OFF by default
+ *
+ * Judges are joined with their positions, education (school names from
+ * people-db-schools) and political affiliations; disclosures with what the
+ * reports say, from eight detail tables (investments, gifts, debts, positions,
+ * agreements, reimbursements, spousal income, non-investment income).
+ * people-db-retention-events is published as a header and nothing else.
  *
  * The opinions table itself (54 GB, the full text) is never read: a cluster
  * row carries the case name, court, date, syllabus, status and citation count,
- * which is the record, and the page link is where the text lives.
+ * which is the record, and the page link is where the text lives. That also
+ * rules out parentheticals and the citation map: both are keyed by OPINION id,
+ * and the only map from an opinion to its cluster is in that 54 GB table.
+ *
+ * IDS
+ *
+ * Every table's rows share one source, and `(source_id, external_id)` is the
+ * row. Courts are keyed by their slug and opinions by the bare cluster id;
+ * every other table's ids are prefixed with what they are (`judge:2749`,
+ * `disclosure:1108`, `audio:17`, `docket:…`, `fjc:…`), because the tables
+ * number their rows independently from 1 and a bare id would make cluster 17
+ * overwrite audio 17. Until ID_SCHEME 2 they did exactly that: the clusters
+ * walk overwrote nearly every judge and disclosure row and half the oral
+ * arguments. A cursor from before the scheme walks those three tables again
+ * (and migration 0028 deletes the bare-id rows they left).
  *
  * THE WALK
  *
@@ -50,7 +77,9 @@ import {
  * version: files are downloaded by their dated name with Range resume into
  * the dump directory, walked 500 rows a batch with the cursor after every
  * batch saying which file and which record, and a run stops when its budget
- * is spent and resumes ten minutes later. A cursor naming a different date
+ * is spent and resumes ten minutes later. The cursor also lists the tables
+ * already walked on that date, so a table turned on (or re-keyed) later is
+ * walked without walking the others again. A cursor naming a different date
  * starts over. Once every file is walked the cursor is `done` and each run
  * until the date changes costs the listing and nothing else.
  *
@@ -80,39 +109,101 @@ export const PREFIX = 'bulk-data/';
 /** The subdirectory of the dump directory the files live in. */
 export const DUMP_DIR = 'courtlistener-catalog';
 
-/** The tables walked by default, in order. */
+/** The tables walked always, in order. Citations follow the clusters they patch. */
 export const FILES = [
   'courts',
   'people-db-people',
   'financial-disclosures',
   'oral-arguments',
   'opinion-clusters',
+  'citations',
 ];
 
-/** The tables a config turns on, by the key that turns them on. */
-export const OPTIONAL_FILES = { dockets: 'dockets', fjc: 'fjc-integrated-database' };
+/** The tables a config turns on, by the key that turns them on, in walk order. */
+export const OPTIONAL_FILES = { fjc: 'fjc-integrated-database', dockets: 'dockets' };
 
 /** Read whole into memory beside a walked table, never walked themselves. */
-export const SIDE_FILES = ['people-db-positions'];
+export const DISCLOSURE_DETAIL_FILES = {
+  investments: 'financial-disclosure-investments',
+  gifts: 'financial-disclosures-gifts',
+  debts: 'financial-disclosures-debts',
+  positions: 'financial-disclosures-positions',
+  agreements: 'financial-disclosures-agreements',
+  reimbursements: 'financial-disclosures-reimbursements',
+  spousalIncome: 'financial-disclosures-spousal-income',
+  nonInvestmentIncome: 'financial-disclosures-non-investment-income',
+};
+export const SIDE_FILES = [
+  'people-db-positions',
+  'people-db-schools',
+  'people-db-educations',
+  'people-db-political-affiliations',
+  ...Object.values(DISCLOSURE_DETAIL_FILES),
+];
 
 /** Tables big enough that a walked copy is dropped from the shared disk at once. */
 export const BIG_FILES = new Set([
   'oral-arguments',
   'opinion-clusters',
+  'citations',
   'dockets',
   'fjc-integrated-database',
 ]);
 
-/** The kind each table's rows become. */
+/** The kind each table's rows become (citations become none: they patch opinions). */
 export const KINDS = {
   courts: 'court',
   'people-db-people': 'judge',
   'financial-disclosures': 'financial-disclosure',
   'oral-arguments': 'oral-argument',
   'opinion-clusters': 'opinion',
+  citations: 'citation',
   dockets: 'docket',
   'fjc-integrated-database': 'case',
 };
+
+/**
+ * The external id scheme. 2: every table but courts and clusters prefixes its
+ * ids (see IDS above). A cursor without it was written under bare ids.
+ */
+export const ID_SCHEME = 2;
+
+/** The prefix each table's ids carry under ID_SCHEME 2. */
+export const ID_PREFIX = {
+  'people-db-people': 'judge',
+  'financial-disclosures': 'disclosure',
+  'oral-arguments': 'audio',
+  dockets: 'docket',
+  'fjc-integrated-database': 'fjc',
+};
+
+/** A row's external id: the table's prefix and CourtListener's id. */
+export const catalogId = (table, id) => `${ID_PREFIX[table]}:${id}`;
+
+/** The tables a pre-scheme walk wrote under bare ids, walked again under the new ones. */
+export const REKEYED = ['people-db-people', 'financial-disclosures', 'oral-arguments'];
+
+/** The tables of the walk before ID_SCHEME 2, in its order, to read an old cursor by. */
+export const LEGACY_FILES = [
+  'courts',
+  'people-db-people',
+  'financial-disclosures',
+  'oral-arguments',
+  'opinion-clusters',
+  'dockets',
+  'fjc-integrated-database',
+];
+
+/**
+ * Tables walked whole on every pass, whatever the watermark: a citation patch
+ * that is already on its opinion writes nothing, and one whose opinion was
+ * rewritten by a changed cluster row (which drops what patches added) must
+ * be applied again even though the citation itself did not change.
+ */
+export const NO_WATERMARK = new Set(['citations']);
+
+/** Detail rows kept per disclosure, per kind, so one row stays a row. */
+export const DETAIL_KEPT = 50;
 
 /** COPY's escape character in every CourtListener file. */
 export const CSV_ESCAPE = '\\';
@@ -366,26 +457,100 @@ export function positionsSummary(positions) {
   return trimTo(lines.join('; '), SUMMARY_CHARS);
 }
 
-/** One person row as a judge, with their positions; an alias of another person is nothing. */
-export function judgeItem(row, positionsByPerson = new Map()) {
+/**
+ * CourtListener's party codes (people.models.PoliticalAffiliation). An
+ * unknown code is kept as the code.
+ */
+export const PARTIES = {
+  d: 'Democratic',
+  r: 'Republican',
+  i: 'Independent',
+  g: 'Green',
+  l: 'Libertarian',
+  f: 'Federalist',
+  w: 'Whig',
+  j: 'Jeffersonian Republican',
+  u: 'National Union',
+  z: 'Reform',
+};
+
+/** One education row, with the school's name when the schools file is loaded. */
+export function educationOf(row, schools = new Map()) {
+  const schoolId = text(row?.school_id);
+  return {
+    school: (schoolId && schools.get(schoolId)) || null,
+    schoolId,
+    degreeLevel: text(row?.degree_level),
+    degree: text(row?.degree_detail),
+    year: num(row?.degree_year),
+  };
+}
+
+/** One political affiliation row. */
+export function affiliationOf(row) {
+  const code = text(row?.political_party);
+  return {
+    party: code ? (PARTIES[code] ?? code) : null,
+    source: text(row?.source),
+    dateStart: text(row?.date_start),
+    dateEnd: text(row?.date_end),
+  };
+}
+
+/** `Yale Law School (J.D., 1997)`, and the rest after it, for a judge's summary. */
+export function educationSummary(educations) {
+  return (educations ?? [])
+    .filter((e) => e.school)
+    .slice(0, 4)
+    .map((e) => {
+      const what = [e.degree ?? e.degreeLevel, e.year].filter(Boolean).join(', ');
+      return what ? `${e.school} (${what})` : e.school;
+    })
+    .join('; ');
+}
+
+/** A party as a tag: `party:democratic`. */
+const partyTag = (party) => (party ? `party:${slugify(party)}` : null);
+
+/**
+ * One person row as a judge, with their positions, education and parties
+ * from the side files; an alias of another person is nothing.
+ */
+export function judgeItem(row, positionsByPerson = new Map(), extra = {}) {
   if (!row?.id || text(row.is_alias_of_id)) return null;
   const title = personName(row);
   if (!title) return null;
-  const positions = (positionsByPerson.get(String(row.id)) ?? []).slice(0, POSITIONS_KEPT);
+  const id = String(row.id);
+  const positions = (positionsByPerson.get(id) ?? []).slice(0, POSITIONS_KEPT);
+  const educations = (extra.educations?.get(id) ?? []).slice(0, POSITIONS_KEPT);
+  const affiliations = (extra.affiliations?.get(id) ?? []).slice(0, POSITIONS_KEPT);
+  const schooling = educationSummary(educations);
+  const parties = [...new Set(affiliations.map((a) => a.party).filter(Boolean))];
   return {
-    externalId: String(row.id),
+    externalId: catalogId('people-db-people', row.id),
     kind: 'judge',
     title,
-    summary: positionsSummary(positions),
+    summary: trimTo(
+      [positionsSummary(positions), schooling ? `Education: ${schooling}` : null]
+        .filter(Boolean)
+        .join('. '),
+      SUMMARY_CHARS,
+    ),
     url: personUrl(row.id, text(row.slug)),
     publishedAt: null,
     timeKnown: false,
     precision: 'day',
-    tags: [PROVIDER, 'judge', ...new Set(positions.map((p) => p.courtId).filter(Boolean))].slice(
-      0,
-      40,
-    ),
+    tags: [
+      PROVIDER,
+      'judge',
+      ...parties.map(partyTag),
+      ...new Set(positions.map((p) => p.courtId).filter(Boolean)),
+    ]
+      .filter(Boolean)
+      .slice(0, 40),
     data: {
+      educations,
+      politicalAffiliations: affiliations,
       provider: PROVIDER,
       nameFirst: text(row.name_first),
       nameMiddle: text(row.name_middle),
@@ -408,8 +573,122 @@ export function judgeItem(row, positionsByPerson = new Map()) {
   };
 }
 
-/** One financial disclosure row, titled by the judge when the people file is loaded. */
-export function disclosureItem(row, namesByPerson = new Map()) {
+/**
+ * One row of a disclosure detail table, reduced to what the report says. The
+ * value columns are the report's letter codes (J: $15,000 or less, up to P4:
+ * over $50 million), kept as codes.
+ */
+export function detailOf(kind, row) {
+  const redacted = bool(row?.redacted);
+  switch (kind) {
+    case 'investments':
+      return {
+        description: text(row.description),
+        incomeCode: text(row.income_during_reporting_period_code),
+        incomeType: text(row.income_during_reporting_period_type),
+        grossValueCode: text(row.gross_value_code),
+        transaction: text(row.transaction_during_reporting_period),
+        transactionDate: text(row.transaction_date) ?? text(row.transaction_date_raw),
+        transactionValueCode: text(row.transaction_value_code),
+        redacted,
+      };
+    case 'gifts':
+      return {
+        source: text(row.source),
+        description: text(row.description),
+        value: text(row.value),
+        redacted,
+      };
+    case 'debts':
+      return {
+        creditor: text(row.creditor_name),
+        description: text(row.description),
+        valueCode: text(row.value_code),
+        redacted,
+      };
+    case 'positions':
+      return { position: text(row.position), organization: text(row.organization_name), redacted };
+    case 'agreements':
+      return { date: text(row.date_raw), partiesAndTerms: text(row.parties_and_terms), redacted };
+    case 'reimbursements':
+      return {
+        source: text(row.source),
+        date: text(row.date_raw),
+        location: text(row.location),
+        purpose: text(row.purpose),
+        itemsPaid: text(row.items_paid_or_provided),
+        redacted,
+      };
+    case 'spousalIncome':
+      return { sourceType: text(row.source_type), date: text(row.date_raw), redacted };
+    case 'nonInvestmentIncome':
+      return {
+        sourceType: text(row.source_type),
+        date: text(row.date_raw),
+        amount: text(row.income_amount),
+        redacted,
+      };
+    default:
+      return null;
+  }
+}
+
+/** The words that name a detail row, for the summary. */
+function detailLabel(kind, d) {
+  switch (kind) {
+    case 'investments':
+      return d.description;
+    case 'gifts':
+      return [d.description, d.source].filter(Boolean).join(' from ');
+    case 'debts':
+      return [d.creditor, d.description].filter(Boolean).join(', ');
+    case 'positions':
+      return [d.position, d.organization].filter(Boolean).join(', ');
+    case 'agreements':
+      return d.partiesAndTerms;
+    case 'reimbursements':
+      return [d.source, d.purpose].filter(Boolean).join(', ');
+    case 'spousalIncome':
+    case 'nonInvestmentIncome':
+      return d.sourceType;
+    default:
+      return null;
+  }
+}
+
+/** Summary headings, in the order a report reads. */
+const DETAIL_HEADINGS = [
+  ['positions', 'Positions'],
+  ['nonInvestmentIncome', 'Income'],
+  ['spousalIncome', 'Spouse'],
+  ['reimbursements', 'Reimbursements'],
+  ['gifts', 'Gifts'],
+  ['agreements', 'Agreements'],
+  ['debts', 'Liabilities'],
+  ['investments', 'Investments'],
+];
+
+/** What a report says, as a line: `Positions (2): Trustee, Trust #1; Investments (150): …`. */
+export function disclosureSummary(detail) {
+  const parts = [];
+  for (const [kind, heading] of DETAIL_HEADINGS) {
+    const d = detail?.[kind];
+    if (!d?.count) continue;
+    const names = d.items
+      .filter((x) => !x.redacted)
+      .map((x) => detailLabel(kind, x))
+      .filter(Boolean)
+      .slice(0, 5);
+    parts.push(`${heading} (${d.count})${names.length ? `: ${names.join(', ')}` : ''}`);
+  }
+  return trimTo(parts.join('; '), SUMMARY_CHARS);
+}
+
+/**
+ * One financial disclosure row, titled by the judge when the people file is
+ * loaded and carrying what the report says when the detail tables are.
+ */
+export function disclosureItem(row, namesByPerson = new Map(), detailByDisclosure = new Map()) {
   if (!row?.id) return null;
   const year = num(row.year);
   const personId = text(row.person_id);
@@ -418,13 +697,14 @@ export function disclosureItem(row, namesByPerson = new Map()) {
   const url = filepath ? `${STORAGE}/${filepath.replace(/^\/+/, '')}` : text(row.download_filepath);
   const thumb = text(row.thumbnail);
   const when = looseDate(year === null ? '' : String(year));
+  const detail = detailByDisclosure.get(String(row.id)) ?? {};
   return {
-    externalId: String(row.id),
+    externalId: catalogId('financial-disclosures', row.id),
     kind: 'financial-disclosure',
     title: name
       ? `${name} financial disclosure ${year ?? '?'}`
       : `Financial disclosure ${year ?? '?'} (person ${personId ?? '?'})`,
-    summary: null,
+    summary: disclosureSummary(detail),
     url,
     imageUrl: thumb ? `${STORAGE}/${thumb.replace(/^\/+/, '')}` : null,
     publishedAt: when.publishedAt,
@@ -439,6 +719,12 @@ export function disclosureItem(row, namesByPerson = new Map()) {
       pageCount: num(row.page_count),
       personId,
       personName: name ?? null,
+      counts: Object.fromEntries(
+        Object.keys(DISCLOSURE_DETAIL_FILES).map((k) => [k, detail[k]?.count ?? 0]),
+      ),
+      ...Object.fromEntries(
+        Object.keys(DISCLOSURE_DETAIL_FILES).map((k) => [k, detail[k]?.items ?? []]),
+      ),
       sha1: text(row.sha1),
       dateModified: text(row.date_modified),
       attribution: ATTRIBUTION,
@@ -453,7 +739,7 @@ export function audioItem(row) {
   if (!title) return null;
   const mp3 = text(row.local_path_mp3);
   return {
-    externalId: String(row.id),
+    externalId: catalogId('oral-arguments', row.id),
     kind: 'oral-argument',
     title,
     summary: null,
@@ -526,7 +812,7 @@ export function docketRowItem(row) {
   const when = looseDate(text(row.date_filed) ?? '');
   const court = courtSlug(row.court_id);
   return {
-    externalId: String(row.id),
+    externalId: catalogId('dockets', row.id),
     kind: 'docket',
     title,
     summary: trimTo([row.nature_of_suit, row.cause].map(text).filter(Boolean).join('; ')),
@@ -570,7 +856,7 @@ export function fjcItem(row) {
   const when = looseDate(text(row.date_filed) ?? '');
   const district = courtSlug(row.district_id);
   return {
-    externalId: String(row.id),
+    externalId: catalogId('fjc-integrated-database', row.id),
     kind: 'case',
     title,
     summary: null,
@@ -605,19 +891,41 @@ export function fjcItem(row) {
   };
 }
 
-/** The mapping for one table's rows, given the side maps loaded for it. */
+/**
+ * One citation row as a patch to its opinion: the cite as a tag (so a search
+ * for "410 U.S. 113" finds the case) and appended to data.citations. A row
+ * without its three parts is nothing.
+ */
+export function citationPatch(row) {
+  const cluster = text(row?.cluster_id);
+  const volume = text(row?.volume);
+  const reporter = text(row?.reporter);
+  const page = text(row?.page);
+  if (!cluster || !/^\d+$/.test(cluster) || !volume || !reporter || !page) return null;
+  const cite = `${volume} ${reporter} ${page}`;
+  return { externalId: cluster, tags: [cite], append: { citations: [cite] } };
+}
+
+/**
+ * The mapping for one table's rows, given the side maps loaded for it: an
+ * item, a patch (`{ patch }`), or null.
+ */
 export function rowItem(table, row, side = {}) {
   switch (table) {
     case 'courts':
       return courtItem(row);
     case 'people-db-people':
-      return judgeItem(row, side.positions);
+      return judgeItem(row, side.positions, side);
     case 'financial-disclosures':
-      return disclosureItem(row, side.names);
+      return disclosureItem(row, side.names, side.detail);
     case 'oral-arguments':
       return audioItem(row);
     case 'opinion-clusters':
       return clusterItem(row);
+    case 'citations': {
+      const patch = citationPatch(row);
+      return patch ? { patch } : null;
+    }
     case 'dockets':
       return docketRowItem(row);
     case 'fjc-integrated-database':
@@ -630,30 +938,48 @@ export function rowItem(table, row, side = {}) {
 // ── Cursor ───────────────────────────────────────────────────────────────────
 
 /**
- * Where a run starts. `version` is the dump date the walk is over; `file` and
- * `record` the position in it (data records already read, so the reader
- * skips that many); `modifiedWatermark` the newest date_modified a COMPLETE
- * pass has seen, below which a later pass skips rows; `maxModified` the same
- * for the pass in progress; `done` that every file of `version` is walked.
+ * Where a run starts. `version` is the dump date the walk is over; `walked`
+ * the tables of it already walked; `file` and `record` the position in the
+ * one in progress (data records already read, so the reader skips that many);
+ * `modifiedWatermark` the newest date_modified a COMPLETE pass has seen,
+ * below which a later pass skips rows; `maxModified` the same for the pass in
+ * progress; `done` that every table in `files` is walked.
+ *
+ * A cursor from before ID_SCHEME 2 has no `walked`: the tables before its
+ * `file` in the old order were walked (all of them if it was done), except
+ * the re-keyed ones, which were written under bare ids and so are walked
+ * again; and its watermark is dropped, since a re-keyed table must be walked
+ * whole.
  */
 export function resumeFrom(prev, files = FILES) {
   const version = /^\d{4}-\d{2}-\d{2}$/.test(String(prev?.version ?? '')) ? prev.version : null;
-  const file = files.includes(prev?.file) ? prev.file : files[0];
-  // A record count belongs to the file it was counted in: a cursor left in
-  // a table that has since been turned off starts the first table over.
-  const record = file === prev?.file ? Math.floor(Number(prev?.record)) : 0;
+  const current = prev?.idScheme === ID_SCHEME;
+  let walked = [];
+  if (version && Array.isArray(prev?.walked)) {
+    walked = prev.walked.filter((f) => files.includes(f));
+  } else if (version && !current) {
+    const at = LEGACY_FILES.indexOf(prev?.file);
+    const before = prev?.done === true ? LEGACY_FILES : at >= 0 ? LEGACY_FILES.slice(0, at) : [];
+    walked = before.filter((f) => files.includes(f) && !REKEYED.includes(f));
+  }
+  const pending = files.filter((f) => !walked.includes(f));
+  // A record count belongs to the file it was counted in: a cursor left in a
+  // table that has since been turned off (or was walked) starts the next one.
+  const file = pending.includes(prev?.file) ? prev.file : (pending[0] ?? null);
+  const record = file !== null && file === prev?.file ? Math.floor(Number(prev?.record)) : 0;
   const watermark =
-    typeof prev?.modifiedWatermark === 'string' && prev.modifiedWatermark
+    current && typeof prev?.modifiedWatermark === 'string' && prev.modifiedWatermark
       ? prev.modifiedWatermark
       : null;
   const max = typeof prev?.maxModified === 'string' && prev.maxModified ? prev.maxModified : null;
   return {
     version,
+    walked,
     file,
     record: record > 0 ? record : 0,
     modifiedWatermark: watermark,
     maxModified: max,
-    done: version !== null && prev?.done === true,
+    done: version !== null && pending.length === 0,
   };
 }
 
@@ -667,18 +993,21 @@ export const isStale = (dateModified, watermark) =>
 
 // ── Side files ───────────────────────────────────────────────────────────────
 
-/** Every position by person id, from the positions file: 51k small objects. */
-export async function loadPositions(path) {
+/** Rows of a side file grouped by one column, each mapped and capped at `keep`. */
+async function groupBy(path, column, map, keep = POSITIONS_KEPT) {
   const by = new Map();
   for await (const { row } of bzip2CsvRows(path, { escape: CSV_ESCAPE })) {
-    const person = text(row.person_id);
-    if (!person) continue;
-    if (!by.has(person)) by.set(person, []);
-    const list = by.get(person);
-    if (list.length < POSITIONS_KEPT) list.push(positionOf(row));
+    const key = text(row[column]);
+    if (!key) continue;
+    if (!by.has(key)) by.set(key, []);
+    const list = by.get(key);
+    if (list.length < keep) list.push(map(row));
   }
   return by;
 }
+
+/** Every position by person id, from the positions file: 51k small objects. */
+export const loadPositions = (path) => groupBy(path, 'person_id', positionOf);
 
 /** Every person's display name by id, from the people file, for disclosure titles. */
 export async function loadNames(path) {
@@ -690,10 +1019,64 @@ export async function loadNames(path) {
   return by;
 }
 
-/** What a table's mapping needs loaded beside it, by side file. */
+/** Every school's name by id. */
+export async function loadSchools(path) {
+  const by = new Map();
+  for await (const { row } of bzip2CsvRows(path, { escape: CSV_ESCAPE })) {
+    const name = text(row.name);
+    if (row.id && name) by.set(String(row.id), name);
+  }
+  return by;
+}
+
+/** Every education by person id, named by the schools loaded before it. */
+export const loadEducations = (path, side) =>
+  groupBy(path, 'person_id', (row) => educationOf(row, side.schools));
+
+/** Every political affiliation by person id. */
+export const loadAffiliations = (path) => groupBy(path, 'person_id', affiliationOf);
+
+/**
+ * One disclosure detail table folded into `side.detail`: per disclosure id,
+ * `{ count, items }` under the table's kind, the first DETAIL_KEPT rows kept
+ * and every row counted. Investments are ~2M rows; this keeps 32k small lists.
+ */
+export function loadDetail(kind) {
+  return async (path, side) => {
+    const by = side.detail ?? new Map();
+    for await (const { row } of bzip2CsvRows(path, { escape: CSV_ESCAPE })) {
+      const id = text(row.financial_disclosure_id);
+      if (!id) continue;
+      if (!by.has(id)) by.set(id, {});
+      const entry = by.get(id);
+      entry[kind] ??= { count: 0, items: [] };
+      entry[kind].count += 1;
+      if (entry[kind].items.length < DETAIL_KEPT) entry[kind].items.push(detailOf(kind, row));
+    }
+    return by;
+  };
+}
+
+/**
+ * What a table's mapping needs loaded beside it, in load order: each side
+ * file is loaded whole into `side[key]`, and a loader may read what an
+ * earlier one loaded (educations name their schools).
+ */
 export const SIDE_FOR = {
-  'people-db-people': { file: 'people-db-positions', key: 'positions', load: loadPositions },
-  'financial-disclosures': { file: 'people-db-people', key: 'names', load: loadNames },
+  'people-db-people': [
+    { file: 'people-db-positions', key: 'positions', load: loadPositions },
+    { file: 'people-db-schools', key: 'schools', load: loadSchools },
+    { file: 'people-db-educations', key: 'educations', load: loadEducations },
+    { file: 'people-db-political-affiliations', key: 'affiliations', load: loadAffiliations },
+  ],
+  'financial-disclosures': [
+    { file: 'people-db-people', key: 'names', load: loadNames },
+    ...Object.entries(DISCLOSURE_DETAIL_FILES).map(([kind, file]) => ({
+      file,
+      key: 'detail',
+      load: loadDetail(kind),
+    })),
+  ],
 };
 
 // ── The adapter ──────────────────────────────────────────────────────────────
@@ -703,7 +1086,7 @@ export const courtlistenerCatalog = defineAdapter({
   title: 'CourtListener: the whole catalogue',
   collection: 'law',
   description:
-    'Everything CourtListener publishes as bulk data, walked from the quarterly dumps: every court (3.4k), every judge with their positions (16k), every judicial financial disclosure with its PDF (32k), every oral argument recording with its MP3 (100k) and every opinion cluster (10 million: case name, court, date filed, syllabus, precedential status, citation count). Public domain, attributed on every row. Downloads each bzip2 CSV with resume, walks it 500 rows a batch across as many runs as it takes, and after a complete pass skips the rows an earlier dump already carried. Dockets (tens of millions of rows, 5 GB) and the FJC Integrated Database (280 MB) are off unless turned on here. Shares ids with the live CourtListener sources, so the two merge.',
+    'Everything CourtListener publishes as bulk data, walked from the quarterly dumps: every court (3.4k), every judge with their positions (16k), every judge with their positions, education and party (16k), every judicial financial disclosure with its PDF and what it reports: investments, gifts, debts, outside positions and income, reimbursements (32k), every oral argument recording with its MP3 (100k), every opinion cluster (10 million: case name, court, date filed, syllabus, precedential status, citation count) with its reporter citations, and the FJC Integrated Database of district court cases (a few million). Public domain, attributed on every row. Downloads each bzip2 CSV with resume, walks it 500 rows a batch across as many runs as it takes, and after a complete pass skips the rows an earlier dump already carried. Dockets (tens of millions of rows, 5 GB) are off unless turned on here.',
   docs: 'https://www.courtlistener.com/help/api/bulk-data/',
   kinds: ['court', 'judge', 'financial-disclosure', 'oral-argument', 'opinion', 'docket', 'case'],
   cadenceMinutes: CADENCE_MINUTES,
@@ -720,8 +1103,8 @@ export const courtlistenerCatalog = defineAdapter({
       key: 'fjc',
       label: 'Walk the FJC Integrated Database',
       type: 'select',
-      options: ['false', 'true'],
-      help: 'The Federal Judicial Center’s record of every district court case, a 280 MB download of a few million rows, as kind `case` with no page of its own. Off by default.',
+      options: ['true', 'false'],
+      help: 'The Federal Judicial Center’s record of every district court case, a 280 MB download of a few million rows, as kind `case` with no page of its own. On by default.',
     },
     {
       key: 'batchRows',
@@ -738,12 +1121,12 @@ export const courtlistenerCatalog = defineAdapter({
       help: 'After a failed request. Three failures in a row end the run; it resumes in ten minutes.',
     },
   ],
-  defaults: { dockets: 'false', fjc: 'false', batchRows: BATCH_ROWS, pauseMs: PAUSE_MS },
+  defaults: { dockets: 'false', fjc: 'true', batchRows: BATCH_ROWS, pauseMs: PAUSE_MS },
   defaultSources: [
     {
       slug: 'courtlistener-catalog',
       name: 'Law: every court, judge, disclosure, oral argument and opinion in CourtListener',
-      config: { dockets: 'false', fjc: 'false', batchRows: BATCH_ROWS, pauseMs: PAUSE_MS },
+      config: { dockets: 'false', fjc: 'true', batchRows: BATCH_ROWS, pauseMs: PAUSE_MS },
     },
   ],
   async *pull({ config, cursor: prev, http, log, deadline }) {
@@ -799,17 +1182,25 @@ export const courtlistenerCatalog = defineAdapter({
 
     const fresh = state.version !== version;
     const watermark = state.modifiedWatermark;
+    const walked = fresh ? [] : [...state.walked];
     let file = fresh ? files[0] : state.file;
     let record = fresh ? 0 : state.record;
     let maxModified = fresh ? null : state.maxModified;
     const cursorAt = (f, n) => ({
+      idScheme: ID_SCHEME,
       version,
+      walked: [...walked],
       file: f,
       record: n,
       modifiedWatermark: watermark,
       maxModified,
       done: false,
     });
+    if (!fresh && prev?.version && prev?.idScheme !== ID_SCHEME) {
+      log(
+        `ids re-keyed (scheme ${ID_SCHEME}): walking ${files.filter((f) => !walked.includes(f)).join(', ')}`,
+      );
+    }
     if (fresh) {
       log(
         `dump ${version}${state.version ? ` replaces ${state.version}` : ''}` +
@@ -899,17 +1290,18 @@ export const courtlistenerCatalog = defineAdapter({
     };
 
     // ── The walk ─────────────────────────────────────────────────────────
-    for (let fi = files.indexOf(file); fi < files.length; fi++) {
-      const table = files[fi];
+    // The table in progress first, then every table of this dump not yet walked.
+    while (file) {
+      const table = file;
       const kind = KINDS[table];
+      const mark = NO_WATERMARK.has(table) ? null : watermark;
 
-      // The side file first, loaded whole; then the table itself.
+      // The side files first, loaded whole; then the table itself.
       const side = {};
-      const need = SIDE_FOR[table];
-      if (need) {
+      for (const need of SIDE_FOR[table] ?? []) {
         const got = await fetchFile(need.file);
         if (got.stop) return got.stop;
-        side[need.key] = await need.load(got.path);
+        side[need.key] = await need.load(got.path, side);
         log(`${need.file} loaded: ${side[need.key].size} ${need.key}`);
       }
       const got = await fetchFile(table);
@@ -918,6 +1310,7 @@ export const courtlistenerCatalog = defineAdapter({
 
       // Walk the rows from where the cursor says, a batch at a time.
       let batch = [];
+      let patches = [];
       let n = record;
       let outOfTime = false;
       let cut = null;
@@ -936,7 +1329,7 @@ export const courtlistenerCatalog = defineAdapter({
           if (typeof modified === 'string' && (maxModified === null || modified > maxModified)) {
             maxModified = modified;
           }
-          if (isStale(modified, watermark)) {
+          if (isStale(modified, mark)) {
             stale += 1;
             continue;
           }
@@ -945,12 +1338,14 @@ export const courtlistenerCatalog = defineAdapter({
             skipped += 1;
             continue;
           }
-          batch.push(item);
-          if (batch.length >= batchRows) {
-            written += batch.length;
+          if (item.patch) patches.push(item.patch);
+          else batch.push(item);
+          if (batch.length + patches.length >= batchRows) {
+            written += batch.length + patches.length;
             batches += 1;
-            yield { items: batch, cursor: cursorAt(table, n) };
+            yield { items: batch, patches, cursor: cursorAt(table, n) };
             batch = [];
+            patches = [];
             if (Date.now() > stopAt) {
               outOfTime = true;
               break;
@@ -967,11 +1362,12 @@ export const courtlistenerCatalog = defineAdapter({
           `${table} dump ${version} unreadable at record ${n}, removed (${err?.message ?? err})`,
         );
       }
-      if (batch.length) {
-        written += batch.length;
+      if (batch.length || patches.length) {
+        written += batch.length + patches.length;
         batches += 1;
-        yield { items: batch, cursor: cursorAt(table, n) };
+        yield { items: batch, patches, cursor: cursorAt(table, n) };
         batch = [];
+        patches = [];
       }
       if (outOfTime) {
         return {
@@ -988,7 +1384,8 @@ export const courtlistenerCatalog = defineAdapter({
       log(`${table} dump ${version} walked: ${n} ${kind} records`);
       if (BIG_FILES.has(table)) await unlink(path).catch(() => {});
       record = 0;
-      file = files[fi + 1] ?? null;
+      walked.push(table);
+      file = files.find((f) => !walked.includes(f)) ?? null;
       if (file) yield { items: [], cursor: cursorAt(file, 0) };
     }
 
@@ -999,7 +1396,9 @@ export const courtlistenerCatalog = defineAdapter({
 
     return {
       cursor: {
+        idScheme: ID_SCHEME,
         version,
+        walked: [...walked],
         file: null,
         record: 0,
         modifiedWatermark: maxModified ?? watermark,

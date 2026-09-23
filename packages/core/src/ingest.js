@@ -209,6 +209,12 @@ async function drainBatches({ batches, source, adapter, deadline, totals, log })
       totals.seen += w.seen;
       totals.added += w.added;
       totals.updated += w.updated;
+      // A batch may also add to rows this source already wrote (see patchItems).
+      if (value?.patches?.length) {
+        const p = await q.patchItems({ sourceId: source.id, patches: value.patches });
+        totals.seen += value.patches.length;
+        totals.updated += p.updated;
+      }
       count += 1;
       if (value?.cursor !== undefined) {
         lastCursor = value.cursor;

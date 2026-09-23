@@ -216,12 +216,95 @@ export function parseOpinionFeed(xml, opts = {}) {
   return out;
 }
 
+/*
+ * The all-courts feed is twenty entries ordered by date filed, and on a
+ * working day twenty is a few hours: on 2026-09-23, 17 of the 20 were filed
+ * that day before noon, and the hourly source had 109 rows after 23 runs. So
+ * the all-courts source also reads each court's own feed, a few courts a
+ * run in rotation. The courts are the ones CourtListener scrapes opinions
+ * from (in_use and has_opinion_scraper in the courts table of the bulk data,
+ * 160 on 2026-06-30), refreshed daily from the dump; the feeds, like the
+ * all-courts one, are free and outside the API budget.
+ */
+
+/** Court feeds read per run beside the all-courts feed. */
+export const COURTS_PER_RUN = 20;
+
+/** The all-courts source runs this often, so each court is read about every 80 minutes. */
+export const ALL_COURTS_CADENCE_MINUTES = 10;
+
+/** How often the list of courts is read again from the bulk data. */
+export const COURT_LIST_MINUTES = 24 * 60;
+
+/** Pause between two feed requests in one run. */
+export const FEED_PAUSE_MS = 1000;
+
+/** The dump subdirectory the courts file is kept in. */
+export const COURT_LIST_DIR = 'courtlistener-court-feeds';
+
+const sleep = (ms) => (ms > 0 ? new Promise((r) => setTimeout(r, ms)) : Promise.resolve());
+
+/** The courts whose opinions CourtListener scrapes, from rows of the courts table, sorted. */
+export function scrapedCourts(rows) {
+  const ids = new Set();
+  for (const r of rows ?? []) {
+    const id = courtSlug(r?.id);
+    if (id && r.in_use === 't' && r.has_opinion_scraper === 't') ids.add(id);
+  }
+  return [...ids].sort();
+}
+
+/** The next `n` courts from `at`, wrapping, and where the run after starts. */
+export function rotation(courts, at, n) {
+  const list = courts ?? [];
+  if (list.length === 0) return { picked: [], next: 0 };
+  const start = Number.isInteger(at) && at >= 0 ? at % list.length : 0;
+  const picked = [];
+  for (let i = 0; i < Math.min(n, list.length); i++) picked.push(list[(start + i) % list.length]);
+  return { picked, next: (start + picked.length) % list.length };
+}
+
+/**
+ * The court list from the cursor, or read again from the bulk data when it is
+ * missing or a day old. A failed read keeps the list there is.
+ */
+async function courtList({ cursor, http, log, now }) {
+  const have = Array.isArray(cursor?.courts) ? cursor.courts.map(courtSlug).filter(Boolean) : [];
+  const listedAt = Date.parse(cursor?.listedAt ?? '');
+  if (have.length && Number.isFinite(listedAt) && now - listedAt < COURT_LIST_MINUTES * 60_000) {
+    return { courts: have, listedAt: cursor.listedAt };
+  }
+  try {
+    // Loaded when needed rather than at the top: the catalogue imports this module.
+    const { CSV_ESCAPE, fileUrl, resolveVersion } = await import('./courtlistener-catalog.js');
+    const { bzip2CsvRows, dumpDir } = await import('@nichedb/core/dump');
+    const version = await resolveVersion(http, ['courts']);
+    const path = `${await dumpDir(COURT_LIST_DIR)}/courts.csv.bz2`;
+    const dl = await http.download(fileUrl('courts', version), path, {
+      headers: { 'user-agent': USER_AGENT },
+      timeoutMs: 60_000,
+    });
+    if (!dl.complete) throw new Error(`courts file incomplete (${dl.bytes} bytes)`);
+    const rows = [];
+    for await (const { row } of bzip2CsvRows(path, { escape: CSV_ESCAPE })) rows.push(row);
+    const courts = scrapedCourts(rows);
+    if (courts.length === 0) throw new Error('no court in the courts file has an opinion scraper');
+    log(`court list ${version}: ${courts.length} courts with an opinion scraper`);
+    return { courts, listedAt: new Date(now).toISOString() };
+  } catch (err) {
+    log(
+      `court list not refreshed (${err?.message ?? err})${have.length ? '; keeping the last' : ''}`,
+    );
+    return { courts: have, listedAt: cursor?.listedAt ?? null };
+  }
+}
+
 export const courtlistener = defineAdapter({
   name: 'courtlistener',
   title: 'CourtListener: newest opinions',
   collection: 'law',
   description:
-    'Court opinions as they are published, from CourtListener’s Atom feed: the twenty newest across every court, or for one court by its id (scotus, ca9, nysd). Keyless and outside the API budget. Each row is the case name, the court, the date filed, the syllabus where there is one and the precedential status; the catalogue walked from the bulk dumps fills in the rest of the record under the same id.',
+    'Court opinions as they are published, from CourtListener’s Atom feeds: for all courts, the twenty newest across every court plus each court’s own feed in rotation (about 160 courts, twenty a run), or one court by its id (scotus, ca9, nysd). Keyless and outside the API budget. Each row is the case name, the court, the date filed, the syllabus where there is one and the precedential status; the catalogue walked from the bulk dumps fills in the rest of the record under the same id.',
   docs: 'https://www.courtlistener.com/help/feeds/',
   kinds: ['opinion'],
   cadenceMinutes: OPINIONS_CADENCE_MINUTES,
@@ -230,27 +313,86 @@ export const courtlistener = defineAdapter({
       key: 'court',
       label: 'Court id',
       placeholder: 'scotus',
-      help: 'Optional: one court’s feed instead of all courts. scotus, ca9, nysd and the rest of CourtListener’s ids.',
+      help: 'Optional: one court’s feed instead of all courts. scotus, ca9, nysd and the rest of CourtListener’s ids. `all` reads the all-courts feed alone, without the rotation.',
+    },
+    {
+      key: 'perRun',
+      label: 'Court feeds per run',
+      type: 'number',
+      placeholder: String(COURTS_PER_RUN),
+      help: 'With no court set: how many courts’ own feeds are read each run, in rotation, beside the all-courts feed. 0 turns the rotation off.',
     },
   ],
-  defaults: {},
+  defaults: { perRun: COURTS_PER_RUN, pauseMs: FEED_PAUSE_MS },
   defaultSources: [
-    { slug: 'courtlistener-opinions', name: 'CourtListener: newest opinions, all courts' },
+    {
+      slug: 'courtlistener-opinions',
+      name: 'CourtListener: newest opinions, all courts',
+      cadenceMinutes: ALL_COURTS_CADENCE_MINUTES,
+      // Seeded at 60 minutes; the rotation needs the shorter cadence to reach it.
+      refresh: true,
+    },
     {
       slug: 'courtlistener-opinions-scotus',
       name: 'CourtListener: Supreme Court opinions',
       config: { court: 'scotus' },
     },
   ],
-  async pull({ config, http, log }) {
+  async pull({ config, cursor, http, log, now = Date.now() }) {
     const court = courtSlug(config?.court);
-    const xml = await http.text(opinionFeedUrl(court), {
-      headers: { 'user-agent': USER_AGENT, accept: 'application/atom+xml, application/xml, */*' },
-    });
-    const items = parseOpinionFeed(xml, { court });
-    const undated = items.filter((i) => !i.publishedAt).length;
-    log(`${items.length} opinion(s)${undated ? `, ${undated} with no usable date` : ''}`);
-    return { items, note: `${items.length} opinion(s) from the ${court || 'all courts'} feed` };
+    const fetchFeed = async (c) =>
+      parseOpinionFeed(
+        await http.text(opinionFeedUrl(c), {
+          headers: {
+            'user-agent': USER_AGENT,
+            accept: 'application/atom+xml, application/xml, */*',
+          },
+        }),
+        { court: c },
+      );
+
+    if (court) {
+      const items = await fetchFeed(court);
+      const undated = items.filter((i) => !i.publishedAt).length;
+      log(`${items.length} opinion(s)${undated ? `, ${undated} with no usable date` : ''}`);
+      return { items, note: `${items.length} opinion(s) from the ${court} feed` };
+    }
+
+    // All courts: the all-courts feed, then the next courts' own feeds.
+    const perRun = Math.max(0, Math.floor(Number(config?.perRun ?? COURTS_PER_RUN)) || 0);
+    const pause = Math.max(0, Math.floor(Number(config?.pauseMs ?? FEED_PAUSE_MS)) || 0);
+    const items = [];
+    let requests = 1;
+    let failures = 0;
+    try {
+      items.push(...(await fetchFeed('')));
+    } catch (err) {
+      failures += 1;
+      log(`all-courts feed failed (${err?.message ?? err})`);
+    }
+
+    const list = perRun > 0 ? await courtList({ cursor, http, log, now }) : { courts: [] };
+    const { picked, next } = rotation(list.courts, cursor?.next, perRun);
+    for (const c of picked) {
+      await sleep(pause);
+      requests += 1;
+      try {
+        items.push(...(await fetchFeed(c)));
+      } catch (err) {
+        failures += 1;
+        log(`${c} feed failed (${err?.message ?? err})`);
+      }
+    }
+    if (failures === requests) throw new Error(`every feed failed (${requests}); see the log`);
+
+    const nextCursor =
+      perRun > 0 ? { courts: list.courts, listedAt: list.listedAt, next } : (cursor ?? {});
+    const note =
+      `${items.length} opinion(s) from the all-courts feed` +
+      (picked.length ? ` and ${picked.length} courts (${picked[0]} to ${picked.at(-1)})` : '') +
+      (failures ? `, ${failures} feed(s) failed` : '');
+    log(note);
+    return { items, cursor: nextCursor, note };
   },
 });
 
