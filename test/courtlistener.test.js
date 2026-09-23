@@ -1805,6 +1805,47 @@ describe('migrations 0027 and 0028, and the patch query', () => {
     });
   });
 
+  test('0029 turns the FJC on when the config is stored as a jsonb string, keeping that form', async () => {
+    const one = async (sql, params) => (await db.query(sql, params)).rows[0];
+    const law = await one(`select id from collections where slug = 'law'`);
+    // Production's form: insertSource's `${JSON.stringify(config)}::jsonb` reaches
+    // Postgres as a JSON string, so the column holds a string, not the object.
+    const asString = await one(
+      `insert into sources (collection_id, adapter, slug, name, config)
+       values ($1, 'courtlistener-catalog', 'catalog-string', 's',
+               to_jsonb('{"dockets":"false","fjc":"false","batchRows":500}'::text)) returning id`,
+      [law.id],
+    );
+    const asObject = await one(
+      `insert into sources (collection_id, adapter, slug, name, config)
+       values ($1, 'courtlistener-catalog', 'catalog-object', 'o', '{"fjc":"false"}') returning id`,
+      [law.id],
+    );
+    const handSet = await one(
+      `insert into sources (collection_id, adapter, slug, name, config)
+       values ($1, 'courtlistener-catalog', 'catalog-hand', 'h', to_jsonb('{"fjc":"no"}'::text)) returning id`,
+      [law.id],
+    );
+    // 0028 alone cannot see inside the string.
+    await db.exec(await readFile(`${dir}0028_courtlistener_catalog_ids.sql`, 'utf8'));
+    const typed = async (id) =>
+      one(`select jsonb_typeof(config) t, config #>> '{}' txt, config from sources where id = $1`, [
+        id,
+      ]);
+    expect(JSON.parse((await typed(asString.id)).txt).fjc).toBe('false');
+
+    const migration = await readFile(`${dir}0029_courtlistener_fjc_on_string_config.sql`, 'utf8');
+    await db.exec(migration);
+    await db.exec(migration);
+    const str = await typed(asString.id);
+    expect(str.t).toBe('string');
+    expect(JSON.parse(str.txt)).toEqual({ dockets: 'false', fjc: 'true', batchRows: 500 });
+    const obj = await typed(asObject.id);
+    expect(obj.t).toBe('object');
+    expect(obj.config).toEqual({ fjc: 'true' });
+    expect(JSON.parse((await typed(handSet.id)).txt)).toEqual({ fjc: 'no' });
+  });
+
   test('patchItems: tags and data arrays appended once, missing rows and full rows untouched', async () => {
     const one = async (sql, params) => (await db.query(sql, params)).rows[0];
     const law = await one(`select id from collections where slug = 'law'`);
