@@ -596,7 +596,19 @@ cmd_cutover() {
   cmd_verify || warn "verify reported differences; check before trusting the target"
 
   log "4/6 Dropping the subscription (also drops the slot on the source)"
-  tgt_q "drop subscription $SUB"
+  if ! tgt_q "drop subscription $SUB"; then
+    warn "drop subscription failed; detaching the slot and dropping locally"
+    tgt_q "alter subscription $SUB disable; alter subscription $SUB set (slot_name = none); drop subscription $SUB"
+  fi
+  # An orphaned slot would hold WAL on the source (capped at SLOT_KEEP_GB, but
+  # still): make sure nothing is left behind.
+  local left
+  left=$(src_q "select string_agg(slot_name, ',') from pg_replication_slots where not active")
+  if [ -n "$left" ]; then
+    src_q "select pg_drop_replication_slot(slot_name) from pg_replication_slots where not active" >/dev/null
+    note "dropped leftover slot(s) on the source: $left"
+  fi
+  note "slots left on the source: $(src_q "select coalesce(string_agg(slot_name||' active='||active, ', '), 'none') from pg_replication_slots")"
 
   if [ "$SOURCE_MODE" = railway ]; then
     log "5/6 Railway app stays on its read-only copy for the DNS TTL, web only"
