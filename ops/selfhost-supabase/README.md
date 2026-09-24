@@ -26,8 +26,8 @@ is disk, and it is cheaper to own.
 What the overlay changes on stock Supabase:
 
 - **Postgres is published directly on 5432**, with TLS on and a self-signed
-  cert for `db.nichedb.dev`. The app already connects with
-  `sslmode=require` and does not verify the cert.
+  cert. The app connects by the server's existing hostname with
+  `sslmode=require` and does not verify the cert. No new DNS names.
 - **pg_hba**: from outside, only the `postgres` role gets in, and only over
   TLS. The compose network is pinned to `172.31.250.0/24` so the Docker
   gateway can be treated as outside. That covers clients Docker proxies:
@@ -38,7 +38,7 @@ What the overlay changes on stock Supabase:
 - **Tuning** is sized from the box's RAM and CPUs: 25% `shared_buffers`, 16 GB
   `max_wal_size`, parallel maintenance, and autovacuum tuned for `items`.
 - **Supavisor** binds 127.0.0.1:6543 only. **Studio** sits behind Caddy with
-  HTTPS and basic auth at `https://supabase.nichedb.dev`.
+  HTTPS and basic auth on the server's hostname.
 - **Docker logs** rotate at 3 x 50 MB. **Supabase's `setup.sh` output**,
   which prints every secret, goes to a root-only log, never the terminal.
 
@@ -63,7 +63,6 @@ What the overlay changes on stock Supabase:
 K=ops/selfhost-supabase/nichedb-db
 
 $K provision root@<server-ip>   # install + start Supabase, fetch the connection
-$K dns                          # db.nichedb.dev + supabase.nichedb.dev -> server
 $K vault                        # server .env -> vault nichedb-supabase--prod,
                                 # SELFHOST_* merged into nichedb--prod (backup kept)
 $K check                        # versions, sizes, free disk on both sides
@@ -80,6 +79,28 @@ $K cutover                      # the switch (below)
 # ...a few days later, once nothing points back:
 $K cleanup                      # drop publication/slot, remove the TCP proxy
 ```
+
+### Sharing a cluster another app already owns
+
+A box runs one Supabase stack (fixed container names, one 5432). When another
+app's stack is already there, nichedb becomes a database inside it instead:
+
+```sh
+$K prepare-db root@<host> /path/to/that/supabase-project nichedb
+```
+
+instead of `provision`. It creates the database, enables citext + pg_trgm,
+locks anon/authenticated out of that database's `public` (the cluster's own
+`postgres` database is untouched), and writes `nichedb-connection.env` into
+the project directory. The rest of the runbook is unchanged, and `vault`
+leaves the cluster's `.env` to its owner.
+The cluster needs `wal_level=logical`, a free replication slot, and a pg_hba
+rule that lets `postgres` in over TLS. What this costs: one restart, bad
+config or OOM takes both apps' databases down together.
+
+This is how it went live: dev2 (23.95.228.174, Buffalo NY, 16-core Ryzen,
+91 GB, 1.8 TB NVMe) already ran crawlproof.com's cluster at
+`/home/anthony/www/crawlproof.com/supabase`.
 
 `cutover` does this, in order, and refuses to start unless every table is
 ready, the index counts match, the schemas are identical and lag is under
@@ -101,6 +122,18 @@ Railway's database is left read-only and intact as the fallback.
 written to the new server after the cutover is not copied back.
 
 State and secrets live in `~/.local/state/nichedb-selfhost/` (mode 0700).
+
+### `subscribe` hangs
+
+`create subscription` builds the slot on Railway, and the slot needs a
+consistent snapshot: every transaction open on the source at that moment has
+to finish first. `pg_stat_replication` shows the sender in `startup` until
+then. On 2026-09-24 the blockers were read queries 10 to 34 minutes old,
+all waiting in `ClientWrite` on clients that had stopped reading; a backend
+blocked in a socket write cannot even honour `statement_timeout`. Terminate
+those (`pg_terminate_backend` where `wait_event = 'ClientWrite'` and
+`xact_start` is older than a few minutes) and the sender moves to
+`streaming` within seconds. Long index builds hold it back the same way.
 
 ### A migration landed mid-copy
 
