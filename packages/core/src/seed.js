@@ -287,6 +287,12 @@ export const COLLECTIONS = [
     description:
       "A reference shelf of algorithms, data structures and methods, assembled from the open catalogues that carry them whole: every entry in NIST's Dictionary of Algorithms and Data Structures with its definition and the relations between entries (public domain); every algorithm and data structure Wikidata files, with who devised it, when, and its stated complexity (CC0); the Papers With Code methods and datasets catalogues as archived when the site closed, spam removed (CC BY-SA 4.0); Rosetta Code's programming tasks with the languages each is solved in (GFDL); and The Algorithms' implementations by language (MIT). Every row names its source and licence. Built for a knowledge base: follow one shelf as a feed, or read the collection by API, CLI or MCP.",
   },
+  {
+    slug: 'models',
+    name: 'AI models & prices',
+    description:
+      'Every AI model you can call and what it costs, from models.dev (MIT, community maintained). One row per provider offering rather than per model, because the same model reaches you from a dozen providers at a dozen prices: the price per million tokens in and out, cache reads and writes, the context and output limits, what it takes in and gives back, and whether it reasons, calls tools, returns structured output or ships open weights. Alongside them the lab catalogue, one entry per model as its maker published it, and the providers themselves with the size of each catalogue. Follow the open-weight models, the free ones, or one provider.',
+  },
 ];
 
 export const DEFAULT_FEEDS = [
@@ -559,6 +565,52 @@ export const DEFAULT_FEEDS = [
     slug: 'algorithm-implementations',
     name: 'Algorithm implementations by language (The Algorithms)',
     query: { sources: ['thealgorithms'] },
+  },
+  {
+    collection: 'models',
+    slug: 'models-and-prices',
+    name: 'Every model and what it costs',
+    description:
+      'One row per provider offering: the price per million tokens, the context window and what the model can do. Newest entry first.',
+    query: { sources: ['models-dev-offerings'] },
+  },
+  {
+    collection: 'models',
+    slug: 'open-weight-models',
+    name: 'Open-weight models',
+    query: { kinds: ['model'], tags: ['open-weights'] },
+  },
+  {
+    collection: 'models',
+    slug: 'free-models',
+    name: 'Models served free',
+    description: 'Offerings whose provider publishes a price of zero in and out.',
+    query: { kinds: ['model'], tags: ['free'] },
+  },
+  {
+    collection: 'models',
+    slug: 'tool-calling-models',
+    name: 'Models that call tools',
+    query: { kinds: ['model'], tags: ['tool-call'] },
+  },
+  {
+    collection: 'models',
+    slug: 'reasoning-models',
+    name: 'Reasoning models',
+    query: { kinds: ['model'], tags: ['reasoning'] },
+  },
+  {
+    collection: 'models',
+    slug: 'model-catalog',
+    name: 'The lab catalogue',
+    description: 'One entry per model as its maker published it, with a page of its own.',
+    query: { kinds: ['catalog-model'] },
+  },
+  {
+    collection: 'models',
+    slug: 'model-providers',
+    name: 'Providers',
+    query: { kinds: ['provider'] },
   },
   {
     collection: 'research',

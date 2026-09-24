@@ -63,6 +63,7 @@ import { livetennis } from './livetennis.js';
 import { lowendbox } from './lowendbox.js';
 import { mcpRegistry } from './mcpregistry.js';
 import { isoMicExchanges } from './mic.js';
+import { modelsdev } from './modelsdev.js';
 import { musicbrainz } from './musicbrainz.js';
 import { musicbrainzCatalog } from './musicbrainz-catalog.js';
 import { nasdaqHalts } from './nasdaqhalts.js';
@@ -322,6 +323,8 @@ export const ADAPTERS = [
   pwcArchive,
   rosettaCode,
   theAlgorithms,
+  // Models: every AI model and what each provider charges for it, from models.dev.
+  modelsdev,
 ];
 
 export { isPlatformHosted, PLATFORM_HOSTS } from './podcastplatforms.js';
