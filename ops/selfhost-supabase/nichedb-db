@@ -561,10 +561,13 @@ cmd_cutover() {
   log "Preflight"
   all_ready || die "not every table is in state r: $(sync_states | tr '\n' ' ')"
   [ "$(tgt_q "select subenabled from pg_subscription where subname = '$SUB'")" = t ] || die "subscription is disabled: see 'nichedb-db status'"
-  local si ti
-  si=$(src_q "select count(*) from pg_indexes where schemaname = 'public'")
-  ti=$(tgt_q "select count(*) from pg_indexes where schemaname = 'public'")
-  [ "$si" = "$ti" ] || die "indexes: source $si, target $ti. Run/finish 'nichedb-db indexes' first"
+  # Valid indexes only: a failed CREATE INDEX CONCURRENTLY leaves an invalid,
+  # empty index on the source that pg_dump omits and nothing should copy.
+  local si ti q
+  q="select count(*) from pg_index i join pg_class c on c.oid = i.indrelid join pg_namespace n on n.oid = c.relnamespace where n.nspname = 'public' and i.indisvalid"
+  si=$(src_q "$q")
+  ti=$(tgt_q "$q")
+  [ "$si" = "$ti" ] || die "valid indexes: source $si, target $ti. Run/finish 'nichedb-db indexes' first"
   cmd_verify >/dev/null 2>&1 || die "schemas differ: run 'nichedb-db verify' and reconcile first"
   local lag
   lag=$(slot_lag_bytes)
