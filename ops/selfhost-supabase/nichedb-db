@@ -488,7 +488,8 @@ cmd_indexes() {
   # source (the app builds some after boot), and those must exist here too.
   src_exec pg_dump -U postgres -d "$SOURCE_DB" --schema-only --no-owner --no-privileges --section=post-data > "$d/post.sql"
   python3 "$HERE/lib/split_post_data.py" "$d/post.sql" "$d/pk.now.sql" "$d/rest.sql" >&2
-  if ! diff -q "$d/pk.sql" "$d/pk.now.sql" >/dev/null; then
+  # pg_dump stamps each dump with a fresh \restrict token: compare without it.
+  if ! diff -q <(grep -v '^\\' "$d/pk.sql") <(grep -v '^\\' "$d/pk.now.sql") >/dev/null; then
     warn "primary keys changed on the source since 'schema'; a new table needs the subscription refreshed"
   fi
   log "Building indexes, unique and foreign keys on the target (detached; replication keeps streaming)"
