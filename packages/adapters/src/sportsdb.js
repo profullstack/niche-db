@@ -50,6 +50,72 @@ export const FREE_KEYS = new Set(['3', '123']);
 /** True on a shared test key, where a query returns a single row. */
 export const usingFreeKey = (key) => FREE_KEYS.has(String(key ?? DEFAULT_KEY));
 
+/* --------------------------------------------------------------- premium -- */
+
+/**
+ * The v2 API, which exists only for subscribers: it takes the key in an
+ * `X-API-KEY` header rather than the URL path, and it answers the catalogue
+ * questions v1 has no endpoint for -- `all/leagues` returns every league in one
+ * request (1,544 on 2026-09-24) where v1's `all_leagues.php` is capped at ten
+ * rows even on a subscriber key, and `livescore/all` is the only live-score feed
+ * either version has.
+ */
+export const V2_BASE = 'https://www.thesportsdb.com/api/v2/json';
+
+/** True on a subscriber key: list endpoints answer in full and v2 is open. */
+export const premium = (key) => !usingFreeKey(key);
+
+/**
+ * Pause between requests. TheSportsDB publishes 30 requests a minute on the
+ * shared test key and 100 on a subscriber key; a burst past either earns a
+ * Cloudflare 1015 (HTTP 429), so a run paces itself rather than finding out.
+ */
+export const PACE_MS = { free: 2100, premium: 650 };
+
+export const paceMs = (key) => (premium(key) ? PACE_MS.premium : PACE_MS.free);
+
+/** Sleep, for the pacing above. Zero and below do not yield. */
+export const sleep = (ms) => (ms > 0 ? new Promise((r) => setTimeout(r, ms)) : Promise.resolve());
+
+/**
+ * A v2 request. The key travels in a header here, so unlike the v1 URLs the
+ * URL itself is safe to log -- `redact` is still applied to failures, because
+ * an error message can quote a request the caller built.
+ */
+export async function v2(http, key, path, { timeoutMs = 20_000 } = {}) {
+  const res = await http.request(`${V2_BASE}/${path}`, {
+    headers: { accept: 'application/json', 'X-API-KEY': String(key) },
+    timeoutMs,
+  });
+  if (!res.ok) throw new Error(`thesportsdb v2 answered ${res.status}`);
+  return await res.json();
+}
+
+/**
+ * Every league TheSportsDB knows, from the v2 catalogue: `{id, name, sport}`
+ * rows in the order it returns them. This is the list both the league and the
+ * team walks run on when the key is a subscriber one, and it is why those walks
+ * stop guessing at ids: the free key has no list endpoint that answers, so the
+ * only way to find a league there is to try every id between the first one ever
+ * entered and the newest, which misses anything outside that range and spends a
+ * quarter of its requests on gaps.
+ */
+export async function leagueIndex(http, key) {
+  const body = await v2(http, key, 'all/leagues');
+  const rows = body?.all ?? body?.leagues ?? body?.list;
+  if (!Array.isArray(rows)) throw new Error('thesportsdb v2: no league list in the answer');
+  const out = [];
+  const seen = new Set();
+  for (const r of rows) {
+    const id = String(r?.idLeague ?? '').trim();
+    const name = String(r?.strLeague ?? '').trim();
+    if (!id || !name || seen.has(id)) continue;
+    seen.add(id);
+    out.push({ id, name, sport: String(r?.strSport ?? '').trim() || null });
+  }
+  return out;
+}
+
 /**
  * nichedb's sport slugs are ESPN's (the fixture items are tagged with them);
  * TheSportsDB uses its own display names. This is tipoffwatch's map, less

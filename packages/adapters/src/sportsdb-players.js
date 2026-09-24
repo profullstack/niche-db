@@ -1,6 +1,16 @@
 import { defineAdapter, slugify } from '@nichedb/core/adapter';
 
-import { BASE, DEFAULT_KEY, PROVIDER, redact, sportSlug, usingFreeKey } from './sportsdb.js';
+import {
+  BASE,
+  DEFAULT_KEY,
+  PROVIDER,
+  paceMs,
+  premium,
+  redact,
+  sleep,
+  sportSlug,
+  usingFreeKey,
+} from './sportsdb.js';
 
 /**
  * TheSportsDB: every player it knows, as OpenProfile.md people for the
@@ -25,7 +35,10 @@ import { BASE, DEFAULT_KEY, PROVIDER, redact, sportSlug, usingFreeKey } from './
  * the squad size (Liverpool and the Atlanta Hawks both came back with exactly
  * ten). That is the same list cap every free endpoint has, so on the free key
  * this source carries the first ten names of every team and a premium key
- * (env `SPORTSDB_API_KEY`) lifts it. Cloudflare answers 1015 (HTTP 429) after
+ * (env `SPORTSDB_API_KEY`) lifts it -- which the deployment has had since
+ * 2026-09-24, so the rows are whole squads now and the cap here is the one that
+ * matters: a subscriber key is 100 requests a minute against 30, so the pause
+ * and the rosters-per-run default both come from the key. Cloudflare answers 1015 (HTTP 429) after
  * about forty fast calls, and thirty a minute is the published limit, so the
  * default pause is 2,100 ms; a 429 counts as a failure and three in a row end
  * the run without losing the place.
@@ -64,13 +77,17 @@ export const TAIL_MISSES = 200;
 /** Rosters per run by default: under a minute at the free key's pace. */
 export const REQUEST_CAP = 25;
 
+/**
+ * Rosters per run on a subscriber key, where the limit is 100 requests a minute
+ * rather than 30 and a roster comes back whole instead of ten names deep.
+ */
+export const PREMIUM_REQUEST_CAP = 90;
+
 /** Consecutive failures after which a run stops asking, so an outage costs little. */
 const FAILURE_STOP = 3;
 
 /** Pause between rosters: thirty a minute is the free key's limit, and a burst earns a 429. */
 export const PAUSE_MS = 2100;
-
-const sleep = (ms) => (ms > 0 ? new Promise((r) => setTimeout(r, ms)) : Promise.resolve());
 
 const enc = (v) => encodeURIComponent(String(v));
 
@@ -340,10 +357,13 @@ export const sportsdbPlayers = defineAdapter({
   ],
   async pull({ config, cursor: prev, env, http, log, deadline }) {
     const key = String(env?.sportsdbApiKey ?? env?.SPORTSDB_API_KEY ?? DEFAULT_KEY);
-    const cap = Math.max(1, Math.floor(Number(config?.requestCap)) || REQUEST_CAP);
+    const cap = Math.max(
+      1,
+      Math.floor(Number(config?.requestCap)) || (premium(key) ? PREMIUM_REQUEST_CAP : REQUEST_CAP),
+    );
     const tail = Math.max(1, Math.floor(Number(config?.tailMisses)) || TAIL_MISSES);
     const pause =
-      config?.pauseMs === 0 ? 0 : Math.max(0, Math.floor(Number(config?.pauseMs))) || PAUSE_MS;
+      config?.pauseMs === 0 ? 0 : Math.max(0, Math.floor(Number(config?.pauseMs))) || paceMs(key);
     const stopAt = Number.isFinite(deadline) ? deadline : Number.POSITIVE_INFINITY;
     const startedAt = resumeId(prev, config);
     const fetchedAt = new Date().toISOString();

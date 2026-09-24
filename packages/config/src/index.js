@@ -139,7 +139,12 @@ export const config = {
     sportsProxyUrl: opt('SPORTS_PROXY_URL'),
     /** Live Tennis API, which owns tennis: 100 requests a day on the free plan. */
     livetennisApiKey: opt('LIVETENNIS_API_KEY'),
-    /** TheSportsDB, for TV listings. The shared key '3' works but returns one row per query. */
+    /**
+     * TheSportsDB, for TV listings, the league and team catalogues and live
+     * scores. The shared key '3' works but every list answers one row, there is
+     * no live feed on it, and the catalogue walks fall back to guessing at ids;
+     * a subscriber key lifts all three.
+     */
     sportsdbApiKey: opt('SPORTSDB_API_KEY', '3'),
     igdbClientId: opt('IGDB_CLIENT_ID'),
     igdbClientSecret: opt('IGDB_CLIENT_SECRET'),
