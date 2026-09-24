@@ -14,7 +14,8 @@
     "./premium": "./src/premium.js",
     "./submissions": "./src/submissions.js",
     "./profiles": "./src/profiles.js",
-    "./account": "./src/account.js"
+    "./account": "./src/account.js",
+    "./build-indexes": "./src/build-indexes.js"
   },
   "dependencies": {
     "@nichedb/config": "workspace:*",
