@@ -121,6 +121,25 @@ export async function ensureIndex(sql, spec, { log = console.log } = {}) {
  * produces no messages for an hour, and because nothing else should wait
  * behind it. Never awaited by boot: call it and let it run.
  */
+/**
+ * One build at a time, however many callers ask.
+ *
+ * Boot starts one and the maintenance tick asks again every couple of minutes,
+ * which is what gives a drop or a build that lost a lock race another go. A
+ * concurrent build can easily outlive the tick that started it, so without
+ * this two of them would run against the same index name and collide.
+ */
+let inFlight = null;
+
+export function buildBigIndexesOnce(opts = {}) {
+  if (!inFlight) {
+    inFlight = buildBigIndexes(opts).finally(() => {
+      inFlight = null;
+    });
+  }
+  return inFlight;
+}
+
 export async function buildBigIndexes({ log = console.log, indexes = BIG_INDEXES } = {}) {
   const sql = connect({ max: 1, idleTimeout: 0 });
   const results = {};
