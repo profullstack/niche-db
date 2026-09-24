@@ -480,9 +480,16 @@ cmd_status() {
 
 cmd_indexes() {
   local d=$STATE_DIR/schema
-  [ -s "$d/rest.sql" ] || die "no $d/rest.sql: run 'nichedb-db schema' first"
+  [ -s "$d/pk.sql" ] || die "no $d/pk.sql: run 'nichedb-db schema' first"
   if ! all_ready && [ "${FORCE:-0}" != 1 ]; then
     die "the initial copy is not finished ($(sync_states | tr '\n' ' ')); FORCE=1 to build now"
+  fi
+  # Re-read post-data NOW: deploys since `schema` may have added indexes on the
+  # source (the app builds some after boot), and those must exist here too.
+  src_exec pg_dump -U postgres -d "$SOURCE_DB" --schema-only --no-owner --no-privileges --section=post-data > "$d/post.sql"
+  python3 "$HERE/lib/split_post_data.py" "$d/post.sql" "$d/pk.now.sql" "$d/rest.sql" >&2
+  if ! diff -q "$d/pk.sql" "$d/pk.now.sql" >/dev/null; then
+    warn "primary keys changed on the source since 'schema'; a new table needs the subscription refreshed"
   fi
   log "Building indexes, unique and foreign keys on the target (detached; replication keeps streaming)"
   local mwm work
