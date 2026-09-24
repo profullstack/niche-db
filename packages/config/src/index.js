@@ -69,6 +69,13 @@ export const config = {
     tickSeconds: num('INGEST_TICK_SECONDS', 60),
     /** Sources fetched at once. Upstreams are rate limited individually inside adapters. */
     concurrency: num('INGEST_CONCURRENCY', 3),
+    /**
+     * Ceiling on one batch write of items. Not a tuning knob so much as a
+     * fuse: a batch that cannot finish in this long has hit something
+     * pathological, and a cancelled batch is retried while a wedged one pins
+     * the xmin horizon and blocks every deploy behind it.
+     */
+    writeTimeoutMs: num('INGEST_WRITE_TIMEOUT_MS', 10 * 60_000),
     /** Wall-clock ceiling on one run; a run past this records what it has and stops. */
     runDeadlineMs: num('INGEST_RUN_DEADLINE_MS', 4 * 60_000),
     /** Detail lookups an adapter may spend per run (appdetails, package docs...). */
@@ -107,6 +114,19 @@ export const config = {
     budgetMs: num('STATS_BUDGET_MS', 8 * 60_000),
     /** One collection's counts are abandoned after this long, so a pass never wedges. */
     statementTimeoutMs: num('STATS_STATEMENT_TIMEOUT_MS', 180_000),
+  },
+
+  /**
+   * GIN pending lists, merged on a schedule so no INSERT is handed the bill.
+   * See packages/db/src/gin-maintenance.js: with fastupdate on, whichever
+   * backend fills the pending list merges it, which is how an ingest insert
+   * ends up stalled for hours on a 6.6 GB index.
+   */
+  maintenance: {
+    /** How often the pending lists are merged. Little and often is the point. */
+    ginTickSeconds: num('GIN_TICK_SECONDS', 120),
+    /** One index's clean is abandoned after this long; the next tick resumes it. */
+    ginStatementTimeoutMs: num('GIN_STATEMENT_TIMEOUT_MS', 5 * 60_000),
   },
 
   feeds: {
