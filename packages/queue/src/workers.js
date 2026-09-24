@@ -7,6 +7,7 @@ import {
   scanFeeds,
 } from '@nichedb/core';
 import { generateDump } from '@nichedb/core/data-dumps';
+import { cleanGinPendingLists } from '@nichedb/db/gin-maintenance';
 import * as q from '@nichedb/db/queries';
 import { sendEmail, sendPush } from '@nichedb/notify';
 import { buildEvent, sendWebhook } from '@profullstack/autoblog';
@@ -172,6 +173,19 @@ export function startWorkers() {
       concurrency: 1,
       lockDuration: config.stats.budgetMs + config.stats.statementTimeoutMs + 60_000,
     }),
+    /*
+     * One at a time: merging a GIN pending list is I/O, and two at once would
+     * compete with the ingest this exists to keep out of trouble.
+     */
+    new Worker(
+      QUEUES.maintain,
+      () => cleanGinPendingLists({ log, timeoutMs: config.maintenance.ginStatementTimeoutMs }),
+      {
+        connection,
+        concurrency: 1,
+        lockDuration: config.maintenance.ginStatementTimeoutMs + 60_000,
+      },
+    ),
   ];
   if (config.dataDumps.enabled)
     workers.push(

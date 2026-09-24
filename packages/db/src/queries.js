@@ -1,3 +1,4 @@
+import { config } from '@nichedb/config';
 import { GeoQueryError, geoQueryFields } from '@nichedb/core/geo';
 import { geoSql } from './geo.js';
 import { sql } from './index.js';
@@ -744,7 +745,24 @@ export async function upsertItems({ collectionId, sourceId, items }) {
   }));
   if (rows.length === 0) return { added: 0, updated: 0 };
 
-  const out = await sql`
+  /*
+   * Bounded, because an insert into `items` is not a small statement: sixteen
+   * indexes, three of them GIN, and with fastupdate on it is the inserting
+   * backend that merges a full pending list. Measured on production
+   * 2026-09-24, that stalled single batches for 14, 27 and 41 minutes, and one
+   * for 19 hours 29 minutes, each pinning the xmin horizon for its whole life
+   * and blocking every index build and deploy behind it.
+   *
+   * packages/db/src/gin-maintenance.js removes the cause by merging those
+   * lists on a schedule. This is the backstop: a batch that somehow still
+   * cannot finish is cancelled and the run fails, which the retry rule already
+   * knows how to handle. At-least-once is safe here, because the upsert is
+   * idempotent per (source_id, external_id).
+   */
+  const out = await bounded(
+    sql,
+    config.ingest.writeTimeoutMs,
+    (db) => db`
     insert into items (collection_id, source_id, external_id, kind, title, summary, url,
                        image_url, published_at, time_known, precision, tags, data, content_hash,
                        dedupe_key)
@@ -766,7 +784,8 @@ export async function upsertItems({ collectionId, sourceId, items }) {
       dedupe_key = excluded.dedupe_key, updated_at = now()
     where items.content_hash is distinct from excluded.content_hash
     returning (xmax = 0) as inserted
-  `;
+  `,
+  );
   let added = 0;
   for (const r of out) if (r.inserted) added++;
   return { added, updated: out.length - added };
