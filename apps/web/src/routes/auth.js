@@ -3,6 +3,7 @@ import { config } from '@nichedb/config';
 import * as q from '@nichedb/db/queries';
 import { sendLoginLink } from '@nichedb/notify';
 import { connection } from '@nichedb/queue';
+import { vapidKeysFromEnv, vapidPublicKeyResponse } from '@profullstack/notifications/server';
 import { getCookie, setCookie } from 'hono/cookie';
 import { AUTH, attempt, callerAddress, forgive, VIEW } from '../lib/auth-throttle.js';
 import { render, requireUser, respond } from '../lib/http.js';
@@ -207,6 +208,16 @@ export function registerAuth(app) {
     c.header('set-cookie', auth.sessionCookie(result.sessionId));
     return c.json({ ok: true });
   });
+
+  /*
+   * The push public key, read from the environment on every request rather than
+   * written into the page, so a key missing at render time cannot leave the page
+   * telling every browser that push is not available. 503 with a reason when the
+   * server has no key pair.
+   */
+  app.get('/api/push/vapid-public-key', () =>
+    vapidPublicKeyResponse(vapidKeysFromEnv(process.env)),
+  );
 
   /* Push subscriptions and the reader's zone. */
   app.post('/api/push/subscribe', async (c) => {

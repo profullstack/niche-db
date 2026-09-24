@@ -1,11 +1,7 @@
 import { config } from '@nichedb/config';
 import * as q from '@nichedb/db/queries';
 import { createEmailer } from '@profullstack/emailer';
-import webpush from 'web-push';
-
-if (config.push.enabled) {
-  webpush.setVapidDetails(config.push.subject, config.push.publicKey, config.push.privateKey);
-}
+import { sendPushToMany } from '@profullstack/notifications/server';
 
 /** Outbound mail goes through @profullstack/emailer (Resend, zero deps). */
 let emailer = null;
@@ -43,27 +39,20 @@ export async function sendPush(target, { feed, items }) {
     tag: `feed-${feed.id}`,
     url: `${config.siteUrl}/f/${feed.slug}`,
   });
-  const results = await Promise.allSettled(
-    target.push_subscriptions.map((s) =>
-      webpush.sendNotification(
-        { endpoint: s.endpoint, keys: { p256dh: s.p256dh, auth: s.auth } },
-        payload,
-        { TTL: 3600 },
-      ),
-    ),
+  const results = await sendPushToMany(
+    target.push_subscriptions.map((s) => ({
+      endpoint: s.endpoint,
+      keys: { p256dh: s.p256dh, auth: s.auth },
+    })),
+    payload,
+    {
+      keys: { publicKey: config.push.publicKey, privateKey: config.push.privateKey },
+      subject: config.push.subject,
+      ttl: 3600,
+      onGone: (endpoint) => q.disablePushSubscription(endpoint),
+    },
   );
-  let delivered = 0;
-  for (let i = 0; i < results.length; i++) {
-    const r = results[i];
-    if (r.status === 'fulfilled') {
-      delivered++;
-      continue;
-    }
-    const code = r.reason?.statusCode;
-    if (code === 404 || code === 410) {
-      await q.disablePushSubscription(target.push_subscriptions[i].endpoint);
-    }
-  }
+  const delivered = results.filter((r) => r.sent).length;
   if (delivered === 0) throw new Error('no live push endpoint');
   return delivered;
 }
