@@ -82,6 +82,19 @@ describe('ensureIndex', () => {
     expect(createAt).toBeGreaterThan(dropAt);
   });
 
+  /*
+   * A plain DROP INDEX needs ACCESS EXCLUSIVE on the table, which a table
+   * under constant ingest never offers. Production retried every two minutes
+   * and logged `canceling statement due to lock timeout` every single time,
+   * so the invalid index never went away and the real one never got built.
+   */
+  test('the drop is CONCURRENT, so a busy table cannot starve it out', async () => {
+    const f = fakeSql({ state: 'invalid' });
+    await ensureIndex(f.tag, SPEC, { log: () => {} });
+    const drop = f.calls.find((c) => c.startsWith('drop index'));
+    expect(drop).toContain('concurrently');
+  });
+
   test('the drop is bounded by a lock timeout, so writes never queue behind it', async () => {
     const f = fakeSql({ state: 'invalid' });
     await ensureIndex(f.tag, SPEC, { log: () => {} });
