@@ -50,6 +50,12 @@ export const BIG_INDEXES = [
 ];
 
 const LOCK_TIMEOUT_MS = 5000;
+/*
+ * The concurrent drop waits for transactions rather than blocking them, so it
+ * can afford to wait properly. Bounded anyway: a wait this long means the
+ * table is in trouble and the next tick should look again.
+ */
+const DROP_LOCK_TIMEOUT_MS = 60_000;
 
 /** Present and valid, present but invalid, or absent. */
 export async function indexState(sql, name) {
@@ -89,13 +95,22 @@ export async function ensureIndex(sql, spec, { log = console.log } = {}) {
     // make `if not exists` skip forever, so it goes before anything else.
     log(`[indexes] ${name}: dropping an invalid index left by an interrupted build`);
     /*
-     * SET takes no bind parameters: `set lock_timeout = ${n}` through the tag
-     * reaches Postgres as `set lock_timeout = $1` and fails with a syntax
-     * error at $1. Shipped exactly that way and caught in production, where
-     * the builder logged the error and left the invalid index in place.
+     * CONCURRENTLY, because a plain DROP INDEX needs ACCESS EXCLUSIVE on the
+     * table and a table under constant ingest never offers a five second gap
+     * to take it in. Production tried every two minutes and logged
+     * `canceling statement due to lock timeout` every time, so the invalid
+     * index simply stayed. The concurrent drop takes a weak lock and waits
+     * for conflicting transactions instead of blocking them, which is the
+     * whole point: no write ever queues behind this.
+     *
+     * The timeout is generous rather than absent so a wait cannot last
+     * forever, and it is inline because SET takes no bind parameters --
+     * `set lock_timeout = ${n}` through the tag reaches Postgres as
+     * `set lock_timeout = $1`, which is a syntax error at $1. Shipped that
+     * way once and caught in production.
      */
-    await sql.unsafe(`set lock_timeout = ${Math.floor(LOCK_TIMEOUT_MS)}`);
-    await sql.unsafe(`drop index if exists ${name}`);
+    await sql.unsafe(`set lock_timeout = ${Math.floor(DROP_LOCK_TIMEOUT_MS)}`);
+    await sql.unsafe(`drop index concurrently if exists ${name}`);
     await sql.unsafe('set lock_timeout = 0');
   }
 
