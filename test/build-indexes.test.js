@@ -95,6 +95,21 @@ describe('ensureIndex', () => {
     expect(await ensureIndex(f.tag, SPEC, { log: () => {} })).toBe('invalid');
   });
 
+  /*
+   * Shipped and caught in production: `set lock_timeout = ${n}` through the
+   * tagged template reaches Postgres as `set lock_timeout = $1`, which is a
+   * syntax error, because SET takes no bind parameters. The builder logged it
+   * and left the invalid index exactly where it was.
+   */
+  test('SET statements carry their value inline, never as a bind parameter', async () => {
+    const f = fakeSql({ state: 'invalid' });
+    await ensureIndex(f.tag, SPEC, { log: () => {} });
+    const sets = f.calls.filter((c) => /^set\s/i.test(c));
+    expect(sets.length).toBeGreaterThan(0);
+    for (const stmt of sets) expect(stmt).not.toContain('$1');
+    expect(sets.some((c) => /lock_timeout = \d+/.test(c))).toBe(true);
+  });
+
   test('a missing extension skips instead of failing', async () => {
     const f = fakeSql({ state: 'absent', extension: false });
     expect(await ensureIndex(f.tag, SPEC, { log: () => {} })).toBe('unavailable');
