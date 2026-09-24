@@ -88,9 +88,15 @@ export async function ensureIndex(sql, spec, { log = console.log } = {}) {
     // An interrupted build from a previous boot. It answers nothing and would
     // make `if not exists` skip forever, so it goes before anything else.
     log(`[indexes] ${name}: dropping an invalid index left by an interrupted build`);
-    await sql`set lock_timeout = ${LOCK_TIMEOUT_MS}`;
+    /*
+     * SET takes no bind parameters: `set lock_timeout = ${n}` through the tag
+     * reaches Postgres as `set lock_timeout = $1` and fails with a syntax
+     * error at $1. Shipped exactly that way and caught in production, where
+     * the builder logged the error and left the invalid index in place.
+     */
+    await sql.unsafe(`set lock_timeout = ${Math.floor(LOCK_TIMEOUT_MS)}`);
     await sql.unsafe(`drop index if exists ${name}`);
-    await sql`set lock_timeout = 0`;
+    await sql.unsafe('set lock_timeout = 0');
   }
 
   if (extension) await sql.unsafe(`create extension if not exists ${extension}`);
