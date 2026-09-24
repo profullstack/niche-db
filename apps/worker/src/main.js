@@ -1,6 +1,6 @@
 import { config } from '@nichedb/config';
 import { close as closeDb, sql } from '@nichedb/db';
-import { buildBigIndexes } from '@nichedb/db/build-indexes';
+import { buildBigIndexesOnce } from '@nichedb/db/build-indexes';
 import { migrate } from '@nichedb/db/migrate';
 import { configurePayments } from '@nichedb/payments';
 import { closeQueues, installSchedules } from '@nichedb/queue';
@@ -15,7 +15,7 @@ const workers = startWorkers();
  * Large indexes build after the workers are up, outside a transaction and
  * CONCURRENTLY, so no write waits on one. Not awaited on purpose.
  */
-buildBigIndexes().catch((err) => console.error('[indexes]', err));
+buildBigIndexesOnce().catch((err) => console.error('[indexes]', err));
 
 async function shutdown(signal) {
   console.log(`[worker] ${signal}, draining`);

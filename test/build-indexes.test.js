@@ -2,6 +2,7 @@ import { describe, expect, test } from 'bun:test';
 
 import {
   BIG_INDEXES,
+  buildBigIndexesOnce,
   ensureIndex,
   extensionAvailable,
   indexState,
@@ -114,6 +115,29 @@ describe('ensureIndex', () => {
     const f = fakeSql({ state: 'absent', extension: false });
     expect(await ensureIndex(f.tag, SPEC, { log: () => {} })).toBe('unavailable');
     expect(f.calls.some((c) => c.startsWith('create index'))).toBe(false);
+  });
+});
+
+describe('one build at a time', () => {
+  /*
+   * Boot starts a build and the maintenance tick asks again every couple of
+   * minutes, which is what gives a drop that lost a lock race another go. A
+   * concurrent build outlives the tick that started it, so two callers must
+   * share one run rather than racing against the same index name.
+   */
+  test('concurrent callers share a single run', () => {
+    const a = buildBigIndexesOnce({ log: () => {}, indexes: [] });
+    const b = buildBigIndexesOnce({ log: () => {}, indexes: [] });
+    expect(a).toBe(b);
+    return a;
+  });
+
+  test('a later caller starts a new run once the first has finished', async () => {
+    const first = buildBigIndexesOnce({ log: () => {}, indexes: [] });
+    await first;
+    const second = buildBigIndexesOnce({ log: () => {}, indexes: [] });
+    expect(second).not.toBe(first);
+    await second;
   });
 });
 
