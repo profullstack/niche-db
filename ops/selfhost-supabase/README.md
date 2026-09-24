@@ -26,8 +26,8 @@ is disk, and it is cheaper to own.
 What the overlay changes on stock Supabase:
 
 - **Postgres is published directly on 5432**, with TLS on and a self-signed
-  cert for `db.nichedb.dev`. The app already connects with
-  `sslmode=require` and does not verify the cert.
+  cert. The app connects by the server's existing hostname with
+  `sslmode=require` and does not verify the cert. No new DNS names.
 - **pg_hba**: from outside, only the `postgres` role gets in, and only over
   TLS. The compose network is pinned to `172.31.250.0/24` so the Docker
   gateway can be treated as outside. That covers clients Docker proxies:
@@ -38,7 +38,7 @@ What the overlay changes on stock Supabase:
 - **Tuning** is sized from the box's RAM and CPUs: 25% `shared_buffers`, 16 GB
   `max_wal_size`, parallel maintenance, and autovacuum tuned for `items`.
 - **Supavisor** binds 127.0.0.1:6543 only. **Studio** sits behind Caddy with
-  HTTPS and basic auth at `https://supabase.nichedb.dev`.
+  HTTPS and basic auth on the server's hostname.
 - **Docker logs** rotate at 3 x 50 MB. **Supabase's `setup.sh` output**,
   which prints every secret, goes to a root-only log, never the terminal.
 
@@ -63,7 +63,6 @@ What the overlay changes on stock Supabase:
 K=ops/selfhost-supabase/nichedb-db
 
 $K provision root@<server-ip>   # install + start Supabase, fetch the connection
-$K dns                          # db.nichedb.dev + supabase.nichedb.dev -> server
 $K vault                        # server .env -> vault nichedb-supabase--prod,
                                 # SELFHOST_* merged into nichedb--prod (backup kept)
 $K check                        # versions, sizes, free disk on both sides
@@ -93,8 +92,8 @@ $K prepare-db root@<host> /path/to/that/supabase-project nichedb
 instead of `provision`. It creates the database, enables citext + pg_trgm,
 locks anon/authenticated out of that database's `public` (the cluster's own
 `postgres` database is untouched), and writes `nichedb-connection.env` into
-the project directory. The rest of the runbook is unchanged; `dns` then sets
-only `db.nichedb.dev`, and `vault` leaves the cluster's `.env` to its owner.
+the project directory. The rest of the runbook is unchanged, and `vault`
+leaves the cluster's `.env` to its owner.
 The cluster needs `wal_level=logical`, a free replication slot, and a pg_hba
 rule that lets `postgres` in over TLS. What this costs: one restart, bad
 config or OOM takes both apps' databases down together.

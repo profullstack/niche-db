@@ -19,8 +19,8 @@
 #   SUPABASE_REF   self-hosted/v0.8.2         pinned release of supabase/docker
 #   INSTALL_ROOT   /opt                       parent of the project directory
 #   PROJECT        nichedb-supabase           project directory name
-#   DB_DOMAIN      db.nichedb.dev             Postgres host name (cert SAN)
-#   STUDIO_DOMAIN  supabase.nichedb.dev       Studio + API over Caddy HTTPS
+#   DB_DOMAIN      $(hostname -f)             Postgres host name (cert SAN)
+#   STUDIO_DOMAIN  = DB_DOMAIN                Studio + API over Caddy HTTPS
 #   SITE_URL       https://nichedb.dev
 #   DB_PORT        5432                       public Postgres port on the host
 #   PGDATA_DIR     (project)/volumes/db/data  put PGDATA on a separate disk
@@ -34,8 +34,9 @@ set -euo pipefail
 SUPABASE_REF=${SUPABASE_REF:-self-hosted/v0.8.2}
 INSTALL_ROOT=${INSTALL_ROOT:-/opt}
 PROJECT=${PROJECT:-nichedb-supabase}
-DB_DOMAIN=${DB_DOMAIN:-db.nichedb.dev}
-STUDIO_DOMAIN=${STUDIO_DOMAIN:-supabase.nichedb.dev}
+# The server's own name: the app connects to the box it already knows.
+DB_DOMAIN=${DB_DOMAIN:-$(hostname -f 2>/dev/null || hostname)}
+STUDIO_DOMAIN=${STUDIO_DOMAIN:-$DB_DOMAIN}
 SITE_URL=${SITE_URL:-https://nichedb.dev}
 DB_PORT=${DB_PORT:-5432}
 PGDATA_DIR=${PGDATA_DIR:-}

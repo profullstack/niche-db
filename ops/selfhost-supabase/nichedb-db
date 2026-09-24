@@ -36,8 +36,10 @@ SHARED_CLUSTER=${SHARED_CLUSTER:-0}
 PUB=${PUB:-nichedb_migrate}
 SUB=${SUB:-nichedb_migrate}
 APP_HEALTH_URL=${APP_HEALTH_URL:-https://nichedb.dev/healthz}
-DB_DOMAIN=${DB_DOMAIN:-db.nichedb.dev}
-STUDIO_DOMAIN=${STUDIO_DOMAIN:-supabase.nichedb.dev}
+# The app reaches the database by the server's existing hostname. No new DNS
+# names: `dns` only runs when you pass DB_DOMAIN yourself.
+DB_DOMAIN=${DB_DOMAIN:-${TARGET_SSH#*@}}
+STUDIO_DOMAIN=${STUDIO_DOMAIN:-}
 DNS_ZONE=${DNS_ZONE:-nichedb.dev}
 VAULT_TEAM=${VAULT_TEAM:-profullstack}
 SSH_KEY=${SSH_KEY:-$HOME/.ssh/id_ed25519}
@@ -327,11 +329,13 @@ cmd_vault() {
 cmd_dns() {
   local ip=${1:-${TARGET_IP:-}}
   [ -n "$ip" ] || die "usage: nichedb-db dns <server-ipv4>"
+  [ "$DB_DOMAIN" != "${TARGET_SSH#*@}" ] || die "DB_DOMAIN is the server's own name; nothing to add"
+  [[ "$DB_DOMAIN" == *.$DNS_ZONE ]] || die "DB_DOMAIN $DB_DOMAIN is not under $DNS_ZONE"
   log "DNS: $DB_DOMAIN -> $ip"
   porkbun set "$DNS_ZONE" "${DB_DOMAIN%%.$DNS_ZONE}" A "$ip" --ttl 600
   [ -n "${TARGET_IPV6:-}" ] && porkbun set "$DNS_ZONE" "${DB_DOMAIN%%.$DNS_ZONE}" AAAA "$TARGET_IPV6" --ttl 600
   # A shared cluster's Studio belongs to the app that owns it.
-  if [ "$SHARED_CLUSTER" != 1 ]; then
+  if [ "$SHARED_CLUSTER" != 1 ] && [ -n "$STUDIO_DOMAIN" ]; then
     porkbun set "$DNS_ZONE" "${STUDIO_DOMAIN%%.$DNS_ZONE}" A "$ip" --ttl 600
     [ -n "${TARGET_IPV6:-}" ] && porkbun set "$DNS_ZONE" "${STUDIO_DOMAIN%%.$DNS_ZONE}" AAAA "$TARGET_IPV6" --ttl 600
   fi
@@ -661,7 +665,6 @@ In order:
   prepare-db user@host /path/to/supabase [db]
                         INSTEAD of provision when the box already runs a Supabase
                         cluster for another app: nichedb becomes a database in it
-  dns [ipv4]            db.nichedb.dev + supabase.nichedb.dev A records (Porkbun)
   vault                 push the server's secrets to the logicsrc team vaults
   check                 versions, sizes and free disk on both sides
   source-prep           Railway: wal_level=logical (RESTART), TCP proxy, publication
@@ -675,6 +678,7 @@ In order:
   cleanup               drop publication/slot and the TCP proxy (after you're sure)
 
 Other:
+  dns [ipv4]            only with DB_DOMAIN=<name under nichedb.dev>: add its A record
   fetch-connection      re-read nichedb-connection.env from the server
   apply-migration FILE  a migration shipped mid-copy: apply its SQL to the target
                         and re-enable the subscription
