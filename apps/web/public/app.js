@@ -144,12 +144,13 @@ async function initPasskeys() {
 
 /* ------------------------------------------------------------------ push -- */
 
-const urlB64ToUint8Array = (b64) => {
-  const padded = (b64 + '='.repeat((4 - (b64.length % 4)) % 4))
-    .replace(/-/g, '+')
-    .replace(/_/g, '/');
-  return Uint8Array.from(atob(padded), (c) => c.charCodeAt(0));
-};
+/**
+ * The house push client (@profullstack/notifications), served by the app at a
+ * stable path and imported on first use. It says why push is unavailable when it
+ * is, and fetches the server's public key at runtime rather than trusting one
+ * written into the page.
+ */
+const loadPushClient = () => import('/vendor-notifications.js');
 
 async function registerSw() {
   if (!('serviceWorker' in navigator)) return null;
@@ -162,13 +163,31 @@ async function registerSw() {
   }
 }
 
-function initPush() {
+async function initPush() {
   const btn = document.getElementById('push-enable');
   const msg = document.getElementById('push-msg');
   if (!btn) return;
-  if (!window.__VAPID || !('PushManager' in window)) {
+  let push;
+  try {
+    push = await loadPushClient();
+  } catch (err) {
+    console.warn('push client failed to load', err);
     btn.hidden = true;
-    say(msg, 'Push is not available here (no VAPID key, or the browser cannot).', 'info');
+    say(msg, 'Push is not available here.', 'info');
+    return;
+  }
+  // The reason, not a generic "not available": HTTPS, iPhone Home Screen, blocked
+  // in settings, or a server with no key.
+  const support = push.pushSupport();
+  const unavailable = support.supported
+    ? await push
+        .getVapidPublicKey()
+        .then(() => null)
+        .catch((err) => err?.message ?? String(err))
+    : support.message;
+  if (unavailable) {
+    btn.hidden = true;
+    say(msg, unavailable, 'info');
     return;
   }
   btn.addEventListener('click', async () => {
@@ -176,13 +195,10 @@ function initPush() {
     try {
       const reg = await registerSw();
       if (!reg) throw new Error('service worker unavailable');
-      const perm = await Notification.requestPermission();
-      if (perm !== 'granted') throw new Error('permission not granted');
-      const sub = await reg.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlB64ToUint8Array(window.__VAPID),
-      });
-      const res = await postJson('/api/push/subscribe', sub.toJSON());
+      // Asks permission, uses the key fetched above, and replaces a subscription
+      // made with an older key.
+      const sub = await push.subscribe({ serviceWorkerUrl: '/sw.js' });
+      const res = await postJson('/api/push/subscribe', sub);
       if (!res.ok) throw new Error(`server said ${res.status}`);
       say(msg, 'Push enabled on this device.', 'ok');
     } catch (err) {

@@ -704,9 +704,8 @@ export const Settings = ({
   pro,
   terms,
   referral,
-  vapidKey,
 }) => (
-  <Layout user={user} title="Settings" vapidKey={vapidKey}>
+  <Layout user={user} title="Settings">
     <h1>Settings</h1>
     <Notice notice={notice} error={error} />
 

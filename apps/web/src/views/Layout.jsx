@@ -1,6 +1,5 @@
 import { config } from '@nichedb/config';
 import { appIconFor, themeFor } from '@nichedb/premium';
-import { html } from 'hono/html';
 import { assetUrl } from '../lib/asset-version.js';
 import { currentModules } from '../lib/modules.js';
 
@@ -204,7 +203,6 @@ export const Layout = (props) => (
       {config.ads.enabled && currentModules().ads ? (
         <script src="https://crawlproof.com/ad.js" async />
       ) : null}
-      {props.vapidKey ? html`<script>window.__VAPID = "${props.vapidKey}";</script>` : null}
     </body>
   </html>
 );

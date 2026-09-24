@@ -13,6 +13,9 @@ const STATIC_FILES = [
   ['/favicon.svg', 'favicon.svg', 'image/svg+xml'],
   ['/favicon.ico', 'icons/favicon.ico', 'image/x-icon'],
 ];
+/** Files served out of a package rather than out of public/. */
+const PACKAGE_FILES = [['/vendor-notifications.js', '@profullstack/notifications/client']];
+
 const VERSIONED_ICONS = [
   'icons/favicon.svg',
   'icons/favicon-16.png',
@@ -31,6 +34,21 @@ const ICON_TYPES = {
 
 export function registerStatic(app, gateway) {
   loadAssetVersions([...STATIC_FILES.map(([, f]) => f), ...VERSIONED_ICONS]);
+
+  /*
+   * The push client, served straight out of @profullstack/notifications rather
+   * than copied into public/, so it cannot drift from the package the server
+   * sends with. Resolved once at boot: a missing dependency should stop the
+   * container rather than 404 the file. An ES module that app.js imports.
+   */
+  for (const [route, spec] of PACKAGE_FILES) {
+    const path = Bun.fileURLToPath(import.meta.resolve(spec));
+    app.get(route, async (c) => {
+      c.header('content-type', 'text/javascript');
+      c.header('cache-control', 'public, max-age=60');
+      return c.body(await Bun.file(path).arrayBuffer());
+    });
+  }
 
   for (const [route, file, type] of STATIC_FILES) {
     app.get(route, async (c) => {
