@@ -107,3 +107,62 @@ and a provider added anywhere above the mark would shift every index below it.
 A cursor naming a provider that is no longer there starts from the top:
 rewriting rows that are already correct costs a write of nothing, and skipping
 them loses them.
+
+## OpenModel: a provider's own file
+
+models.dev is a community database. It is good, and it is still a third party
+writing down what a company charges. [OpenModel](https://logicsrc.com/docs/openmodel)
+is the same row with the provider as its author: one file at
+`/.well-known/openmodel.json` on the provider's own origin, listing the models it
+serves and what they cost.
+
+The `openmodel` adapter reads it into this collection beside the models.dev rows,
+in the same vocabulary (`cost`, `limit`, `modalities`, the capability flags), so
+the existing feeds catch both. Point a source at an origin (`acme.ai`) or at a
+full descriptor URL.
+
+```json
+{
+  "openmodel": "0.1",
+  "updated": "2026-09-24",
+  "provider": {
+    "id": "acme",
+    "name": "Acme AI",
+    "web": "https://acme.ai",
+    "doc": "https://acme.ai/docs/models",
+    "env": ["ACME_API_KEY"]
+  },
+  "models": [
+    {
+      "id": "acme-large",
+      "name": "Acme Large",
+      "family": "acme",
+      "reasoning": true,
+      "tool_call": true,
+      "open_weights": false,
+      "modalities": { "input": ["text", "image"], "output": ["text"] },
+      "limit": { "context": 200000, "output": 64000 },
+      "cost": { "input": 1, "output": 5, "cache_read": 0.1 },
+      "release_date": "2026-03-01",
+      "last_updated": "2026-06-01"
+    }
+  ]
+}
+```
+
+Two rules it keeps, the same ones every other descriptor reader here keeps.
+
+**Origin is the proof.** A descriptor is believed only when it was fetched from
+the origin it describes: the URL it was read from must share a host with
+`provider.web`. A file naming a provider's `web` and served by somebody else is a
+stranger's claim about a company's prices, and is dropped with a note in the log.
+A file that names no `web` is only ever about whoever served it, so it is kept and
+tagged `unverified`.
+
+**Absent is unstated.** A model with no `cost` has not said it is free, it has
+said nothing, and `free` stays a published zero in and out. A capability the
+provider did not set stays null rather than false, because a reader will quote a
+false back as a fact.
+
+Nothing is seeded: no provider serves one yet. Add a source at `/c/models/add`
+pointing at an origin, and the descriptor's rows land in the collection's feeds.

@@ -86,6 +86,7 @@ import { openalex } from './openalex.js';
 import { openfda } from './openfda.js';
 import { openlibrary } from './openlibrary.js';
 import { openlibraryCatalog } from './openlibrary-catalog.js';
+import { openmodel } from './openmodel.js';
 import { openprofiles } from './openprofiles.js';
 import { opensaas } from './opensaas.js';
 import { openserver } from './openserver.js';
@@ -325,8 +326,10 @@ export const ADAPTERS = [
   pwcArchive,
   rosettaCode,
   theAlgorithms,
-  // Models: every AI model and what each provider charges for it, from models.dev.
+  // Models: every AI model and what each provider charges, from models.dev, and
+  // the same rows served by a provider itself as an OpenModel descriptor.
   modelsdev,
+  openmodel,
 ];
 
 export { isPlatformHosted, PLATFORM_HOSTS } from './podcastplatforms.js';
