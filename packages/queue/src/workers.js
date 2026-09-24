@@ -7,6 +7,7 @@ import {
   scanFeeds,
 } from '@nichedb/core';
 import { generateDump } from '@nichedb/core/data-dumps';
+import { buildBigIndexesOnce } from '@nichedb/db/build-indexes';
 import { cleanGinPendingLists } from '@nichedb/db/gin-maintenance';
 import * as q from '@nichedb/db/queries';
 import { sendEmail, sendPush } from '@nichedb/notify';
@@ -179,7 +180,21 @@ export function startWorkers() {
      */
     new Worker(
       QUEUES.maintain,
-      () => cleanGinPendingLists({ log, timeoutMs: config.maintenance.ginStatementTimeoutMs }),
+      async () => {
+        /*
+         * The index builder runs on this tick as well as at boot. Its drop and
+         * its build both hold short locks under a lock_timeout, so on a busy
+         * table either can lose the race and give up -- which is the correct
+         * behaviour and also means one attempt per deploy is not enough.
+         * Production, 2026-09-24: `canceling statement due to lock timeout`,
+         * and the index then waited for the next deploy to try again. It is
+         * cheap to repeat: a valid index costs one catalog query.
+         */
+        // Started, never awaited: a build runs for as long as it runs, and the
+        // tick must not hold its queue lock open for it.
+        buildBigIndexesOnce({ log }).catch((err) => log(`[indexes] ${err?.message ?? err}`));
+        return cleanGinPendingLists({ log, timeoutMs: config.maintenance.ginStatementTimeoutMs });
+      },
       {
         connection,
         concurrency: 1,

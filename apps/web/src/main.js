@@ -1,7 +1,7 @@
 import { assertCoinpayMerchantKey, config } from '@nichedb/config';
 import { ensureDefaults, envFor } from '@nichedb/core';
 import { close as closeDb, healthcheck, sql } from '@nichedb/db';
-import { buildBigIndexes } from '@nichedb/db/build-indexes';
+import { buildBigIndexesOnce } from '@nichedb/db/build-indexes';
 import { migrate } from '@nichedb/db/migrate';
 import { configurePayments } from '@nichedb/payments';
 import { closeQueues, installSchedules } from '@nichedb/queue';
@@ -46,7 +46,7 @@ if (config.roles.includes('worker')) {
    * awaited -- the process serves while it runs, and a build interrupted by a
    * deploy is repaired by the next boot.
    */
-  buildBigIndexes().catch((err) => console.error('[indexes]', err));
+  buildBigIndexesOnce().catch((err) => console.error('[indexes]', err));
 }
 
 let server;

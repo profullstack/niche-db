@@ -2,6 +2,7 @@ import { describe, expect, test } from 'bun:test';
 
 import {
   BIG_INDEXES,
+  buildBigIndexesOnce,
   ensureIndex,
   extensionAvailable,
   indexState,
@@ -81,6 +82,19 @@ describe('ensureIndex', () => {
     expect(createAt).toBeGreaterThan(dropAt);
   });
 
+  /*
+   * A plain DROP INDEX needs ACCESS EXCLUSIVE on the table, which a table
+   * under constant ingest never offers. Production retried every two minutes
+   * and logged `canceling statement due to lock timeout` every single time,
+   * so the invalid index never went away and the real one never got built.
+   */
+  test('the drop is CONCURRENT, so a busy table cannot starve it out', async () => {
+    const f = fakeSql({ state: 'invalid' });
+    await ensureIndex(f.tag, SPEC, { log: () => {} });
+    const drop = f.calls.find((c) => c.startsWith('drop index'));
+    expect(drop).toContain('concurrently');
+  });
+
   test('the drop is bounded by a lock timeout, so writes never queue behind it', async () => {
     const f = fakeSql({ state: 'invalid' });
     await ensureIndex(f.tag, SPEC, { log: () => {} });
@@ -114,6 +128,29 @@ describe('ensureIndex', () => {
     const f = fakeSql({ state: 'absent', extension: false });
     expect(await ensureIndex(f.tag, SPEC, { log: () => {} })).toBe('unavailable');
     expect(f.calls.some((c) => c.startsWith('create index'))).toBe(false);
+  });
+});
+
+describe('one build at a time', () => {
+  /*
+   * Boot starts a build and the maintenance tick asks again every couple of
+   * minutes, which is what gives a drop that lost a lock race another go. A
+   * concurrent build outlives the tick that started it, so two callers must
+   * share one run rather than racing against the same index name.
+   */
+  test('concurrent callers share a single run', () => {
+    const a = buildBigIndexesOnce({ log: () => {}, indexes: [] });
+    const b = buildBigIndexesOnce({ log: () => {}, indexes: [] });
+    expect(a).toBe(b);
+    return a;
+  });
+
+  test('a later caller starts a new run once the first has finished', async () => {
+    const first = buildBigIndexesOnce({ log: () => {}, indexes: [] });
+    await first;
+    const second = buildBigIndexesOnce({ log: () => {}, indexes: [] });
+    expect(second).not.toBe(first);
+    await second;
   });
 });
 
