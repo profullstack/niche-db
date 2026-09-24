@@ -598,15 +598,14 @@ cmd_cutover() {
   tgt_q "drop subscription $SUB"
 
   if [ "$SOURCE_MODE" = railway ]; then
-    log "5/6 Railway app -> the new database, web only (the worker moves here)"
-    local old
-    old=$(rw_vars "$RW_APP_SERVICE" true | jq -r '.DATABASE_URL')
-    [ "${OLD_DATABASE_URL:-}" ] || save_state OLD_DATABASE_URL "$old"
-    rw_set_var "$RW_APP_SERVICE" ROLES web
-    rw_set_var "$RW_APP_SERVICE" DATABASE_URL "$(target_url)"
-    note "DATABASE_URL updated (was $old), ROLES=web; Railway is deploying"
-    wait_for_deploy "$RW_APP_SERVICE"
-    curl -fsS --max-time 20 "$APP_HEALTH_URL" >/dev/null && note "Railway app healthy on the new database" || warn "$APP_HEALTH_URL did not answer ok"
+    log "5/6 Railway app stays on its read-only copy for the DNS TTL, web only"
+    # Not repointed at the new database: dev2's 5432 is allowlisted and
+    # Railway's egress addresses are not fixed. Stale resolvers get reads
+    # from Railway for up to ten minutes; writes there fail until they move.
+    if [ "$(rw_vars "$RW_APP_SERVICE" | jq -r '.ROLES')" != web ]; then
+      rw_set_var "$RW_APP_SERVICE" ROLES web
+      wait_for_deploy "$RW_APP_SERVICE"
+    fi
 
     log "6/6 The app on this box, then DNS"
     cmd_app_deploy --start
@@ -642,9 +641,8 @@ cmd_rollback() {
   warn "Rollback points the app back at Railway. Writes made on the new server since the cutover are NOT copied back."
   confirm "Roll back to the Railway database?"
   if [ "$SOURCE_MODE" = railway ]; then
-    rw_set_var "$RW_APP_SERVICE" DATABASE_URL "${OLD_DATABASE_URL:-\${{Postgres.DATABASE_URL\}}}"
     rw_set_var "$RW_APP_SERVICE" ROLES web,worker
-    note "DATABASE_URL restored, ROLES=web,worker"
+    note "ROLES=web,worker on Railway again"
     tgt_exec "cd $APP_DIR 2>/dev/null && docker compose -f docker-compose.app.yml --env-file deploy.env stop app" 2>/dev/null || true
     note "app on the box stopped"
     if [ -n "${APP_DNS_FLIPPED:-}" ]; then
@@ -792,8 +790,8 @@ In order:
   app-deploy            clone + build the app under ~/www/nichedb.dev (not started)
   app-cert              cert for nichedb.dev + www over Porkbun DNS-01 (before DNS moves)
   app-vhost             nginx vhost -> 127.0.0.1:3010
-  cutover               source read-only, drain, sequences; then Railway app ->
-                        new DB (web only), start the app here, move DNS at Porkbun
+  cutover               source read-only, drain, sequences; start the app on the
+                        box, move DNS at Porkbun (Railway serves reads for the TTL)
   rollback              point the app back at Railway and make it writable
   cleanup               drop publication/slot and the TCP proxy (after you're sure)
 
