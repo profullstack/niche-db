@@ -26,6 +26,8 @@ export const QUEUES = {
   dumps: 'data-dumps',
   /** Every few minutes: recount the collections whose stored statistics went stale. */
   stats: 'collection-stats',
+  /** Every couple of minutes: merge the GIN pending lists so no insert has to. */
+  maintain: 'db-maintenance',
 };
 
 const defaults = {
@@ -54,7 +56,14 @@ export const minuteStamp = () => new Date().toISOString().slice(0, 16).replace(/
  * (next_run_at, last_scanned_item_id) decides whether they do anything.
  */
 export async function installSchedules({ log = console.log } = {}) {
-  for (const queue of [queues.tick, queues.scan, queues.enrich, queues.dumps, queues.stats]) {
+  for (const queue of [
+    queues.tick,
+    queues.scan,
+    queues.enrich,
+    queues.dumps,
+    queues.stats,
+    queues.maintain,
+  ]) {
     for (const r of await queue.getRepeatableJobs()) await queue.removeRepeatableByKey(r.key);
   }
   await queues.stats.add(
@@ -93,6 +102,12 @@ export async function installSchedules({ log = console.log } = {}) {
     );
     await queues.dumps.add('snapshot', {}, { jobId: `dumps-boot-${minuteStamp()}`, delay: 15_000 });
   }
+  await queues.maintain.add(
+    'gin',
+    {},
+    { repeat: { every: config.maintenance.ginTickSeconds * 1000 }, jobId: 'gin' },
+  );
+  await queues.maintain.add('gin', {}, { jobId: `gin-boot-${minuteStamp()}`, delay: 30_000 });
   log('[queue] schedules installed');
 }
 
