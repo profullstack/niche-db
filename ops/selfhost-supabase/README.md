@@ -123,6 +123,18 @@ written to the new server after the cutover is not copied back.
 
 State and secrets live in `~/.local/state/nichedb-selfhost/` (mode 0700).
 
+### `subscribe` hangs
+
+`create subscription` builds the slot on Railway, and the slot needs a
+consistent snapshot: every transaction open on the source at that moment has
+to finish first. `pg_stat_replication` shows the sender in `startup` until
+then. On 2026-09-24 the blockers were read queries 10 to 34 minutes old,
+all waiting in `ClientWrite` on clients that had stopped reading; a backend
+blocked in a socket write cannot even honour `statement_timeout`. Terminate
+those (`pg_terminate_backend` where `wait_event = 'ClientWrite'` and
+`xact_start` is older than a few minutes) and the sender moves to
+`streaming` within seconds. Long index builds hold it back the same way.
+
 ### A migration landed mid-copy
 
 The subscription disables itself on the first apply error, and `status` shows
