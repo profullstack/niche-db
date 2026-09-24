@@ -116,6 +116,7 @@ import { socrataCrime } from './socratacrime.js';
 import { sportarrPersons } from './sportarr-persons.js';
 import { sportsdbTv } from './sportsdb.js';
 import { sportsdbLeagues } from './sportsdb-leagues.js';
+import { sportsdbLive } from './sportsdb-live.js';
 import { sportsdbPlayers } from './sportsdb-players.js';
 import { sportsdbTeams } from './sportsdb-teams.js';
 import { statuspage } from './statuspage.js';
@@ -263,6 +264,7 @@ export const ADAPTERS = [
   livetennis,
   sportsdbTv,
   sportsdbLeagues,
+  sportsdbLive,
   sportarrPersons,
   // Screen: films, TV and anime, and the IMDb ratings behind 400k titles.
   tmdbReleases,

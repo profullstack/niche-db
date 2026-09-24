@@ -1,0 +1,57 @@
+{
+  "livescore": [
+    {
+      "idLiveScore": "19474773",
+      "idEvent": "2589337",
+      "strSport": "Ice Hockey",
+      "idLeague": "4932",
+      "strLeague": "Slovak Extraliga",
+      "intDivision": "1",
+      "idHomeTeam": "140964",
+      "idAwayTeam": "140939",
+      "strHomeTeam": "Kosice",
+      "strAwayTeam": "Slovan Bratislava",
+      "strHomeTeamBadge": "https://r2.thesportsdb.com/images/media/team/badge/p17riw1668175125.png",
+      "strAwayTeamBadge": "https://r2.thesportsdb.com/images/media/team/badge/2pvyyn1736860877.png",
+      "intHomeScore": "2",
+      "intAwayScore": "4",
+      "strStatus": "P3",
+      "strProgress": "20",
+      "strTimestamp": "2026-09-23T15:30:00",
+      "strEventTime": "15:30",
+      "dateEvent": "2026-09-23",
+      "updated": "2026-09-23 18:49:30"
+    },
+    {
+      "idLiveScore": "19474999",
+      "idEvent": "2589400",
+      "strSport": "Soccer",
+      "idLeague": "4328",
+      "strLeague": "English Premier League",
+      "intDivision": "1",
+      "idHomeTeam": "133604",
+      "idAwayTeam": "133602",
+      "strHomeTeam": "Arsenal",
+      "strAwayTeam": "Liverpool",
+      "strHomeTeamBadge": "",
+      "strAwayTeamBadge": "",
+      "intHomeScore": null,
+      "intAwayScore": null,
+      "strStatus": "NS",
+      "strProgress": null,
+      "strTimestamp": "2026-09-24T19:00:00",
+      "strEventTime": "19:00",
+      "dateEvent": "2026-09-24",
+      "updated": "2026-09-24 09:00:00"
+    },
+    {
+      "idLiveScore": "19475111",
+      "idEvent": "",
+      "strSport": "Soccer",
+      "strLeague": "Nowhere",
+      "strHomeTeam": "",
+      "strAwayTeam": "",
+      "strStatus": "FT"
+    }
+  ]
+}

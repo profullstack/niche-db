@@ -1,0 +1,34 @@
+{
+  "all": [
+    {
+      "idLeague": "4328",
+      "strLeague": "English Premier League",
+      "strSport": "Soccer",
+      "strLeagueAlternate": "Premier League, EPL, England"
+    },
+    {
+      "idLeague": "4424",
+      "strLeague": "MLB",
+      "strSport": "Baseball",
+      "strLeagueAlternate": "Major League Baseball"
+    },
+    {
+      "idLeague": "4380",
+      "strLeague": "NHL",
+      "strSport": "Ice Hockey",
+      "strLeagueAlternate": "National Hockey League"
+    },
+    {
+      "idLeague": "4424",
+      "strLeague": "MLB again, same id",
+      "strSport": "Baseball",
+      "strLeagueAlternate": ""
+    },
+    {
+      "idLeague": "",
+      "strLeague": "no id at all",
+      "strSport": "Soccer",
+      "strLeagueAlternate": ""
+    }
+  ]
+}

@@ -47,7 +47,7 @@ Adapters are one file each in `packages/adapters/src`. One hundred and sixty-one
 | water | `nwps-river-gauges`, `coops-water-levels`, `drought-monitor`, `ndbc-buoys`, `nws-surf-zone` | no |
 | consumer-finance | `cfpb-complaints`, `fdic-institutions`, `fdic-structure-changes` | no |
 | deals | `slickdeals`, `dealnews`, `dealcatcher`, `bensbargains`, `reddit-deals` | no |
-| sports | `espn-catalogue`, `espn-schedule`, `espn-live`, `espn-plays`, `livetennis`, `sportsdb-tv`, `sportsdb-leagues`, `sportsdb-teams` | Live Tennis; TheSportsDB (`SPORTSDB_API_KEY`, the shared key `3` returns one row per query); ESPN is keyless (`SPORTS_PROXY_URL` for cloud egress) |
+| sports | `espn-catalogue`, `espn-schedule`, `espn-live`, `espn-plays`, `livetennis`, `sportsdb-tv`, `sportsdb-leagues`, `sportsdb-teams`, `sportsdb-live` | Live Tennis; TheSportsDB (`SPORTSDB_API_KEY`: on the shared key `3` every list answers one row and there is no live feed at all, on a subscriber key the catalogues are walked from lists and `sportsdb-live` turns on); ESPN is keyless (`SPORTS_PROXY_URL` for cloud egress) |
 | screen | `tmdb-releases`, `tvmaze-schedule`, `tvmaze-catalog` (every show TVmaze knows, CC BY-SA, walked once then kept current from /updates/shows), `anilist-airing`, `imdb-ratings`, `wikidata-films`, `kitsu-anime`, `thetvdb-catalog` (every series on TheTVDB, `THETVDB_API_KEY`, attribution link required) | TMDB only |
 | channels | `iptv-org-channels` | no |
 | saas | `saasrow`, `opensaas` (nichedb.dev first; any service serving `/.well-known/opensaas.json`) | no |
