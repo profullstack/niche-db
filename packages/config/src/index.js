@@ -69,6 +69,13 @@ export const config = {
     tickSeconds: num('INGEST_TICK_SECONDS', 60),
     /** Sources fetched at once. Upstreams are rate limited individually inside adapters. */
     concurrency: num('INGEST_CONCURRENCY', 3),
+    /**
+     * Ceiling on one batch write of items. Not a tuning knob so much as a
+     * fuse: a batch that cannot finish in this long has hit something
+     * pathological, and a cancelled batch is retried while a wedged one pins
+     * the xmin horizon and blocks every deploy behind it.
+     */
+    writeTimeoutMs: num('INGEST_WRITE_TIMEOUT_MS', 10 * 60_000),
     /** Wall-clock ceiling on one run; a run past this records what it has and stops. */
     runDeadlineMs: num('INGEST_RUN_DEADLINE_MS', 4 * 60_000),
     /** Detail lookups an adapter may spend per run (appdetails, package docs...). */
@@ -109,6 +116,19 @@ export const config = {
     statementTimeoutMs: num('STATS_STATEMENT_TIMEOUT_MS', 180_000),
   },
 
+  /**
+   * GIN pending lists, merged on a schedule so no INSERT is handed the bill.
+   * See packages/db/src/gin-maintenance.js: with fastupdate on, whichever
+   * backend fills the pending list merges it, which is how an ingest insert
+   * ends up stalled for hours on a 6.6 GB index.
+   */
+  maintenance: {
+    /** How often the pending lists are merged. Little and often is the point. */
+    ginTickSeconds: num('GIN_TICK_SECONDS', 120),
+    /** One index's clean is abandoned after this long; the next tick resumes it. */
+    ginStatementTimeoutMs: num('GIN_STATEMENT_TIMEOUT_MS', 5 * 60_000),
+  },
+
   feeds: {
     /** How often followed feeds are checked for new items. */
     scanSeconds: num('FEED_SCAN_SECONDS', 60),
@@ -139,7 +159,12 @@ export const config = {
     sportsProxyUrl: opt('SPORTS_PROXY_URL'),
     /** Live Tennis API, which owns tennis: 100 requests a day on the free plan. */
     livetennisApiKey: opt('LIVETENNIS_API_KEY'),
-    /** TheSportsDB, for TV listings. The shared key '3' works but returns one row per query. */
+    /**
+     * TheSportsDB, for TV listings, the league and team catalogues and live
+     * scores. The shared key '3' works but every list answers one row, there is
+     * no live feed on it, and the catalogue walks fall back to guessing at ids;
+     * a subscriber key lifts all three.
+     */
     sportsdbApiKey: opt('SPORTSDB_API_KEY', '3'),
     igdbClientId: opt('IGDB_CLIENT_ID'),
     igdbClientSecret: opt('IGDB_CLIENT_SECRET'),

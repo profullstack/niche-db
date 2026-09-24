@@ -47,7 +47,7 @@ Adapters are one file each in `packages/adapters/src`. One hundred and sixty-one
 | water | `nwps-river-gauges`, `coops-water-levels`, `drought-monitor`, `ndbc-buoys`, `nws-surf-zone` | no |
 | consumer-finance | `cfpb-complaints`, `fdic-institutions`, `fdic-structure-changes` | no |
 | deals | `slickdeals`, `dealnews`, `dealcatcher`, `bensbargains`, `reddit-deals` | no |
-| sports | `espn-catalogue`, `espn-schedule`, `espn-live`, `espn-plays`, `livetennis`, `sportsdb-tv`, `sportsdb-leagues`, `sportsdb-teams` | Live Tennis; TheSportsDB (`SPORTSDB_API_KEY`, the shared key `3` returns one row per query); ESPN is keyless (`SPORTS_PROXY_URL` for cloud egress) |
+| sports | `espn-catalogue`, `espn-schedule`, `espn-live`, `espn-plays`, `livetennis`, `sportsdb-tv`, `sportsdb-leagues`, `sportsdb-teams`, `sportsdb-live` | Live Tennis; TheSportsDB (`SPORTSDB_API_KEY`: on the shared key `3` every list answers one row and there is no live feed at all, on a subscriber key the catalogues are walked from lists and `sportsdb-live` turns on); ESPN is keyless (`SPORTS_PROXY_URL` for cloud egress) |
 | screen | `tmdb-releases`, `tvmaze-schedule`, `tvmaze-catalog` (every show TVmaze knows, CC BY-SA, walked once then kept current from /updates/shows), `anilist-airing`, `imdb-ratings`, `wikidata-films`, `kitsu-anime`, `thetvdb-catalog` (every series on TheTVDB, `THETVDB_API_KEY`, attribution link required) | TMDB only |
 | channels | `iptv-org-channels` | no |
 | saas | `saasrow`, `opensaas` (nichedb.dev first; any service serving `/.well-known/opensaas.json`) | no |
@@ -72,6 +72,7 @@ A person claims their entry with **This is me** (proven by the email the profile
 | directory | `outreachgraph` | no |
 | sites | `opensite` | no |
 | algorithms | `nist-dads` (NIST's Dictionary of Algorithms and Data Structures, every entry with its definition and relations; public domain), `wikidata-algorithms` (every algorithm and data structure on Wikidata, with who devised it, when, and its complexity; CC0), `pwc-archive` (the Papers With Code methods and datasets catalogues as archived on Hugging Face, call-centre spam dropped; CC BY-SA 4.0), `rosetta-code` (every programming task with the languages it is solved in; GFDL), `thealgorithms` (The Algorithms' implementations by language from each repo's DIRECTORY.md; MIT). [docs/algorithms.md](docs/algorithms.md) | no |
+| models | `modelsdev` (every AI model and what it costs, from models.dev; MIT). One row per provider offering rather than per model, because the same model reaches you from many of the 223 providers at as many prices: price per million tokens in, out and cached, context and output limits, modalities and capability flags, 8,179 of them. Plus the lab catalogue, one entry per model as its maker published it with a page of its own, and the providers themselves. `openmodel` (a provider's own file at /.well-known/openmodel.json, believed only when served from the origin it describes; the same vocabulary as the models.dev rows beside it, so one feed catches both). [docs/models.md](docs/models.md) | no |
 
 ### Moderators
 

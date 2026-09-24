@@ -63,6 +63,7 @@ import { livetennis } from './livetennis.js';
 import { lowendbox } from './lowendbox.js';
 import { mcpRegistry } from './mcpregistry.js';
 import { isoMicExchanges } from './mic.js';
+import { modelsdev } from './modelsdev.js';
 import { musicbrainz } from './musicbrainz.js';
 import { musicbrainzCatalog } from './musicbrainz-catalog.js';
 import { nasdaqHalts } from './nasdaqhalts.js';
@@ -85,6 +86,7 @@ import { openalex } from './openalex.js';
 import { openfda } from './openfda.js';
 import { openlibrary } from './openlibrary.js';
 import { openlibraryCatalog } from './openlibrary-catalog.js';
+import { openmodel } from './openmodel.js';
 import { openprofiles } from './openprofiles.js';
 import { opensaas } from './opensaas.js';
 import { openserver } from './openserver.js';
@@ -115,6 +117,7 @@ import { socrataCrime } from './socratacrime.js';
 import { sportarrPersons } from './sportarr-persons.js';
 import { sportsdbTv } from './sportsdb.js';
 import { sportsdbLeagues } from './sportsdb-leagues.js';
+import { sportsdbLive } from './sportsdb-live.js';
 import { sportsdbPlayers } from './sportsdb-players.js';
 import { sportsdbTeams } from './sportsdb-teams.js';
 import { statuspage } from './statuspage.js';
@@ -262,6 +265,7 @@ export const ADAPTERS = [
   livetennis,
   sportsdbTv,
   sportsdbLeagues,
+  sportsdbLive,
   sportarrPersons,
   // Screen: films, TV and anime, and the IMDb ratings behind 400k titles.
   tmdbReleases,
@@ -322,6 +326,10 @@ export const ADAPTERS = [
   pwcArchive,
   rosettaCode,
   theAlgorithms,
+  // Models: every AI model and what each provider charges, from models.dev, and
+  // the same rows served by a provider itself as an OpenModel descriptor.
+  modelsdev,
+  openmodel,
 ];
 
 export { isPlatformHosted, PLATFORM_HOSTS } from './podcastplatforms.js';

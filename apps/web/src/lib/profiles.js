@@ -68,14 +68,22 @@ export function requireEditor(user, profile) {
 /* --------------------------------------------------------------- claims -- */
 
 const LINKBACK_MS = 6000;
+/*
+ * A whole claim's worth of link fetching. Six pages at six seconds each is
+ * thirty-six seconds of a person waiting on a button, which is not a request
+ * any more. The budget is shared: pages are tried until it runs out, and a
+ * page that would overrun it gets whatever is left rather than its own six.
+ */
+const LINKBACK_TOTAL_MS = 8000;
 const LINKBACK_BYTES = 256 * 1024;
 
 /** The first bytes of a public page, or '' when it cannot be read. */
-export async function readHead(url, { fetcher = fetch } = {}) {
+export async function readHead(url, { fetcher = fetch, timeoutMs = LINKBACK_MS } = {}) {
   const safe = normaliseFeedUrl(url);
   if (!safe) return '';
+  if (timeoutMs <= 0) return '';
   const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), LINKBACK_MS);
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs);
   try {
     const res = await fetcher(safe, {
       signal: ctrl.signal,
@@ -137,8 +145,14 @@ export async function proveClaim(user, profile, { fetcher = fetch, adminFor = nu
   const pages = [profile.data?.identity?.web, ...profile.sources.map((s) => s.page_url)].filter(
     Boolean,
   );
+  const deadline = Date.now() + LINKBACK_TOTAL_MS;
   for (const page of pages.slice(0, 6)) {
-    if (linksBack(await readHead(page, { fetcher }), profile)) return 'linkback';
+    const left = deadline - Date.now();
+    if (left <= 0) break;
+    if (
+      linksBack(await readHead(page, { fetcher, timeoutMs: Math.min(LINKBACK_MS, left) }), profile)
+    )
+      return 'linkback';
   }
   return null;
 }

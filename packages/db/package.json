@@ -1,6 +1,6 @@
 {
   "name": "@nichedb/db",
-  "version": "0.27.0",
+  "version": "0.29.0",
   "private": true,
   "type": "module",
   "exports": {
@@ -14,7 +14,9 @@
     "./premium": "./src/premium.js",
     "./submissions": "./src/submissions.js",
     "./profiles": "./src/profiles.js",
-    "./account": "./src/account.js"
+    "./account": "./src/account.js",
+    "./build-indexes": "./src/build-indexes.js",
+    "./gin-maintenance": "./src/gin-maintenance.js"
   },
   "dependencies": {
     "@nichedb/config": "workspace:*",

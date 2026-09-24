@@ -1,6 +1,17 @@
 import { defineAdapter, slugify, stripHtml } from '@nichedb/core/adapter';
 
-import { BASE, DEFAULT_KEY, PROVIDER, redact, sportSlug, usingFreeKey } from './sportsdb.js';
+import {
+  BASE,
+  DEFAULT_KEY,
+  leagueIndex,
+  PROVIDER,
+  paceMs,
+  premium,
+  redact,
+  sleep,
+  sportSlug,
+  usingFreeKey,
+} from './sportsdb.js';
 
 /**
  * TheSportsDB: the team catalogue for the `sports` collection.
@@ -27,6 +38,18 @@ import { BASE, DEFAULT_KEY, PROVIDER, redact, sportSlug, usingFreeKey } from './
  * a run keeps `pauseMs` between lookups and the default cap keeps a run under a
  * minute of traffic followed by ten minutes of silence.
  *
+ * SINCE 2026-09-24 THE DEPLOYMENT HAS A SUBSCRIBER KEY, and the original plan
+ * works on it after all -- not through `lookup_all_teams.php`, which is gone
+ * (it answers HTML now), but through `search_all_teams.php?l=<name>`, which on
+ * a subscriber key returns every team in the league as the same 63-field row
+ * `lookupteam.php` gives: 20 for the Premier League, 30 for MLB, 121 for the
+ * Copa del Rey. So on that key `pullByLeague` walks the v2 league catalogue
+ * instead, which is fifteen times fewer requests and turns a week-long pass
+ * into a couple of hours. The id walk below stays for the shared test key.
+ * Note the endpoint matches the league's DISPLAY name and only that: `l=MLB`
+ * answers, `l=Major League Baseball` answers null, so the names come from the
+ * catalogue rather than from anything a human typed.
+ *
  * One item per team, kind `team`, tagged the way espn.js tags its teams: `team`,
  * the sport slug (the same slug fixtures and broadcasts carry, via sportSlug),
  * `league:<slug>` for every league the row names (a club plays in a league and
@@ -48,13 +71,18 @@ export const TAIL_MISSES = 25;
 /** Lookups per run by default: under a minute of traffic on the free key's pace. */
 export const REQUEST_CAP = 25;
 
+/**
+ * Leagues per run on a subscriber key. A league is one request whatever its
+ * size, 100 a minute is the published limit, and 1,544 leagues at 120 a run is
+ * the whole catalogue inside a couple of hours.
+ */
+export const LEAGUE_REQUEST_CAP = 120;
+
 /** Consecutive failures after which a run stops asking, so an outage costs little. */
 const FAILURE_STOP = 3;
 
 /** Pause between lookups: the free key is 30 a minute, and a burst is banned for a while. */
 export const PAUSE_MS = 2_100;
-
-const sleep = (ms) => (ms > 0 ? new Promise((r) => setTimeout(r, ms)) : Promise.resolve());
 
 export const teamUrl = (key, id) =>
   `${BASE}/${encodeURIComponent(String(key ?? DEFAULT_KEY))}/lookupteam.php?id=${encodeURIComponent(String(id))}`;
@@ -199,6 +227,134 @@ export function teamItem(r) {
   };
 }
 
+/* ------------------------------------------------------- by league (premium) -- */
+
+/**
+ * Every team in one league, by the league's name as TheSportsDB spells it.
+ * The endpoint matches that display name and nothing else: `l=MLB` answers with
+ * thirty teams and `l=Major League Baseball` answers null, so the name has to
+ * come from the catalogue rather than from anything a human typed.
+ */
+export const teamsByLeagueUrl = (key, name) =>
+  `${BASE}/${encodeURIComponent(String(key ?? DEFAULT_KEY))}/search_all_teams.php?l=${encodeURIComponent(String(name))}`;
+
+/** The team rows of a search_all_teams answer; an empty list for a league with none. */
+export function parseTeams(body) {
+  const rows = body?.teams;
+  if (!Array.isArray(rows)) return [];
+  return rows.filter((r) => text(r?.idTeam) && text(r?.strTeam));
+}
+
+/**
+ * A subscriber key's pass: walk the league catalogue instead of the team id
+ * space. `search_all_teams.php?l=` is capped to ten rows on the shared test key
+ * and returns the full 63-field team row on a subscriber one -- the same row
+ * `lookupteam.php` gives, so nothing is lost by asking a league at a time. It
+ * is about fifteen times fewer requests (1,544 leagues against some 24,000 ids,
+ * three quarters of which are gaps), a pass takes hours rather than a week, and
+ * a team whose id falls outside the walked range is found like any other.
+ *
+ * A team plays in up to seven competitions, so the same row comes back under
+ * several leagues; a run keeps the first and skips the rest.
+ */
+export async function pullByLeague({ key, cap, pause, prev, http, log, stopAt }) {
+  let leagues =
+    Array.isArray(prev?.leagues) && prev.leagues.length ? prev.leagues.map(String) : null;
+  let at = Math.max(0, Math.floor(Number(prev?.at)) || 0);
+  let listed = false;
+  if (!leagues || at >= leagues.length) {
+    leagues = (await leagueIndex(http, key)).map((l) => l.name);
+    at = 0;
+    listed = true;
+  }
+
+  const startedAt = at;
+  const items = [];
+  const seen = new Set();
+  let requests = 0;
+  let failures = 0;
+  let streak = 0;
+  let empty = 0;
+  let stopped = null;
+
+  while (at < leagues.length) {
+    if (requests >= cap) {
+      stopped = 'cap';
+      break;
+    }
+    if (Date.now() > stopAt) {
+      stopped = 'deadline';
+      break;
+    }
+    if (requests > 0) await sleep(pause);
+    const league = leagues[at];
+    requests += 1;
+    let body = null;
+    try {
+      const res = await http.request(teamsByLeagueUrl(key, league), {
+        headers: { accept: 'application/json' },
+        timeoutMs: 20_000,
+      });
+      if (!res.ok) throw new Error(`thesportsdb answered ${res.status}`);
+      body = await res.json();
+      streak = 0;
+    } catch (err) {
+      failures += 1;
+      streak += 1;
+      log(`teams of ${league} unavailable (${redact(err?.message ?? err, key)})`);
+      if (streak >= FAILURE_STOP) {
+        stopped = 'errors';
+        break;
+      }
+      at += 1;
+      continue;
+    }
+    const rows = parseTeams(body);
+    if (!rows.length) empty += 1;
+    for (const row of rows) {
+      const item = teamItem(row);
+      if (seen.has(item.externalId)) continue;
+      seen.add(item.externalId);
+      items.push(item);
+    }
+    at += 1;
+  }
+
+  if (requests > 0 && failures === requests) {
+    throw new Error(`thesportsdb: every request failed (${requests} of ${requests}); see the log`);
+  }
+
+  const done = at >= leagues.length;
+  const reason =
+    stopped === 'cap'
+      ? 'at the request cap'
+      : stopped === 'deadline'
+        ? 'on the run deadline'
+        : stopped === 'errors'
+          ? 'after repeated failures'
+          : null;
+
+  return {
+    items,
+    cursor: {
+      leagues: done ? null : leagues,
+      at: done ? 0 : at,
+      total: leagues.length,
+      walkedAt: done ? new Date().toISOString() : (prev?.walkedAt ?? null),
+      freeKey: false,
+    },
+    nextInMinutes: done ? undefined : 10,
+    note:
+      `${items.length} teams from ${requests} leagues (${startedAt + 1}-${at} of ${leagues.length}` +
+      `${listed ? ', catalogue listed this run' : ''})` +
+      (empty ? `, ${empty} with no teams` : '') +
+      (failures ? `, ${failures} failed` : '') +
+      (done
+        ? '; whole catalogue read, next pass lists it again'
+        : `; stopped ${reason}, resuming in 10 min`),
+  };
+}
+
 /** Where a run starts: the cursor's next id, else the configured start. */
 export function resumeId(prev, config) {
   const start = Math.max(1, Math.floor(Number(config?.startId)) || START_ID);
@@ -211,7 +367,7 @@ export const sportsdbTeams = defineAdapter({
   title: 'TheSportsDB teams',
   collection: 'sports',
   description:
-    'Every team TheSportsDB knows, one row each with its sport, leagues and cups, country, stadium, colours, badge, description, website, socials and the ESPN and API-Football cross-reference ids. Walks the team id space through lookupteam.php, which answers for any id on the free key while the per-league list endpoint ignores its league id on that key and the search is capped at ten rows; a run asks for a fixed number of ids with a pause between them and resumes, the walk ends after a run of unknown ids past the newest team, and the next run starts the catalogue over. TheSportsDB terms of use allow copying anything the official API endpoints return, keep copyright notices intact and ask for a link back where the artwork is used; every row links its team page and carries attribution.',
+    'Every team TheSportsDB knows, one row each with its sport, leagues and cups, country, stadium, colours, badge, description, website, socials and the ESPN and API-Football cross-reference ids. On a subscriber key (SPORTSDB_API_KEY) it asks a league at a time, over the ~1,500 leagues the v2 catalogue names, and gets every team in that league as a full row. On the shared test key that same search is capped at ten rows, so it walks the team id space through lookupteam.php instead: a run asks for a fixed number of ids with a pause between them and resumes, the walk ends after a run of unknown ids past the newest team, and the next run starts the catalogue over. TheSportsDB terms of use allow copying anything the official API endpoints return, keep copyright notices intact and ask for a link back where the artwork is used; every row links its team page and carries attribution.',
   docs: 'https://www.thesportsdb.com/documentation',
   kinds: ['team'],
   cadenceMinutes: 1440,
@@ -265,11 +421,16 @@ export const sportsdbTeams = defineAdapter({
   ],
   async pull({ config, cursor: prev, env, http, log, deadline }) {
     const key = String(env?.sportsdbApiKey ?? env?.SPORTSDB_API_KEY ?? DEFAULT_KEY);
-    const cap = Math.max(1, Math.floor(Number(config?.requestCap)) || REQUEST_CAP);
+    const paid = premium(key);
+    const cap = Math.max(
+      1,
+      Math.floor(Number(config?.requestCap)) || (paid ? LEAGUE_REQUEST_CAP : REQUEST_CAP),
+    );
     const tail = Math.max(1, Math.floor(Number(config?.tailMisses)) || TAIL_MISSES);
     const pause =
-      config?.pauseMs === 0 ? 0 : Math.max(0, Math.floor(Number(config?.pauseMs))) || PAUSE_MS;
+      config?.pauseMs === 0 ? 0 : Math.max(0, Math.floor(Number(config?.pauseMs))) || paceMs(key);
     const stopAt = Number.isFinite(deadline) ? deadline : Number.POSITIVE_INFINITY;
+    if (paid) return await pullByLeague({ key, cap, pause, prev, http, log, stopAt });
     const startedAt = resumeId(prev, config);
     let id = startedAt;
     let topId = Math.floor(Number(prev?.topId)) || 0;

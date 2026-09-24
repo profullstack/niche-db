@@ -93,6 +93,19 @@ const store = {
 };
 mock.module('@nichedb/db/profiles', () => store);
 
+/*
+ * No test here is about the open web, and the claim route's linkback proof
+ * fetches whatever a profile calls its Web page. Left alone that reaches
+ * ada.example for real: it resolves differently on every machine, and CI saw
+ * `a claim is proven by the email the profile lists` blow through its 5s
+ * timeout again and again, failing main and blocking unrelated merges. Every
+ * fetch here refuses instantly instead, which readHead already treats as "no
+ * link back".
+ */
+globalThis.fetch = async () => {
+  throw new Error('network disabled in tests');
+};
+
 const { registerProfiles } = await import('./profiles.js');
 const { Denied } = await import('../lib/service.js');
 const { withModules, decideModules } = await import('../lib/modules.js');

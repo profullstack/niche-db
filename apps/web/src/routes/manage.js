@@ -405,7 +405,6 @@ export function registerManage(app) {
           balance={snapshot.balance}
           terms={terms}
           referral={referral}
-          vapidKey={config.push.publicKey || null}
           notice={c.req.query('notice')}
           error={c.req.query('error')}
         />,
