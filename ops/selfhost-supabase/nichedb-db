@@ -562,6 +562,10 @@ cmd_cutover() {
   lag=$(slot_lag_bytes)
   [ "$lag" -lt $((64 * 1024 * 1024)) ] || die "slot lag is $(numfmt --to=iec "$lag"); wait for it to drain"
   [ "$SOURCE_MODE" = docker ] || target_url >/dev/null
+  if [ "$SOURCE_MODE" = railway ]; then
+    tgt_exec "test -s $CERT_DIR/fullchain.pem && test -e /etc/nginx/sites-enabled/$APP_DOMAIN && docker image inspect nichedb:latest >/dev/null" ||
+      die "app not staged on the box: run app-deploy, app-cert, app-vhost first"
+  fi
   confirm "Cut over now? Writes fail for a few minutes; reads keep working from the old DB."
 
   log "1/6 Source read-only, sessions closed"
@@ -587,15 +591,23 @@ cmd_cutover() {
   tgt_q "drop subscription $SUB"
 
   if [ "$SOURCE_MODE" = railway ]; then
-    log "5/6 Pointing the app at the new database"
+    log "5/6 Railway app -> the new database, web only (the worker moves here)"
     local old
     old=$(rw_vars "$RW_APP_SERVICE" true | jq -r '.DATABASE_URL')
     [ "${OLD_DATABASE_URL:-}" ] || save_state OLD_DATABASE_URL "$old"
+    rw_set_var "$RW_APP_SERVICE" ROLES web
     rw_set_var "$RW_APP_SERVICE" DATABASE_URL "$(target_url)"
-    note "DATABASE_URL updated (was $old); Railway is deploying"
+    note "DATABASE_URL updated (was $old), ROLES=web; Railway is deploying"
     wait_for_deploy "$RW_APP_SERVICE"
-    log "6/6 Smoke test"
-    curl -fsS --max-time 20 "$APP_HEALTH_URL" && echo >&2 || warn "$APP_HEALTH_URL did not answer ok"
+    curl -fsS --max-time 20 "$APP_HEALTH_URL" >/dev/null && note "Railway app healthy on the new database" || warn "$APP_HEALTH_URL did not answer ok"
+
+    log "6/6 The app on this box, then DNS"
+    cmd_app_deploy --start
+    local via
+    via=$(curl -sk --max-time 20 --resolve "$APP_DOMAIN:443:$TARGET_IP" "https://$APP_DOMAIN/healthz" || true)
+    [ "$via" = ok ] || die "https://$APP_DOMAIN via $TARGET_IP answered '$via', not ok; DNS NOT moved (Railway still serves it from the new DB)"
+    cmd_app_dns "$TARGET_IP"
+    note "DNS moved; Railway keeps answering old resolvers for the TTL, from the same database"
     note "app connections on the target: $(tgt_q "select count(*) from pg_stat_activity where usename = 'postgres' and client_addr is not null and client_addr <> '127.0.0.1'")"
   else
     note "5/6 and 6/6 skipped (rehearsal: no app to repoint)"
@@ -624,7 +636,13 @@ cmd_rollback() {
   confirm "Roll back to the Railway database?"
   if [ "$SOURCE_MODE" = railway ]; then
     rw_set_var "$RW_APP_SERVICE" DATABASE_URL "${OLD_DATABASE_URL:-\${{Postgres.DATABASE_URL\}}}"
-    note "DATABASE_URL restored"
+    rw_set_var "$RW_APP_SERVICE" ROLES web,worker
+    note "DATABASE_URL restored, ROLES=web,worker"
+    tgt_exec "cd $APP_DIR 2>/dev/null && docker compose -f docker-compose.app.yml --env-file deploy.env stop app" 2>/dev/null || true
+    note "app on the box stopped"
+    if [ -n "${APP_DNS_FLIPPED:-}" ]; then
+      warn "DNS was moved to this box at $APP_DNS_FLIPPED; restore nichedb.dev at Porkbun by hand from $STATE_DIR/$APP_DOMAIN-dns.bak-*.json (ALIAS apex -> Railway, www CNAME)"
+    fi
   fi
   src_q "alter database $SOURCE_DB reset default_transaction_read_only"
   src_q "select count(pg_terminate_backend(pid)) from pg_stat_activity where datname = '$SOURCE_DB' and backend_type = 'client backend' and pid <> pg_backend_pid()" >/dev/null
@@ -646,6 +664,97 @@ cmd_cleanup() {
     fi
   fi
   note "The Railway Postgres service itself is left in place (read-only). Delete it by hand once you no longer want the fallback."
+}
+
+# ------------------------------------------------- the app, on the same box
+# nichedb.dev itself moves with its database: the app runs from Docker under
+# ~/www/nichedb.dev like every other site on a fleet box, nginx proxies to it,
+# and at cutover the domain's A records move at Porkbun. Nothing new is named.
+APP_DOMAIN=${APP_DOMAIN:-nichedb.dev}
+APP_DIR=${APP_DIR:-/home/anthony/www/$APP_DOMAIN}
+APP_PORT=${APP_PORT:-3010}
+APP_REPO=${APP_REPO:-https://github.com/profullstack/niche-db.git}
+APP_BRANCH=${APP_BRANCH:-main}
+CERT_DIR=/etc/nginx/ssl/$APP_DOMAIN
+
+porkbun_keys() { # exports PORKBUN_API_KEY / PORKBUN_SECRET_API_KEY from cli-tools' store
+  local f=$HOME/.config/cli-tools/credentials.json
+  : "${PORKBUN_API_KEY:=$(jq -r '.porkbun.value // .porkbun // .PORKBUN_API_KEY // empty' "$f" 2>/dev/null)}"
+  : "${PORKBUN_SECRET_API_KEY:=$(jq -r '.porkbun_secret.value // .porkbun_secret // .PORKBUN_SECRET_API_KEY // empty' "$f" 2>/dev/null)}"
+  [ -n "$PORKBUN_API_KEY" ] && [ -n "$PORKBUN_SECRET_API_KEY" ] || die "no Porkbun keys: run 'cli-tools config pull' or export PORKBUN_API_KEY/PORKBUN_SECRET_API_KEY"
+  export PORKBUN_API_KEY PORKBUN_SECRET_API_KEY
+}
+
+app_env_from_railway() { # the app's real environment is Railway's, rendered
+  rw_vars "$RW_APP_SERVICE" | jq -r 'to_entries[] | select(.key | test("^RAILWAY_") | not) | "\(.key)=\(.value)"' |
+    grep -Ev '^(DATABASE_URL|REDIS_URL|PORT|NODE_ENV)='
+  printf 'DATABASE_URL=%s\n' "$(target_url | sed "s|@${DB_DOMAIN}:|@${APP_DB_HOST:-$DB_DOMAIN}:|")"
+}
+
+cmd_app_deploy() { # app-deploy [--start]   clone/pull + build; starts only with --start
+  local start=0
+  [ "${1:-}" = --start ] && start=1
+  log "App: $APP_REPO@$APP_BRANCH -> $TARGET_SSH:$APP_DIR"
+  tgt_exec "install -d -m 2755 -o anthony -g anthony $APP_DIR"
+  tgt_exec "if [ -d $APP_DIR/app/.git ]; then cd $APP_DIR/app && git fetch -q origin && git checkout -q $APP_BRANCH && git reset -q --hard origin/$APP_BRANCH; else git clone -q -b $APP_BRANCH $APP_REPO $APP_DIR/app; fi; cd $APP_DIR/app && git log --oneline -1"
+  local work
+  work=$(mktemp -d)
+  app_env_from_railway > "$work/app.env"
+  note "$(wc -l < "$work/app.env") variables from Railway, DATABASE_URL -> this box"
+  tgt_copy "$work/app.env" "$APP_DIR/app.env"
+  tgt_copy "$HERE/app/docker-compose.app.yml" "$APP_DIR/docker-compose.app.yml"
+  printf 'APP_PORT=%s\n' "$APP_PORT" > "$work/deploy.env"
+  tgt_copy "$work/deploy.env" "$APP_DIR/deploy.env"
+  rm -rf "$work"
+  tgt_exec "chmod 600 $APP_DIR/app.env; cd $APP_DIR && docker compose -f docker-compose.app.yml --env-file deploy.env build -q app"
+  note "image built"
+  if [ "$start" = 1 ]; then
+    tgt_exec "cd $APP_DIR && docker compose -f docker-compose.app.yml --env-file deploy.env up -d --wait"
+    local ok=0
+    for _ in $(seq 1 30); do
+      [ "$(tgt_exec "curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:$APP_PORT/healthz")" = 200 ] && { ok=1; break; }
+      sleep 4
+    done
+    [ "$ok" = 1 ] || { tgt_exec "cd $APP_DIR && docker compose -f docker-compose.app.yml logs --tail 40 app" >&2; die "app did not answer on 127.0.0.1:$APP_PORT/healthz"; }
+    note "app healthy on 127.0.0.1:$APP_PORT"
+  else
+    note "not started (it would write to the target before the cutover); 'app-deploy --start' or 'cutover' starts it"
+  fi
+}
+
+cmd_app_cert() { # DNS-01 through Porkbun, so the cert exists BEFORE the domain moves
+  porkbun_keys
+  log "Certificate for $APP_DOMAIN + www via acme.sh (Porkbun DNS-01)"
+  tgt_exec "test -x /root/.acme.sh/acme.sh || curl -fsSL https://get.acme.sh | env HOME=/root sh -s email=anthony@profullstack.com >/dev/null"
+  tgt_exec "install -d -m 0750 $CERT_DIR && env HOME=/root PORKBUN_API_KEY='$PORKBUN_API_KEY' PORKBUN_SECRET_API_KEY='$PORKBUN_SECRET_API_KEY' /root/.acme.sh/acme.sh --issue --server letsencrypt --dns dns_porkbun -d $APP_DOMAIN -d www.$APP_DOMAIN --force >/tmp/acme-$APP_DOMAIN.log 2>&1 || { tail -n 20 /tmp/acme-$APP_DOMAIN.log; exit 1; }"
+  tgt_exec "env HOME=/root /root/.acme.sh/acme.sh --install-cert -d $APP_DOMAIN --fullchain-file $CERT_DIR/fullchain.pem --key-file $CERT_DIR/privkey.pem --reloadcmd 'systemctl reload nginx' >/dev/null"
+  note "$(tgt_exec "openssl x509 -in $CERT_DIR/fullchain.pem -noout -subject -enddate | tr '\n' ' '")"
+}
+
+cmd_app_vhost() {
+  log "nginx vhost for $APP_DOMAIN -> 127.0.0.1:$APP_PORT"
+  tgt_exec "test -s $CERT_DIR/fullchain.pem" || die "no cert at $CERT_DIR: run 'nichedb-db app-cert' first"
+  local work
+  work=$(mktemp -d)
+  sed -e "s/__DOMAIN__/$APP_DOMAIN/g" -e "s/__APP_PORT__/$APP_PORT/g" "$HERE/app/nginx-vhost.conf" > "$work/vhost"
+  tgt_copy "$work/vhost" "/tmp/nichedb-vhost.conf"
+  rm -rf "$work"
+  tgt_exec "if [ -e /etc/nginx/sites-enabled/$APP_DOMAIN ]; then n=1; while [ -e /etc/nginx/sites-enabled/$APP_DOMAIN.bak-\$(printf %03d \$n) ]; do n=\$((n+1)); done; cp -a /etc/nginx/sites-enabled/$APP_DOMAIN /etc/nginx/sites-enabled/$APP_DOMAIN.bak-\$(printf %03d \$n); fi; install -m 0644 /tmp/nichedb-vhost.conf /etc/nginx/sites-available/$APP_DOMAIN && ln -sf /etc/nginx/sites-available/$APP_DOMAIN /etc/nginx/sites-enabled/$APP_DOMAIN && nginx -t 2>&1 | tail -n 1 && systemctl reload nginx"
+  note "vhost live; test: curl -sk --resolve $APP_DOMAIN:443:$TARGET_IP https://$APP_DOMAIN/healthz"
+}
+
+cmd_app_dns() { # the flip: nichedb.dev + www -> this box, at Porkbun
+  local ip=${1:-${TARGET_IP:-}}
+  [ -n "$ip" ] || die "usage: nichedb-db app-dns <ipv4>"
+  log "Porkbun: $APP_DOMAIN and www -> $ip"
+  # The apex is an ALIAS to Railway today and www a CNAME; an A record cannot
+  # coexist with either, so they go first. Backed up as JSON beside the state.
+  porkbun ls "$APP_DOMAIN" --json > "$STATE_DIR/$APP_DOMAIN-dns.bak-$(date -u +%Y%m%dT%H%M%SZ).json"
+  porkbun rm "$APP_DOMAIN" @ --type ALIAS --yes 2>/dev/null || true
+  porkbun rm "$APP_DOMAIN" www --type CNAME --yes 2>/dev/null || true
+  porkbun set "$APP_DOMAIN" @ A "$ip" --ttl 600
+  porkbun set "$APP_DOMAIN" www A "$ip" --ttl 600
+  save_state APP_DNS_FLIPPED "$(date -u +%FT%TZ)"
 }
 
 cmd_apply_migration() { # apply-migration packages/db/migrations/00xx_name.sql
@@ -673,7 +782,11 @@ In order:
   status                copy progress, slot lag, errors
   indexes               build indexes/unique/foreign keys once the copy is done
   verify                schema diff + row counts (FULL=1 counts items too)
-  cutover               source read-only, drain, sequences, switch DATABASE_URL
+  app-deploy            clone + build the app under ~/www/nichedb.dev (not started)
+  app-cert              cert for nichedb.dev + www over Porkbun DNS-01 (before DNS moves)
+  app-vhost             nginx vhost -> 127.0.0.1:3010
+  cutover               source read-only, drain, sequences; then Railway app ->
+                        new DB (web only), start the app here, move DNS at Porkbun
   rollback              point the app back at Railway and make it writable
   cleanup               drop publication/slot and the TCP proxy (after you're sure)
 
@@ -702,6 +815,10 @@ main() {
   case "$cmd" in
     provision) cmd_provision "$@" ;;
     prepare-db) cmd_prepare_db "$@" ;;
+    app-deploy) cmd_app_deploy "$@" ;;
+    app-cert) cmd_app_cert ;;
+    app-vhost) cmd_app_vhost ;;
+    app-dns) cmd_app_dns "$@" ;;
     fetch-connection) cmd_fetch_connection ;;
     vault) cmd_vault ;;
     dns) cmd_dns "$@" ;;

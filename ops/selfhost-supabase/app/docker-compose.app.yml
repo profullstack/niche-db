@@ -1,0 +1,41 @@
+# nichedb.dev on a fleet box: the app image built from the checked-out repo,
+# plus its Redis. Postgres is the box's Supabase cluster (DATABASE_URL in .env).
+# nginx on the host terminates TLS and proxies to 127.0.0.1:${APP_PORT}.
+#
+# Layout on the box (same shape as every other site under ~/www):
+#   ~/www/nichedb.dev/app            git checkout of profullstack/niche-db
+#   ~/www/nichedb.dev/app.env        the app's environment (0600)
+#   ~/www/nichedb.dev/deploy.env     APP_PORT for this file
+#   ~/www/nichedb.dev/docker-compose.app.yml   this file
+services:
+  app:
+    build:
+      context: ./app
+    image: nichedb:latest
+    restart: unless-stopped
+    env_file: app.env
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      REDIS_URL: redis://redis:6379
+    ports:
+      - "127.0.0.1:${APP_PORT:-3010}:3000"
+    depends_on:
+      redis:
+        condition: service_started
+    logging:
+      driver: json-file
+      options: { max-size: "50m", max-file: "3" }
+
+  redis:
+    image: redis:8-alpine
+    restart: unless-stopped
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory", "2gb", "--maxmemory-policy", "noeviction"]
+    volumes:
+      - redisdata:/data
+    logging:
+      driver: json-file
+      options: { max-size: "20m", max-file: "2" }
+
+volumes:
+  redisdata:
