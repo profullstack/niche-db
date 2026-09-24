@@ -81,6 +81,28 @@ $K cutover                      # the switch (below)
 $K cleanup                      # drop publication/slot, remove the TCP proxy
 ```
 
+### Sharing a cluster another app already owns
+
+A box runs one Supabase stack (fixed container names, one 5432). When another
+app's stack is already there, nichedb becomes a database inside it instead:
+
+```sh
+$K prepare-db root@<host> /path/to/that/supabase-project nichedb
+```
+
+instead of `provision`. It creates the database, enables citext + pg_trgm,
+locks anon/authenticated out of that database's `public` (the cluster's own
+`postgres` database is untouched), and writes `nichedb-connection.env` into
+the project directory. The rest of the runbook is unchanged; `dns` then sets
+only `db.nichedb.dev`, and `vault` leaves the cluster's `.env` to its owner.
+The cluster needs `wal_level=logical`, a free replication slot, and a pg_hba
+rule that lets `postgres` in over TLS. What this costs: one restart, bad
+config or OOM takes both apps' databases down together.
+
+This is how it went live: dev2 (23.95.228.174, Buffalo NY, 16-core Ryzen,
+91 GB, 1.8 TB NVMe) already ran crawlproof.com's cluster at
+`/home/anthony/www/crawlproof.com/supabase`.
+
 `cutover` does this, in order, and refuses to start unless every table is
 ready, the index counts match, the schemas are identical and lag is under
 64 MB:

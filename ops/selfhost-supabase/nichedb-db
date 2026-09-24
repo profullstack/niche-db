@@ -30,6 +30,9 @@ SOURCE_CONTAINER=${SOURCE_CONTAINER:-}
 TARGET_SSH=${TARGET_SSH:-}
 TARGET_DIR=${TARGET_DIR:-/opt/nichedb-supabase}
 TARGET_DB=${TARGET_DB:-postgres}
+# SHARED_CLUSTER=1: the target is a database inside a Supabase cluster that
+# another app already owns on the box (`prepare-db` instead of `provision`).
+SHARED_CLUSTER=${SHARED_CLUSTER:-0}
 PUB=${PUB:-nichedb_migrate}
 SUB=${SUB:-nichedb_migrate}
 APP_HEALTH_URL=${APP_HEALTH_URL:-https://nichedb.dev/healthz}
@@ -153,11 +156,12 @@ tgt_exec() { # run a shell command string on the target host
     ssh -o BatchMode=yes -o ServerAliveInterval=30 "$TARGET_SSH" "$1"
   fi
 }
-tgt_sudo() { if [ "$TARGET_SSH" = local ]; then printf ''; else printf 'sudo -n '; fi; }
+tgt_sudo() { case "$TARGET_SSH" in local | root@*) printf '' ;; *) printf 'sudo -n ' ;; esac; }
 
-tgt_sql() { # tgt_sql ROLE  (SQL on stdin) - ROLE is supabase_admin or postgres
-  tgt_exec "$(tgt_sudo)docker exec -i supabase-db psql -h localhost -U $1 -d $TARGET_DB -v ON_ERROR_STOP=1 -X -q -At"
+tgt_sql_in() { # tgt_sql_in DB ROLE  (SQL on stdin)
+  tgt_exec "$(tgt_sudo)docker exec -i supabase-db psql -h localhost -U $2 -d $1 -v ON_ERROR_STOP=1 -X -q -At"
 }
+tgt_sql() { tgt_sql_in "$TARGET_DB" "$1"; } # tgt_sql ROLE - supabase_admin or postgres
 tgt_q() { tgt_sql supabase_admin <<<"$1"; }
 
 tgt_copy() { # tgt_copy LOCAL_FILE REMOTE_PATH
@@ -227,6 +231,58 @@ cmd_provision() { # provision user@host
   cmd_fetch_connection
 }
 
+cmd_prepare_db() { # prepare-db user@host /path/to/supabase-project [dbname]
+  local host=${1:-$TARGET_SSH} dir=${2:-$TARGET_DIR} db=${3:-${TARGET_DB_SHARED:-nichedb}}
+  [ -n "$host" ] && [ -n "$dir" ] || die "usage: nichedb-db prepare-db user@host /path/to/supabase-project [dbname]"
+  save_state TARGET_SSH "$host"
+  save_state TARGET_DIR "$dir"
+  save_state TARGET_DB "$db"
+  save_state SHARED_CLUSTER 1
+  log "Preparing database $db in the Supabase cluster at $host:$dir"
+  tgt_exec "test -f $dir/.env && $(tgt_sudo)docker exec supabase-db pg_isready -h localhost -U postgres" >/dev/null ||
+    die "no running Supabase cluster with $dir/.env on $host"
+  local wal
+  wal=$(tgt_sql_in postgres supabase_admin <<<"show wal_level")
+  [ "$wal" = logical ] || die "cluster wal_level is $wal, not logical"
+  if [ "$(tgt_sql_in postgres supabase_admin <<<"select count(*) from pg_database where datname = '$db'")" = 0 ]; then
+    tgt_sql_in postgres supabase_admin <<<"create database $db owner postgres"
+    note "database $db created"
+  else
+    note "database $db already exists"
+  fi
+  tgt_sql_in "$db" supabase_admin <<'EOF'
+create extension if not exists citext with schema public;
+create extension if not exists pg_trgm with schema public;
+-- This database is the app's alone: PostgREST/anon never get into it. (Only
+-- this database; the cluster's own `postgres` database is not touched.)
+alter default privileges for role postgres in schema public revoke all on tables from anon, authenticated;
+alter default privileges for role postgres in schema public revoke all on sequences from anon, authenticated;
+alter default privileges for role postgres in schema public revoke all on functions from anon, authenticated;
+revoke all on all tables in schema public from anon, authenticated;
+revoke all on all sequences in schema public from anon, authenticated;
+revoke all on all functions in schema public from anon, authenticated;
+revoke usage on schema public from public, anon, authenticated;
+grant usage on schema public to postgres, service_role;
+EOF
+  note "extensions citext + pg_trgm; anon/authenticated locked out of $db"
+  local pw
+  pw=$(tgt_exec "$(tgt_sudo)grep '^POSTGRES_PASSWORD=' $dir/.env | cut -d= -f2-")
+  [ -n "$pw" ] || die "no POSTGRES_PASSWORD in $dir/.env"
+  local port
+  port=$(tgt_exec "$(tgt_sudo)grep '^POSTGRES_PORT=' $dir/.env | cut -d= -f2-")
+  # Written by root into the shared project dir, 0600, same shape provision makes.
+  tgt_exec "umask 077; $(tgt_sudo)tee $dir/nichedb-connection.env >/dev/null" <<EOF
+# nichedb app connection (shared cluster, written by nichedb-db prepare-db). Keep secret.
+SELFHOST_DATABASE_URL=postgres://postgres:${pw}@${DB_DOMAIN}:${port:-5432}/${db}?sslmode=require
+SELFHOST_DB_DOMAIN=${DB_DOMAIN}
+SELFHOST_DB_PORT=${port:-5432}
+SELFHOST_DB_NAME=${db}
+SELFHOST_POSTGRES_PASSWORD=${pw}
+SELFHOST_SHARED_CLUSTER_DIR=${dir}
+EOF
+  cmd_fetch_connection
+}
+
 cmd_fetch_connection() {
   log "Fetching the connection details from the server"
   local f=$STATE_DIR/connection.env
@@ -247,9 +303,12 @@ cmd_vault() {
   local work
   work=$(mktemp -d)
   trap 'rm -rf "$work"' RETURN
-  # 1) the server's whole Supabase .env as its own vault
-  tgt_exec "$(tgt_sudo)cat $TARGET_DIR/.env" > "$work/supabase.env"
-  logicsrc teams push "$VAULT_TEAM" nichedb-supabase prod --env "$work/supabase.env"
+  # 1) the server's whole Supabase .env as its own vault (not when the cluster
+  #    belongs to another app: its owner keeps that vault)
+  if [ "$SHARED_CLUSTER" != 1 ]; then
+    tgt_exec "$(tgt_sudo)cat $TARGET_DIR/.env" > "$work/supabase.env"
+    logicsrc teams push "$VAULT_TEAM" nichedb-supabase prod --env "$work/supabase.env"
+  fi
   # 2) SELFHOST_* next to the app's own secrets, merged, never replacing them
   if logicsrc teams pull "$VAULT_TEAM" nichedb prod --env "$work/app.env" >/dev/null 2>&1 && [ -s "$work/app.env" ]; then
     local n=1
@@ -268,11 +327,14 @@ cmd_vault() {
 cmd_dns() {
   local ip=${1:-${TARGET_IP:-}}
   [ -n "$ip" ] || die "usage: nichedb-db dns <server-ipv4>"
-  log "DNS: $DB_DOMAIN and $STUDIO_DOMAIN -> $ip"
+  log "DNS: $DB_DOMAIN -> $ip"
   porkbun set "$DNS_ZONE" "${DB_DOMAIN%%.$DNS_ZONE}" A "$ip" --ttl 600
-  porkbun set "$DNS_ZONE" "${STUDIO_DOMAIN%%.$DNS_ZONE}" A "$ip" --ttl 600
   [ -n "${TARGET_IPV6:-}" ] && porkbun set "$DNS_ZONE" "${DB_DOMAIN%%.$DNS_ZONE}" AAAA "$TARGET_IPV6" --ttl 600
-  [ -n "${TARGET_IPV6:-}" ] && porkbun set "$DNS_ZONE" "${STUDIO_DOMAIN%%.$DNS_ZONE}" AAAA "$TARGET_IPV6" --ttl 600
+  # A shared cluster's Studio belongs to the app that owns it.
+  if [ "$SHARED_CLUSTER" != 1 ]; then
+    porkbun set "$DNS_ZONE" "${STUDIO_DOMAIN%%.$DNS_ZONE}" A "$ip" --ttl 600
+    [ -n "${TARGET_IPV6:-}" ] && porkbun set "$DNS_ZONE" "${STUDIO_DOMAIN%%.$DNS_ZONE}" AAAA "$TARGET_IPV6" --ttl 600
+  fi
   return 0
 }
 
@@ -407,8 +469,8 @@ cmd_status() {
   note "source slot lag: $( [ -n "$lag" ] && numfmt --to=iec "$lag" 2>/dev/null || echo none)"
   src_q "select 'source slot '||slot_name||' wal_status='||wal_status||' safe_wal_size='||coalesce(pg_size_pretty(safe_wal_size),'unlimited') from pg_replication_slots where slot_name='$SUB'" | sed 's/^/     /'
   note "sizes: source $(src_q "select pg_size_pretty(pg_database_size(current_database()))"), target $(tgt_q "select pg_size_pretty(pg_database_size(current_database()))")"
-  if [ -n "$(tgt_exec "test -f $TARGET_DIR/indexes.log && echo y" 2>/dev/null || true)" ]; then
-    note "index build: $(tgt_exec "$(tgt_sudo)tail -n 2 $TARGET_DIR/indexes.log" | tr '\n' ' ')"
+  if [ -n "$(tgt_exec "test -f /tmp/nichedb-indexes.log && echo y" 2>/dev/null || true)" ]; then
+    note "index build: $(tgt_exec "tail -n 2 /tmp/nichedb-indexes.log" | tr '\n' ' ')"
   fi
 }
 
@@ -435,12 +497,12 @@ EOF
   tgt_copy "$work/indexes.sh" /tmp/nichedb-indexes.sh
   rm -rf "$work"
   if [ "$TARGET_SSH" = local ]; then
-    sh /tmp/nichedb-indexes.sh > "$TARGET_DIR/indexes.log" 2>&1 || { tail -n 5 "$TARGET_DIR/indexes.log" >&2; die "index build failed"; }
-    tail -n 1 "$TARGET_DIR/indexes.log" >&2
+    sh /tmp/nichedb-indexes.sh > /tmp/nichedb-indexes.log 2>&1 || { tail -n 5 /tmp/nichedb-indexes.log >&2; die "index build failed"; }
+    tail -n 1 /tmp/nichedb-indexes.log >&2
   else
     # Detached: 26 GB of indexes outlives an ssh session.
-    tgt_exec "$(tgt_sudo)nohup sh /tmp/nichedb-indexes.sh > /tmp/nichedb-indexes.log 2>&1 < /dev/null & sleep 1; $(tgt_sudo)ln -sf /tmp/nichedb-indexes.log $TARGET_DIR/indexes.log"
-    note "running on the server; progress in $TARGET_DIR/indexes.log (nichedb-db status shows the tail)"
+    tgt_exec "$(tgt_sudo)nohup sh /tmp/nichedb-indexes.sh > /tmp/nichedb-indexes.log 2>&1 < /dev/null & sleep 1"
+    note "running on the server; progress in /tmp/nichedb-indexes.log (nichedb-db status shows the tail)"
   fi
 }
 
@@ -596,6 +658,9 @@ nichedb-db: move nichedb's Postgres from Railway to self-hosted Supabase.
 
 In order:
   provision user@host   install Supabase on the new server (setup-server.sh)
+  prepare-db user@host /path/to/supabase [db]
+                        INSTEAD of provision when the box already runs a Supabase
+                        cluster for another app: nichedb becomes a database in it
   dns [ipv4]            db.nichedb.dev + supabase.nichedb.dev A records (Porkbun)
   vault                 push the server's secrets to the logicsrc team vaults
   check                 versions, sizes and free disk on both sides
@@ -632,6 +697,7 @@ main() {
   shift || true
   case "$cmd" in
     provision) cmd_provision "$@" ;;
+    prepare-db) cmd_prepare_db "$@" ;;
     fetch-connection) cmd_fetch_connection ;;
     vault) cmd_vault ;;
     dns) cmd_dns "$@" ;;
