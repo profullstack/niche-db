@@ -9,6 +9,7 @@
     "./migrate": "./src/migrate.js",
     "./knowledge": "./src/knowledge.js",
     "./automotive": "./src/automotive.js",
+    "./population": "./src/population.js",
     "./agents": "./src/agents.js",
     "./revenue": "./src/revenue.js",
     "./premium": "./src/premium.js",

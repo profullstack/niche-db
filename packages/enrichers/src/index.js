@@ -6,6 +6,7 @@ import { mapillary } from './mapillary.js';
 import { npmStats } from './npm.js';
 import { opengraph } from './opengraph.js';
 import { openlibraryWork } from './openlibrary.js';
+import { population } from './population.js';
 import { secCompany } from './sec.js';
 import { semanticScholar } from './semanticscholar.js';
 import { tmdbArtwork } from './tmdb-artwork.js';
@@ -27,6 +28,7 @@ export const ENRICHERS = [
   tmdbArtwork,
   corpusdata,
   mapillary,
+  population,
 ];
 
 const byName = new Map(ENRICHERS.map((e) => [e.name, e]));

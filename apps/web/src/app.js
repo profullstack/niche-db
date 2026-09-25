@@ -19,6 +19,7 @@ import { registerManage } from './routes/manage.js';
 import { registerMcp } from './routes/mcp.js';
 import { registerOpenSaaS } from './routes/opensaas.js';
 import { registerPages } from './routes/pages.js';
+import { registerPopulation } from './routes/population.js';
 import { registerPremium } from './routes/premium.js';
 import { registerProfiles } from './routes/profiles.js';
 import { registerRevenue } from './routes/revenue.js';
@@ -145,6 +146,8 @@ registerPremium(app);
 registerDataDumps(app);
 registerOpenSaaS(app);
 registerAutomotive(app);
+/** Population: /population, the tree from the world to the ZIP code, and /api/v1/population. */
+registerPopulation(app);
 registerMcp(app);
 
 /**

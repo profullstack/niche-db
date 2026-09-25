@@ -12,7 +12,8 @@
     "./profiles": "./src/profiles.js",
     "./dump": "./src/dump.js",
     "./data-dumps": "./src/data-dumps.js",
-    "./geo": "./src/geo.js"
+    "./geo": "./src/geo.js",
+    "./population": "./src/population.js"
   },
   "dependencies": {
     "@nichedb/adapters": "workspace:*",
