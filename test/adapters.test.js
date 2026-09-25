@@ -86,6 +86,7 @@ describe('registry', () => {
         'dht',
         'algorithms',
         'models',
+        'parts',
       ]).toContain(a.collection);
     }
     expect(adapterByName('steam').title).toContain('Steam');

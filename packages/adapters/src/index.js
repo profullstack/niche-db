@@ -20,6 +20,7 @@ import { clinicalTrials } from './clinicaltrials.js';
 import { coopsWaterLevels } from './coops.js';
 import { courtlistener, courtlistenerApi, courtlistenerOralArguments } from './courtlistener.js';
 import { courtlistenerCatalog } from './courtlistener-catalog.js';
+import { cpscRecalls } from './cpsc.js';
 import { crates } from './crates.js';
 import { crossref } from './crossref.js';
 import { coingeckoAssets, cryptoPairs } from './crypto.js';
@@ -31,6 +32,7 @@ import { discogsCatalog } from './discogs-catalog.js';
 import { droughtMonitor } from './droughtmonitor.js';
 import { ecbFxRates } from './ecb.js';
 import { edgar } from './edgar.js';
+import { energyStarModels } from './energystar.js';
 import { eonetEvents } from './eonet.js';
 import { alpacaAssets, equityHistory, secFundamentals } from './equities.js';
 import { espnCatalogue, espnLive, espnSchedule } from './espn.js';
@@ -330,15 +332,19 @@ export const ADAPTERS = [
   // the same rows served by a provider itself as an OpenModel descriptor.
   modelsdev,
   openmodel,
+  // Parts: the appliance models a part has to fit, and the recalls against them.
+  energyStarModels,
+  cpscRecalls,
 ];
 
-export { isPlatformHosted, PLATFORM_HOSTS } from './podcastplatforms.js';
-export { normaliseTitle, normTitleOrNull, titleKey } from './screen-titles.js';
 /**
  * The place lists two adapters seed their sources from, re-exported so the
  * seed can build a feed per city from the same list rather than a second copy
  * of it that drifts the first time a city is added to one and not the other.
  */
+export { CATALOGUES as ENERGYSTAR_CATALOGUES } from './energystar.js';
+export { isPlatformHosted, PLATFORM_HOSTS } from './podcastplatforms.js';
+export { normaliseTitle, normTitleOrNull, titleKey } from './screen-titles.js';
 export { CITIES as CRIME_CITIES } from './socratacrime.js';
 export { UK_PLACES as UK_CRIME_PLACES } from './ukpolice.js';
 

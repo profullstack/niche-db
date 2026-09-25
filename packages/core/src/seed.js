@@ -288,6 +288,12 @@ export const COLLECTIONS = [
       "A reference shelf of algorithms, data structures and methods, assembled from the open catalogues that carry them whole: every entry in NIST's Dictionary of Algorithms and Data Structures with its definition and the relations between entries (public domain); every algorithm and data structure Wikidata files, with who devised it, when, and its stated complexity (CC0); the Papers With Code methods and datasets catalogues as archived when the site closed, spam removed (CC BY-SA 4.0); Rosetta Code's programming tasks with the languages each is solved in (GFDL); and The Algorithms' implementations by language (MIT). Every row names its source and licence. Built for a knowledge base: follow one shelf as a feed, or read the collection by API, CLI or MCP.",
   },
   {
+    slug: 'parts',
+    name: 'Parts & appliances',
+    description:
+      'The appliances people need parts for, and what has been recalled. There is no free catalogue of appliance parts: part numbers, prices and what fits what is the thing the parts retailers sell, and nothing open replaces it. What is free is the layer underneath: every model certified under ENERGY STAR with its brand, model number, UPC and specification (EPA, public domain, rewritten daily), and every recall the CPSC announces with the model numbers and barcodes affected, the hazard and the remedy owed (public domain, about fifty a month). Follow a category, a brand, or recalls against the models you own.',
+  },
+  {
     slug: 'models',
     name: 'AI models & prices',
     description:
@@ -296,6 +302,36 @@ export const COLLECTIONS = [
 ];
 
 export const DEFAULT_FEEDS = [
+  {
+    collection: 'parts',
+    slug: 'appliance-recalls',
+    name: 'Product recalls',
+    query: { kinds: ['recall'] },
+  },
+  {
+    collection: 'parts',
+    slug: 'new-appliance-models',
+    name: 'New appliance models',
+    query: { kinds: ['appliance-model'] },
+  },
+  {
+    collection: 'parts',
+    slug: 'kitchen-appliances',
+    name: 'Kitchen appliances',
+    query: { kinds: ['appliance-model'], tags: ['kitchen'] },
+  },
+  {
+    collection: 'parts',
+    slug: 'laundry-appliances',
+    name: 'Laundry appliances',
+    query: { kinds: ['appliance-model'], tags: ['laundry'] },
+  },
+  {
+    collection: 'parts',
+    slug: 'hvac-equipment',
+    name: 'HVAC & water heating',
+    query: { kinds: ['appliance-model'], tags: ['hvac'] },
+  },
   {
     collection: 'games',
     slug: 'new-on-steam',
