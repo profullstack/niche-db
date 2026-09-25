@@ -183,6 +183,13 @@ export const COMMANDS = [
     options: ['--fetch'],
   },
   {
+    name: 'population',
+    usage: 'population [<country> [<state> [<city>]]] | zip <zip> | find <name>',
+    summary:
+      'Population from the world to the ZIP code: an area, its measures and its largest children.',
+    options: ['--level country|state|city|zip', '--limit', '--offset', '--json'],
+  },
+  {
     name: 'profiles',
     usage: 'profiles [<query>] [--since <iso>] [--mine]',
     summary: 'People with an OpenProfile.md: search them, or list the ones your key owns.',
@@ -738,6 +745,64 @@ export async function run(
       }
       const res = await fetchImpl(url);
       out(await res.text());
+      return 0;
+    }
+    case 'population': {
+      const qs = new URLSearchParams();
+      if (flags.level) qs.set('level', flags.level);
+      if (flags.limit) qs.set('limit', flags.limit);
+      if (flags.offset) qs.set('offset', flags.offset);
+      const people = (n) =>
+        n === null || n === undefined ? '—' : Math.round(n).toLocaleString('en-US');
+      const [sub, ...args] = rest;
+
+      if (sub === 'find') {
+        const name = args.join(' ');
+        if (!name) throw new Error('population find <name>');
+        const { areas } = await client.get(
+          `/api/v1/population/search?q=${encodeURIComponent(name)}`,
+        );
+        if (json) {
+          out(JSON.stringify(areas, null, 2));
+          return 0;
+        }
+        for (const a of areas)
+          out(`${pad(a.key, 34)} ${pad(a.level, 8)} ${pad(people(a.population), 14)} ${a.title}`);
+        if (areas.length === 0) out('(no place by that name)');
+        return 0;
+      }
+
+      let path = '/api/v1/population';
+      if (sub === 'zip') {
+        if (!args[0]) throw new Error('population zip <zip>');
+        path = `/api/v1/population/zip/${encodeURIComponent(String(args[0]).trim())}`;
+      } else if (sub) {
+        path = `/api/v1/population/${encodeURIComponent(rest.join('-').toLowerCase())}`;
+      }
+      const body = await client.get(`${path}${qs.size ? `?${qs}` : ''}`);
+      if (json) {
+        out(JSON.stringify(body, null, 2));
+        return 0;
+      }
+      if (body.area) {
+        const a = body.area;
+        out(`${a.title}  (${a.key}, ${a.level})`);
+        out(
+          `  ${pad('population', 24)} ${people(a.population)}${a.year ? `  (${a.survey ?? a.year})` : ''}`,
+        );
+        for (const [k, v] of Object.entries(a.measures ?? {})) {
+          if (typeof v === 'number') out(`  ${pad(k, 24)} ${v.toLocaleString('en-US')}`);
+        }
+        out(`  ${a.page}`);
+      }
+      const kids = body.children?.areas ?? body.countries ?? [];
+      const total = body.children?.total ?? body.total ?? kids.length;
+      if (kids.length) {
+        out(
+          `\n${body.children?.level ?? 'country'}: ${kids.length} of ${Number(total).toLocaleString('en-US')}`,
+        );
+        for (const k of kids) out(`  ${pad(k.key, 34)} ${pad(people(k.population), 14)} ${k.name}`);
+      }
       return 0;
     }
     case 'profiles': {

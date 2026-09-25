@@ -25,6 +25,7 @@ import { blsSeries } from './bls.js';
 import { brisk } from './brisk.js';
 import { buyvps } from './buyvps.js';
 import { c0upons } from './c0upons.js';
+import { censusAcs } from './census-acs.js';
 import { cfpbComplaints } from './cfpb.js';
 import { channels } from './channels.js';
 import { clinicalTrials } from './clinicaltrials.js';
@@ -59,6 +60,7 @@ import { freddieMacRates } from './freddiemac.js';
 import { fueleconomyCatalog } from './fueleconomy.js';
 import { gdacs } from './gdacs.js';
 import { gdelt } from './gdelt.js';
+import { geonamesCities } from './geonames-cities.js';
 import { githubAgentTopics, githubMcpTopics } from './ghtopics.js';
 import { githubReleases } from './github.js';
 import { goModules } from './golang.js';
@@ -166,6 +168,7 @@ import { warnLayoffs } from './warn.js';
 import { wikidataAlgorithms } from './wikidata-algorithms.js';
 import { wikidataFilms } from './wikidata-films.js';
 import { wikidataGames } from './wikidata-games.js';
+import { worldbankPopulation } from './worldbank-population.js';
 
 /** Every adapter this deployment knows, in the order the add-source page lists them. */
 export const ADAPTERS = [
@@ -393,6 +396,11 @@ export const ADAPTERS = [
   openlisting,
   // Housing: what the market did, from Redfin's open bucket.
   redfinMarket,
+  // Population: countries, then US states, cities and ZIPs, then the cities
+  // of everywhere else, one tree walked by tags.
+  worldbankPopulation,
+  censusAcs,
+  geonamesCities,
 ];
 
 /**

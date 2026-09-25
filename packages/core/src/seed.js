@@ -347,6 +347,12 @@ export const COLLECTIONS = [
     description:
       'Hooks: what runs before and after a tool call, a prompt or a session. The ones the community ships, with install counts.',
   },
+  {
+    slug: 'population',
+    name: 'Population',
+    description:
+      'Who lives where, from the world down to the ZIP code. Every country from the World Bank (population and its series since 1990, growth, age structure, births, deaths, fertility, life expectancy, migration); every US state, city and ZIP code from the Census Bureau’s American Community Survey (age, income, home value, rent, ownership, poverty, education, unemployment, race and Hispanic origin); and the cities of every other country from GeoNames. All of it free and keyless. Browse it as a tree at /population.',
+  },
 ];
 
 export const DEFAULT_FEEDS = [
@@ -394,6 +400,30 @@ export const DEFAULT_FEEDS = [
     name: 'Housing market by region',
     description: 'Median prices, sales, inventory and days on market, monthly.',
     query: { kinds: ['housing-market'] },
+  },
+  {
+    collection: 'population',
+    slug: 'population-countries',
+    name: 'Countries',
+    description: 'Population and demography for every country.',
+    query: { kinds: ['population-area'], tags: ['level-country'] },
+  },
+  /* A feed's tags are ANY-of, so "US states" cannot be level-state AND in-us;
+     the US levels are cut by the source that writes them instead. The tree
+     itself (AND semantics) is the /population pages and the population API. */
+  {
+    collection: 'population',
+    slug: 'population-us',
+    name: 'US states, cities and ZIP codes',
+    description: 'Population, income, housing and work for every US state, city and ZIP code.',
+    query: { kinds: ['population-area'], sources: ['census-acs'] },
+  },
+  {
+    collection: 'population',
+    slug: 'population-world-cities',
+    name: 'Cities of the world',
+    description: 'Every city of 15,000 or more outside the United States, by region.',
+    query: { kinds: ['population-area'], sources: ['geonames-cities'] },
   },
   {
     collection: 'housing',

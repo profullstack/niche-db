@@ -605,6 +605,26 @@ async function* processLines(cmd, opts) {
   }
 }
 
+/**
+ * The text of a small zip's members, concatenated (`unzip -p`). For files of a
+ * few megabytes that arrive zipped (the Census Gazetteer, GeoNames' city
+ * lists); anything larger belongs on a streaming reader instead.
+ */
+export async function unzipText(path) {
+  const proc = Bun.spawn(['unzip', '-p', path], {
+    stdout: 'pipe',
+    stderr: 'pipe',
+    stdin: 'ignore',
+  });
+  const text = await new Response(proc.stdout).text();
+  const code = await proc.exited;
+  if (code !== 0) {
+    const err = await new Response(proc.stderr).text();
+    throw new Error(`unzip -p exited ${code}${err ? `: ${err.trim().slice(0, 200)}` : ''}`);
+  }
+  return text;
+}
+
 const asBuffer = (c) =>
   Buffer.isBuffer(c) ? c : Buffer.from(c.buffer, c.byteOffset, c.byteLength);
 

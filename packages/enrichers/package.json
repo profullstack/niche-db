@@ -7,6 +7,8 @@
     ".": "./src/index.js"
   },
   "dependencies": {
-    "@nichedb/core": "workspace:*"
+    "@nichedb/config": "workspace:*",
+    "@nichedb/core": "workspace:*",
+    "@nichedb/db": "workspace:*"
   }
 }

@@ -74,6 +74,7 @@ export const RESERVED_NICHE_SLUGS = new Set([
   'mcp',
   'niches',
   'opportunities',
+  'population',
   'pro',
   'robots.txt',
   'rings',

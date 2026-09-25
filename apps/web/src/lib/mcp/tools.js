@@ -2,9 +2,12 @@ import { config } from '@nichedb/config';
 import { describeAdapters, describeEnrichers } from '@nichedb/core';
 import { geoQueryFields, geoSchema } from '@nichedb/core/geo';
 import { cleanChannelName, parseName } from '@nichedb/core/names';
+import { CHILD_LEVELS, normaliseKey, normaliseZip, zipKey } from '@nichedb/core/population';
+import * as pop from '@nichedb/db/population';
 import * as profiles from '@nichedb/db/profiles';
 import * as q from '@nichedb/db/queries';
 import { enqueueRun } from '@nichedb/queue';
+import { areaOut } from '../population.js';
 import { claimProfile, editProfile, profileOut, resolveRef } from '../profiles.js';
 import { allowedEnrichers, collectionOut, feedOut, itemOut, sourceOut } from '../serialize.js';
 import { addSource, createFeed, Denied, editSource } from '../service.js';
@@ -242,6 +245,61 @@ export const TOOLS = [
       const item = await q.getItem(Number(id));
       if (!item) throw toolError(`No item ${id}`);
       return itemOut(item, site());
+    },
+  },
+  {
+    name: 'population',
+    description:
+      'Population and demography, drilled down from the world to the ZIP code. Give a `key` (us, us-ca, us-ca-los-angeles, gb, gb-england-london), a US `zip`, or a place name in `q`; no argument is the world. Answers with the area (population, year, measures: age, income, home value, rent, poverty, education, unemployment, race and Hispanic origin for the US; growth, age structure, births, deaths, fertility, life expectancy, migration, GDP per head and Gini for countries), how many areas of each level it contains, and the largest of its children at `level` (country, state, city or zip). Sources: World Bank, US Census ACS 5-year, GeoNames.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        key: str('Area key, e.g. us, us-ca, us-ca-los-angeles, us-90210, de (optional)'),
+        zip: str('A US ZIP code (optional)'),
+        q: str('A place name to look up, e.g. Springfield (optional)'),
+        level: str('Which children to list: country, state, city or zip (optional)'),
+        limit: int('Children to list, default 20, max 500'),
+        offset: int('Skip this many children, for paging'),
+      },
+    },
+    run: async ({ key, zip, q: term, level, limit, offset }) => {
+      const n = Math.min(Math.max(1, Number(limit) || 20), 500);
+      const skip = Math.max(0, Number(offset) || 0);
+      if (term && !zip && !key) {
+        const z = normaliseZip(term);
+        if (!z) return { q: term, areas: (await pop.areasNamed(term, { limit: n })).map(areaOut) };
+        zip = z;
+      }
+      const areaKey = zip
+        ? normaliseZip(zip)
+          ? zipKey(normaliseZip(zip))
+          : null
+        : key
+          ? normaliseKey(key)
+          : null;
+      if ((zip || key) && !areaKey) throw toolError('That is not an area key or a ZIP code.');
+      if (!areaKey) {
+        const [levels, list] = await Promise.all([
+          pop.populationStats(),
+          pop.areasIn({ level: 'country', limit: n, offset: skip }),
+        ]);
+        return { levels, total: list.total, countries: list.areas.map(areaOut) };
+      }
+      const row = await pop.areaByKey(areaKey);
+      if (!row) throw toolError(`No area ${areaKey}. Try q with its name.`);
+      const counts = await pop.childCounts(areaKey);
+      const offered = (CHILD_LEVELS[row.data?.level] ?? []).filter((l) => counts[l] > 0);
+      const child = offered.includes(level) ? level : offered[0];
+      const list = child
+        ? await pop.areasIn({ within: areaKey, level: child, limit: n, offset: skip })
+        : null;
+      return {
+        area: areaOut(row),
+        contains: counts,
+        children: child
+          ? { level: child, total: list.total, areas: list.areas.map(areaOut) }
+          : null,
+      };
     },
   },
   {

@@ -39,6 +39,7 @@ Adapters are one file each in `packages/adapters/src`. One hundred and sixty-one
 | public-money | `usaspending-awards`, `ocds-tenders`, `ted-notices` | no |
 | housing | `uk-land-registry`, `freddie-mac-rates`, `building-permits`, `ruuster` (agent saved searches) | no |
 | jobs | `bls-series`, `eurostat`, `warn-layoffs`, `agenticjobs` | no |
+| population | `worldbank-population` (every country, World Bank WDI, CC BY 4.0), `census-acs` (every US state, city and ZIP code from the ACS 5-year Summary File, public domain), `geonames-cities` (cities of 15,000+ everywhere else and their regions, CC BY 4.0); browse the tree at `/population`, or `/api/v1/population/{key}` | no |
 | ai-incidents | `rogue-ai-incidents`, `rogue-ai-research`, `aiid-reports` | no |
 | news | `newsfeed` (newsroom desks, and NIST's 28 topic, event and blog feeds as `nist-news`), `gdelt`, `rssamplifier`, `brisk`, `news-channels` | no |
 | domains | `ntld-totals`, `ntld-tlds`, `ntld-launches`, `ntld-changes` | no |
