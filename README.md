@@ -29,7 +29,7 @@ Adapters are one file each in `packages/adapters/src`. One hundred and sixty-one
 | alerts | `usgs-earthquakes`, `gdacs` | no |
 | weather | `nws-alerts`, `nhc-cyclones`, `swpc-space-weather`, `eonet-events` | no |
 | outages | `statuspage` (any Statuspage host) | no |
-| extensions | `firefox-addons`, `vscode-extensions`, `mcp-registry` | no |
+| extensions | `firefox-addons`, `vscode-extensions` | no |
 | health | `openfda-recalls`, `clinical-trials` | no |
 | research | `arxiv`, `crossref`, `openalex` (works newest first under a topic or a search; `openalex-algorithms` seeded), `nist-datasets` (every dataset on data.nist.gov, by last revision), `nist-csrc-drafts` (NIST security drafts open for comment, marked closed in place) | no |
 | automotive | `fueleconomy-catalog`, `nhtsa-recalls`, `nhtsa-complaints`, `nhtsa-safety-ratings` | no |
@@ -73,6 +73,8 @@ A person claims their entry with **This is me** (proven by the email the profile
 | sites | `opensite` | no |
 | algorithms | `nist-dads` (NIST's Dictionary of Algorithms and Data Structures, every entry with its definition and relations; public domain), `wikidata-algorithms` (every algorithm and data structure on Wikidata, with who devised it, when, and its complexity; CC0), `pwc-archive` (the Papers With Code methods and datasets catalogues as archived on Hugging Face, call-centre spam dropped; CC BY-SA 4.0), `rosetta-code` (every programming task with the languages it is solved in; GFDL), `thealgorithms` (The Algorithms' implementations by language from each repo's DIRECTORY.md; MIT). [docs/algorithms.md](docs/algorithms.md) | no |
 | models | `modelsdev` (every AI model and what it costs, from models.dev; MIT). One row per provider offering rather than per model, because the same model reaches you from many of the 223 providers at as many prices: price per million tokens in, out and cached, context and output limits, modalities and capability flags, 8,179 of them. Plus the lab catalogue, one entry per model as its maker published it with a page of its own, and the providers themselves. `openmodel` (a provider's own file at /.well-known/openmodel.json, believed only when served from the origin it describes; the same vocabulary as the models.dev rows beside it, so one feed catches both). [docs/models.md](docs/models.md) | no |
+| mcp | `mcp-registry` (the official registry: one row per server at its newest version, with packages, remotes and status), `docker-mcp` (Docker's catalogue: pull counts, categories, licences and the tools each server exposes), `smithery` (how often each server is actually called through Smithery's proxy), `awesome-mcp` (the punkpeye, wong2 and appcypher lists plus the protocol repo's reference servers), `aitmpl-mcps` (ready-made configs), `github-mcp-topics` (repositories tagged for MCP, newest push first). Deduplicated on URL: the first source to carry a server keeps it. [docs/mcp-and-workflows.md](docs/mcp-and-workflows.md) | keyless (`GITHUB_TOKEN` raises the search and enrichment rate limits) |
+| workflows | `reddit-workflows` (the r/ClaudeWorkflows library, one post per workflow with its rating, freshness, level and categories parsed out of the post), `awesome-claude-code` (read from the CSV the list is generated from, so entries its maintainer has marked dead are skipped), `plugin-marketplaces` (every plugin declared in the marketplace manifests of the repos you name, the official one included), `aitmpl-components` (skills, subagents, commands, hooks, settings, loops and mods with install counts), `github-agent-topics` (repositories tagged for Claude Code, skills and subagents). [docs/mcp-and-workflows.md](docs/mcp-and-workflows.md) | keyless (`GITHUB_TOKEN` optional, as above) |
 
 ### Moderators
 
@@ -146,7 +148,7 @@ After ingest, every item is enriched by the enrichers that apply to it (`package
 | --- | --- | --- |
 | `youtube` | top videos (trailers, official audio, webcasts); Data API key optional | games, music, tabletop, space, chess, books |
 | `wikipedia` | the article's lead paragraph and picture | games, music, books, space, tabletop, hosting |
-| `github-repo` | stars, forks, topics, licence, language, last push | packages, extensions |
+| `github-repo` | stars, forks, topics, licence, language, last push | packages, extensions, mcp, workflows |
 | `npm-stats` | last week's downloads | packages |
 | `sec-company` | tickers, exchange, industry, state, website of the filer | filings |
 | `company-ticker` | the listed company behind a hosting provider: ticker and CIK from the SEC's company list, matched on name | hosting |

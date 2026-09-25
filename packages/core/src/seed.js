@@ -87,7 +87,7 @@ export const COLLECTIONS = [
     slug: 'extensions',
     name: 'Extensions',
     description:
-      'New Firefox add-ons, VS Code extensions and MCP servers, with icons, categories and repo stats.',
+      'New Firefox add-ons and VS Code extensions, with icons, categories and repo stats. MCP servers have a collection of their own.',
   },
   {
     slug: 'health',
@@ -298,6 +298,18 @@ export const COLLECTIONS = [
     name: 'AI models & prices',
     description:
       'Every AI model you can call and what it costs, from models.dev (MIT, community maintained). One row per provider offering rather than per model, because the same model reaches you from a dozen providers at a dozen prices: the price per million tokens in and out, cache reads and writes, the context and output limits, what it takes in and gives back, and whether it reasons, calls tools, returns structured output or ships open weights. Alongside them the lab catalogue, one entry per model as its maker published it, and the providers themselves with the size of each catalogue. Follow the open-weight models, the free ones, or one provider.',
+  },
+  {
+    slug: 'mcp',
+    name: 'MCP servers',
+    description:
+      'Every Model Context Protocol server anyone has published, from six sources that each know something the others do not: the official registry knows what was published and with which packages, Docker knows what has been packaged and how often it is pulled, Smithery knows how often each is actually called, the big community lists know the servers that were never published anywhere, and GitHub knows what was tagged this morning. The same server is in most of them, so the collection deduplicates on URL and the first source to carry a server keeps it.',
+  },
+  {
+    slug: 'workflows',
+    name: 'Agent workflows',
+    description:
+      'How people actually work with Claude and Claude Code: workflows published and voted on in the r/ClaudeWorkflows library, the skills, subagents, slash commands, hooks and settings the community ships, the plugin marketplaces you can add in one command, and the repositories tagged for them. Rated where the source rates them, and deduplicated across the lists.',
   },
 ];
 
@@ -542,10 +554,58 @@ export const DEFAULT_FEEDS = [
     query: { sources: ['vscode-new-extensions'] },
   },
   {
-    collection: 'extensions',
+    collection: 'mcp',
     slug: 'new-mcp-servers',
     name: 'New MCP servers',
     query: { kinds: ['mcp-server'] },
+  },
+  {
+    collection: 'mcp',
+    slug: 'mcp-remote-servers',
+    name: 'Remote MCP servers',
+    query: { tags: ['remote'] },
+  },
+  {
+    collection: 'mcp',
+    slug: 'mcp-packaged-servers',
+    name: 'MCP servers packaged as images',
+    query: { sources: ['docker-mcp-catalog'] },
+  },
+  {
+    collection: 'workflows',
+    slug: 'claude-workflows',
+    name: 'Claude workflows',
+    query: { kinds: ['workflow'] },
+  },
+  {
+    collection: 'workflows',
+    slug: 'claude-skills',
+    name: 'Skills',
+    query: { kinds: ['skill'] },
+  },
+  {
+    collection: 'workflows',
+    slug: 'claude-subagents',
+    name: 'Subagents',
+    query: { kinds: ['agent'] },
+  },
+  {
+    collection: 'workflows',
+    slug: 'claude-commands',
+    name: 'Slash commands',
+    query: { kinds: ['command'] },
+  },
+  {
+    collection: 'workflows',
+    slug: 'claude-plugins',
+    name: 'Plugins',
+    query: { kinds: ['plugin'] },
+  },
+  {
+    collection: 'workflows',
+    slug: 'claude-hooks',
+    name: 'Hooks',
+    query: { kinds: ['hook'] },
   },
   { collection: 'health', slug: 'fda-recalls', name: 'FDA recalls', query: { kinds: ['recall'] } },
   {
