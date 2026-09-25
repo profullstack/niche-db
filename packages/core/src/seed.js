@@ -809,6 +809,132 @@ export const DEFAULT_FEEDS = [
     name: 'Makes, models and years',
     query: { kinds: ['model'] },
   },
+  /*
+   * The same automotive data indexed by the PART that failed rather than
+   * by the vehicle it was bolted to.
+   *
+   * There is no free car-parts catalogue with year/make/model fitment --
+   * ACES/VCdb and TecDoc are both subscription, and eBay's Browse API is
+   * the only free source of real fitment, which this deployment cannot
+   * use. What IS free and already flowing is NHTSA's component taxonomy,
+   * which goes down to the individual fastener ('SUSPENSION:FRONT:
+   * SPRINGS:LEAF SPRING ASSEMBLY:U-BOLT, LEAF SPRING TO AXLE').
+   *
+   * So these are feeds, not a new source: the adapter already slugifies
+   * Component into tags, and nothing needs to be fetched again. Every tag
+   * below was checked against the live API before being written down.
+   *
+   * Two of them look misspelt and are not. `slugify` drops "/" instead of
+   * turning it into a hyphen, so a component containing one collapses into a
+   * single run-on word: LATCHES/LOCKS/LINKAGES is `latcheslockslinkages` and
+   * VISIBILITY/WIPER is `visibilitywiper`. The hyphenated spellings match
+   * nothing. Changing slugify would be the real fix, but it would silently
+   * re-tag every adapter in the deployment and orphan the tags already
+   * written, so the feeds use what is actually in the data.
+   */
+  {
+    collection: 'automotive',
+    slug: 'parts-brakes',
+    name: 'Brakes',
+    description:
+      'Braking recalls and complaints across every manufacturer: hydraulic, air and parking brakes.',
+    /* Recalls and complaints together: a recall is the manufacturer
+       admitting it, a complaint is an owner noticing first. */
+    query: {
+      kinds: ['recall', 'complaint'],
+      tags: ['service-brakes-hydraulic', 'service-brakes-air', 'parking-brake'],
+    },
+  },
+  {
+    collection: 'automotive',
+    slug: 'parts-airbags',
+    name: 'Airbags and restraints',
+    description: 'The restraint system: airbags, inflators, seat belts and child seats.',
+    /* Recalls and complaints together: a recall is the manufacturer
+       admitting it, a complaint is an owner noticing first. */
+    query: { kinds: ['recall', 'complaint'], tags: ['air-bags', 'seat-belts', 'child-seat'] },
+  },
+  {
+    collection: 'automotive',
+    slug: 'parts-tires-and-wheels',
+    name: 'Tires and wheels',
+    description:
+      'Tire and wheel recalls, including the tire-only campaigns that never name a vehicle.',
+    /* Recalls and complaints together: a recall is the manufacturer
+       admitting it, a complaint is an owner noticing first. */
+    query: { kinds: ['recall', 'complaint'], tags: ['tires', 'wheels'] },
+  },
+  {
+    collection: 'automotive',
+    slug: 'parts-electrical',
+    name: 'Electrical system',
+    description:
+      'Wiring, charging, control modules and lighting — the largest single component category.',
+    /* Recalls and complaints together: a recall is the manufacturer
+       admitting it, a complaint is an owner noticing first. */
+    query: { kinds: ['recall', 'complaint'], tags: ['electrical-system', 'exterior-lighting'] },
+  },
+  {
+    collection: 'automotive',
+    slug: 'parts-fuel-system',
+    name: 'Fuel system',
+    description: 'Pumps, lines, tanks and injection, where a defect usually means a fire risk.',
+    /* Recalls and complaints together: a recall is the manufacturer
+       admitting it, a complaint is an owner noticing first. */
+    query: {
+      kinds: ['recall', 'complaint'],
+      tags: ['fuel-system-gasoline', 'fuel-system-diesel', 'fuel-system-other'],
+    },
+  },
+  {
+    collection: 'automotive',
+    slug: 'parts-engine-and-powertrain',
+    name: 'Engine and powertrain',
+    description: 'Engine, cooling, transmission, driveline and axles.',
+    /* Recalls and complaints together: a recall is the manufacturer
+       admitting it, a complaint is an owner noticing first. */
+    query: {
+      kinds: ['recall', 'complaint'],
+      tags: ['engine', 'power-train', 'engine-and-engine-cooling'],
+    },
+  },
+  {
+    collection: 'automotive',
+    slug: 'parts-steering-and-suspension',
+    name: 'Steering and suspension',
+    description: 'Steering gear, columns, springs, control arms and the fasteners holding them on.',
+    /* Recalls and complaints together: a recall is the manufacturer
+       admitting it, a complaint is an owner noticing first. */
+    query: { kinds: ['recall', 'complaint'], tags: ['steering', 'suspension'] },
+  },
+  {
+    collection: 'automotive',
+    slug: 'parts-structure-and-body',
+    name: 'Structure and body',
+    description: 'Frame, body, latches and locks.',
+    /* Recalls and complaints together: a recall is the manufacturer
+       admitting it, a complaint is an owner noticing first. */
+    query: { kinds: ['recall', 'complaint'], tags: ['structure', 'latcheslockslinkages'] },
+  },
+  {
+    collection: 'automotive',
+    slug: 'parts-visibility',
+    name: 'Glass, mirrors and wipers',
+    description: 'Windshields, mirrors, defrosters and wiper systems.',
+    /* Recalls and complaints together: a recall is the manufacturer
+       admitting it, a complaint is an owner noticing first. */
+    query: { kinds: ['recall', 'complaint'], tags: ['visibilitywiper', 'visibility'] },
+  },
+  {
+    collection: 'automotive',
+    slug: 'parts-equipment',
+    name: 'Equipment and aftermarket parts',
+    description:
+      'Recalls filed against a part rather than a vehicle: aftermarket equipment, cameras and accessories.',
+    /* Recalls and complaints together: a recall is the manufacturer
+       admitting it, a complaint is an owner noticing first. */
+    query: { kinds: ['recall', 'complaint'], tags: ['equipment', 'back-over-prevention'] },
+  },
   /* Markets. The first two are the worldwide half and the rest are US, which
      is the shape of what is actually given away: the register of the world's
      venues is public, and their prices are not. */
