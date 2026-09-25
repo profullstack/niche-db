@@ -153,6 +153,12 @@ export const config = {
     /** TheTVDB v4, for the screen collection's series catalogue. Free below $50k a year; attribution required. */
     thetvdbApiKey: opt('THETVDB_API_KEY'),
     /**
+     * Mapillary, for street-level imagery on anything with coordinates. Free,
+     * but a token, and the imagery is CC BY-SA so the credit must be shown
+     * with the picture. Unset means the enricher is simply off.
+     */
+    mapillaryToken: opt('MAPILLARY_TOKEN'),
+    /**
      * ESPN answers a datacenter with 403, so on cloud egress the sports
      * sources go through a residential proxy. Optional: unset means direct.
      */
