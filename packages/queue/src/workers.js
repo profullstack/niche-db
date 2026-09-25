@@ -7,6 +7,7 @@ import {
   scanFeeds,
 } from '@nichedb/core';
 import { generateDump } from '@nichedb/core/data-dumps';
+import { syncTlds } from '@nichedb/core/tlds';
 import { buildBigIndexesOnce } from '@nichedb/db/build-indexes';
 import { cleanGinPendingLists } from '@nichedb/db/gin-maintenance';
 import * as q from '@nichedb/db/queries';
@@ -202,6 +203,14 @@ export function startWorkers() {
       },
     ),
   ];
+  if (config.tlds.enabled)
+    workers.push(
+      new Worker(QUEUES.tlds, async () => log('[tlds]', JSON.stringify(await syncTlds({ log }))), {
+        connection,
+        concurrency: 1,
+        lockDuration: 20 * 60_000,
+      }),
+    );
   if (config.dataDumps.enabled)
     workers.push(
       new Worker(QUEUES.dumps, () => generateDump({ log }), {

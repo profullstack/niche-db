@@ -1704,3 +1704,53 @@ table.kv td {
   margin: 1.25rem 0;
   overflow-wrap: anywhere;
 }
+
+/* top-level domains (/tlds): facets on the left, the price table on the right */
+.tld-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 16rem) minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+@media (max-width: 52rem) {
+  .tld-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.tld-grid .facet h3 {
+  font-size: 0.85rem;
+  margin: 1rem 0 0.25rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.table.tlds th,
+.table.tlds td {
+  white-space: nowrap;
+}
+.table.tlds td.registry {
+  max-width: 16rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.table.tlds .money {
+  text-align: right;
+}
+.table.tlds a.sort {
+  color: inherit;
+}
+.table.tlds a.sort.on {
+  color: var(--accent);
+}
+.table.tlds thead th {
+  position: sticky;
+  top: 0;
+  background: var(--ground);
+}
+.trap {
+  color: var(--err);
+  font-weight: 600;
+}
+.money .ok {
+  color: var(--ok);
+}

@@ -13,7 +13,8 @@
     "./dump": "./src/dump.js",
     "./data-dumps": "./src/data-dumps.js",
     "./geo": "./src/geo.js",
-    "./population": "./src/population.js"
+    "./population": "./src/population.js",
+    "./tlds": "./src/tlds/index.js"
   },
   "dependencies": {
     "@nichedb/adapters": "workspace:*",

@@ -17,7 +17,8 @@
     "./profiles": "./src/profiles.js",
     "./account": "./src/account.js",
     "./build-indexes": "./src/build-indexes.js",
-    "./gin-maintenance": "./src/gin-maintenance.js"
+    "./gin-maintenance": "./src/gin-maintenance.js",
+    "./tlds": "./src/tlds.js"
   },
   "dependencies": {
     "@nichedb/config": "workspace:*",

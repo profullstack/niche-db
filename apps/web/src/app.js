@@ -26,6 +26,7 @@ import { registerRevenue } from './routes/revenue.js';
 import { registerSites } from './routes/sites.js';
 import { registerStatic } from './routes/static.js';
 import { registerSubmit } from './routes/submit.js';
+import { registerTlds } from './routes/tlds.js';
 import { NotFound } from './views/pages.jsx';
 
 export const app = new Hono();
@@ -148,6 +149,8 @@ registerOpenSaaS(app);
 registerAutomotive(app);
 /** Population: /population, the tree from the world to the ZIP code, and /api/v1/population. */
 registerPopulation(app);
+/** Top-level domains: /tlds and /api/v1/tlds, after the API middleware so the API half is metered. */
+registerTlds(app);
 registerMcp(app);
 
 /**

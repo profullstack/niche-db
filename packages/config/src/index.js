@@ -352,6 +352,22 @@ export const config = {
    * `AUTOMOTIVE_MONTHLY_CENTS` is the month-at-a-time price quoted beside it.
    * Everyone gets a few an hour for nothing, so a person can try it.
    */
+  /**
+   * Top-level domains (/tlds): IANA's list diffed daily, registrar prices,
+   * RDAP lookups. See packages/core/src/tlds.
+   */
+  tlds: {
+    enabled: bool('TLDS', true),
+    /** When the daily sync runs. IANA's list is regenerated early UTC. */
+    cron: opt('TLDS_CRON', '20 8 * * *'),
+    /** Registrars that serve their own OpenTLD file, comma separated. */
+    openTldUrls: list('TLDS_OPENTLD_URLS'),
+    /** Names a stranger may check over RDAP per hour; paid callers are not counted. */
+    freeChecksPerHour: num('TLDS_FREE_CHECKS_PER_HOUR', 120),
+    /** Names one check may ask about at once. */
+    maxNamesPerCheck: num('TLDS_MAX_NAMES_PER_CHECK', 25),
+  },
+
   automotive: {
     /* Generous enough that a person comparing a few cars never meets it, and
        only new decodes are counted at all. The meter is there for agents
