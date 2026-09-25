@@ -102,6 +102,7 @@ import { openalex } from './openalex.js';
 import { openfda } from './openfda.js';
 import { openlibrary } from './openlibrary.js';
 import { openlibraryCatalog } from './openlibrary-catalog.js';
+import { openlisting } from './openlisting.js';
 import { openmodel } from './openmodel.js';
 import { openprofiles } from './openprofiles.js';
 import { opensaas } from './opensaas.js';
@@ -122,6 +123,7 @@ import { pwcArchive } from './pwc-archive.js';
 import { pypi } from './pypi.js';
 import { redditDeals } from './redditdeals.js';
 import { redditWorkflows } from './redditworkflows.js';
+import { redfinMarket } from './redfin.js';
 import { rogueIncidents, rogueResearch } from './rogueaitracker.js';
 import { rosettaCode } from './rosetta-code.js';
 import { rssamplifier } from './rssamplifier.js';
@@ -382,6 +384,10 @@ export const ADAPTERS = [
   cpscRecalls,
   // Health: the US provider registry, from the CMS monthly bulk file.
   nppesProviders,
+  // Listings: things on offer, read from the seller's own OpenListing file.
+  openlisting,
+  // Housing: what the market did, from Redfin's open bucket.
+  redfinMarket,
 ];
 
 /**

@@ -135,7 +135,7 @@ export const COLLECTIONS = [
     slug: 'housing',
     name: 'Housing',
     description:
-      'What homes cost and what is being built: every property sold in England and Wales with its address and price, harmonised house price indices across Europe, the weekly US mortgage rate, and the building permits US cities issue months before ground is broken.',
+      'What homes cost and what is being built: every property sold in England and Wales with its address and price, harmonised house price indices across Europe, the weekly US mortgage rate, the building permits US cities issue months before ground is broken, and the US market by region and month since 2012 \u2014 median prices, sales, inventory and days on market \u2014 from the open bucket Redfin publishes. All of it aggregate; the things actually on offer are in Listings.',
   },
   {
     slug: 'jobs',
@@ -294,6 +294,12 @@ export const COLLECTIONS = [
       'The appliances people need parts for, and what has been recalled. There is no free catalogue of appliance parts: part numbers, prices and what fits what is the thing the parts retailers sell, and nothing open replaces it. What is free is the layer underneath: every model certified under ENERGY STAR with its brand, model number, UPC and specification (EPA, public domain, rewritten daily), and every recall the CPSC announces with the model numbers and barcodes affected, the hazard and the remedy owed (public domain, about fifty a month). Follow a category, a brand, or recalls against the models you own.',
   },
   {
+    slug: 'listings',
+    name: 'Listings',
+    description:
+      'Things on offer, read from the file the seller serves on its own origin: a house for sale, an apartment to rent, a car. The reference directory for OpenListing (logicsrc.com/docs/openlisting), which exists because listing data is enclosed twice over \u2014 484 separate MLSs in US real estate, each behind its own licence and a broker, none of them redistributable. A listing counts only when served from the origin its id claims, and a closed one is kept, because knowing that something sold is the part every listing site loses.',
+  },
+  {
     slug: 'models',
     name: 'AI models & prices',
     description:
@@ -344,6 +350,58 @@ export const COLLECTIONS = [
 ];
 
 export const DEFAULT_FEEDS = [
+  {
+    collection: 'listings',
+    slug: 'for-sale',
+    name: 'For sale',
+    description: 'Everything offered for sale, from the seller\u2019s own file.',
+    query: { kinds: ['listing'], tags: ['offer:sale'] },
+  },
+  {
+    collection: 'listings',
+    slug: 'to-rent',
+    name: 'To rent',
+    description: 'Everything offered to rent or lease.',
+    query: { kinds: ['listing'], tags: ['offer:rent', 'offer:lease'] },
+  },
+  {
+    collection: 'listings',
+    slug: 'property-listings',
+    name: 'Property',
+    description: 'Houses, apartments, rooms and land, as published under the OpenProperty profile.',
+    query: { kinds: ['listing'], tags: ['subject:property'] },
+  },
+  {
+    collection: 'listings',
+    slug: 'car-listings',
+    name: 'Cars',
+    description: 'Cars, motorcycles, trucks, vans and RVs, as published under the OpenCar profile.',
+    query: { kinds: ['listing'], tags: ['subject:car'] },
+  },
+  {
+    collection: 'listings',
+    slug: 'sold-and-closed',
+    name: 'Sold and closed',
+    /* The outcome, which is the thing every listing site throws away. The
+       spec asks sellers to keep a closed listing served for ninety days so a
+       directory learns it sold rather than inferring it from a 404. */
+    description: 'Listings the seller has marked closed, kept so the outcome is knowable.',
+    query: { kinds: ['listing'], tags: ['closed'] },
+  },
+  {
+    collection: 'housing',
+    slug: 'housing-market',
+    name: 'Housing market by region',
+    description: 'Median prices, sales, inventory and days on market, monthly.',
+    query: { kinds: ['housing-market'] },
+  },
+  {
+    collection: 'housing',
+    slug: 'housing-by-state',
+    name: 'By state',
+    description: 'State-level housing market figures.',
+    query: { kinds: ['housing-market'], tags: ['state'] },
+  },
   {
     collection: 'health',
     slug: 'providers',
