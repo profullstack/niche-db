@@ -85,6 +85,7 @@ export const RESERVED_NICHE_SLUGS = new Set([
   'sitemap.xml',
   'sources',
   'sw.js',
+  'tlds',
   'well-known',
 ]);
 

@@ -190,6 +190,40 @@ export const COMMANDS = [
     options: ['--level country|state|city|zip', '--limit', '--offset', '--json'],
   },
   {
+    name: 'tlds',
+    usage: 'tlds [<query>] [--registrar <slug>] [--type <t>] [--max-renew <n>] [--trap] [--sort …]',
+    summary:
+      "Top-level domains with each one's cheapest register, renew and transfer price, renewal first.",
+    options: [
+      '--registrar <porkbun|dynadot|cloudflare|ovh>',
+      '--type <generic|country-code|…>',
+      '--max-renew <n>',
+      '--max-register <n>',
+      '--trap (renews at 2x the first year or more)',
+      '--idn / --no-idn',
+      '--status <delegated|removed|all>',
+      '--sort <renew|register|transfer|ratio|tld|registrars|first_seen>',
+      '--order <asc|desc>',
+      '--limit',
+      '--csv',
+      '--json',
+    ],
+  },
+  {
+    name: 'tld',
+    usage: 'tld <tld> | tld changes',
+    summary:
+      'One top-level domain: registry, RDAP server and every registrar price; or what changed in the root.',
+    options: ['--json'],
+  },
+  {
+    name: 'check',
+    usage: 'check <name> [--tlds com,dev,io]',
+    summary:
+      'Is a domain name registered? Asks the registry over RDAP; a bare word is tried under each ending.',
+    options: ['--tlds <list>', '--json'],
+  },
+  {
     name: 'profiles',
     usage: 'profiles [<query>] [--since <iso>] [--mine]',
     summary: 'People with an OpenProfile.md: search them, or list the ones your key owns.',
@@ -803,6 +837,118 @@ export async function run(
         );
         for (const k of kids) out(`  ${pad(k.key, 34)} ${pad(people(k.population), 14)} ${k.name}`);
       }
+      return 0;
+    }
+    case 'tlds': {
+      const qs = new URLSearchParams();
+      const term = rest.join(' ');
+      if (term) qs.set('q', term);
+      for (const [flag, param] of [
+        ['registrar', 'registrar'],
+        ['type', 'type'],
+        ['maxRenew', 'max_renew'],
+        ['maxRegister', 'max_register'],
+        ['status', 'status'],
+        ['sort', 'sort'],
+        ['order', 'order'],
+        ['limit', 'limit'],
+        ['offset', 'offset'],
+        ['manager', 'manager'],
+        ['band', 'band'],
+      ])
+        if (flags[flag] !== undefined && flags[flag] !== true) qs.set(param, flags[flag]);
+      if (flags.trap) qs.set('trap', '1');
+      if (flags.idn) qs.set('idn', '1');
+      if (flags.noIdn) qs.set('idn', '0');
+      if (flags.csv) {
+        qs.set('format', 'csv');
+        const res = await fetchImpl(`${api}/api/v1/tlds?${qs}`);
+        out((await res.text()).trimEnd());
+        return 0;
+      }
+      const r = await client.get(`/api/v1/tlds?${qs}`);
+      if (json) {
+        out(JSON.stringify(r, null, 2));
+        return 0;
+      }
+      const m = (p) =>
+        p ? `${p.amount.toFixed(2)} ${p.currency === 'USD' ? '' : p.currency}`.trim() : '-';
+      out(
+        `${pad('TLD', 22)} ${pad('REGISTER', 10)} ${pad('RENEW', 10)} ${pad('x', 5)} ${pad('TRANSFER', 10)} ${pad('CHEAPEST RENEWAL AT', 22)} REGISTRY`,
+      );
+      for (const t of r.tlds) {
+        out(
+          `${pad(`.${t.unicode ?? t.tld}`, 22)} ${pad(m(t.best?.register), 10)} ${pad(m(t.best?.renew), 10)} ${pad(t.renewal_ratio ? `${t.renewal_ratio}x` : '', 5)} ${pad(m(t.best?.transfer), 10)} ${pad(t.best?.renew?.registrar_name ?? '', 22)} ${t.manager ?? ''}`,
+        );
+      }
+      out(`(${r.tlds.length} of ${r.total}${r.compare_currency ? '; cheapest in USD' : ''})`);
+      return 0;
+    }
+    case 'tld': {
+      const [arg] = rest;
+      if (!arg) throw new Error('tld <tld> | tld changes');
+      if (arg === 'changes') {
+        const r = await client.get('/api/v1/tlds/changes');
+        if (json) {
+          out(JSON.stringify(r.changes, null, 2));
+          return 0;
+        }
+        for (const c of r.changes)
+          out(
+            `${when(c.at)}  ${pad(c.change, 8)} .${pad(c.unicode ?? c.tld, 24)} ${c.list_version ?? ''}`,
+          );
+        if (!r.changes.length) out('(no changes since tracking began)');
+        return 0;
+      }
+      const t = await client.get(`/api/v1/tlds/${encodeURIComponent(arg.replace(/^\./, ''))}`);
+      if (json) {
+        out(JSON.stringify(t, null, 2));
+        return 0;
+      }
+      out(`.${t.unicode ?? t.tld}${t.unicode ? ` (${t.tld})` : ''}  ${t.status}  ${t.type ?? ''}`);
+      out(`registry  ${t.manager ?? '-'}`);
+      out(`rdap      ${t.rdap ?? 'none published'}`);
+      out('');
+      out(
+        `${pad('REGISTRAR', 24)} ${pad('CUR', 4)} ${pad('REGISTER', 10)} ${pad('RENEW', 10)} ${pad('TRANSFER', 10)} RESTORE`,
+      );
+      const f = (v) => (v === null || v === undefined ? '-' : Number(v).toFixed(2));
+      for (const p of t.prices)
+        out(
+          `${pad(p.registrar_name, 24)} ${pad(p.currency, 4)} ${pad(f(p.register), 10)} ${pad(f(p.renew), 10)} ${pad(f(p.transfer), 10)} ${f(p.restore)}`,
+        );
+      if (!t.prices.length) out('(no registrar read here sells it)');
+      out(`\n${t.page}`);
+      return 0;
+    }
+    case 'check': {
+      const name = rest.join(',');
+      if (!name) throw new Error('check <name> [--tlds com,dev,io]');
+      const qs = new URLSearchParams({ name });
+      if (flags.tlds && flags.tlds !== true) qs.set('tlds', flags.tlds);
+      const r = await client.get(`/api/v1/tlds/check?${qs}`);
+      if (json) {
+        out(JSON.stringify(r, null, 2));
+        return 0;
+      }
+      const word = {
+        registered: 'taken',
+        not_registered: 'not registered',
+        unknown: 'unknown',
+        invalid: 'invalid',
+      };
+      for (const x of r.results) {
+        const detail =
+          x.status === 'registered'
+            ? `${x.registrar ?? ''}${x.expires ? `, expires ${String(x.expires).slice(0, 10)}` : ''}`
+            : x.status === 'not_registered'
+              ? x.cheapest?.register
+                ? `from ${x.cheapest.register.amount.toFixed(2)} at ${x.cheapest.register.registrar_name}, renews ${x.cheapest.renew?.amount?.toFixed(2) ?? '?'}`
+                : ''
+              : (x.reason ?? '');
+        out(`${pad(x.name, 32)} ${pad(word[x.status] ?? x.status, 15)} ${detail}`);
+      }
+      if (r.truncated) out('(only the first names were checked)');
       return 0;
     }
     case 'profiles': {

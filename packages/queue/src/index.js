@@ -28,6 +28,8 @@ export const QUEUES = {
   stats: 'collection-stats',
   /** Every couple of minutes: merge the GIN pending lists so no insert has to. */
   maintain: 'db-maintenance',
+  /** Daily: IANA's top-level domain list diffed, and every registrar's prices read. */
+  tlds: 'tld-sync',
 };
 
 const defaults = {
@@ -63,6 +65,7 @@ export async function installSchedules({ log = console.log } = {}) {
     queues.dumps,
     queues.stats,
     queues.maintain,
+    queues.tlds,
   ]) {
     for (const r of await queue.getRepeatableJobs()) await queue.removeRepeatableByKey(r.key);
   }
@@ -108,6 +111,16 @@ export async function installSchedules({ log = console.log } = {}) {
     { repeat: { every: config.maintenance.ginTickSeconds * 1000 }, jobId: 'gin' },
   );
   await queues.maintain.add('gin', {}, { jobId: `gin-boot-${minuteStamp()}`, delay: 30_000 });
+  if (config.tlds.enabled) {
+    await queues.tlds.add(
+      'sync',
+      {},
+      { repeat: { pattern: config.tlds.cron, tz: 'UTC' }, jobId: 'tld-sync' },
+    );
+    // Once at boot as well: an unchanged list costs one fetch, and a fresh
+    // deployment (or a new registrar) should not wait a day for its first rows.
+    await queues.tlds.add('sync', {}, { jobId: `tlds-boot-${minuteStamp()}`, delay: 60_000 });
+  }
   log('[queue] schedules installed');
 }
 

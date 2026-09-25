@@ -3,15 +3,25 @@ import { describeAdapters, describeEnrichers } from '@nichedb/core';
 import { geoQueryFields, geoSchema } from '@nichedb/core/geo';
 import { cleanChannelName, parseName } from '@nichedb/core/names';
 import { CHILD_LEVELS, normaliseKey, normaliseZip, zipKey } from '@nichedb/core/population';
+import {
+  buildRows,
+  checkNames,
+  normaliseName,
+  priceOut,
+  queryTlds,
+  tldOut,
+} from '@nichedb/core/tlds';
 import * as pop from '@nichedb/db/population';
 import * as profiles from '@nichedb/db/profiles';
 import * as q from '@nichedb/db/queries';
+import * as tldStore from '@nichedb/db/tlds';
 import { enqueueRun } from '@nichedb/queue';
 import { areaOut } from '../population.js';
 import { claimProfile, editProfile, profileOut, resolveRef } from '../profiles.js';
 import { allowedEnrichers, collectionOut, feedOut, itemOut, sourceOut } from '../serialize.js';
 import { addSource, createFeed, Denied, editSource } from '../service.js';
 import { submissionOut, submitFeed } from '../submissions.js';
+import { catalogueRows, namesFrom } from '../tlds.js';
 
 /**
  * Every MCP tool, in the order they are worth learning. This array is the
@@ -546,6 +556,119 @@ export const TOOLS = [
       await q.requestRun(s.id);
       await enqueueRun(s.id, { force: true }).catch(() => {});
       return { ok: true, source: s.slug };
+    },
+  },
+  {
+    name: 'search_tlds',
+    description:
+      "Top-level domains: every label in IANA's root, with type, registry, RDAP server and each registrar's one-year register/renew/transfer price (Porkbun, Dynadot, Cloudflare, OVHcloud). Sorted by renewal by default, because the first year is a promotion. `best` is the cheapest USD price across registrars; with `registrar` it is that registrar's own price in its currency. Answers carry facet counts. `trap: true` keeps only labels that renew at 2x the first year or more.",
+    inputSchema: {
+      type: 'object',
+      properties: {
+        q: str('Text in the label, its Unicode form or the registry name (optional)'),
+        type: str(
+          'generic, country-code, sponsored, generic-restricted, infrastructure, test; comma separated (optional)',
+        ),
+        manager: str('Exact registry name, as IANA writes it (optional)'),
+        registrar: str(
+          'porkbun, dynadot, cloudflare, ovh (optional): only labels it sells, at its prices',
+        ),
+        max_renew: { type: 'number', description: 'Highest renewal price (optional)' },
+        max_register: { type: 'number', description: 'Highest first-year price (optional)' },
+        trap: { type: 'boolean', description: 'Only labels renewing at 2x the first year or more' },
+        idn: {
+          type: 'boolean',
+          description: 'true: internationalised labels only; false: ASCII only',
+        },
+        status: str('delegated (default), removed, or all'),
+        sort: str(
+          'renew (default), register, transfer, restore, ratio, tld, registrars, type, manager, first_seen',
+        ),
+        order: str('asc or desc'),
+        limit: int('Default 50, max 500'),
+        offset: int('Default 0'),
+      },
+    },
+    run: async (args = {}) => {
+      const result = queryTlds(await catalogueRows(), {
+        ...args,
+        limit: Math.min(Number(args.limit) || 50, 500),
+      });
+      return {
+        total: result.total,
+        facets: result.facets,
+        tlds: result.rows.map((r) => tldOut(r, site())),
+      };
+    },
+  },
+  {
+    name: 'get_tld',
+    description:
+      'One top-level domain: type, registry, RDAP server, when it entered or left the root, every registrar price (register, renew, transfer, restore, promotions, privacy, restrictions) and its change history.',
+    inputSchema: {
+      type: 'object',
+      properties: { tld: str('The label, with or without the dot; Unicode or xn-- both work') },
+      required: ['tld'],
+    },
+    run: async ({ tld }) => {
+      const raw = String(tld ?? '')
+        .toLowerCase()
+        .replace(/^\./, '');
+      const ascii = normaliseName(`x.${raw}`)?.slice(2) ?? raw;
+      const row = await tldStore.getTld(ascii);
+      if (!row) throw toolError(`.${raw} is not in IANA's list`);
+      const [built] = buildRows({ tlds: [row], prices: row.prices.filter((p) => !p.gone_at) });
+      return {
+        ...tldOut(built, site()),
+        no_longer_sold_at: row.prices.filter((p) => p.gone_at).map(priceOut),
+        changes: row.changes,
+      };
+    },
+  },
+  {
+    name: 'tld_changes',
+    description:
+      "Top-level domains added to or removed from IANA's root, newest first, with the IANA list version each happened in. Nobody else publishes this diff.",
+    inputSchema: {
+      type: 'object',
+      properties: {
+        since: str('ISO time: only changes after it (optional)'),
+        change: str('added, removed or returned (optional)'),
+        limit: int('Default 100, max 1000'),
+      },
+    },
+    run: async ({ since, change, limit }) =>
+      tldStore.listChanges({
+        since: since ?? null,
+        change: ['added', 'removed', 'returned'].includes(change) ? change : null,
+        limit: limit ?? 100,
+      }),
+  },
+  {
+    name: 'check_domain',
+    description:
+      'Is a domain name registered? Asks each registry over RDAP. Give `name` as a full name (foo.watches), or a bare word with `tlds` (foo + com,dev,io), or several names comma separated. Each answer is registered (with registrar and expiry), not_registered, or unknown. not_registered means the registry holds no registration; the name may still be reserved or premium, so it is not a promise that it is for sale. unknown (no RDAP server, a timeout, a 429) is never a yes. Each answer carries the cheapest known USD price for its ending.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        name: str('foo.watches, or foo, or a.com,b.dev'),
+        tlds: str('Endings to try a bare word under, comma separated (optional)'),
+      },
+      required: ['name'],
+    },
+    run: async ({ name, tlds }) => {
+      const { names, truncated } = namesFrom({ name, tlds });
+      if (!names.length) throw toolError('name is required');
+      const rows = await catalogueRows();
+      const byTld = new Map(rows.map((r) => [r.tld, r]));
+      const results = await checkNames(names, {
+        rdapFor: async (t) => byTld.get(t)?.rdap ?? null,
+        userAgent: `niche-db/0.1 (+${site()})`,
+      });
+      return {
+        truncated,
+        results: results.map((r) => ({ ...r, cheapest: byTld.get(r.tld)?.best ?? null })),
+      };
     },
   },
 ];

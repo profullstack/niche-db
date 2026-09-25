@@ -1499,11 +1499,11 @@ export async function markDeliveriesFailed({ feedId, userId, itemIds, channel })
 /* --------------------------------------------------------------- api usage -- */
 
 /** Count one request in this hour's bucket and return the running total. */
-export async function bumpApiUsage(bucket) {
+export async function bumpApiUsage(bucket, by = 1) {
   const [row] = await sql`
     insert into api_usage (bucket, hour, count)
-    values (${bucket}, date_trunc('hour', now()), 1)
-    on conflict (bucket, hour) do update set count = api_usage.count + 1
+    values (${bucket}, date_trunc('hour', now()), ${by})
+    on conflict (bucket, hour) do update set count = api_usage.count + ${by}
     returning count
   `;
   return row.count;

@@ -143,6 +143,7 @@ export const Layout = (props) => (
           <a href="/feeds">Feeds</a>
           <a href="/submit">Submit a feed</a>
           <a href="/vin">VIN</a>
+          <a href="/tlds">TLDs</a>
           {props.user?.role === 'admin' || props.user?.moderates ? (
             <a href="/admin/submissions">Queue</a>
           ) : null}
