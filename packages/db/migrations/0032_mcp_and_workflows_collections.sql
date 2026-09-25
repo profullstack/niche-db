@@ -1,5 +1,5 @@
--- MCP servers and agent workflows each get a collection, and the MCP servers
--- move out of `extensions`.
+-- Seven collections for MCP servers and for how people work with agents, and
+-- the MCP servers move out of `extensions`.
 --
 -- `extensions` was "things you install into something": Firefox add-ons, VS
 -- Code extensions and MCP servers. That was a fair description when the only
@@ -35,7 +35,7 @@ insert into collections (slug, name, description)
 values (
   'workflows',
   'Agent workflows',
-  'How people actually work with Claude and Claude Code: workflows published and voted on in the r/ClaudeWorkflows library, the skills, subagents, slash commands, hooks and settings the community ships, the plugin marketplaces you can add in one command, and the repositories tagged for them. Rated where the source rates them, and deduplicated across the lists.'
+  'How people actually work with Claude and Claude Code: workflows published and voted on in the r/ClaudeWorkflows library, the guides and CLAUDE.md files the community keeps, settings bundles, agent loops and behaviour mods, and the repositories tagged for all of it. Rated where the source rates them, and deduplicated across the lists. The things you install rather than read have collections of their own: skills, subagents, commands, hooks and plugins.'
 )
 on conflict (slug) do nothing;
 
@@ -62,10 +62,51 @@ update collections
    set description = 'New Firefox add-ons and VS Code extensions, with icons, categories and repo stats. MCP servers have a collection of their own.'
  where slug = 'extensions';
 
--- Both collections are assembled from lists that overlap heavily -- 4,761
--- entries across the four big MCP lists were 4,507 distinct servers, before
--- the registry, Docker, Smithery and GitHub are counted -- so both opt in to
--- dropping an item whose canonical URL another source in the collection
--- already carries. Without this every server would be stored once per list
--- that mentions it.
-update collections set dedupe_urls = true where slug in ('mcp', 'workflows');
+-- The four things people install get collections of their own, beside the
+-- workflows they are used in.
+--
+-- A subagent, a skill, a slash command, a hook and a plugin are five different
+-- things to go looking for, and a niche's page is served from the site root,
+-- so each of these is also a name: /skills, /agents, /commands, /plugins,
+-- /hooks. `mcp` deliberately has no collection of its own here because that
+-- slug is reserved -- /mcp is this site's own MCP endpoint -- so the servers
+-- stay at /c/mcp.
+
+insert into collections (slug, name, description)
+values
+  (
+    'skills',
+    'Skills',
+    'Agent skills you can drop into a project: the 890 claude-code-templates ships with their install counts, and the hand-picked ones from awesome-claude-code. One row per skill, with the command that installs it.'
+  ),
+  (
+    'agents',
+    'Subagents',
+    'Subagents by the job they do, from the claude-code-templates catalogue and the community lists that name each one rather than the bundle it ships in. One row per subagent, with its category and the file that defines it.'
+  ),
+  (
+    'commands',
+    'Slash commands',
+    'Slash commands the community ships, by category, with how many times each has been installed and the one line that installs it.'
+  ),
+  (
+    'plugins',
+    'Plugins',
+    'Every plugin declared in a Claude Code marketplace manifest, the official one included: what it installs, who wrote it, its version and licence, and the command that adds the marketplace it comes from.'
+  ),
+  (
+    'hooks',
+    'Hooks',
+    'Hooks: what runs before and after a tool call, a prompt or a session. The ones the community ships, with install counts.'
+  )
+on conflict (slug) do nothing;
+
+-- Every one of these is assembled from lists that overlap -- 4,761 entries
+-- across the four big MCP lists were 4,507 distinct servers, before the
+-- registry, Docker, Smithery and GitHub are counted -- so they all opt in to
+-- dropping an item whose canonical URL another source in the same collection
+-- already carries. Without this a server would be stored once per list that
+-- mentions it.
+update collections
+   set dedupe_urls = true
+ where slug in ('mcp', 'workflows', 'skills', 'agents', 'commands', 'plugins', 'hooks');

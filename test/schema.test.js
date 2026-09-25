@@ -1038,15 +1038,22 @@ describe('a source seeded off for a missing key', () => {
 });
 
 describe('the MCP and workflows collections migration', () => {
-  test('both collections exist and deduplicate on URL', async () => {
+  test('all seven collections exist and deduplicate on URL', async () => {
     // Without `dedupe_urls` every server would be stored once per list that
     // mentions it, and the four MCP lists alone carry 4,761 entries for 4,507
     // servers.
     const cs = await rows(
-      `select slug, dedupe_urls from collections where slug in ('mcp', 'workflows') order by slug`,
+      `select slug, dedupe_urls from collections
+        where slug in ('mcp', 'workflows', 'skills', 'agents', 'commands', 'plugins', 'hooks')
+        order by slug`,
     );
     expect(cs).toEqual([
+      { slug: 'agents', dedupe_urls: true },
+      { slug: 'commands', dedupe_urls: true },
+      { slug: 'hooks', dedupe_urls: true },
       { slug: 'mcp', dedupe_urls: true },
+      { slug: 'plugins', dedupe_urls: true },
+      { slug: 'skills', dedupe_urls: true },
       { slug: 'workflows', dedupe_urls: true },
     ]);
   });

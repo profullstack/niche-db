@@ -20,7 +20,17 @@ export const githubRepo = defineEnricher({
   name: 'github-repo',
   title: 'GitHub repository',
   description: 'Stars, topics, licence, language and last push of the linked repository.',
-  collections: ['packages', 'extensions', 'mcp', 'workflows'],
+  collections: [
+    'packages',
+    'extensions',
+    'mcp',
+    'workflows',
+    'skills',
+    'agents',
+    'commands',
+    'plugins',
+    'hooks',
+  ],
   appliesTo: (item) => Boolean(repoOf(item)),
   perRun: 25,
   async enrich(item, { env, http }) {

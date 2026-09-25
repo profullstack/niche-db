@@ -2,13 +2,21 @@ import { adsbFlights } from './adsb.js';
 import { agenticjobs } from './agenticjobs.js';
 import { aiid } from './aiid.js';
 import { aiornot } from './aiornot.js';
-import { aitmplComponents, aitmplMcps } from './aitmpl.js';
+import {
+  aitmplAgents,
+  aitmplCommands,
+  aitmplComponents,
+  aitmplHooks,
+  aitmplMcps,
+  aitmplSkills,
+} from './aitmpl.js';
 import { alpacaCorporateActions, alpacaNews } from './alpaca.js';
 import { firefoxAddons } from './amo.js';
 import { anilistAiring } from './anilist.js';
 import { arxiv } from './arxiv.js';
 import { aviationHazards, aviationMetar } from './aviationweather.js';
-import { awesomeClaudeCode } from './awesomeclaudecode.js';
+import { awesomeAgents } from './awesomeagents.js';
+import { awesomeClaudeCode, awesomeClaudeCodeSkills } from './awesomeclaudecode.js';
 import { awesomeMcp } from './awesomemcp.js';
 import { bensbargains } from './bensbargains.js';
 import { bittorrentedDht } from './bittorrented.js';
@@ -252,12 +260,23 @@ export const ADAPTERS = [
   awesomeMcp,
   aitmplMcps,
   githubMcpTopics,
-  // Agent workflows: the library, the curated lists, the marketplaces.
+  /*
+   * Agent workflows, and the four things people install, each in the
+   * collection somebody looking for one would open: skills, subagents, slash
+   * commands, hooks and plugins. Curated lists before bulk catalogues, for
+   * the same reason as above.
+   */
   redditWorkflows,
   awesomeClaudeCode,
-  pluginMarketplaces,
   aitmplComponents,
   githubAgentTopics,
+  awesomeClaudeCodeSkills,
+  aitmplSkills,
+  awesomeAgents,
+  aitmplAgents,
+  aitmplCommands,
+  aitmplHooks,
+  pluginMarketplaces,
   openfda,
   clinicalTrials,
   arxiv,

@@ -89,6 +89,11 @@ describe('registry', () => {
         'parts',
         'mcp',
         'workflows',
+        'skills',
+        'agents',
+        'commands',
+        'plugins',
+        'hooks',
       ]).toContain(a.collection);
     }
     expect(adapterByName('steam').title).toContain('Steam');
