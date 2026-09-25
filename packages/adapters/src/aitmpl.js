@@ -7,21 +7,24 @@ import { defineAdapter, slugify } from '@nichedb/core/adapter';
  * can drop into a project. Measured on 2026-09-25: 889 skills, 422 subagents,
  * 288 slash commands, 104 MCP server configs, 72 settings bundles, 62 hooks,
  * 29 mods, 18 loops and 14 project templates — and a `downloads` count per
- * component, which is the only install signal in this collection.
+ * component, which is the only install signal in these collections.
  *
- * Two adapters read the one file because a component that configures an MCP
- * server belongs with the MCP servers and the other seven kinds belong with
- * the workflows, and an adapter writes into exactly one collection. They are
- * deliberately not one adapter with a switch: a source is what a reader
- * follows, and "MCP configs from aitmpl" and "subagents from aitmpl" are two
- * different things to follow.
+ * ONE FILE, SIX ADAPTERS
  *
- * The file is 2 MB, so both run on a slow cadence. Two groups are deliberately
- * not ingested: `sandbox`, whose entries are documentation rather than
- * components and whose `type` arrives truncated to `sandbo`, and `templates`,
- * which are project scaffolds and the only group with no `path` — all 14 of
- * them would land on one URL, and in a collection that deduplicates on URL
- * that is 13 rows discarded to publish one that links nowhere useful.
+ * A subagent, a skill, a slash command and a hook are four different things to
+ * go looking for, so they are four collections, and an adapter writes into
+ * exactly one. That makes this file a factory rather than one adapter with a
+ * switch: each collection gets a source of its own, which is also what a
+ * reader follows and what the run log reports on. The cost is that the same
+ * 2 MB file is fetched once per collection, which is why the cadences are
+ * slow and staggered rather than hourly.
+ *
+ * Two groups are deliberately not ingested: `sandbox`, whose entries are
+ * documentation rather than components and whose `type` arrives truncated to
+ * `sandbo`, and `templates`, which are project scaffolds and the only group
+ * with no `path` — all 14 of them would land on one URL, and in a collection
+ * that deduplicates on URL that is 13 rows discarded to publish one that links
+ * nowhere useful.
  */
 
 const INDEX =
@@ -29,8 +32,8 @@ const INDEX =
 const REPO = 'https://github.com/davila7/claude-code-templates';
 const BLOB = `${REPO}/blob/main/cli-tool/components`;
 
-/** The groups in components.json this collection wants, and what each row is. */
-export const WORKFLOW_GROUPS = new Map([
+/** Every group this file reads, and what one of its rows is. */
+export const GROUP_KINDS = new Map([
   ['skills', 'skill'],
   ['agents', 'agent'],
   ['commands', 'command'],
@@ -38,6 +41,7 @@ export const WORKFLOW_GROUPS = new Map([
   ['settings', 'setting'],
   ['loops', 'loop'],
   ['mods', 'mod'],
+  ['mcps', 'mcp-config'],
 ]);
 
 export function toItem(c, { group, kind }) {
@@ -49,6 +53,7 @@ export function toItem(c, { group, kind }) {
   const path = String(c.path ?? '').trim();
   if (!path) return null;
   const url = `${BLOB}/${group}/${path}`;
+  const flag = kind === 'mcp-config' ? 'mcp' : kind;
 
   return {
     externalId: `aitmpl:${group}:${path}`,
@@ -62,7 +67,7 @@ export function toItem(c, { group, kind }) {
     url,
     publishedAt: null,
     tags: [
-      kind,
+      flag,
       'claude-code',
       'aitmpl',
       c.category ? slugify(c.category) : null,
@@ -82,64 +87,103 @@ export function toItem(c, { group, kind }) {
       downloads: Number.isFinite(c.downloads) ? c.downloads : null,
       securityValidated: c.security?.validated === true,
       securityScore: c.security?.score ?? null,
-      install: `npx claude-code-templates@latest --${kind} ${c.category ? `${c.category}/` : ''}${name}`,
+      install: `npx claude-code-templates@latest --${flag} ${c.category ? `${c.category}/` : ''}${name}`,
     },
   };
 }
 
-async function load(http) {
-  const index = await http.json(INDEX, { timeoutMs: 60_000 });
-  if (!index || typeof index !== 'object') throw new Error('components.json is not an object');
-  return index;
+/**
+ * One adapter over the groups of components.json that belong in one
+ * collection.
+ *
+ * @param {{ name: string, title: string, collection: string, groups: string[],
+ *           description: string, cadenceMinutes: number }} spec
+ */
+function aitmplAdapter({ name, title, collection, groups, description, cadenceMinutes }) {
+  return defineAdapter({
+    name,
+    title,
+    collection,
+    description,
+    docs: 'https://aitmpl.com',
+    kinds: [...new Set(groups.map((g) => GROUP_KINDS.get(g)))],
+    cadenceMinutes,
+    defaults: {},
+    defaultSources: [{ slug: name, name: title }],
+    async pull({ http, log }) {
+      const index = await http.json(INDEX, { timeoutMs: 60_000 });
+      if (!index || typeof index !== 'object') throw new Error('components.json is not an object');
+
+      const items = [];
+      for (const group of groups) {
+        const kind = GROUP_KINDS.get(group);
+        for (const c of index[group] ?? []) {
+          const item = toItem(c, { group, kind });
+          if (item) items.push(item);
+        }
+      }
+      log(`${items.length} components from ${groups.join(', ')}`);
+      return { items, note: `${items.length} component(s)` };
+    },
+  });
 }
 
-export const aitmplComponents = defineAdapter({
-  name: 'aitmpl-components',
-  title: 'Claude Code components (aitmpl)',
-  collection: 'workflows',
-  description:
-    'Skills, subagents, slash commands, hooks, settings bundles, loops and mods from claude-code-templates, with the install count and the one-line command that installs each. Around 1,780 components, keyless.',
-  docs: 'https://aitmpl.com',
-  kinds: [...new Set(WORKFLOW_GROUPS.values())],
+export const aitmplSkills = aitmplAdapter({
+  name: 'aitmpl-skills',
+  title: 'Skills (aitmpl)',
+  collection: 'skills',
+  groups: ['skills'],
   cadenceMinutes: 60 * 8,
-  defaults: {},
-  defaultSources: [{ slug: 'aitmpl-components', name: 'Claude Code components' }],
-  async pull({ http, log }) {
-    const index = await load(http);
-    const items = [];
-    for (const [group, kind] of WORKFLOW_GROUPS) {
-      for (const c of index[group] ?? []) {
-        const item = toItem(c, { group, kind });
-        if (item) items.push(item);
-      }
-    }
-    log(`${items.length} components across ${WORKFLOW_GROUPS.size} groups`);
-    return { items, note: `${items.length} component(s)` };
-  },
+  description:
+    'The skills claude-code-templates ships, with the install count and the one-line command that installs each. Around 890 of them, keyless.',
 });
 
-export const aitmplMcps = defineAdapter({
+export const aitmplAgents = aitmplAdapter({
+  name: 'aitmpl-agents',
+  title: 'Subagents (aitmpl)',
+  collection: 'agents',
+  groups: ['agents'],
+  cadenceMinutes: 60 * 8,
+  description:
+    'The subagents claude-code-templates ships, by category, with the install count and the command that installs each. Around 420 of them, keyless.',
+});
+
+export const aitmplCommands = aitmplAdapter({
+  name: 'aitmpl-commands',
+  title: 'Slash commands (aitmpl)',
+  collection: 'commands',
+  groups: ['commands'],
+  cadenceMinutes: 60 * 12,
+  description:
+    'The slash commands claude-code-templates ships, with the install count and the command that installs each. Around 290 of them, keyless.',
+});
+
+export const aitmplHooks = aitmplAdapter({
+  name: 'aitmpl-hooks',
+  title: 'Hooks (aitmpl)',
+  collection: 'hooks',
+  groups: ['hooks'],
+  cadenceMinutes: 60 * 12,
+  description:
+    'The hooks claude-code-templates ships — what runs before and after a tool call, a prompt or a session — with the install count for each. Keyless.',
+});
+
+export const aitmplComponents = aitmplAdapter({
+  name: 'aitmpl-components',
+  title: 'Settings, loops and mods (aitmpl)',
+  collection: 'workflows',
+  groups: ['settings', 'loops', 'mods'],
+  cadenceMinutes: 60 * 12,
+  description:
+    'The claude-code-templates components that are a way of working rather than a thing installed: settings bundles, agent loops and behaviour mods. The skills, subagents, commands and hooks from the same file have collections of their own.',
+});
+
+export const aitmplMcps = aitmplAdapter({
   name: 'aitmpl-mcps',
   title: 'MCP configs (aitmpl)',
   collection: 'mcp',
+  groups: ['mcps'],
+  cadenceMinutes: 60 * 12,
   description:
     'The MCP servers claude-code-templates ships a ready-made config for, with the install count for each. One file, keyless; the servers themselves are elsewhere in this collection, so most of these rows are dropped as duplicates and what is left is what only this list carries.',
-  docs: 'https://aitmpl.com',
-  kinds: ['mcp-config'],
-  cadenceMinutes: 60 * 12,
-  defaults: {},
-  defaultSources: [{ slug: 'aitmpl-mcps', name: 'MCP configs on aitmpl' }],
-  async pull({ http, log }) {
-    const index = await load(http);
-    const items = [];
-    for (const c of index.mcps ?? []) {
-      const item = toItem(c, { group: 'mcps', kind: 'mcp-config' });
-      if (item) {
-        item.tags = ['mcp', ...item.tags.filter((t) => t !== 'mcp-config')];
-        items.push(item);
-      }
-    }
-    log(`${items.length} MCP configs`);
-    return { items, note: `${items.length} MCP config(s)` };
-  },
 });

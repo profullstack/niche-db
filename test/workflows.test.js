@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'bun:test';
-import { toItem as aitmplItem, WORKFLOW_GROUPS } from '../packages/adapters/src/aitmpl.js';
+import { toItem as aitmplItem, GROUP_KINDS } from '../packages/adapters/src/aitmpl.js';
+import { toItem as agentItem } from '../packages/adapters/src/awesomeagents.js';
 import {
   toItem as accItem,
   parseCsv,
@@ -15,6 +16,7 @@ import {
   toItem as redditItem,
 } from '../packages/adapters/src/redditworkflows.js';
 import { normaliseItem } from '../packages/core/src/adapter.js';
+import { isReservedNicheSlug } from '../packages/knowledge/src/index.js';
 
 process.env.DATABASE_URL ??= 'postgres://test:test@localhost:5432/test';
 process.env.SITE_URL ??= 'https://nichedb.test';
@@ -128,9 +130,12 @@ docs-3,Best Practices,Start Here,,https://code.claude.com/docs/en/best-practices
     expect(items.some((i) => i.title === 'Dead Thing')).toBe(false);
   });
 
-  test('a category that is its own kind becomes one', () => {
+  test('a category that is its own kind becomes one, and is split off', () => {
     expect(accItem(rows[0]).kind).toBe('skill');
     expect(accItem(rows[2]).kind).toBe('workflow');
+    // The skill rows go to /skills, the rest to /workflows, from one CSV.
+    expect(adapterByName('awesome-claude-code-skills').collection).toBe('skills');
+    expect(adapterByName('awesome-claude-code').collection).toBe('workflows');
   });
 
   test('stale is kept as a tag rather than a deletion', () => {
@@ -222,9 +227,21 @@ describe('aitmpl components', () => {
     expect(item.data.downloads).toBe(50);
   });
 
-  test('every group this ingests has a kind the adapter declares', () => {
-    const declared = new Set(adapterByName('aitmpl-components').kinds);
-    for (const kind of WORKFLOW_GROUPS.values()) expect(declared.has(kind)).toBe(true);
+  test('each group lands in the collection somebody would look for it in', () => {
+    const where = {
+      'aitmpl-skills': 'skills',
+      'aitmpl-agents': 'agents',
+      'aitmpl-commands': 'commands',
+      'aitmpl-hooks': 'hooks',
+      'aitmpl-components': 'workflows',
+      'aitmpl-mcps': 'mcp',
+    };
+    for (const [name, collection] of Object.entries(where)) {
+      expect(adapterByName(name)?.collection).toBe(collection);
+    }
+    // Every group of components.json is ingested by exactly one of them.
+    const covered = Object.keys(where).flatMap((n) => adapterByName(n).kinds);
+    for (const kind of GROUP_KINDS.values()) expect(covered).toContain(kind);
   });
 
   test('a component with nothing to link to is not a row', () => {
@@ -239,29 +256,63 @@ describe('aitmpl components', () => {
         },
       ),
     ).toBeNull();
-    expect(WORKFLOW_GROUPS.has('templates')).toBe(false);
+    expect(GROUP_KINDS.has('templates')).toBe(false);
   });
 });
 
-describe('the collection', () => {
-  test('workflows is seeded with feeds for each kind', () => {
-    const c = COLLECTIONS.find((x) => x.slug === 'workflows');
-    expect(c?.name).toBe('Agent workflows');
-    const feeds = DEFAULT_FEEDS.filter((f) => f.collection === 'workflows');
-    expect(feeds.map((f) => f.slug)).toContain('claude-workflows');
-    expect(feeds.map((f) => f.slug)).toContain('claude-skills');
+describe('the collections', () => {
+  test('each thing people install has a collection of its own', () => {
+    // Served from the site root as /workflows, /skills, /agents, /commands,
+    // /plugins and /hooks, because a niche's page is its slug.
+    for (const slug of ['workflows', 'skills', 'agents', 'commands', 'plugins', 'hooks']) {
+      expect(COLLECTIONS.find((x) => x.slug === slug)).toBeTruthy();
+      expect(DEFAULT_FEEDS.some((f) => f.collection === slug)).toBe(true);
+    }
   });
 
-  test('every workflow adapter is registered and points at it', () => {
-    for (const name of [
-      'reddit-workflows',
-      'awesome-claude-code',
-      'plugin-marketplaces',
-      'aitmpl-components',
-      'github-agent-topics',
-    ]) {
-      expect(adapterByName(name)?.collection).toBe('workflows');
+  test('none of those names is one the site already owns at the root', () => {
+    // A reserved slug would be shadowed by a real route, so the niche page
+    // would never answer. `mcp` is reserved, which is why the servers stay
+    // at /c/mcp.
+    for (const slug of ['workflows', 'skills', 'agents', 'commands', 'plugins', 'hooks']) {
+      expect(isReservedNicheSlug(slug)).toBe(false);
     }
+    expect(isReservedNicheSlug('mcp')).toBe(true);
+  });
+
+  test('every workflow adapter is registered and points at its collection', () => {
+    const where = {
+      'reddit-workflows': 'workflows',
+      'awesome-claude-code': 'workflows',
+      'aitmpl-components': 'workflows',
+      'github-agent-topics': 'workflows',
+      'awesome-claude-code-skills': 'skills',
+      'aitmpl-skills': 'skills',
+      'awesome-agents': 'agents',
+      'aitmpl-agents': 'agents',
+      'aitmpl-commands': 'commands',
+      'aitmpl-hooks': 'hooks',
+      'plugin-marketplaces': 'plugins',
+    };
+    for (const [name, collection] of Object.entries(where)) {
+      expect(adapterByName(name)?.collection).toBe(collection);
+    }
+  });
+
+  test('a curated subagent list names one subagent per row', () => {
+    const item = agentItem(
+      {
+        title: 'api-designer',
+        url: 'https://github.com/voltagent/awesome-claude-code-subagents/tree/HEAD/categories/01-core-development/api-designer.md',
+        description: 'REST and GraphQL API architect',
+        section: 'Categories',
+        subsection: '01. Core Development',
+      },
+      { list: 'voltagent' },
+    );
+    expect(item.kind).toBe('agent');
+    expect(item.title).toBe('api designer');
+    expect(normaliseItem(item).tags).toContain('voltagent');
   });
 
   test('a tagged agent repository is an agent-repo, not an MCP server', () => {

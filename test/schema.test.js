@@ -1037,16 +1037,23 @@ describe('a source seeded off for a missing key', () => {
   });
 });
 
-describe('the MCP and workflows collections migration', () => {
-  test('both collections exist and deduplicate on URL', async () => {
+describe('the MCP, workflows and component collections migrations', () => {
+  test('all seven collections exist and deduplicate on URL', async () => {
     // Without `dedupe_urls` every server would be stored once per list that
     // mentions it, and the four MCP lists alone carry 4,761 entries for 4,507
     // servers.
     const cs = await rows(
-      `select slug, dedupe_urls from collections where slug in ('mcp', 'workflows') order by slug`,
+      `select slug, dedupe_urls from collections
+        where slug in ('mcp', 'workflows', 'skills', 'agents', 'commands', 'plugins', 'hooks')
+        order by slug`,
     );
     expect(cs).toEqual([
+      { slug: 'agents', dedupe_urls: true },
+      { slug: 'commands', dedupe_urls: true },
+      { slug: 'hooks', dedupe_urls: true },
       { slug: 'mcp', dedupe_urls: true },
+      { slug: 'plugins', dedupe_urls: true },
+      { slug: 'skills', dedupe_urls: true },
       { slug: 'workflows', dedupe_urls: true },
     ]);
   });
@@ -1100,5 +1107,68 @@ describe('the MCP and workflows collections migration', () => {
     );
     // The feed keeps its slug: /c/mcp/new-mcp-servers, never a 404.
     expect(moved).toEqual({ sources: 1, items: 1, feeds: 1, left_behind: 0 });
+  });
+
+  test('0033 moves the plugin marketplaces whole and drops the split-off rows', async () => {
+    const wf = await one(`select id from collections where slug = 'workflows'`);
+    const plugins = await one(`select id from collections where slug = 'plugins'`);
+
+    // A source whose every row is a plugin: it moves, rows and all.
+    const mkt = await one(
+      `insert into sources (collection_id, adapter, slug, name)
+       values ($1, 'plugin-marketplaces', 'claude-plugin-marketplaces', 'P') returning id`,
+      [wf.id],
+    );
+    // And the source that was split: its settings row stays, its skill row goes,
+    // because the skill arrives again through a source pointed at /skills.
+    const comp = await one(
+      `insert into sources (collection_id, adapter, slug, name)
+       values ($1, 'aitmpl-components', 'aitmpl-components', 'C') returning id`,
+      [wf.id],
+    );
+    for (const [source, kind, id] of [
+      [mkt.id, 'plugin', 'p1'],
+      [comp.id, 'skill', 's1'],
+      [comp.id, 'setting', 'c1'],
+    ]) {
+      await db.query(
+        `insert into items (source_id, collection_id, external_id, kind, title, content_hash)
+         values ($1, $2, $3, $4, 'X', $3)`,
+        [source, wf.id, id, kind],
+      );
+    }
+
+    // Exactly what 0033 runs, in its order.
+    await db.query(
+      `update items i set collection_id = $1 from sources s
+        where s.id = i.source_id and s.adapter = 'plugin-marketplaces' and i.collection_id = $2`,
+      [plugins.id, wf.id],
+    );
+    await db.query(
+      `update sources set collection_id = $1 where adapter = 'plugin-marketplaces' and collection_id = $2`,
+      [plugins.id, wf.id],
+    );
+    await db.query(
+      `delete from items i using sources s
+        where s.id = i.source_id and s.adapter = 'aitmpl-components'
+          and i.kind in ('skill', 'agent', 'command', 'hook') and i.collection_id = $1`,
+      [wf.id],
+    );
+
+    const after = await one(
+      `select
+         (select count(*)::int from sources where slug = 'claude-plugin-marketplaces' and collection_id = $1) as plugin_sources,
+         (select count(*)::int from items where collection_id = $1 and kind = 'plugin') as plugin_items,
+         (select count(*)::int from items where source_id = $2 and kind = 'skill') as orphan_skills,
+         (select count(*)::int from items where source_id = $2 and kind = 'setting') as kept_settings`,
+      [plugins.id, comp.id],
+    );
+    expect(after).toEqual({
+      plugin_sources: 1,
+      plugin_items: 1,
+      // Dropped rather than moved: a workflows source must not own a /skills row.
+      orphan_skills: 0,
+      kept_settings: 1,
+    });
   });
 });

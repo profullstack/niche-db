@@ -353,6 +353,9 @@ describe('the registries', () => {
     );
     expect(item.url).toContain('/cli-tool/components/mcps/audio/elevenlabs.json');
     expect(item.data.downloads).toBe(84);
+    // Tagged mcp rather than mcp-config, so it is followable beside the servers.
+    expect(item.tags).toContain('mcp');
+    expect(item.data.install).toContain('--mcp ');
   });
 });
 

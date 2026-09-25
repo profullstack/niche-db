@@ -97,10 +97,11 @@ export function toItem(r) {
   const category = String(r.Category ?? '').trim();
   const sub = String(r['Sub-Category'] ?? '').trim();
   const stale = String(r.Stale ?? '').toUpperCase() === 'TRUE';
+  const kind = KINDS.get(category.toLowerCase()) ?? 'workflow';
 
   return {
     externalId: `acc:${id}`,
-    kind: KINDS.get(category.toLowerCase()) ?? 'workflow',
+    kind,
     title: name.slice(0, 200),
     summary:
       String(r.Description ?? '')
@@ -109,7 +110,7 @@ export function toItem(r) {
     url,
     publishedAt: tableDate(r['Date Added']),
     tags: [
-      'workflow',
+      kind,
       'claude-code',
       'awesome-claude-code',
       stale ? 'stale' : null,
@@ -132,27 +133,65 @@ export function toItem(r) {
   };
 }
 
-export const awesomeClaudeCode = defineAdapter({
+/**
+ * The list feeds two collections, so it is read twice.
+ *
+ * Its `Skills` category is skills and belongs with the other skills; the rest
+ * is how people work rather than something installed, and belongs in
+ * workflows. One adapter cannot write into both, and the alternative — leaving
+ * five skill rows in the workflows collection because that is where the
+ * adapter happens to point — would put a row of kind `skill` somewhere nobody
+ * looking for a skill will go. Two small reads of one small CSV is the
+ * cheaper mistake.
+ *
+ * @param {{ name: string, title: string, collection: string, kinds: string[],
+ *           description: string, skillsOnly: boolean }} spec
+ */
+function accAdapter({ name, title, collection, kinds, description, skillsOnly }) {
+  return defineAdapter({
+    name,
+    title,
+    collection,
+    description,
+    docs: 'https://github.com/hesreallyhim/awesome-claude-code',
+    kinds,
+    cadenceMinutes: 60 * 6,
+    configFields: [{ key: 'url', label: 'Table URL', placeholder: CSV }],
+    defaults: { url: CSV },
+    defaultSources: [{ slug: name, name: title }],
+    async pull({ config, http, log }) {
+      const text = await http.text(String(config.url || CSV), {
+        headers: { accept: 'text/csv, text/plain, */*' },
+      });
+      const rows = parseTable(text);
+      if (!rows.length) throw new Error('the resources table parsed to nothing');
+
+      const items = rows
+        .map(toItem)
+        .filter(Boolean)
+        .filter((it) => (it.kind === 'skill') === skillsOnly);
+      log(`${items.length} live entries of ${rows.length}`);
+      return { items, note: `${items.length} entr(ies) of ${rows.length}` };
+    },
+  });
+}
+
+export const awesomeClaudeCode = accAdapter({
   name: 'awesome-claude-code',
   title: 'awesome-claude-code',
   collection: 'workflows',
+  kinds: ['workflow', 'statusline', 'config', 'client'],
+  skillsOnly: false,
   description:
-    'The awesome-claude-code list, read from the CSV it is generated from: slash commands, CLAUDE.md files, hooks, status lines, skills, orchestration and the official guides, with the author of each. The list marks entries whose links have died and those are skipped.',
-  docs: 'https://github.com/hesreallyhim/awesome-claude-code',
-  kinds: ['workflow', 'skill', 'statusline', 'config', 'client'],
-  cadenceMinutes: 60 * 6,
-  configFields: [{ key: 'url', label: 'Table URL', placeholder: CSV }],
-  defaults: { url: CSV },
-  defaultSources: [{ slug: 'awesome-claude-code', name: 'awesome-claude-code' }],
-  async pull({ config, http, log }) {
-    const text = await http.text(String(config.url || CSV), {
-      headers: { accept: 'text/csv, text/plain, */*' },
-    });
-    const rows = parseTable(text);
-    if (!rows.length) throw new Error('the resources table parsed to nothing');
+    'The awesome-claude-code list, read from the CSV it is generated from: slash commands, CLAUDE.md files, hooks, status lines, orchestration and the official guides, with the author of each. The list marks entries whose links have died and those are skipped; its skills are in the skills collection.',
+});
 
-    const items = rows.map(toItem).filter(Boolean);
-    log(`${items.length} live entries of ${rows.length}`);
-    return { items, note: `${items.length} entr(ies) of ${rows.length}` };
-  },
+export const awesomeClaudeCodeSkills = accAdapter({
+  name: 'awesome-claude-code-skills',
+  title: 'awesome-claude-code: skills',
+  collection: 'skills',
+  kinds: ['skill'],
+  skillsOnly: true,
+  description:
+    'The skills section of awesome-claude-code, hand-picked rather than published in bulk, read from the CSV the list is generated from so dead entries are skipped.',
 });

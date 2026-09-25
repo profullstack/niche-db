@@ -87,7 +87,7 @@ export function toItem(p, { repo, marketplace }) {
 export const pluginMarketplaces = defineAdapter({
   name: 'plugin-marketplaces',
   title: 'Claude Code plugin marketplaces',
-  collection: 'workflows',
+  collection: 'plugins',
   description:
     'Every plugin declared in the marketplace manifests of the repositories you name, including the official one: what it installs, who wrote it, its version and licence, and the command that adds the marketplace. One request per repository, no key.',
   docs: 'https://docs.claude.com/en/docs/claude-code/plugins',
