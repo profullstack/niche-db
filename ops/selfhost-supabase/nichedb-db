@@ -561,10 +561,13 @@ cmd_cutover() {
   log "Preflight"
   all_ready || die "not every table is in state r: $(sync_states | tr '\n' ' ')"
   [ "$(tgt_q "select subenabled from pg_subscription where subname = '$SUB'")" = t ] || die "subscription is disabled: see 'nichedb-db status'"
-  local si ti
-  si=$(src_q "select count(*) from pg_indexes where schemaname = 'public'")
-  ti=$(tgt_q "select count(*) from pg_indexes where schemaname = 'public'")
-  [ "$si" = "$ti" ] || die "indexes: source $si, target $ti. Run/finish 'nichedb-db indexes' first"
+  # Valid indexes only: a failed CREATE INDEX CONCURRENTLY leaves an invalid,
+  # empty index on the source that pg_dump omits and nothing should copy.
+  local si ti q
+  q="select count(*) from pg_index i join pg_class c on c.oid = i.indrelid join pg_namespace n on n.oid = c.relnamespace where n.nspname = 'public' and i.indisvalid"
+  si=$(src_q "$q")
+  ti=$(tgt_q "$q")
+  [ "$si" = "$ti" ] || die "valid indexes: source $si, target $ti. Run/finish 'nichedb-db indexes' first"
   cmd_verify >/dev/null 2>&1 || die "schemas differ: run 'nichedb-db verify' and reconcile first"
   local lag
   lag=$(slot_lag_bytes)
@@ -626,7 +629,7 @@ cmd_cutover() {
     via=$(curl -sk --max-time 20 --resolve "$APP_DOMAIN:443:$TARGET_IP" "https://$APP_DOMAIN/healthz" || true)
     [ "$via" = ok ] || die "https://$APP_DOMAIN via $TARGET_IP answered '$via', not ok; DNS NOT moved (Railway still serves it from the new DB)"
     cmd_app_dns "$TARGET_IP"
-    note "DNS moved; Railway keeps answering old resolvers for the TTL, from the same database"
+    note "DNS moved; Railway answers stale resolvers for the TTL from its read-only copy"
     note "app connections on the target: $(tgt_q "select count(*) from pg_stat_activity where usename = 'postgres' and client_addr is not null and client_addr <> '127.0.0.1'")"
   else
     note "5/6 and 6/6 skipped (rehearsal: no app to repoint)"
@@ -705,8 +708,10 @@ porkbun_keys() { # exports PORKBUN_API_KEY / PORKBUN_SECRET_API_KEY from cli-too
 
 app_env_from_railway() { # the app's real environment is Railway's, rendered
   rw_vars "$RW_APP_SERVICE" | jq -r 'to_entries[] | select(.key | test("^RAILWAY_") | not) | "\(.key)=\(.value)"' |
-    grep -Ev '^(DATABASE_URL|REDIS_URL|PORT|NODE_ENV)='
+    grep -Ev '^(DATABASE_URL|REDIS_URL|PORT|NODE_ENV|ROLES)='
   printf 'DATABASE_URL=%s\n' "$(target_url | sed "s|@${DB_DOMAIN}:|@${APP_DB_HOST:-$DB_DOMAIN}:|")"
+  # Railway may be running web-only while the copy runs; the box takes both.
+  printf 'ROLES=web,worker\n'
 }
 
 cmd_app_deploy() { # app-deploy [--start]   clone/pull + build; starts only with --start
