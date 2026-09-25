@@ -107,11 +107,31 @@ export function priceOf(raw) {
   };
 }
 
+/** A coordinate, or null. */
+function coord(v, limit) {
+  if (v == null || v === '') return null;
+  const n = Number(v);
+  return Number.isFinite(n) && Math.abs(n) <= limit ? n : null;
+}
+
 /** Where it is, at the precision the seller chose to state. */
 export function locationOf(raw) {
   if (!raw || typeof raw !== 'object') return null;
   const precision = str(raw.precision)?.toLowerCase();
+  const lat = coord(raw.lat ?? raw.latitude, 90);
+  const lon = coord(raw.lon ?? raw.lng ?? raw.longitude, 180);
+  /*
+   * Carried under `lat`/`lon` on `data.location` because that is exactly where
+   * the database's ndb_geo_shape() looks, so a listing with coordinates is
+   * findable by the geographic queries and can be enriched with street-level
+   * imagery without any further plumbing.
+   *
+   * (0, 0) is in the Atlantic and is a missing coordinate rather than a place,
+   * so it is dropped rather than put on a map.
+   */
+  const point = lat !== null && lon !== null && !(lat === 0 && lon === 0) ? { lat, lon } : null;
   return {
+    ...(point ?? {}),
     locality: str(raw.locality),
     region: str(raw.region),
     country: str(raw.country)?.toUpperCase() ?? null,

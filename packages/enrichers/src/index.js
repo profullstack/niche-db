@@ -2,6 +2,7 @@ import { companyTicker } from './company-ticker.js';
 import { corpusdata } from './corpusdata.js';
 import { developer } from './developer.js';
 import { githubRepo } from './github.js';
+import { mapillary } from './mapillary.js';
 import { npmStats } from './npm.js';
 import { opengraph } from './opengraph.js';
 import { openlibraryWork } from './openlibrary.js';
@@ -25,6 +26,7 @@ export const ENRICHERS = [
   opengraph,
   tmdbArtwork,
   corpusdata,
+  mapillary,
 ];
 
 const byName = new Map(ENRICHERS.map((e) => [e.name, e]));
