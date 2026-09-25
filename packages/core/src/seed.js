@@ -353,6 +353,12 @@ export const COLLECTIONS = [
     description:
       'Who lives where, from the world down to the ZIP code. Every country from the World Bank (population and its series since 1990, growth, age structure, births, deaths, fertility, life expectancy, migration); every US state, city and ZIP code from the Census Bureau’s American Community Survey (age, income, home value, rent, ownership, poverty, education, unemployment, race and Hispanic origin); and the cities of every other country from GeoNames. All of it free and keyless. Browse it as a tree at /population.',
   },
+  {
+    slug: 'events',
+    name: 'Concerts & festivals',
+    description:
+      'Who is playing where and when. About 126,000 concerts, festivals, stage shows, conventions and award ceremonies from MusicBrainz, each with its performers, venue, date, setlist and a link to its ticketing page where one is known; and every music festival on Wikidata with its website, place and genres. All CC0. No ticket prices: Ticketmaster, SeatGeek and StubHub do not license theirs for storage.',
+  },
 ];
 
 export const DEFAULT_FEEDS = [
@@ -424,6 +430,41 @@ export const DEFAULT_FEEDS = [
     name: 'Cities of the world',
     description: 'Every city of 15,000 or more outside the United States, by region.',
     query: { kinds: ['population-area'], sources: ['geonames-cities'] },
+  },
+  {
+    collection: 'events',
+    slug: 'upcoming-events',
+    name: 'Coming up',
+    description: 'Concerts, festivals and shows still to come, soonest first.',
+    query: { kinds: ['event'], upcoming: true },
+  },
+  {
+    collection: 'events',
+    slug: 'upcoming-concerts',
+    name: 'Upcoming concerts',
+    description: 'Concerts still to come.',
+    query: { kinds: ['event'], tags: ['type:concert'], upcoming: true },
+  },
+  {
+    collection: 'events',
+    slug: 'events-with-tickets',
+    name: 'On sale',
+    description: 'Upcoming events with a link to their ticketing page.',
+    query: { kinds: ['event'], tags: ['tickets'], upcoming: true },
+  },
+  {
+    collection: 'events',
+    slug: 'music-festivals',
+    name: 'Music festivals',
+    description: 'Every music festival Wikidata knows, with its website, place and genres.',
+    query: { kinds: ['festival'] },
+  },
+  {
+    collection: 'events',
+    slug: 'setlists',
+    name: 'Setlists',
+    description: 'Past events with a setlist, on MusicBrainz or setlist.fm.',
+    query: { kinds: ['event'], tags: ['setlist'] },
   },
   {
     collection: 'housing',

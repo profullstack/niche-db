@@ -40,6 +40,7 @@ Adapters are one file each in `packages/adapters/src`. One hundred and sixty-one
 | housing | `uk-land-registry`, `freddie-mac-rates`, `building-permits`, `ruuster` (agent saved searches) | no |
 | jobs | `bls-series`, `eurostat`, `warn-layoffs`, `agenticjobs` | no |
 | population | `worldbank-population` (every country, World Bank WDI, CC BY 4.0), `census-acs` (every US state, city and ZIP code from the ACS 5-year Summary File, public domain), `geonames-cities` (cities of 15,000+ everywhere else and their regions, CC BY 4.0); browse the tree at `/population`, or `/api/v1/population/{key}` | no |
+| events | `musicbrainz-events` (about 126,000 concerts, festivals and shows from the MusicBrainz JSON dumps: performers by role, venue with coordinates, date and local start time, setlist, ticketing and setlist.fm links; CC0), `wikidata-festivals` (every music festival on Wikidata with website, place, genres and its MusicBrainz series; CC0). No ticket prices: Ticketmaster and SeatGeek terms forbid storing their data, and StubHub and Vivid Seats offer only affiliate programmes | no |
 | ai-incidents | `rogue-ai-incidents`, `rogue-ai-research`, `aiid-reports` | no |
 | news | `newsfeed` (newsroom desks, and NIST's 28 topic, event and blog feeds as `nist-news`), `gdelt`, `rssamplifier`, `brisk`, `news-channels` | no |
 | domains | `ntld-totals`, `ntld-tlds`, `ntld-launches`, `ntld-changes` | no |

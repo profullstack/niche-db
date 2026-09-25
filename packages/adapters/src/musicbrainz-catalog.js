@@ -106,11 +106,11 @@ export function parseLatest(text) {
  * Where a run starts. A cursor from another dump directory restarts the walk
  * at the first entity's first line; `done` only holds for the same directory.
  */
-export function resumeFrom(prev, dir) {
+export function resumeFrom(prev, dir, entities = ENTITIES) {
   if (!prev || typeof prev !== 'object' || prev.dir !== dir) {
-    return { dir, entity: ENTITIES[0], line: 0, done: false };
+    return { dir, entity: entities[0], line: 0, done: false };
   }
-  const entity = ENTITIES.includes(prev.entity) ? prev.entity : ENTITIES[0];
+  const entity = entities.includes(prev.entity) ? prev.entity : entities[0];
   const line = Math.max(0, Math.floor(Number(prev.line)) || 0);
   return { dir, entity, line, done: prev.done === true };
 }
@@ -244,7 +244,8 @@ export function toItem(entity, row) {
 }
 
 /** The entity after this one, or null at the end of the list. */
-export const nextEntity = (entity) => ENTITIES[ENTITIES.indexOf(entity) + 1] ?? null;
+export const nextEntity = (entity, entities = ENTITIES) =>
+  entities[entities.indexOf(entity) + 1] ?? null;
 
 /**
  * Drop the archives of any other dump directory. The disk under the dump
@@ -267,10 +268,22 @@ export async function pruneOthers(dataDir, dir) {
  * `opts` is the test seam: `dataDir` in place of `dumpDir('musicbrainz')`,
  * `pauseMs` in place of the retry pause and `now` in place of the clock. The
  * adapter's `pull` passes none of them.
+ *
+ * It is also how another adapter walks other entities of the same dump:
+ * `entities` in place of ENTITIES, `map(entity, row)` in place of `toItem`
+ * and `dumpName` for a cache directory of its own, so neither adapter's
+ * prune removes an archive the other is part way through.
  */
 export async function* walk(
   { config, cursor: prev, http, log, deadline },
-  { dataDir = null, pauseMs = RETRY_PAUSE_MS, now = Date.now } = {},
+  {
+    dataDir = null,
+    pauseMs = RETRY_PAUSE_MS,
+    now = Date.now,
+    entities = ENTITIES,
+    map = toItem,
+    dumpName = 'musicbrainz',
+  } = {},
 ) {
   const stopAt = Number.isFinite(deadline) ? deadline : Number.POSITIVE_INFINITY;
   const batchSize = Math.max(1, Math.floor(Number(config?.batchSize)) || BATCH_SIZE);
@@ -299,13 +312,13 @@ export async function* walk(
   }
   if (!dir) throw new Error(`musicbrainz: every request failed (${requests}); see the log`);
 
-  const state = resumeFrom(prev, dir);
+  const state = resumeFrom(prev, dir, entities);
   if (state.done) {
     log(`dump ${dir} already walked; nothing to do`);
     return { cursor: prev, note: 'unchanged' };
   }
 
-  const base = dataDir ?? (await dumpDir('musicbrainz'));
+  const base = dataDir ?? (await dumpDir(dumpName));
   const pruned = await pruneOthers(base, dir).catch(() => 0);
   if (pruned) log(`${pruned} archive${pruned === 1 ? '' : 's'} of an older dump removed`);
 
@@ -377,7 +390,7 @@ export async function* walk(
     try {
       for await (const text of xzLines(file, { member: memberOf(entity), skip: line })) {
         line += 1;
-        const item = toItem(entity, parseRow(text));
+        const item = map(entity, parseRow(text));
         if (!item) {
           if (text.trim()) bad += 1;
           continue;
@@ -421,11 +434,11 @@ export async function* walk(
     }
     log(`${entity}: ${line} lines of ${dir} read`);
 
-    const next = nextEntity(entity);
+    const next = nextEntity(entity, entities);
     if (!next) {
       return {
         cursor: { ...at(), done: true },
-        note: `${progress()}; dump ${dir} walked, ${ENTITIES.join(' and ')} complete`,
+        note: `${progress()}; dump ${dir} walked, ${entities.join(' and ')} complete`,
       };
     }
     entity = next;
