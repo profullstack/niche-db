@@ -84,6 +84,7 @@ import { isoMicExchanges } from './mic.js';
 import { modelsdev } from './modelsdev.js';
 import { musicbrainz } from './musicbrainz.js';
 import { musicbrainzCatalog } from './musicbrainz-catalog.js';
+import { musicbrainzEvents } from './musicbrainz-events.js';
 import { nasdaqHalts } from './nasdaqhalts.js';
 import { ndbcBuoys } from './ndbc.js';
 import { newsChannels } from './newschannels.js';
@@ -166,6 +167,7 @@ import { vscodeExtensions } from './vscode.js';
 import { vultrPlans } from './vultr.js';
 import { warnLayoffs } from './warn.js';
 import { wikidataAlgorithms } from './wikidata-algorithms.js';
+import { wikidataFestivals } from './wikidata-festivals.js';
 import { wikidataFilms } from './wikidata-films.js';
 import { wikidataGames } from './wikidata-games.js';
 import { worldbankPopulation } from './worldbank-population.js';
@@ -401,6 +403,10 @@ export const ADAPTERS = [
   worldbankPopulation,
   censusAcs,
   geonamesCities,
+  // Events: who is playing where and when, from the open catalogues. No ticket
+  // seller licenses its listings or prices for storage, so none is read here.
+  musicbrainzEvents,
+  wikidataFestivals,
 ];
 
 /**

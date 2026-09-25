@@ -1,0 +1,1558 @@
+{
+ "head": {
+  "vars": [
+   "item",
+   "itemLabel",
+   "itemDescription",
+   "website",
+   "coords",
+   "founded",
+   "countryCode",
+   "imageFile",
+   "mbSeries",
+   "wikipedia",
+   "locations",
+   "genres",
+   "ended"
+  ]
+ },
+ "results": {
+  "bindings": [
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q385333"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Qlimax"
+    },
+    "itemDescription": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "music festival"
+    },
+    "website": {
+     "type": "uri",
+     "value": "https://www.q-dance.com/en/events/qlimax/"
+    },
+    "coords": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(5.89277778 51.96416667)"
+    },
+    "founded": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "2000-01-01T00:00:00Z"
+    },
+    "wikipedia": {
+     "type": "uri",
+     "value": "https://en.wikipedia.org/wiki/Qlimax"
+    },
+    "locations": {
+     "type": "literal",
+     "value": "GelreDome"
+    },
+    "genres": {
+     "type": "literal",
+     "value": "hard dance"
+    },
+    "imageFile": {
+     "type": "uri",
+     "value": "http://commons.wikimedia.org/wiki/Special:FilePath/Qlimax%202008-11-22.JPG"
+    },
+    "mbSeries": {
+     "type": "literal",
+     "value": "f493d6fe-bca1-4db9-bcda-08c958c5dd15"
+    },
+    "ended": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "2024-11-17T00:00:00Z"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q441816"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Masters of Rock"
+    },
+    "itemDescription": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Czech heavy metal festival"
+    },
+    "website": {
+     "type": "uri",
+     "value": "http://www.mastersofrock.cz"
+    },
+    "founded": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "2003-01-01T00:00:00Z"
+    },
+    "countryCode": {
+     "type": "literal",
+     "value": "CZ"
+    },
+    "wikipedia": {
+     "type": "uri",
+     "value": "https://en.wikipedia.org/wiki/Masters_of_Rock_(festival)"
+    },
+    "locations": {
+     "type": "literal",
+     "value": "Vizovice"
+    },
+    "genres": {
+     "type": "literal",
+     "value": "heavy metal music"
+    },
+    "imageFile": {
+     "type": "uri",
+     "value": "http://commons.wikimedia.org/wiki/Special:FilePath/Masters%20of%20Rock%202010%2C%20Ronnie%20James%20Dio%20stage.jpg"
+    },
+    "mbSeries": {
+     "type": "literal",
+     "value": "e0f866cc-992d-4e0f-8f53-da0e77fe3525"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q669118"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Montreux Jazz Festival"
+    },
+    "itemDescription": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "music festival in Switzerland, held annually in early July in Montreux on the Lake Geneva shoreline"
+    },
+    "website": {
+     "type": "uri",
+     "value": "http://www.montreuxjazzfestival.com"
+    },
+    "coords": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(6.904444444 46.438888888)"
+    },
+    "founded": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "1967-01-01T00:00:00Z"
+    },
+    "countryCode": {
+     "type": "literal",
+     "value": "CH"
+    },
+    "wikipedia": {
+     "type": "uri",
+     "value": "https://en.wikipedia.org/wiki/Montreux_Jazz_Festival"
+    },
+    "locations": {
+     "type": "literal",
+     "value": "Montreux"
+    },
+    "genres": {
+     "type": "literal",
+     "value": "jazz"
+    },
+    "imageFile": {
+     "type": "uri",
+     "value": "http://commons.wikimedia.org/wiki/Special:FilePath/Audioslave%202005.jpg"
+    },
+    "mbSeries": {
+     "type": "literal",
+     "value": "4cbd4796-35e9-4ca7-8dba-7333d9ba31dc"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q670546"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Bloodstock Open Air"
+    },
+    "itemDescription": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "heavy metal music festival held in England"
+    },
+    "website": {
+     "type": "uri",
+     "value": "http://www.bloodstock.uk.com"
+    },
+    "founded": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "2005-01-01T00:00:00Z"
+    },
+    "countryCode": {
+     "type": "literal",
+     "value": "GB"
+    },
+    "wikipedia": {
+     "type": "uri",
+     "value": "https://en.wikipedia.org/wiki/Bloodstock_Open_Air"
+    },
+    "locations": {
+     "type": "literal",
+     "value": ""
+    },
+    "genres": {
+     "type": "literal",
+     "value": "heavy metal music"
+    },
+    "imageFile": {
+     "type": "uri",
+     "value": "http://commons.wikimedia.org/wiki/Special:FilePath/BloodstockOpenAirMainStage.jpg"
+    },
+    "mbSeries": {
+     "type": "literal",
+     "value": "db03cc4d-71f8-4da1-a8f7-9f9e1294927c"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q677489"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Gurtenfestival"
+    },
+    "itemDescription": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "music festival"
+    },
+    "website": {
+     "type": "uri",
+     "value": "https://www.gurtenfestival.ch"
+    },
+    "coords": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(7.45 46.95)"
+    },
+    "founded": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "1977-01-01T00:00:00Z"
+    },
+    "countryCode": {
+     "type": "literal",
+     "value": "CH"
+    },
+    "wikipedia": {
+     "type": "uri",
+     "value": "https://en.wikipedia.org/wiki/Gurtenfestival"
+    },
+    "locations": {
+     "type": "literal",
+     "value": ""
+    },
+    "genres": {
+     "type": "literal",
+     "value": "rock music"
+    },
+    "imageFile": {
+     "type": "uri",
+     "value": "http://commons.wikimedia.org/wiki/Special:FilePath/Gurtenfestival2000.jpg"
+    },
+    "mbSeries": {
+     "type": "literal",
+     "value": "40198c6d-7f40-4479-b08b-10abf26eb211"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q1001859"
+    },
+    "itemLabel": {
+     "type": "literal",
+     "value": "Q1001859"
+    },
+    "coords": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(-6.8558 62.1948)"
+    },
+    "countryCode": {
+     "type": "literal",
+     "value": "FO"
+    },
+    "locations": {
+     "type": "literal",
+     "value": "Skálabotnur"
+    },
+    "genres": {
+     "type": "literal",
+     "value": ""
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q3283576"
+    },
+    "itemLabel": {
+     "type": "literal",
+     "value": "Q3283576"
+    },
+    "founded": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "2000-01-01T00:00:00Z"
+    },
+    "countryCode": {
+     "type": "literal",
+     "value": "ES"
+    },
+    "locations": {
+     "type": "literal",
+     "value": "Q12402227"
+    },
+    "genres": {
+     "type": "literal",
+     "value": ""
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q5396352"
+    },
+    "itemLabel": {
+     "type": "literal",
+     "value": "Q5396352"
+    },
+    "countryCode": {
+     "type": "literal",
+     "value": "FI"
+    },
+    "locations": {
+     "type": "literal",
+     "value": ""
+    },
+    "genres": {
+     "type": "literal",
+     "value": ""
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q1407488"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Stonehenge Free Festival"
+    },
+    "itemDescription": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "historic 1974-'84 multi-day summer solstice folk arts, mystical rites & music gatherings"
+    },
+    "coords": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(-1.826111111 51.178888888)"
+    },
+    "founded": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "1972-01-01T00:00:00Z"
+    },
+    "countryCode": {
+     "type": "literal",
+     "value": "GB"
+    },
+    "wikipedia": {
+     "type": "uri",
+     "value": "https://en.wikipedia.org/wiki/Stonehenge_Free_Festival"
+    },
+    "locations": {
+     "type": "literal",
+     "value": ""
+    },
+    "genres": {
+     "type": "literal",
+     "value": "rock music"
+    },
+    "imageFile": {
+     "type": "uri",
+     "value": "http://commons.wikimedia.org/wiki/Special:FilePath/Stonehenge84.jpg"
+    },
+    "ended": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "1984-01-01T00:00:00Z"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q1282623"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Acid Tests"
+    },
+    "itemDescription": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "LSD experiments in the 60's"
+    },
+    "founded": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "1965-01-01T00:00:00Z"
+    },
+    "wikipedia": {
+     "type": "uri",
+     "value": "https://en.wikipedia.org/wiki/Acid_Tests"
+    },
+    "locations": {
+     "type": "literal",
+     "value": ""
+    },
+    "genres": {
+     "type": "literal",
+     "value": "psychedelic music"
+    },
+    "ended": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "1966-01-01T00:00:00Z"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q325448"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Berliner Festspiele"
+    },
+    "itemDescription": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "cultural festival in Berlin, Germany"
+    },
+    "website": {
+     "type": "uri",
+     "value": "http://www.berlinerfestspiele.de/"
+    },
+    "coords": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(13.3288711 52.498579)"
+    },
+    "founded": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "1951-01-01T00:00:00Z"
+    },
+    "countryCode": {
+     "type": "literal",
+     "value": "DE"
+    },
+    "wikipedia": {
+     "type": "uri",
+     "value": "https://en.wikipedia.org/wiki/Berliner_Festspiele"
+    },
+    "locations": {
+     "type": "literal",
+     "value": "Berlin"
+    },
+    "genres": {
+     "type": "literal",
+     "value": ""
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q336753"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Salzburg Easter Festival"
+    },
+    "itemDescription": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "music festival"
+    },
+    "website": {
+     "type": "uri",
+     "value": "http://www.osterfestspiele-salzburg.at/"
+    },
+    "founded": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "1967-01-01T00:00:00Z"
+    },
+    "countryCode": {
+     "type": "literal",
+     "value": "AT"
+    },
+    "wikipedia": {
+     "type": "uri",
+     "value": "https://en.wikipedia.org/wiki/Salzburg_Easter_Festival"
+    },
+    "locations": {
+     "type": "literal",
+     "value": "Salzburg"
+    },
+    "genres": {
+     "type": "literal",
+     "value": "classical music"
+    },
+    "imageFile": {
+     "type": "uri",
+     "value": "http://commons.wikimedia.org/wiki/Special:FilePath/GFestspielhaus%20Salzburg.jpg"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q337666"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Jazz Jamboree"
+    },
+    "itemDescription": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "music festival"
+    },
+    "website": {
+     "type": "uri",
+     "value": "http://adamiakjazz.pl/koncerty/jazz-jamboree/"
+    },
+    "founded": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "1958-01-01T00:00:00Z"
+    },
+    "countryCode": {
+     "type": "literal",
+     "value": "PL"
+    },
+    "wikipedia": {
+     "type": "uri",
+     "value": "https://en.wikipedia.org/wiki/Jazz_Jamboree"
+    },
+    "locations": {
+     "type": "literal",
+     "value": "Warsaw"
+    },
+    "genres": {
+     "type": "literal",
+     "value": ""
+    },
+    "imageFile": {
+     "type": "uri",
+     "value": "http://commons.wikimedia.org/wiki/Special:FilePath/Plakat%20Jazz%20Jamboree%20z%201968%20r.png"
+    },
+    "mbSeries": {
+     "type": "literal",
+     "value": "14ab5681-5ad7-403e-a57e-cfedf30e8067"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q365976"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Seefestspiele Mörbisch"
+    },
+    "itemDescription": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "music festival on a lake stage in Mörbisch, Austria"
+    },
+    "website": {
+     "type": "uri",
+     "value": "https://www.seefestspiele-moerbisch.at/"
+    },
+    "coords": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(16.698888888 47.753888888)"
+    },
+    "countryCode": {
+     "type": "literal",
+     "value": "AT"
+    },
+    "wikipedia": {
+     "type": "uri",
+     "value": "https://en.wikipedia.org/wiki/Seefestspiele_M%C3%B6rbisch"
+    },
+    "locations": {
+     "type": "literal",
+     "value": "Mörbisch am See"
+    },
+    "genres": {
+     "type": "literal",
+     "value": ""
+    },
+    "imageFile": {
+     "type": "uri",
+     "value": "http://commons.wikimedia.org/wiki/Special:FilePath/M%C3%B6rbisch-3.jpg"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q390075"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Sound Relief"
+    },
+    "itemDescription": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "recurring event"
+    },
+    "website": {
+     "type": "uri",
+     "value": "http://www.soundrelief.com.au"
+    },
+    "founded": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "2009-01-01T00:00:00Z"
+    },
+    "countryCode": {
+     "type": "literal",
+     "value": "AU"
+    },
+    "wikipedia": {
+     "type": "uri",
+     "value": "https://en.wikipedia.org/wiki/Sound_Relief"
+    },
+    "locations": {
+     "type": "literal",
+     "value": ""
+    },
+    "genres": {
+     "type": "literal",
+     "value": ""
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q408039"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Airbeat One"
+    },
+    "itemDescription": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Electronic music festival in Neustadt-Glewe, Germany"
+    },
+    "coords": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(11.616388888 53.360555555)"
+    },
+    "founded": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "2002-01-01T00:00:00Z"
+    },
+    "countryCode": {
+     "type": "literal",
+     "value": "DE"
+    },
+    "wikipedia": {
+     "type": "uri",
+     "value": "https://en.wikipedia.org/wiki/Airbeat_One"
+    },
+    "locations": {
+     "type": "literal",
+     "value": "Neustadt-Glewe airfield"
+    },
+    "genres": {
+     "type": "literal",
+     "value": ""
+    },
+    "imageFile": {
+     "type": "uri",
+     "value": "http://commons.wikimedia.org/wiki/Special:FilePath/Airbeat%20One%202018%20Mainstage.png"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q426402"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "INmusic festival"
+    },
+    "itemDescription": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "annual music festival in Croatia"
+    },
+    "founded": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "2006-01-01T00:00:00Z"
+    },
+    "countryCode": {
+     "type": "literal",
+     "value": "HR"
+    },
+    "wikipedia": {
+     "type": "uri",
+     "value": "https://en.wikipedia.org/wiki/INmusic_Festival"
+    },
+    "locations": {
+     "type": "literal",
+     "value": "Otok hrvatske mladeži|Jarun"
+    },
+    "genres": {
+     "type": "literal",
+     "value": ""
+    },
+    "imageFile": {
+     "type": "uri",
+     "value": "http://commons.wikimedia.org/wiki/Special:FilePath/Rokia%20Traor%C3%A9%20with%20a%20guitar.jpg"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q434319"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Altamont Free Concert"
+    },
+    "itemDescription": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "1969 musical festival by the Rolling Stones"
+    },
+    "coords": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(-121.561111111 37.739444444)"
+    },
+    "founded": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "1969-01-01T00:00:00Z"
+    },
+    "countryCode": {
+     "type": "literal",
+     "value": "US"
+    },
+    "wikipedia": {
+     "type": "uri",
+     "value": "https://en.wikipedia.org/wiki/Altamont_Free_Concert"
+    },
+    "locations": {
+     "type": "literal",
+     "value": "Altamont Raceway Park"
+    },
+    "genres": {
+     "type": "literal",
+     "value": "rock music"
+    },
+    "imageFile": {
+     "type": "uri",
+     "value": "http://commons.wikimedia.org/wiki/Special:FilePath/Rolling%20Stones%20at%20Altamont%201969.jpg"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q670324"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Street Parade"
+    },
+    "itemDescription": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "technoparade in Zürich, Switzerland"
+    },
+    "website": {
+     "type": "uri",
+     "value": "https://www.streetparade.com/"
+    },
+    "founded": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "1992-01-01T00:00:00Z"
+    },
+    "countryCode": {
+     "type": "literal",
+     "value": "CH"
+    },
+    "wikipedia": {
+     "type": "uri",
+     "value": "https://en.wikipedia.org/wiki/Street_Parade"
+    },
+    "locations": {
+     "type": "literal",
+     "value": "Zurich"
+    },
+    "genres": {
+     "type": "literal",
+     "value": "electronic music"
+    },
+    "imageFile": {
+     "type": "uri",
+     "value": "http://commons.wikimedia.org/wiki/Special:FilePath/30.%20Street%20Parade%20in%20Z%C3%BCrich%20c.jpg"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q676303"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "The Hague Jazz"
+    },
+    "itemDescription": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "music festival"
+    },
+    "founded": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "2006-01-01T00:00:00Z"
+    },
+    "wikipedia": {
+     "type": "uri",
+     "value": "https://en.wikipedia.org/wiki/The_Hague_Jazz"
+    },
+    "locations": {
+     "type": "literal",
+     "value": ""
+    },
+    "genres": {
+     "type": "literal",
+     "value": ""
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q678361"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Ars Electronica"
+    },
+    "itemDescription": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Austrian cultural, educational and scientific institute"
+    },
+    "website": {
+     "type": "uri",
+     "value": "https://ars.electronica.art"
+    },
+    "founded": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "1979-09-18T00:00:00Z"
+    },
+    "countryCode": {
+     "type": "literal",
+     "value": "AT"
+    },
+    "wikipedia": {
+     "type": "uri",
+     "value": "https://en.wikipedia.org/wiki/Ars_Electronica"
+    },
+    "locations": {
+     "type": "literal",
+     "value": "Linz"
+    },
+    "genres": {
+     "type": "literal",
+     "value": ""
+    },
+    "imageFile": {
+     "type": "uri",
+     "value": "http://commons.wikimedia.org/wiki/Special:FilePath/ARS%20Electronica%20Linz%20Austria%20%283822117769%29.jpg"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q682179"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "by:Larm"
+    },
+    "itemDescription": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "annual music festival held in Norway"
+    },
+    "website": {
+     "type": "uri",
+     "value": "http://www.bylarm.no"
+    },
+    "founded": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "1998-01-01T00:00:00Z"
+    },
+    "wikipedia": {
+     "type": "uri",
+     "value": "https://en.wikipedia.org/wiki/By:Larm"
+    },
+    "locations": {
+     "type": "literal",
+     "value": ""
+    },
+    "genres": {
+     "type": "literal",
+     "value": "ANY"
+    },
+    "imageFile": {
+     "type": "uri",
+     "value": "http://commons.wikimedia.org/wiki/Special:FilePath/Pink%20Robots%20Bylarm%202010.JPG"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q682398"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Lake Parade"
+    },
+    "itemDescription": {
+     "xml:lang": "fr",
+     "type": "literal",
+     "value": "festival de musique"
+    },
+    "website": {
+     "type": "uri",
+     "value": "http://www.lakeparade.ch"
+    },
+    "founded": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "1997-01-01T00:00:00Z"
+    },
+    "wikipedia": {
+     "type": "uri",
+     "value": "https://en.wikipedia.org/wiki/Lake_Parade"
+    },
+    "locations": {
+     "type": "literal",
+     "value": ""
+    },
+    "genres": {
+     "type": "literal",
+     "value": "electronic music"
+    },
+    "imageFile": {
+     "type": "uri",
+     "value": "http://commons.wikimedia.org/wiki/Special:FilePath/Lake%20Parade%202007%20001.jpg"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q685561"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Metalfest"
+    },
+    "itemDescription": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "music festival"
+    },
+    "website": {
+     "type": "uri",
+     "value": "http://www.metalfest.eu/"
+    },
+    "founded": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "2009-01-01T00:00:00Z"
+    },
+    "countryCode": {
+     "type": "literal",
+     "value": "HR"
+    },
+    "wikipedia": {
+     "type": "uri",
+     "value": "https://en.wikipedia.org/wiki/Metalfest"
+    },
+    "locations": {
+     "type": "literal",
+     "value": ""
+    },
+    "genres": {
+     "type": "literal",
+     "value": "heavy metal music"
+    },
+    "imageFile": {
+     "type": "uri",
+     "value": "http://commons.wikimedia.org/wiki/Special:FilePath/Metalfest-plzen.JPG"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q685607"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Freakstock"
+    },
+    "itemDescription": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "music festival"
+    },
+    "founded": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "1995-01-01T00:00:00Z"
+    },
+    "countryCode": {
+     "type": "literal",
+     "value": "DE"
+    },
+    "wikipedia": {
+     "type": "uri",
+     "value": "https://en.wikipedia.org/wiki/Freakstock"
+    },
+    "locations": {
+     "type": "literal",
+     "value": ""
+    },
+    "genres": {
+     "type": "literal",
+     "value": ""
+    },
+    "imageFile": {
+     "type": "uri",
+     "value": "http://commons.wikimedia.org/wiki/Special:FilePath/Freakstock%20mainstage%202004.jpg"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q686960"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Schubertiade"
+    },
+    "itemDescription": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "music festival"
+    },
+    "website": {
+     "type": "uri",
+     "value": "https://www.schubertiade.at/"
+    },
+    "countryCode": {
+     "type": "literal",
+     "value": "AT"
+    },
+    "wikipedia": {
+     "type": "uri",
+     "value": "https://en.wikipedia.org/wiki/Schubertiade"
+    },
+    "locations": {
+     "type": "literal",
+     "value": "Schwarzenberg"
+    },
+    "genres": {
+     "type": "literal",
+     "value": ""
+    },
+    "imageFile": {
+     "type": "uri",
+     "value": "http://commons.wikimedia.org/wiki/Special:FilePath/Moritz%20von%20Schwind%20Schubertiade.jpg"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q917300"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Savonlinna Opera Festival"
+    },
+    "itemDescription": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "annual music festival in Savonlinna, Finland"
+    },
+    "website": {
+     "type": "uri",
+     "value": "http://www.operafestival.fi/"
+    },
+    "coords": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(28.9011 61.8639)"
+    },
+    "founded": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "1967-01-01T00:00:00Z"
+    },
+    "countryCode": {
+     "type": "literal",
+     "value": "FI"
+    },
+    "wikipedia": {
+     "type": "uri",
+     "value": "https://en.wikipedia.org/wiki/Savonlinna_Opera_Festival"
+    },
+    "locations": {
+     "type": "literal",
+     "value": "Olavinlinna Castle"
+    },
+    "genres": {
+     "type": "literal",
+     "value": ""
+    },
+    "imageFile": {
+     "type": "uri",
+     "value": "http://commons.wikimedia.org/wiki/Special:FilePath/Olavinlinna2.jpg"
+    },
+    "mbSeries": {
+     "type": "literal",
+     "value": "95631ce1-e497-479a-bd4b-a3e9c7924af9"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q919794"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Meltdown"
+    },
+    "itemDescription": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "music festival"
+    },
+    "coords": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(-0.113908333 51.506941666)"
+    },
+    "countryCode": {
+     "type": "literal",
+     "value": "GB"
+    },
+    "wikipedia": {
+     "type": "uri",
+     "value": "https://en.wikipedia.org/wiki/Meltdown_(festival)"
+    },
+    "locations": {
+     "type": "literal",
+     "value": ""
+    },
+    "genres": {
+     "type": "literal",
+     "value": ""
+    },
+    "mbSeries": {
+     "type": "literal",
+     "value": "c30000e6-6b0b-45c8-a27c-8c3c94380064"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q922592"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Interceltic Festival of Avilés"
+    },
+    "itemDescription": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Asturias- Spain"
+    },
+    "website": {
+     "type": "uri",
+     "value": "http://www.intercelticu.com"
+    },
+    "founded": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "1997-01-01T00:00:00Z"
+    },
+    "countryCode": {
+     "type": "literal",
+     "value": "ES"
+    },
+    "wikipedia": {
+     "type": "uri",
+     "value": "https://en.wikipedia.org/wiki/Interceltic_Festival_of_Avil%C3%A9s"
+    },
+    "locations": {
+     "type": "literal",
+     "value": "Avilés"
+    },
+    "genres": {
+     "type": "literal",
+     "value": ""
+    },
+    "imageFile": {
+     "type": "uri",
+     "value": "http://commons.wikimedia.org/wiki/Special:FilePath/Festival%20Intercelticu%2C%20Stonehouse%20Pipe%20Band.JPG"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q923398"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Vitoria-Gasteiz jazz festival"
+    },
+    "itemDescription": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "music festival"
+    },
+    "website": {
+     "type": "uri",
+     "value": "http://www.jazzvitoria.com/"
+    },
+    "coords": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(-2.68333 42.85)"
+    },
+    "founded": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "1977-01-01T00:00:00Z"
+    },
+    "countryCode": {
+     "type": "literal",
+     "value": "ES"
+    },
+    "wikipedia": {
+     "type": "uri",
+     "value": "https://en.wikipedia.org/wiki/Vitoria-Gasteiz_jazz_festival"
+    },
+    "locations": {
+     "type": "literal",
+     "value": ""
+    },
+    "genres": {
+     "type": "literal",
+     "value": ""
+    },
+    "imageFile": {
+     "type": "uri",
+     "value": "http://commons.wikimedia.org/wiki/Special:FilePath/Wynton%20Marsalis%20Septet.jpg"
+    },
+    "mbSeries": {
+     "type": "literal",
+     "value": "4bad12a3-a038-4ccb-b043-03d1f2fecbec"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q924893"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Mystery Land"
+    },
+    "itemDescription": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "music festival"
+    },
+    "website": {
+     "type": "uri",
+     "value": "http://mysteryland.id-t.com/"
+    },
+    "founded": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "1993-01-01T00:00:00Z"
+    },
+    "wikipedia": {
+     "type": "uri",
+     "value": "https://en.wikipedia.org/wiki/Mysteryland"
+    },
+    "locations": {
+     "type": "literal",
+     "value": ""
+    },
+    "genres": {
+     "type": "literal",
+     "value": "electronic dance music"
+    },
+    "imageFile": {
+     "type": "uri",
+     "value": "http://commons.wikimedia.org/wiki/Special:FilePath/Mysteryland%202017.jpg"
+    },
+    "mbSeries": {
+     "type": "literal",
+     "value": "b613c282-57e3-4c8e-99dd-1cd7e8dd4b92"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q933410"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Woodstock '94"
+    },
+    "itemDescription": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "music festival in 1994"
+    },
+    "website": {
+     "type": "uri",
+     "value": "http://www.woodstock.com"
+    },
+    "coords": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(-73.985 42.09)"
+    },
+    "countryCode": {
+     "type": "literal",
+     "value": "US"
+    },
+    "wikipedia": {
+     "type": "uri",
+     "value": "https://en.wikipedia.org/wiki/Woodstock_%2794"
+    },
+    "locations": {
+     "type": "literal",
+     "value": "Saugerties"
+    },
+    "genres": {
+     "type": "literal",
+     "value": ""
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q935911"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Palatia jazz"
+    },
+    "itemDescription": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "music festival"
+    },
+    "countryCode": {
+     "type": "literal",
+     "value": "DE"
+    },
+    "wikipedia": {
+     "type": "uri",
+     "value": "https://en.wikipedia.org/wiki/Palatia_jazz"
+    },
+    "locations": {
+     "type": "literal",
+     "value": ""
+    },
+    "genres": {
+     "type": "literal",
+     "value": "jazz"
+    },
+    "imageFile": {
+     "type": "uri",
+     "value": "http://commons.wikimedia.org/wiki/Special:FilePath/Ahmad%20Jamal%20beim%20Palatia%20Jazz%20Festival%20in%20Bad%20D%C3%BCrkheim%20am%2021.7.2011.jpg"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q941538"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Printemps de Bourges"
+    },
+    "itemDescription": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "annual music festival held in Bourges, France"
+    },
+    "website": {
+     "type": "uri",
+     "value": "http://www.printemps-bourges.com/"
+    },
+    "coords": {
+     "datatype": "http://www.opengis.net/ont/geosparql#wktLiteral",
+     "type": "literal",
+     "value": "Point(2.39639 47.0844)"
+    },
+    "founded": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "1977-01-01T00:00:00Z"
+    },
+    "countryCode": {
+     "type": "literal",
+     "value": "FR"
+    },
+    "wikipedia": {
+     "type": "uri",
+     "value": "https://en.wikipedia.org/wiki/Printemps_de_Bourges"
+    },
+    "locations": {
+     "type": "literal",
+     "value": "Bourges"
+    },
+    "genres": {
+     "type": "literal",
+     "value": "electronic music"
+    },
+    "imageFile": {
+     "type": "uri",
+     "value": "http://commons.wikimedia.org/wiki/Special:FilePath/Alain%20Meilland%20conf%C3%A9rence%20presse%20printemps%20de%20bourges%201984.jpg"
+    },
+    "mbSeries": {
+     "type": "literal",
+     "value": "36c97f5e-21a6-4909-879e-6c55967e9bba"
+    }
+   },
+   {
+    "item": {
+     "type": "uri",
+     "value": "http://www.wikidata.org/entity/Q944603"
+    },
+    "itemLabel": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "Isle of Wight Festival"
+    },
+    "itemDescription": {
+     "xml:lang": "en",
+     "type": "literal",
+     "value": "British music festival which takes place annually on the Isle of Wight in Newport, England"
+    },
+    "website": {
+     "type": "uri",
+     "value": "https://isleofwightfestival.com/"
+    },
+    "founded": {
+     "datatype": "http://www.w3.org/2001/XMLSchema#dateTime",
+     "type": "literal",
+     "value": "1968-01-01T00:00:00Z"
+    },
+    "countryCode": {
+     "type": "literal",
+     "value": "GB"
+    },
+    "wikipedia": {
+     "type": "uri",
+     "value": "https://en.wikipedia.org/wiki/Isle_of_Wight_Festival"
+    },
+    "locations": {
+     "type": "literal",
+     "value": "Seaclose Park"
+    },
+    "genres": {
+     "type": "literal",
+     "value": "rock music"
+    },
+    "imageFile": {
+     "type": "uri",
+     "value": "http://commons.wikimedia.org/wiki/Special:FilePath/1970-Isle%20of%20Wight%20Festival-%205.JPG"
+    },
+    "mbSeries": {
+     "type": "literal",
+     "value": "4f699690-24bf-429d-8021-4ff6b76b1c79"
+    }
+   }
+  ]
+ }
+}
