@@ -1036,3 +1036,69 @@ describe('a source seeded off for a missing key', () => {
     expect(after).toEqual({ never_ran: true, stopped: false, key_gone: false });
   });
 });
+
+describe('the MCP and workflows collections migration', () => {
+  test('both collections exist and deduplicate on URL', async () => {
+    // Without `dedupe_urls` every server would be stored once per list that
+    // mentions it, and the four MCP lists alone carry 4,761 entries for 4,507
+    // servers.
+    const cs = await rows(
+      `select slug, dedupe_urls from collections where slug in ('mcp', 'workflows') order by slug`,
+    );
+    expect(cs).toEqual([
+      { slug: 'mcp', dedupe_urls: true },
+      { slug: 'workflows', dedupe_urls: true },
+    ]);
+  });
+
+  test('the registry source, its items and its feed leave extensions together', async () => {
+    // The whole risk in 0032, as in 0010: leave the source under `extensions`
+    // and the next boot seeds a second one under `mcp`, and both poll the
+    // official registry forever.
+    const ext = await one(
+      `insert into collections (slug, name) values ('extensions', 'Extensions')
+       on conflict (slug) do update set name = excluded.name returning id`,
+    );
+    const s = await one(
+      `insert into sources (collection_id, adapter, slug, name)
+       values ($1, 'mcp-registry', 'mcp-servers', 'MCP') returning id`,
+      [ext.id],
+    );
+    await db.query(
+      `insert into items (source_id, collection_id, external_id, kind, title, content_hash)
+       values ($1, $2, 'io.example/thing', 'mcp-server', 'Thing', 'h1')`,
+      [s.id, ext.id],
+    );
+    await db.query(
+      `insert into feeds (collection_id, slug, name) values ($1, 'new-mcp-servers', 'New MCP servers')`,
+      [ext.id],
+    );
+
+    // Exactly the statements migration 0032 runs, in its order.
+    const mcp = await one(`select id from collections where slug = 'mcp'`);
+    await db.query(
+      `update items i set collection_id = $1 from sources s
+        where s.id = i.source_id and s.adapter = 'mcp-registry' and i.collection_id = $2`,
+      [mcp.id, ext.id],
+    );
+    await db.query(
+      `update sources set collection_id = $1 where adapter = 'mcp-registry' and collection_id = $2`,
+      [mcp.id, ext.id],
+    );
+    await db.query(
+      `update feeds set collection_id = $1 where slug = 'new-mcp-servers' and collection_id = $2`,
+      [mcp.id, ext.id],
+    );
+
+    const moved = await one(
+      `select
+         (select count(*)::int from sources where adapter = 'mcp-registry' and collection_id = $1) as sources,
+         (select count(*)::int from items where collection_id = $1) as items,
+         (select count(*)::int from feeds where slug = 'new-mcp-servers' and collection_id = $1) as feeds,
+         (select count(*)::int from sources where adapter = 'mcp-registry' and collection_id = $2) as left_behind`,
+      [mcp.id, ext.id],
+    );
+    // The feed keeps its slug: /c/mcp/new-mcp-servers, never a 404.
+    expect(moved).toEqual({ sources: 1, items: 1, feeds: 1, left_behind: 0 });
+  });
+});

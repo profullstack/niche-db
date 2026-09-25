@@ -2,11 +2,14 @@ import { adsbFlights } from './adsb.js';
 import { agenticjobs } from './agenticjobs.js';
 import { aiid } from './aiid.js';
 import { aiornot } from './aiornot.js';
+import { aitmplComponents, aitmplMcps } from './aitmpl.js';
 import { alpacaCorporateActions, alpacaNews } from './alpaca.js';
 import { firefoxAddons } from './amo.js';
 import { anilistAiring } from './anilist.js';
 import { arxiv } from './arxiv.js';
 import { aviationHazards, aviationMetar } from './aviationweather.js';
+import { awesomeClaudeCode } from './awesomeclaudecode.js';
+import { awesomeMcp } from './awesomemcp.js';
 import { bensbargains } from './bensbargains.js';
 import { bittorrentedDht } from './bittorrented.js';
 import { bl0ggers } from './bl0ggers.js';
@@ -29,6 +32,7 @@ import { dealcatcher } from './dealcatcher.js';
 import { dealnews } from './dealnews.js';
 import { digitaloceanSizes } from './digitalocean.js';
 import { discogsCatalog } from './discogs-catalog.js';
+import { dockerMcp } from './dockermcp.js';
 import { droughtMonitor } from './droughtmonitor.js';
 import { ecbFxRates } from './ecb.js';
 import { edgar } from './edgar.js';
@@ -47,6 +51,7 @@ import { freddieMacRates } from './freddiemac.js';
 import { fueleconomyCatalog } from './fueleconomy.js';
 import { gdacs } from './gdacs.js';
 import { gdelt } from './gdelt.js';
+import { githubAgentTopics, githubMcpTopics } from './ghtopics.js';
 import { githubReleases } from './github.js';
 import { goModules } from './golang.js';
 import { gutenbergCatalog } from './gutenberg-catalog.js';
@@ -99,6 +104,7 @@ import { outreachgraph } from './outreachgraph.js';
 import { ovhVps } from './ovh.js';
 import { p0dcasters } from './p0dcasters.js';
 import { buildingPermits } from './permits.js';
+import { pluginMarketplaces } from './pluginmarketplaces.js';
 import { podcastindexCatalog } from './podcastindex-catalog.js';
 import { podcasts } from './podcasts.js';
 import { policeUpdates } from './police-updates.js';
@@ -106,6 +112,7 @@ import { proscanDirectory } from './proscan.js';
 import { pwcArchive } from './pwc-archive.js';
 import { pypi } from './pypi.js';
 import { redditDeals } from './redditdeals.js';
+import { redditWorkflows } from './redditworkflows.js';
 import { rogueIncidents, rogueResearch } from './rogueaitracker.js';
 import { rosettaCode } from './rosetta-code.js';
 import { rssamplifier } from './rssamplifier.js';
@@ -115,6 +122,7 @@ import { scalewayInstances } from './scaleway.js';
 import { scannerDirectory } from './scanners.js';
 import { scryfallCards, scryfallSets } from './scryfall.js';
 import { slickdeals } from './slickdeals.js';
+import { smithery } from './smithery.js';
 import { socrataCrime } from './socratacrime.js';
 import { sportarrPersons } from './sportarr-persons.js';
 import { sportsdbTv } from './sportsdb.js';
@@ -232,7 +240,24 @@ export const ADAPTERS = [
   statuspage,
   firefoxAddons,
   vscodeExtensions,
+  /*
+   * MCP servers. The registry runs first on purpose: the collection drops an
+   * item whose URL another source already carries, so the order these are
+   * listed in is the order in which a duplicate server's account of itself is
+   * decided. Published beats packaged beats curated beats tagged.
+   */
   mcpRegistry,
+  dockerMcp,
+  smithery,
+  awesomeMcp,
+  aitmplMcps,
+  githubMcpTopics,
+  // Agent workflows: the library, the curated lists, the marketplaces.
+  redditWorkflows,
+  awesomeClaudeCode,
+  pluginMarketplaces,
+  aitmplComponents,
+  githubAgentTopics,
   openfda,
   clinicalTrials,
   arxiv,

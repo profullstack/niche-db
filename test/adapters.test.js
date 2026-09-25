@@ -87,6 +87,8 @@ describe('registry', () => {
         'algorithms',
         'models',
         'parts',
+        'mcp',
+        'workflows',
       ]).toContain(a.collection);
     }
     expect(adapterByName('steam').title).toContain('Steam');
