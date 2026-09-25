@@ -41,6 +41,31 @@ the repositories tagged for all of it.
 | Protocol repo README | `awesome-mcp-reference` | 20 | the reference servers and what has been archived | 6 h |
 | aitmpl MCP configs | `aitmpl-mcps` | 104 | a ready-made config and an install count | 12 h |
 | GitHub topic search | `github-mcp-topics` | 400 a run, 30,246 matched | what was tagged this morning | 1 h |
+| Installmap YC crawl | `installmap-yc-mcp` | 182 companies, 53 with an endpoint, 14 online | which Y Combinator companies run a server, their batch, whether they also have a public API or an llms.txt, and the evidence | 7 d |
+
+The Installmap rows are OpenMCP records ([logicsrc.com/openmcp](https://logicsrc.com/docs/openmcp)),
+under `data.openmcp`: `id`, `descriptor`, `tools`, `server`, `verified`, `online`,
+`lastError`. The endpoint comes from Installmap's evidence (an `mcp.` subdomain or
+`/mcp` path that answered), then the official registry's remotes under the
+company's reverse-domain namespace, then the company's own
+`/.well-known/openmcp.json`. `verified` means that descriptor was served (none
+were on 2026-09-25) and `online` means an unauthenticated `initialize` and
+`tools/list` both worked. A 401 or 403 is kept as the endpoint, offline, with the
+status in `lastError`: a server that wants a key is still a server. A 404, a 405
+to a POST, or a web page at `/mcp` is not. The spec's catalog lists only a relay
+it verified or reached. This directory keeps every row, because the question it
+answers is which companies ship a server, and the two flags carry the rest.
+
+Each row also carries `data.company`: the description, logo and accounts from the
+company's own homepage (schema.org `sameAs` first, then the links on the page,
+and only the account whose handle matches the company when several are linked),
+Wikidata's accounts and founders (CC0, matched on the official website), and the
+founders the homepage's schema.org markup names. A second adapter,
+`installmap-yc-people`, writes the same companies (Kind organization) and their
+founders (Kind person) into `/c/profiles` as OpenProfile documents, so a founder
+is someone you can follow. ycombinator.com is not read, because its terms forbid
+scraping, and yc-oss is a scrape of it. Attribution for the dataset: Installmap,
+September 2026 (CC BY 4.0).
 
 ### `/workflows` and the four beside it
 

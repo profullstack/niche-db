@@ -68,6 +68,7 @@ import { huggingface } from './huggingface.js';
 import { igdb } from './igdb.js';
 import { igdbCatalog } from './igdb-catalog.js';
 import { imdbRatings } from './imdb.js';
+import { installmapYcMcp, installmapYcPeople } from './installmap.js';
 import { kitsuAnime } from './kitsu-anime.js';
 import { landRegistrySales } from './landregistry.js';
 import { launchLibrary } from './launchlibrary.js';
@@ -263,6 +264,9 @@ export const ADAPTERS = [
   awesomeMcp,
   aitmplMcps,
   githubMcpTopics,
+  // Last: a third party's crawl of which YC companies run one. Where the
+  // registry already carries the same endpoint, the registry's row stands.
+  installmapYcMcp,
   /*
    * Agent workflows, and the four things people install, each in the
    * collection somebody looking for one would open: skills, subagents, slash
@@ -316,6 +320,7 @@ export const ADAPTERS = [
   sportsdbLeagues,
   sportsdbLive,
   sportarrPersons,
+  installmapYcPeople,
   // Screen: films, TV and anime, and the IMDb ratings behind 400k titles.
   tmdbReleases,
   tvmazeSchedule,
