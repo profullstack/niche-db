@@ -1,15 +1,30 @@
-# MCP servers (`/c/mcp`) and agent workflows (`/c/workflows`)
+# MCP servers and agent workflows
 
-Two collections built from the same problem: everything worth knowing about
+Seven collections built from the same problem: everything worth knowing about
 MCP servers and about how people work with coding agents is written down in
 somebody's list, and there are a dozen lists, and they overlap. Nobody
 maintains the union. These collections are the union, cleaned.
 
-They ship together because they share their machinery — the same URL folding,
-the same deduplication, two sources that feed both — and because the question
-that started them ("which MCP server does this?") and the question beside it
-("how do people actually use it?") are asked by the same person on the same
-afternoon.
+| Collection | Where | Distinct rows, first pass |
+| --- | --- | --- |
+| MCP servers | `/c/mcp` | 5,782 |
+| Agent workflows | `/workflows` | 1,309 |
+| Skills | `/skills` | 894 |
+| Subagents | `/agents` | 587 |
+| Slash commands | `/commands` | 288 |
+| Plugins | `/plugins` | 117 |
+| Hooks | `/hooks` | 62 |
+
+A subagent, a skill, a slash command, a hook and a plugin are five different
+things to go looking for, so they are five collections rather than five kinds
+inside one. Each is also a name at the site root, because a collection seeds a
+niche and a niche's page is served from `/`. **MCP is the exception**: `mcp` is
+a reserved niche slug — `/mcp` is this site's own MCP endpoint — so the servers
+live at `/c/mcp` and nowhere else.
+
+`workflows` keeps what is read rather than installed: the library posts, the
+guides and CLAUDE.md files, settings bundles, agent loops, behaviour mods, and
+the repositories tagged for all of it.
 
 ## Where the rows come from
 
@@ -27,15 +42,21 @@ afternoon.
 | aitmpl MCP configs | `aitmpl-mcps` | 104 | a ready-made config and an install count | 12 h |
 | GitHub topic search | `github-mcp-topics` | 400 a run, 30,246 matched | what was tagged this morning | 1 h |
 
-### `/c/workflows`
+### `/workflows` and the four beside it
 
-| Source | Slug | Rows measured 2026-09-25 | What only it knows | Cadence |
+| Source | Slug | Collection | Rows | What only it knows |
 | --- | --- | --- | --- | --- |
-| r/ClaudeWorkflows | `reddit-claude-workflows` | 600 posts a run, walking from 2026-05 | a workflow written out by the person who used it, rated by votes, with a template the adapter parses into fields | 1 h |
-| awesome-claude-code | `awesome-claude-code` | 202 live of 212 | a maintainer who re-checks links and marks the dead ones | 6 h |
-| Plugin marketplaces | `claude-plugin-marketplaces` | 117 plugins across 3 manifests | what a marketplace installs, declared by its publisher for machines to read | 4 h |
-| aitmpl components | `aitmpl-components` | 1,780 | skills, subagents, commands, hooks, settings, loops and mods with install counts | 8 h |
-| GitHub topic search | `github-agent-topics` | 399 a run, 77,213 matched | repositories tagged for Claude Code before any list has them | 1 h |
+| r/ClaudeWorkflows | `reddit-claude-workflows` | workflows | 600 a run, walking from 2026-05 | a workflow written out by the person who used it, rated by votes, with a template the adapter parses into fields |
+| awesome-claude-code | `awesome-claude-code` | workflows | 197 | a maintainer who re-checks links and marks the dead ones |
+| aitmpl settings, loops, mods | `aitmpl-components` | workflows | 119 | ways of working rather than things installed |
+| GitHub topic search | `github-agent-topics` | workflows | 398 a run, 77,213 matched | repositories tagged before any list has them |
+| aitmpl skills | `aitmpl-skills` | skills | 889 | the bulk catalogue, with install counts |
+| awesome-claude-code skills | `awesome-claude-code-skills` | skills | 5 | the hand-picked few |
+| aitmpl subagents | `aitmpl-agents` | agents | 422 | subagents by category, with install counts |
+| VoltAgent list | `awesome-subagents-voltagent` | agents | 165 | each subagent named, rather than the bundle it ships in |
+| aitmpl commands | `aitmpl-commands` | commands | 288 | slash commands with install counts |
+| aitmpl hooks | `aitmpl-hooks` | hooks | 62 | what runs before and after a tool call, a prompt or a session |
+| Plugin marketplaces | `claude-plugin-marketplaces` | plugins | 117 across 3 manifests | what a marketplace installs, declared by its publisher for machines to read |
 
 Everything is keyless. `GITHUB_TOKEN` is optional and only raises rate limits:
 search goes from 10 requests a minute to 30, and the `github-repo` enricher
@@ -45,12 +66,20 @@ Reddit is read through the Arctic Shift archive rather than reddit.com, which
 blocks this deployment on every road including a real browser. See
 `packages/adapters/src/redditworkflows.js`.
 
+**One file, several adapters.** aitmpl's `components.json` feeds six
+collections and awesome-claude-code's CSV feeds two, because an adapter writes
+into exactly one collection. That is deliberate rather than reluctant: a source
+is what a reader follows and what the run log reports on, so "subagents from
+aitmpl" and "skills from aitmpl" should be two rows on the sources page. The
+cost is re-fetching one file per collection, which is why those cadences are
+slow and staggered.
+
 ## Deduplication
 
-Both collections have `dedupe_urls` set, so the core drops an item whose
-canonical URL another source in the collection already carries. That is only
-useful if the URLs are comparable in the first place, which they are not as
-published: the same server is written `https://github.com/Owner/Repo`,
+Every one of these collections has `dedupe_urls` set, so the core drops an item
+whose canonical URL another source in the same collection already carries. That
+is only useful if the URLs are comparable in the first place, which they are not
+as published: the same server is written `https://github.com/Owner/Repo`,
 `.../owner/repo/`, `.../owner/repo.git`, `.../owner/repo/blob/main/src/x` and
 `.../owner/repo/tree/9f8c1ab/src/x`.
 
@@ -62,7 +91,7 @@ agrees with `main`. What it deliberately does not do is drop the subpath —
 `awslabs/mcp` a dozen, and collapsing those to the repository root would fuse
 distinct servers into one row. Measured: 4,761 entries across the four MCP
 lists are 4,507 distinct servers, and 82 of Docker's 270 entries share a
-repository with another entry.
+repository with another.
 
 **First writer keeps the row**, so the order sources are registered in
 (`packages/adapters/src/index.js`) is the order in which a duplicate's account
@@ -90,22 +119,29 @@ Beyond the usual title, summary, URL and tags:
   Docker's `pulls`/`tools`/`license`/`category`, Smithery's `useCount` and
   whether it is deployed and verified, and for a tagged repository its stars,
   language and last push.
-- **Workflows**: for a library post, `value`, `freshness`, `confidence`,
-  `status`, `level`, `categories` and the original source it was lifted from,
-  plus the vote count; for a component or plugin, the install count and the
-  exact command that installs it.
+- **A library post**: `value`, `freshness`, `confidence`, `status`, `level`,
+  `categories` and the original source it was lifted from, plus the vote count.
+- **A component or plugin**: the install count and the exact command that
+  installs it (`npx claude-code-templates@latest --agent …`, or
+  `/plugin marketplace add owner/repo`).
 
-The `github-repo` enricher is on by default for both, so a row whose URL is a
-repository gains stars, licence, language, topics, last push and whether the
+The `github-repo` enricher is on by default for all seven, so a row whose URL is
+a repository gains stars, licence, language, topics, last push and whether the
 repository has been archived — which is how a dead server shows up as dead
 without anyone re-checking a list by hand.
 
 ## Feeds
 
 `/c/mcp/new-mcp-servers`, `/c/mcp/mcp-remote-servers`,
-`/c/mcp/mcp-packaged-servers`, and for workflows `claude-workflows`,
-`claude-skills`, `claude-subagents`, `claude-commands`, `claude-plugins` and
-`claude-hooks`.
+`/c/mcp/mcp-packaged-servers`, then one per collection beside them:
+`claude-workflows` and `workflow-library` under workflows, and `new-skills`,
+`new-subagents`, `new-slash-commands`, `new-plugins` and `new-hooks`.
 
 `new-mcp-servers` kept its slug through the move out of `/c/extensions`
 (migration `0032`), because a feed URL is a promise to whoever is polling it.
+
+Migration `0033` is what split the five component collections out of
+`workflows`, as a second migration rather than an edit to `0032`: migrations
+are keyed by filename with no checksum, so editing one that has already run
+means it never runs again -- the collections would still appear, because
+seeding creates them, but with `dedupe_urls` silently false.

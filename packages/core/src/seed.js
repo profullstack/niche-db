@@ -309,7 +309,37 @@ export const COLLECTIONS = [
     slug: 'workflows',
     name: 'Agent workflows',
     description:
-      'How people actually work with Claude and Claude Code: workflows published and voted on in the r/ClaudeWorkflows library, the skills, subagents, slash commands, hooks and settings the community ships, the plugin marketplaces you can add in one command, and the repositories tagged for them. Rated where the source rates them, and deduplicated across the lists.',
+      'How people actually work with Claude and Claude Code: workflows published and voted on in the r/ClaudeWorkflows library, the guides and CLAUDE.md files the community keeps, settings bundles, agent loops and behaviour mods, and the repositories tagged for all of it. Rated where the source rates them, and deduplicated across the lists. The things you install rather than read have collections of their own: skills, subagents, commands, hooks and plugins.',
+  },
+  {
+    slug: 'skills',
+    name: 'Skills',
+    description:
+      'Agent skills you can drop into a project: the 890 claude-code-templates ships with their install counts, and the hand-picked ones from awesome-claude-code. One row per skill, with the command that installs it.',
+  },
+  {
+    slug: 'agents',
+    name: 'Subagents',
+    description:
+      'Subagents by the job they do, from the claude-code-templates catalogue and the community lists that name each one rather than the bundle it ships in. One row per subagent, with its category and the file that defines it.',
+  },
+  {
+    slug: 'commands',
+    name: 'Slash commands',
+    description:
+      'Slash commands the community ships, by category, with how many times each has been installed and the one line that installs it.',
+  },
+  {
+    slug: 'plugins',
+    name: 'Plugins',
+    description:
+      'Every plugin declared in a Claude Code marketplace manifest, the official one included: what it installs, who wrote it, its version and licence, and the command that adds the marketplace it comes from.',
+  },
+  {
+    slug: 'hooks',
+    name: 'Hooks',
+    description:
+      'Hooks: what runs before and after a tool call, a prompt or a session. The ones the community ships, with install counts.',
   },
 ];
 
@@ -579,32 +609,38 @@ export const DEFAULT_FEEDS = [
   },
   {
     collection: 'workflows',
-    slug: 'claude-skills',
-    name: 'Skills',
+    slug: 'workflow-library',
+    name: 'The workflow library',
+    query: { sources: ['reddit-claude-workflows'] },
+  },
+  {
+    collection: 'skills',
+    slug: 'new-skills',
+    name: 'New skills',
     query: { kinds: ['skill'] },
   },
   {
-    collection: 'workflows',
-    slug: 'claude-subagents',
-    name: 'Subagents',
+    collection: 'agents',
+    slug: 'new-subagents',
+    name: 'New subagents',
     query: { kinds: ['agent'] },
   },
   {
-    collection: 'workflows',
-    slug: 'claude-commands',
-    name: 'Slash commands',
+    collection: 'commands',
+    slug: 'new-slash-commands',
+    name: 'New slash commands',
     query: { kinds: ['command'] },
   },
   {
-    collection: 'workflows',
-    slug: 'claude-plugins',
-    name: 'Plugins',
+    collection: 'plugins',
+    slug: 'new-plugins',
+    name: 'New plugins',
     query: { kinds: ['plugin'] },
   },
   {
-    collection: 'workflows',
-    slug: 'claude-hooks',
-    name: 'Hooks',
+    collection: 'hooks',
+    slug: 'new-hooks',
+    name: 'New hooks',
     query: { kinds: ['hook'] },
   },
   { collection: 'health', slug: 'fda-recalls', name: 'FDA recalls', query: { kinds: ['recall'] } },
