@@ -94,6 +94,7 @@ describe('registry', () => {
         'commands',
         'plugins',
         'hooks',
+        'listings',
       ]).toContain(a.collection);
     }
     expect(adapterByName('steam').title).toContain('Steam');
