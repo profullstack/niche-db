@@ -91,6 +91,7 @@ import { nistCsrcDrafts } from './nist-csrc.js';
 import { nistDads } from './nist-dads.js';
 import { nistDatasets } from './nist-data.js';
 import { npm } from './npm.js';
+import { nppesProviders } from './nppes.js';
 import { ntldChanges, ntldLaunches, ntldTlds, ntldTotals } from './ntlddata.js';
 import { ntsbAccidents } from './ntsb.js';
 import { nvd } from './nvd.js';
@@ -379,6 +380,8 @@ export const ADAPTERS = [
   // Parts: the appliance models a part has to fit, and the recalls against them.
   energyStarModels,
   cpscRecalls,
+  // Health: the US provider registry, from the CMS monthly bulk file.
+  nppesProviders,
 ];
 
 /**
