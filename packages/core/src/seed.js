@@ -93,7 +93,7 @@ export const COLLECTIONS = [
     slug: 'health',
     name: 'Health',
     description:
-      'FDA recalls and clinical trials as they are posted, with sponsor, phase and reason.',
+      'FDA recalls and clinical trials as they are posted, with sponsor, phase and reason, and the US provider registry: every clinician and healthcare organization with an NPI \u2014 about eight million of them \u2014 with their specialty, licence state and city, from the monthly file CMS publishes in the public domain. Sole practitioners often register a home address, so individuals are carried at city and state without the street line.',
   },
   {
     slug: 'research',
@@ -344,6 +344,22 @@ export const COLLECTIONS = [
 ];
 
 export const DEFAULT_FEEDS = [
+  {
+    collection: 'health',
+    slug: 'providers',
+    name: 'US healthcare providers',
+    description:
+      'Every clinician and healthcare organization holding an NPI, with specialty and location.',
+    query: { kinds: ['provider'] },
+  },
+  {
+    collection: 'health',
+    slug: 'provider-organizations',
+    name: 'Hospitals, pharmacies and clinics',
+    description:
+      'The organization half of the registry: hospitals, pharmacies, laboratories and agencies.',
+    query: { kinds: ['provider'], tags: ['organization'] },
+  },
   {
     collection: 'parts',
     slug: 'appliance-recalls',
