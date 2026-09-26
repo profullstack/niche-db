@@ -25,6 +25,7 @@ const {
   countryOf,
   eventItem,
   musicbrainzEvents,
+  MAPPING_VERSION,
   pullEvents,
   relationsOf,
   toEventItem,
@@ -455,7 +456,7 @@ describe('area countries', () => {
       pullEvents(
         {
           config: {},
-          cursor: { dir: DIR, entity: 'event', line: 191, done: true },
+          cursor: { dir: DIR, entity: 'event', line: 191, done: true, v: MAPPING_VERSION },
           http,
           log: () => {},
           deadline: Infinity,
@@ -465,5 +466,25 @@ describe('area countries', () => {
     );
     expect(downloads).toEqual([]);
     expect(result.note).toBe('unchanged');
+  });
+
+  test('a dump walked under an older mapping is walked again, once', async () => {
+    const dataDir = await mkdtemp(join(tmp, 'remap-'));
+    const { http, downloads } = fakeHttp();
+    const old = { dir: DIR, entity: 'event', line: 191, done: true };
+    const ctx = { config: {}, cursor: old, http, log: () => {}, deadline: Infinity };
+    const { batches, result } = await collect(pullEvents(ctx, { dataDir }));
+    expect(batches.flatMap((b) => b.items).length).toBe(191);
+    expect(downloads.some((u) => u.endsWith('/area.tar.xz'))).toBe(true);
+    expect(batches.every((b) => b.cursor.v === MAPPING_VERSION)).toBe(true);
+    expect(result.cursor).toMatchObject({ dir: DIR, done: true, v: MAPPING_VERSION });
+
+    const again = fakeHttp();
+    const second = await collect(
+      pullEvents({ ...ctx, cursor: result.cursor, http: again.http }, { dataDir }),
+    );
+    expect(second.batches).toEqual([]);
+    expect(second.result.note).toBe('unchanged');
+    expect(again.downloads).toEqual([]);
   });
 });

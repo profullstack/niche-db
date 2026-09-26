@@ -68,6 +68,17 @@ import {
  */
 
 export const ENTITIES = ['event'];
+
+/**
+ * The version of what a row maps to. The walk marks a dump done and skips it
+ * until the next one, so a change to the mapping would otherwise wait up to
+ * four days to reach the rows; a cursor carrying another version is read as
+ * no cursor, and the current dump is walked again once. Bump it with any
+ * change to eventItem or the area map.
+ *
+ * 2: a country from the area hierarchy; cancelled shows lose `tickets`.
+ */
+export const MAPPING_VERSION = 2;
 export const ATTRIBUTION = 'MusicBrainz, CC0';
 
 /** A dump lands twice a week; a daily look at LATEST picks each one up within a day. */
@@ -394,17 +405,28 @@ export async function* pullEvents(ctx, { dataDir = null, pauseMs, now } = {}) {
   } catch {
     // the walk asks again and reports the failure itself
   }
-  const walked = ctx.cursor?.dir === dir && ctx.cursor?.done === true;
+  const prev = ctx.cursor?.v === MAPPING_VERSION ? ctx.cursor : null;
+  const walked = prev?.dir === dir && prev?.done === true;
   if (dir && !walked)
     countries = await loadCountries({ http: ctx.http, log: ctx.log, dir, dataDir: base });
-  return yield* walk(ctx, {
-    dataDir: base,
-    ...(pauseMs === undefined ? {} : { pauseMs }),
-    ...(now ? { now } : {}),
-    entities: ENTITIES,
-    map: (entity, row) => toEventItem(entity, row, countries),
-    dumpName: 'musicbrainz-events',
-  });
+  const stamp = (cursor) => (cursor ? { ...cursor, v: MAPPING_VERSION } : cursor);
+  const inner = walk(
+    { ...ctx, cursor: prev },
+    {
+      dataDir: base,
+      ...(pauseMs === undefined ? {} : { pauseMs }),
+      ...(now ? { now } : {}),
+      entities: ENTITIES,
+      map: (entity, row) => toEventItem(entity, row, countries),
+      dumpName: 'musicbrainz-events',
+    },
+  );
+  let step = await inner.next();
+  while (!step.done) {
+    yield { ...step.value, cursor: stamp(step.value.cursor) };
+    step = await inner.next();
+  }
+  return step.value ? { ...step.value, cursor: stamp(step.value.cursor) } : step.value;
 }
 
 export const musicbrainzEvents = defineAdapter({
