@@ -1,6 +1,6 @@
 import { config } from '@nichedb/config';
 import { asJson, asJsonArray, formatBps, nextTierFor } from '@nichedb/knowledge';
-import { Notice, Num, Relative } from './components.jsx';
+import { ItemList, Notice, Num, Relative } from './components.jsx';
 import { Layout } from './Layout.jsx';
 import { PlanBadge } from './premium.jsx';
 
@@ -69,7 +69,59 @@ const ModeratorCard = ({ member, plan = 'free' }) => (
   </li>
 );
 
-export const NichePage = ({ user, niche, members: everyone, tiers, contributions, plans = {} }) => {
+/**
+ * The niche's own data, first thing under the title: the counts, the feeds,
+ * what is coming up and what just came in, so a person who lands on /music
+ * or /events sees music or events before being asked to claim anything.
+ */
+export const NicheData = ({ data }) => {
+  if (!data) return null;
+  const { collection, stats, feeds = [], upcoming = [], latest = [] } = data;
+  if (!latest.length && !upcoming.length) return null;
+  const more = `/c/${collection.slug}`;
+  return (
+    <section class="niche-data">
+      {stats ? (
+        <p class="stats">
+          <Num n={stats.items} /> items · <Num n={stats.items_today ?? 0} /> today ·{' '}
+          <Num n={stats.sources} /> sources · <Num n={stats.feeds} /> feeds
+        </p>
+      ) : null}
+      {feeds.length ? (
+        <p class="tags">
+          {feeds.map((f) => (
+            <a key={f.slug} class="tag" href={`/f/${f.slug}`}>
+              {f.name}
+            </a>
+          ))}
+        </p>
+      ) : null}
+      {upcoming.length ? (
+        <>
+          <h2>Coming up</h2>
+          <ItemList items={upcoming} />
+        </>
+      ) : null}
+      <h2>Just in</h2>
+      <ItemList items={latest} />
+      <p>
+        <a class="button" href={more}>
+          Browse all {stats ? <Num n={stats.items} /> : null} {collection.name.toLowerCase()}
+        </a>
+      </p>
+    </section>
+  );
+};
+
+export const NichePage = ({
+  user,
+  niche,
+  members: everyone,
+  tiers,
+  contributions,
+  plans = {},
+  data = null,
+}) => {
   // Experts are on the ladder; moderators are not, and are shown apart.
   const members = everyone.filter((m) => m.role !== 'moderator');
   const moderators = everyone.filter((m) => m.role === 'moderator');
@@ -99,6 +151,8 @@ export const NichePage = ({ user, niche, members: everyone, tiers, contributions
           <a href={`/${niche.slug}/manifest.json`}>manifest</a>
         </p>
       </section>
+
+      <NicheData data={data} />
 
       {members.length ? (
         <section>

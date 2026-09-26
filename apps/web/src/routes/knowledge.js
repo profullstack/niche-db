@@ -2,6 +2,7 @@ import { config } from '@nichedb/config';
 import * as agents from '@nichedb/db/agents';
 import * as k from '@nichedb/db/knowledge';
 import * as premiumDb from '@nichedb/db/premium';
+import * as q from '@nichedb/db/queries';
 import {
   CONTRIBUTION_EVENT_TYPES,
   isKnownEventType,
@@ -30,6 +31,34 @@ import {
  * (`isReservedNicheSlug`, enforced when the niche is created), so it can never
  * shadow a real page however the router resolves ties.
  */
+
+/**
+ * What the niche's collection holds, for the top of its page: the stored
+ * counts, the feeds, the next fortnight and the newest rows. The page is
+ * cached per niche for every visitor, so an early-access collection shows
+ * nothing here rather than showing a member's view to everyone; its
+ * /c page keeps the real gate. Any failure is an empty section, never a
+ * broken niche page.
+ */
+async function nicheData(collectionSlug) {
+  if (!collectionSlug) return null;
+  try {
+    const collection = await q.getCollection(collectionSlug);
+    if (!collection || collection.early_access) return null;
+    const [stats, feeds, upcoming, latest] = await Promise.all([
+      q.storedCollectionStats(collection.id),
+      q.listFeeds({ collectionId: collection.id }),
+      q.upcomingItems({ collectionId: collection.id, days: 14, limit: 8 }),
+      q.feedItems(
+        { collection_id: collection.id, query: {} },
+        { limit: 12, timeoutMs: config.web.queryTimeoutMs },
+      ),
+    ]);
+    return { collection, stats, feeds, upcoming, latest };
+  } catch {
+    return null;
+  }
+}
 
 const requireAdmin = (c) => {
   const user = requireUser(c);
@@ -506,10 +535,11 @@ export function registerKnowledge(app) {
     const niche = await k.getNiche(slug);
     if (!niche || niche.status === 'draft' || niche.status === 'archived') return c.notFound();
     return cached(c, `niche:${niche.slug}`, async () => {
-      const [members, tiers, contributions] = await Promise.all([
+      const [members, tiers, contributions, data] = await Promise.all([
         k.nicheMembers(niche.id),
         k.listTiers(),
         k.listContributions({ nicheId: niche.id, status: 'verified', limit: 15 }),
+        nicheData(niche.collection_slug),
       ]);
       // One statement for the whole list, so a badge beside fifteen names is
       // not fifteen extra queries.
@@ -527,6 +557,7 @@ export function registerKnowledge(app) {
           members={members}
           tiers={tiers}
           contributions={contributions}
+          data={data}
         />,
       );
     });
