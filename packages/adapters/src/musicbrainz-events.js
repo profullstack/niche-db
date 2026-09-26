@@ -1,6 +1,20 @@
+import { readdir, readFile, unlink, writeFile } from 'node:fs/promises';
+import { join } from 'node:path';
 import { defineAdapter, looseDate, slugify } from '@nichedb/core/adapter';
+import { dumpDir, xzLines } from '@nichedb/core/dump';
 
-import { BATCH_SIZE, BUDGET_MS, PROVIDER, walk } from './musicbrainz-catalog.js';
+import {
+  BATCH_SIZE,
+  BUDGET_MS,
+  dumpUrl,
+  LATEST_URL,
+  localFile,
+  memberOf,
+  PROVIDER,
+  parseLatest,
+  USER_AGENT,
+  walk,
+} from './musicbrainz-catalog.js';
 
 /**
  * MusicBrainz: every live event, for the `events` collection.
@@ -36,7 +50,19 @@ import { BATCH_SIZE, BUDGET_MS, PROVIDER, walk } from './musicbrainz-catalog.js'
  * last resort of looseDate, reads as 2 April 2001. Only a year, a year and
  * month or a whole date is parsed, so such a row is stored undated. The
  * `time` is the venue's local wall clock with no zone, so it goes to `data`
- * and the timestamp stays date-only. Annotations, ratings, tags and genres
+ * and the timestamp stays date-only.
+ *
+ * WHERE, BY COUNTRY
+ *
+ * An event row names its venue's city but not the city's country: only 15k
+ * of 126k events carried an ISO code of their own. The country is in the
+ * area dump (35 MB, 120k areas), where every area is "part of" a larger one
+ * up to a country: Bonn, then Nordrhein-Westfalen (DE-NW), then Germany. So
+ * each new dump starts by fetching area.tar.xz, resolving every area to its
+ * country up that chain, and caching the map as JSON beside the dump; the
+ * archive is then deleted. That puts a country on 114k events (90.8%); the
+ * rest name no venue or area at all. A failure here is logged and the walk
+ * goes on without it, so an area outage never stops events being read. Annotations, ratings, tags and genres
  * in the same rows are CC BY-NC-SA and never reach an item; the setlist is
  * a column of the event itself, core data, and is kept.
  */
@@ -170,7 +196,7 @@ export function billing(performers) {
 }
 
 /** One event row as an item, or null when it is not one. */
-export function eventItem(e) {
+export function eventItem(e, countries = null) {
   const id = str(e?.id);
   const name = str(e?.name);
   if (!id || !name) return null;
@@ -181,7 +207,12 @@ export function eventItem(e) {
   const when = looseDate(PARTIAL_DATE.test(begin ?? '') ? begin : '');
   const rel = relationsOf(e.relations);
   const city = rel.place?.area ?? rel.area;
-  const country = rel.place?.area?.country ?? rel.area?.country ?? null;
+  const country =
+    rel.place?.area?.country ??
+    rel.area?.country ??
+    countries?.get(rel.place?.area?.mbid) ??
+    countries?.get(rel.area?.mbid) ??
+    null;
   const cancelled = e.cancelled === true;
   const where = [rel.place?.name, city?.name].filter(Boolean);
   const bill = billing(rel.performers);
@@ -218,7 +249,9 @@ export function eventItem(e) {
       cancelled ? 'cancelled' : null,
       country ? `country:${country.toLowerCase()}` : null,
       citySlug ? `city:${citySlug}` : null,
-      rel.links.ticketing ? 'tickets' : null,
+      // "tickets" means you can still buy one: the on-sale feed asks for it,
+      // and a cancelled show keeps its link in data but not the tag.
+      rel.links.ticketing && !cancelled ? 'tickets' : null,
       rel.links.setlistfm || str(e.setlist) ? 'setlist' : null,
       ...artistTags,
     ]),
@@ -244,7 +277,135 @@ export function eventItem(e) {
 }
 
 /** The walk's mapper: only event rows become items. */
-export const toEventItem = (entity, row) => (entity === 'event' && row ? eventItem(row) : null);
+export const toEventItem = (entity, row, countries = null) =>
+  entity === 'event' && row ? eventItem(row, countries) : null;
+
+/** The first "part of" parent an area row names: `{ id, country }`, or null. */
+function parentOf(row) {
+  for (const r of Array.isArray(row?.relations) ? row.relations : []) {
+    if (r?.['target-type'] === 'area' && r.type === 'part of' && r.direction === 'backward') {
+      const id = str(r.area?.id);
+      if (id) return { id, country: countryOf(r.area) };
+    }
+  }
+  return null;
+}
+
+/**
+ * Every area's country, from the rows of the area member: an area's own ISO
+ * code, else its parent's, else up the "part of" chain until one has a code.
+ * A chain longer than a dozen steps, or a loop, resolves to nothing.
+ */
+export async function areaCountries(rows) {
+  const own = new Map();
+  const parent = new Map();
+  for await (const row of rows) {
+    const id = str(row?.id);
+    if (!id) continue;
+    const p = parentOf(row);
+    const cc = countryOf(row) ?? p?.country ?? null;
+    if (cc) own.set(id, cc);
+    if (p) parent.set(id, p.id);
+  }
+  const out = new Map();
+  const resolve = (id) => {
+    if (out.has(id)) return out.get(id);
+    let cur = id;
+    let cc = null;
+    for (let i = 0; i < 12 && cur && !cc; i++) {
+      cc = out.get(cur) ?? own.get(cur) ?? null;
+      cur = parent.get(cur);
+    }
+    out.set(id, cc);
+    return cc;
+  };
+  for (const id of new Set([...own.keys(), ...parent.keys()])) resolve(id);
+  for (const [id, cc] of out) if (!cc) out.delete(id);
+  return out;
+}
+
+/** Where a dump's area map is cached. */
+export const countriesFile = (dataDir, dir) => join(dataDir, `${dir}-area-country.json`);
+
+async function* parsedLines(file) {
+  for await (const line of xzLines(file, { member: memberOf('area') })) {
+    try {
+      yield JSON.parse(line);
+    } catch {
+      // a bad line is skipped, as in the walk
+    }
+  }
+}
+
+/**
+ * The area map for one dump: read from its cache, or built from area.tar.xz
+ * and cached. Older dumps' maps are removed. Null when it cannot be had.
+ */
+export async function loadCountries({ http, log, dir, dataDir }) {
+  const file = countriesFile(dataDir, dir);
+  try {
+    return new Map(Object.entries(JSON.parse(await readFile(file, 'utf8'))));
+  } catch {
+    // not cached yet
+  }
+  const archive = localFile(dataDir, dir, 'area');
+  try {
+    const dl = await http.download(dumpUrl(dir, 'area'), archive, {
+      headers: { 'user-agent': USER_AGENT },
+      timeoutMs: 10 * 60_000,
+    });
+    if (!dl?.complete) {
+      log(`area: download incomplete (${dl?.bytes ?? 0} bytes), countries from the events alone`);
+      return null;
+    }
+    const map = await areaCountries(parsedLines(archive));
+    await writeFile(file, JSON.stringify(Object.fromEntries(map)));
+    for (const name of await readdir(dataDir)) {
+      if (name.endsWith('-area-country.json') && !name.startsWith(`${dir}-`)) {
+        await unlink(join(dataDir, name)).catch(() => {});
+      }
+    }
+    log(`area: ${map.size} areas resolved to a country`);
+    return map;
+  } catch (err) {
+    log(`area: ${err?.message ?? err}, countries from the events alone`);
+    return null;
+  } finally {
+    await unlink(archive).catch(() => {});
+  }
+}
+
+/**
+ * The adapter's pull: the area map for the current dump, then the shared
+ * walk with it. A dump already walked goes straight to the walk, which
+ * answers "unchanged" without fetching anything else.
+ */
+export async function* pullEvents(ctx, { dataDir = null, pauseMs, now } = {}) {
+  const base = dataDir ?? (await dumpDir('musicbrainz-events'));
+  let countries = null;
+  let dir = null;
+  try {
+    dir = parseLatest(
+      await ctx.http.text(LATEST_URL, {
+        headers: { 'user-agent': USER_AGENT, accept: 'text/plain, */*' },
+        timeoutMs: 20_000,
+      }),
+    );
+  } catch {
+    // the walk asks again and reports the failure itself
+  }
+  const walked = ctx.cursor?.dir === dir && ctx.cursor?.done === true;
+  if (dir && !walked)
+    countries = await loadCountries({ http: ctx.http, log: ctx.log, dir, dataDir: base });
+  return yield* walk(ctx, {
+    dataDir: base,
+    ...(pauseMs === undefined ? {} : { pauseMs }),
+    ...(now ? { now } : {}),
+    entities: ENTITIES,
+    map: (entity, row) => toEventItem(entity, row, countries),
+    dumpName: 'musicbrainz-events',
+  });
+}
 
 export const musicbrainzEvents = defineAdapter({
   name: 'musicbrainz-events',
@@ -273,6 +434,5 @@ export const musicbrainzEvents = defineAdapter({
       config: { batchSize: BATCH_SIZE },
     },
   ],
-  pull: (ctx) =>
-    walk(ctx, { entities: ENTITIES, map: toEventItem, dumpName: 'musicbrainz-events' }),
+  pull: (ctx) => pullEvents(ctx),
 });

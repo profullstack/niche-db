@@ -17,8 +17,18 @@ import { join } from 'node:path';
 process.env.DATABASE_URL ??= 'postgres://test:test@localhost:5432/test';
 process.env.SITE_URL ??= 'https://nichedb.test';
 
-const { ENTITIES, eventItem, billing, countryOf, relationsOf, toEventItem, musicbrainzEvents } =
-  await import('../packages/adapters/src/musicbrainz-events.js');
+const {
+  ENTITIES,
+  areaCountries,
+  billing,
+  countriesFile,
+  countryOf,
+  eventItem,
+  musicbrainzEvents,
+  pullEvents,
+  relationsOf,
+  toEventItem,
+} = await import('../packages/adapters/src/musicbrainz-events.js');
 const catalog = await import('../packages/adapters/src/musicbrainz-catalog.js');
 const { festivalItem, pointOf, wikidataFestivals, buildQuery } = await import(
   '../packages/adapters/src/wikidata-festivals.js'
@@ -112,10 +122,29 @@ describe('musicbrainz-events mapping', () => {
   });
 
   test('a ticketing link is kept and tagged', () => {
-    const r = find((e) => (e.relations ?? []).some((x) => x.type === 'ticketing'));
+    const r = find((e) => !e.cancelled && (e.relations ?? []).some((x) => x.type === 'ticketing'));
     const item = eventItem(r);
     expect(item.tags).toContain('tickets');
     expect(item.data.links.ticketing[0]).toMatch(/^https?:\/\//);
+  });
+
+  test('a cancelled show keeps its ticket link but is not on sale', () => {
+    const r = find((e) => !e.cancelled && (e.relations ?? []).some((x) => x.type === 'ticketing'));
+    const item = eventItem({ ...r, cancelled: true });
+    expect(item.tags).not.toContain('tickets');
+    expect(item.tags).toContain('cancelled');
+    expect(item.data.links.ticketing.length).toBeGreaterThan(0);
+  });
+
+  test('a country missing from the row comes from the area map', () => {
+    const r = find((e) =>
+      (e.relations ?? []).some((x) => x.type === 'held at' && x.place?.area?.id),
+    );
+    const areaId = r.relations.find((x) => x.type === 'held at').place.area.id;
+    const without = eventItem(r);
+    const withMap = eventItem(r, new Map([[areaId, 'DE']]));
+    expect(withMap.data.country).toBe(without.data.country ?? 'DE');
+    if (!without.data.country) expect(withMap.tags).toContain('country:de');
   });
 
   test('the venue carries its coordinates and city', () => {
@@ -327,5 +356,114 @@ describe('events collection wiring', () => {
     for (const f of feeds) {
       for (const k of f.query.kinds) expect(['event', 'festival']).toContain(k);
     }
+  });
+});
+
+describe('area countries', () => {
+  const AREAS = join(FIXTURES, 'musicbrainz-area-sample.tar.xz');
+  const area = (id, parent = null, codes = {}) => ({
+    id,
+    ...codes,
+    relations: parent
+      ? [{ 'target-type': 'area', type: 'part of', direction: 'backward', area: { id: parent } }]
+      : [],
+  });
+  async function* each(xs) {
+    for (const x of xs) yield x;
+  }
+
+  test('a city resolves up its chain to the first area with a code', async () => {
+    const map = await areaCountries(
+      each([
+        area('bonn', 'nrw'),
+        area('nrw', 'de', { 'iso-3166-2-codes': ['DE-NW'] }),
+        area('de', null, { 'iso-3166-1-codes': ['DE'] }),
+        area('beuel', 'bonn'),
+      ]),
+    );
+    expect(map.get('bonn')).toBe('DE');
+    expect(map.get('beuel')).toBe('DE');
+    expect(map.get('de')).toBe('DE');
+  });
+
+  test('a loop or a chain with no code resolves to nothing', async () => {
+    const map = await areaCountries(each([area('a', 'b'), area('b', 'a'), area('c')]));
+    expect(map.size).toBe(0);
+  });
+
+  const fakeHttp = ({ areaFails = false } = {}) => {
+    const downloads = [];
+    return {
+      downloads,
+      http: {
+        async text() {
+          return `${DIR}\n`;
+        },
+        async download(url, filePath) {
+          downloads.push(url);
+          if (url.endsWith('/area.tar.xz')) {
+            if (areaFails) throw new Error('503');
+            await copyFile(AREAS, filePath);
+          } else {
+            await copyFile(EVENTS, filePath);
+          }
+          return { complete: true, bytes: 1 };
+        },
+      },
+    };
+  };
+
+  test('a pull resolves countries from the real area rows and caches the map', async () => {
+    const dataDir = await mkdtemp(join(tmp, 'pull-'));
+    const { http, downloads } = fakeHttp();
+    const ctx = { config: {}, cursor: null, http, log: () => {}, deadline: Infinity };
+    const { batches, result } = await collect(pullEvents(ctx, { dataDir }));
+    const items = batches.flatMap((b) => b.items);
+    expect(items.length).toBe(191);
+    const withCountry = items.filter((i) => i.data.country).length;
+    const baseline = rows.filter((r) => eventItem(r).data.country).length;
+    expect(withCountry).toBeGreaterThan(baseline);
+    expect(downloads.filter((u) => u.endsWith('/area.tar.xz')).length).toBe(1);
+    const cached = JSON.parse(await readFile(countriesFile(dataDir, DIR), 'utf8'));
+    expect(Object.keys(cached).length).toBeGreaterThan(0);
+    expect(result.cursor.done).toBe(true);
+
+    // A second walk of the same dump reads the cache, not the archive.
+    const again = fakeHttp();
+    await collect(pullEvents({ ...ctx, http: again.http }, { dataDir }));
+    expect(again.downloads.some((u) => u.endsWith('/area.tar.xz'))).toBe(false);
+  });
+
+  test('an area outage still walks the events', async () => {
+    const dataDir = await mkdtemp(join(tmp, 'outage-'));
+    const { http } = fakeHttp({ areaFails: true });
+    const logs = [];
+    const { batches } = await collect(
+      pullEvents(
+        { config: {}, cursor: null, http, log: (m) => logs.push(m), deadline: Infinity },
+        { dataDir },
+      ),
+    );
+    expect(batches.flatMap((b) => b.items).length).toBe(191);
+    expect(logs.some((m) => m.startsWith('area:'))).toBe(true);
+  });
+
+  test('a walked dump asks for no area archive', async () => {
+    const dataDir = await mkdtemp(join(tmp, 'done-'));
+    const { http, downloads } = fakeHttp();
+    const { result } = await collect(
+      pullEvents(
+        {
+          config: {},
+          cursor: { dir: DIR, entity: 'event', line: 191, done: true },
+          http,
+          log: () => {},
+          deadline: Infinity,
+        },
+        { dataDir },
+      ),
+    );
+    expect(downloads).toEqual([]);
+    expect(result.note).toBe('unchanged');
   });
 });
