@@ -762,7 +762,10 @@ cmd_app_vhost() {
   sed -e "s/__DOMAIN__/$APP_DOMAIN/g" -e "s/__APP_PORT__/$APP_PORT/g" "$HERE/app/nginx-vhost.conf" > "$work/vhost"
   tgt_copy "$work/vhost" "/tmp/nichedb-vhost.conf"
   rm -rf "$work"
-  tgt_exec "if [ -e /etc/nginx/sites-enabled/$APP_DOMAIN ]; then n=1; while [ -e /etc/nginx/sites-enabled/$APP_DOMAIN.bak-\$(printf %03d \$n) ]; do n=\$((n+1)); done; cp -a /etc/nginx/sites-enabled/$APP_DOMAIN /etc/nginx/sites-enabled/$APP_DOMAIN.bak-\$(printf %03d \$n); fi; install -m 0644 /tmp/nichedb-vhost.conf /etc/nginx/sites-available/$APP_DOMAIN && ln -sf /etc/nginx/sites-available/$APP_DOMAIN /etc/nginx/sites-enabled/$APP_DOMAIN && nginx -t 2>&1 | tail -n 1 && systemctl reload nginx"
+  # The backup goes in sites-available: nginx includes sites-enabled/*, so a
+  # copy there would load as a second nichedb.dev server. nginx -t gates the
+  # reload by its own status (piping it through tail used tail's).
+  tgt_exec "f=/etc/nginx/sites-available/$APP_DOMAIN; if [ -e \$f ]; then n=1; while [ -e \$f.bak-\$(printf %03d \$n) ]; do n=\$((n+1)); done; cp -a \$f \$f.bak-\$(printf %03d \$n); fi; install -m 0644 /tmp/nichedb-vhost.conf \$f && ln -sf \$f /etc/nginx/sites-enabled/$APP_DOMAIN && { nginx -t 2>/tmp/nginx-t.log || { tail -n 3 /tmp/nginx-t.log; exit 1; }; } && systemctl reload nginx"
   note "vhost live; test: curl -sk --resolve $APP_DOMAIN:443:$TARGET_IP https://$APP_DOMAIN/healthz"
 }
 
