@@ -125,6 +125,7 @@ import { policeUpdates } from './police-updates.js';
 import { proscanDirectory } from './proscan.js';
 import { pwcArchive } from './pwc-archive.js';
 import { pypi } from './pypi.js';
+import { radiobrowser } from './radiobrowser.js';
 import { redditDeals } from './redditdeals.js';
 import { redditWorkflows } from './redditworkflows.js';
 import { redfinMarket } from './redfin.js';
@@ -407,6 +408,7 @@ export const ADAPTERS = [
   // seller licenses its listings or prices for storage, so none is read here.
   musicbrainzEvents,
   wikidataFestivals,
+  radiobrowser,
 ];
 
 /**
