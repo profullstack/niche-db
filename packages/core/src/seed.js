@@ -359,9 +359,142 @@ export const COLLECTIONS = [
     description:
       'Who is playing where and when. About 126,000 concerts, festivals, stage shows, conventions and award ceremonies from MusicBrainz, each with its performers, venue, date, setlist and a link to its ticketing page where one is known; and every music festival on Wikidata with its website, place and genres. All CC0. No ticket prices: Ticketmaster, SeatGeek and StubHub do not license theirs for storage.',
   },
+  {
+    slug: 'radio',
+    name: 'Radio stations',
+    description:
+      'Internet radio stations, about 67,000 of them (60,000 with a stream that plays) from the community directory at radio-browser.info: the stream URL, the homepage, country and language, genres, codec and bitrate, whether the stream passed its last check, votes and the last day\u2019s listens, and coordinates where known, so the collection answers near= and sort=distance. Free to use, swept daily. Follow a genre, a country, or only the streams that play.',
+  },
 ];
 
 export const DEFAULT_FEEDS = [
+  {
+    collection: 'radio',
+    slug: 'radio-stations',
+    name: 'Every station',
+    description: 'Every station in the directory, most recently changed first.',
+    query: { kinds: ['station'] },
+  },
+  {
+    collection: 'radio',
+    slug: 'radio-online',
+    name: 'Stations that play',
+    description: 'Only the streams that passed the directory\u2019s last check.',
+    query: { kinds: ['station'], tags: ['online'] },
+  },
+  {
+    collection: 'radio',
+    slug: 'radio-popular',
+    name: 'Popular stations',
+    description: 'A thousand votes or more, or a hundred listens in the last day.',
+    query: { kinds: ['station'], tags: ['popular'] },
+  },
+  {
+    collection: 'radio',
+    slug: 'radio-on-the-map',
+    name: 'Stations on the map',
+    description: 'Stations with coordinates, for near= and sort=distance.',
+    query: { kinds: ['station'], tags: ['geo'] },
+  },
+  {
+    collection: 'radio',
+    slug: 'radio-news',
+    name: 'News and talk radio',
+    query: { kinds: ['station'], tags: ['news', 'talk', 'talk & speech'] },
+  },
+  {
+    collection: 'radio',
+    slug: 'radio-jazz',
+    name: 'Jazz radio',
+    query: { kinds: ['station'], tags: ['jazz'] },
+  },
+  {
+    collection: 'radio',
+    slug: 'radio-classical',
+    name: 'Classical radio',
+    query: { kinds: ['station'], tags: ['classical'] },
+  },
+  {
+    collection: 'radio',
+    slug: 'radio-rock',
+    name: 'Rock radio',
+    query: { kinds: ['station'], tags: ['rock', 'classic rock', 'alternative rock'] },
+  },
+  {
+    collection: 'radio',
+    slug: 'radio-pop',
+    name: 'Pop radio',
+    query: { kinds: ['station'], tags: ['pop', 'hits', 'top 40'] },
+  },
+  {
+    collection: 'radio',
+    slug: 'radio-electronic',
+    name: 'Electronic and dance radio',
+    query: { kinds: ['station'], tags: ['electronic', 'dance', 'house', 'techno', 'trance'] },
+  },
+  {
+    collection: 'radio',
+    slug: 'radio-country-music',
+    name: 'Country radio',
+    query: { kinds: ['station'], tags: ['country'] },
+  },
+  {
+    collection: 'radio',
+    slug: 'radio-oldies',
+    name: 'Oldies and decades',
+    query: {
+      kinds: ['station'],
+      tags: ['oldies', '60s', '70s', '80s', '90s', 'decades', 'classic hits'],
+    },
+  },
+  {
+    collection: 'radio',
+    slug: 'radio-christian',
+    name: 'Christian radio',
+    query: { kinds: ['station'], tags: ['christian', 'gospel'] },
+  },
+  {
+    collection: 'radio',
+    slug: 'radio-ambient',
+    name: 'Ambient and chillout',
+    query: { kinds: ['station'], tags: ['ambient', 'chillout', 'lounge'] },
+  },
+  {
+    collection: 'radio',
+    slug: 'radio-country-us',
+    name: 'Radio: United States',
+    query: { kinds: ['station'], tags: ['country:us'] },
+  },
+  {
+    collection: 'radio',
+    slug: 'radio-country-gb',
+    name: 'Radio: United Kingdom',
+    query: { kinds: ['station'], tags: ['country:gb'] },
+  },
+  {
+    collection: 'radio',
+    slug: 'radio-country-de',
+    name: 'Radio: Germany',
+    query: { kinds: ['station'], tags: ['country:de'] },
+  },
+  {
+    collection: 'radio',
+    slug: 'radio-country-fr',
+    name: 'Radio: France',
+    query: { kinds: ['station'], tags: ['country:fr'] },
+  },
+  {
+    collection: 'radio',
+    slug: 'radio-country-ca',
+    name: 'Radio: Canada',
+    query: { kinds: ['station'], tags: ['country:ca'] },
+  },
+  {
+    collection: 'radio',
+    slug: 'radio-country-au',
+    name: 'Radio: Australia',
+    query: { kinds: ['station'], tags: ['country:au'] },
+  },
   {
     collection: 'listings',
     slug: 'for-sale',
