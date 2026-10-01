@@ -34,6 +34,7 @@ import {
   parseSports,
   parseTeams,
   proxyUsable,
+  pruneWatch,
   regionFor,
   resetProxyBreaker,
   scheduleQueries,
@@ -1106,6 +1107,30 @@ describe('espn-schedule pull', () => {
   });
 });
 
+describe('pruneWatch', () => {
+  const now = Date.parse('2026-10-01T03:25:00Z');
+  const ago = (m) => new Date(now - m * 60_000).toISOString();
+  test('a league unseen for longer than the grace is dropped while the source was running', () => {
+    expect(pruneWatch({ a: ago(20), b: ago(5) }, { now, lastTickAt: ago(1) })).toEqual({
+      b: ago(5),
+    });
+  });
+  test('time the source was not running does not count against a league', () => {
+    // Last tick 01:54, back at 03:25: MLB was seen at that last tick.
+    expect(pruneWatch({ mlb: ago(91), old: ago(120) }, { now, lastTickAt: ago(91) })).toEqual({
+      mlb: ago(91),
+    });
+  });
+  test('no previous tick recorded means the wall clock, as before', () => {
+    expect(pruneWatch({ a: ago(20) }, { now })).toEqual({});
+  });
+  test('a league no longer in the catalogue is dropped whatever its age', () => {
+    expect(pruneWatch({ gone: ago(1) }, { now, lastTickAt: ago(1), known: () => false })).toEqual(
+      {},
+    );
+  });
+});
+
 describe('espn-live pull', () => {
   test('watches a league with a game on, emits fresh state, and drops it when nothing is on', async () => {
     const live = structuredClone(nfl);
@@ -1140,6 +1165,22 @@ describe('espn-live pull', () => {
     expect(r2.items).toEqual([]);
     const asked = http.urls.filter((u) => u.url.includes('/scoreboard')).map((u) => u.url);
     expect(asked[asked.length - 1] === asked[asked.length - 2]).toBe(false);
+  });
+
+  test('an outage longer than the grace does not empty the watch list', async () => {
+    // dev2 2026-10-01: Postgres down 01:56-03:25, espn-live not running. The
+    // first tick back must still ask the league it was watching.
+    const now = Date.now();
+    const ago = (m) => new Date(now - m * 60_000).toISOString();
+    const http = fakeEspn({ onScoreboard: () => json({ events: [] }) });
+    await espnLive.pull(
+      ctx(http, {
+        config: { ...espnLive.defaults, probePerRun: 1 },
+        cursor: { watch: { 'football/nfl': ago(90) }, tickAt: ago(89), scanIdx: 1 },
+      }),
+    );
+    const asked = http.urls.filter((u) => u.url.includes('/scoreboard')).map((u) => u.url);
+    expect(asked.some((u) => u.includes('football/nfl'))).toBe(true);
   });
 
   test('pinned leagues are polled and nothing else is probed', async () => {

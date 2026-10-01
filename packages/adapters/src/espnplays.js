@@ -15,10 +15,10 @@ import {
   oddsFromCompetition,
   PROVIDER,
   pool,
+  pruneWatch,
   regionFor,
   SITE,
   SKIP_SPORTS_FIELD,
-  WATCH_GRACE_MS,
   WATCH_LEAD_MS,
 } from './espn.js';
 
@@ -583,10 +583,12 @@ export const espnPlays = defineAdapter({
     const leagues = await ensureCatalogue(ctx, client, cursor);
     const byKey = new Map(leagues.map((l) => [l.key, l]));
 
-    const watch = { ...(cursor.watch ?? {}) };
-    for (const [k, seen] of Object.entries(watch)) {
-      if (!byKey.has(k) || now - Date.parse(seen) > WATCH_GRACE_MS) delete watch[k];
-    }
+    // Time the source was not running does not count against a league; see pruneWatch.
+    const watch = pruneWatch(cursor.watch, {
+      now,
+      lastTickAt: cursor.tickAt,
+      known: (k) => byKey.has(k),
+    });
     const recapped = pruneStamps(cursor.recapped, now);
     const read = pruneStamps(cursor.read, now);
     const pinned = leagueKeysOf(config, leagues).filter((k) => byKey.has(k));
@@ -666,6 +668,7 @@ export const espnPlays = defineAdapter({
         scanIdx,
         recapped,
         read,
+        tickAt: new Date(now).toISOString(),
       },
       note: `${Object.keys(watch).length} league(s) watched, ${candidates.length} candidate(s), ${live} live + ${finals} final read of ${due.length} due, ${failed} failed${boardsFailed ? `, ${boardsFailed} scoreboard(s) failed` : ''}`,
     };

@@ -1256,6 +1256,31 @@ export const WATCH_LEAD_MS = 2 * HOUR_MS;
 export const WATCH_GRACE_MS = 15 * 60_000;
 
 /**
+ * The watch list as this tick starts: leagues no longer in the catalogue
+ * dropped, and leagues not seen worth watching for WATCH_GRACE_MS dropped.
+ *
+ * The grace counts only time the source was actually running. A league leaves
+ * the list on the first tick that finds nothing on in it, so the grace exists
+ * for ticks that did not get to ask (deadline, a failed request). Measured on
+ * the wall clock it also emptied the list after any outage longer than the
+ * grace: on dev2 a Postgres crash recovery stopped espn-live from 01:56 to
+ * 03:25, the first tick back dropped every league, and an MLB playoff game in
+ * the 4th inning waited for the rolling probe (a pass of the whole catalogue
+ * takes about 90 minutes) to be found again. So time since the previous tick,
+ * less a minute for the usual cadence, is not counted against a league.
+ */
+export function pruneWatch(watch, { now, lastTickAt = null, known = () => true }) {
+  const last = Date.parse(lastTickAt ?? '');
+  const idle = Number.isFinite(last) ? Math.max(0, now - last - 60_000) : 0;
+  const out = { ...(watch ?? {}) };
+  for (const [k, seen] of Object.entries(out)) {
+    const age = now - idle - Date.parse(seen);
+    if (!known(k) || !(age <= WATCH_GRACE_MS)) delete out[k];
+  }
+  return out;
+}
+
+/**
  * Whether a fixture is worth emitting from the live tick: on now, about to start,
  * or finished recently enough that its final may not have been written yet.
  */
@@ -1339,10 +1364,11 @@ export const espnLive = defineAdapter({
     const now = Date.now();
     const leagues = await ensureCatalogue(ctx, client, cursor);
     const byKey = new Map(leagues.map((l) => [l.key, l]));
-    const watch = { ...(cursor.watch ?? {}) };
-    for (const [k, seen] of Object.entries(watch)) {
-      if (!byKey.has(k) || now - Date.parse(seen) > WATCH_GRACE_MS) delete watch[k];
-    }
+    const watch = pruneWatch(cursor.watch, {
+      now,
+      lastTickAt: cursor.tickAt,
+      known: (k) => byKey.has(k),
+    });
     const pinned = leagueKeysOf(config, leagues).filter((k) => byKey.has(k));
     const { targets, scanIdx } = liveTargets({
       leagues,
@@ -1390,6 +1416,7 @@ export const espnLive = defineAdapter({
         leaguesAt: cursor.leaguesAt,
         watch,
         scanIdx,
+        tickAt: new Date(now).toISOString(),
       },
       note: `${Object.keys(watch).length} league(s) watched, ${live} in play, ${items.length} fixtures, ${failed} failed`,
     };
