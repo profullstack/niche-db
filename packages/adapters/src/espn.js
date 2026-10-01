@@ -24,9 +24,6 @@ import { defineAdapter, slugify } from '@nichedb/core/adapter';
 const CORE = 'https://sports.core.api.espn.com/v2';
 export const SITE = 'https://site.api.espn.com/apis/site/v2/sports';
 
-/** A scoreboard response caps out around 100 events regardless of `limit`. */
-export const PAGE_CAP = 100;
-
 export const PROVIDER = 'espn';
 
 /** Leagues people actually follow, polled ahead of the long tail. */
@@ -831,45 +828,125 @@ export function horizonWindow(now, days) {
 }
 
 /**
+ * ESPN files a scoreboard day in US Eastern time: a 10pm Pacific first pitch
+ * (05:00Z) is on the previous day's board. Windows are turned into ESPN days in
+ * that zone, not UTC, or the late games of a US evening fall between two asks.
+ */
+export const ESPN_TZ = 'America/New_York';
+
+const espnDayFormat = new Intl.DateTimeFormat('en-CA', {
+  timeZone: ESPN_TZ,
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+});
+
+/** The ESPN scoreboard day (YYYYMMDD) an instant falls on. */
+export const espnDay = (d) => espnDayFormat.format(d).replace(/-/g, '');
+
+/** Every ESPN day a window touches, oldest first. Never empty, never backwards. */
+export function espnDays(from, to) {
+  const first = espnDay(from);
+  const last = espnDay(to);
+  const out = [first];
+  let d = new Date(`${first.slice(0, 4)}-${first.slice(4, 6)}-${first.slice(6)}T12:00:00Z`);
+  while (out[out.length - 1] < last && out.length < 400) {
+    d = new Date(d.getTime() + DAY_MS);
+    out.push(yyyymmdd(d));
+  }
+  return out;
+}
+
+/** What each scoreboard request asks for; ESPN honours it (a month of NHL is 200+). */
+export const QUERY_LIMIT = 1000;
+
+/** A window of up to this many ESPN days is asked one day at a time. */
+export const PER_DAY_MAX_DAYS = 7;
+
+/** A month with fewer days than this inside a longer window is asked by day. */
+export const MONTH_MIN_DAYS = 4;
+
+/**
+ * The `dates=` values that cover a window.
+ *
+ * ESPN stopped answering a date RANGE (`dates=A-B`) on 2026-09-30: every one is a
+ * 400 "Failed to get events endpoint." A single day (`YYYYMMDD`) and a calendar
+ * month (`YYYYMM`) still work. A short window, which is every live tick and the
+ * near refresh, is asked a day at a time, which keeps each response small. The
+ * daily horizon sweep would be 31 requests a league that way, so the whole months
+ * inside it are asked as a month (two to five requests for the 30-day horizon)
+ * and only a ragged edge of a few days by day. A month carries its days so it can
+ * be re-asked by day if ESPN refuses the month too.
+ */
+export function scheduleQueries(from, to) {
+  const days = espnDays(from, to);
+  if (days.length <= PER_DAY_MAX_DAYS) return days.map((dates) => ({ dates }));
+  const months = new Map();
+  for (const d of days) {
+    const m = d.slice(0, 6);
+    if (!months.has(m)) months.set(m, []);
+    months.get(m).push(d);
+  }
+  const out = [];
+  for (const [m, ds] of months) {
+    if (ds.length < MONTH_MIN_DAYS) for (const dates of ds) out.push({ dates });
+    else out.push({ dates: m, days: ds });
+  }
+  return out;
+}
+
+/**
  * Fixtures for one league across a date window.
  *
- * ESPN answers a whole range in a single request. When a response comes back at
- * the cap the window is split and re-fetched, because a truncated response is
- * indistinguishable from a quiet fortnight. A 404 on a date window means nothing
- * is scheduled inside it, which is the normal state of most leagues most of the
- * year; with `fallback` the undated scoreboard answers with the NEXT fixtures
- * instead, so an out-of-season league shows its season opener.
+ * The window is asked as the days (or months) `scheduleQueries` names, one
+ * request at a time, and the answers merged by fixture key. A 404 on a date means
+ * nothing is scheduled on it, which is the normal state of most leagues most of
+ * the year. A month ESPN refuses with a 400, or that comes back full, is re-asked
+ * a day at a time. With `fallback`, a window with nothing in it, or a request that
+ * fails outright, is answered by the undated scoreboard, which carries the NEXT
+ * fixtures, so an out-of-season league shows its season opener. Without it a
+ * failure is thrown, so the caller counts the league as failed rather than quiet.
  */
-export async function fetchSchedule(client, { league, from, to, fallback = true, depth = 0 }) {
+export async function fetchSchedule(client, { league, from, to, fallback = true }) {
   const base = `${SITE}/${league.key}/scoreboard`;
-  let data;
-  try {
-    data = await client.get(`${base}?dates=${yyyymmdd(from)}-${yyyymmdd(to)}&limit=1000`);
-  } catch (err) {
-    if (depth > 0 || !fallback) {
-      if (err?.status === 404) return { league: null, events: [] };
-      throw err;
+  const queue = scheduleQueries(from, to);
+  // A month starts before the window does: drop what started well before it,
+  // with a week of slack for a tournament that began earlier and is still on.
+  const floor = from.getTime() - 7 * DAY_MS;
+  const byKey = new Map();
+  let meta = null;
+  for (let i = 0; i < queue.length; i++) {
+    const q = queue[i];
+    let data;
+    try {
+      data = await client.get(`${base}?dates=${q.dates}&limit=${QUERY_LIMIT}`);
+    } catch (err) {
+      if (q.days && err?.status === 400) {
+        queue.push(...q.days.map((dates) => ({ dates })));
+        continue;
+      }
+      if (err?.status === 404) continue;
+      if (!fallback) throw err;
+      return parseScoreboard(await client.get(base), league);
     }
-    data = await client.get(base);
-  }
-  const parsed = parseScoreboard(data, league);
-  const spansMultipleDays = to.getTime() - from.getTime() >= 2 * DAY_MS;
-  if ((data?.events ?? []).length >= PAGE_CAP && depth < 4 && spansMultipleDays) {
-    const mid = new Date((from.getTime() + to.getTime()) / 2);
-    const dayAfterMid = new Date(mid.getTime() + DAY_MS);
-    if (mid > from && dayAfterMid <= to) {
-      const [a, b] = await Promise.all([
-        fetchSchedule(client, { league, from, to: mid, depth: depth + 1 }),
-        fetchSchedule(client, { league, from: dayAfterMid, to, depth: depth + 1 }),
-      ]);
-      const seen = new Set();
-      return {
-        league: parsed.league ?? a.league ?? b.league,
-        events: [...a.events, ...b.events].filter((e) => !seen.has(e.key) && seen.add(e.key)),
-      };
+    if (q.days && (data?.events ?? []).length >= QUERY_LIMIT) {
+      queue.push(...q.days.map((dates) => ({ dates })));
+      continue;
+    }
+    const parsed = parseScoreboard(data, league);
+    meta ??= parsed.league;
+    for (const e of parsed.events) {
+      if (q.days) {
+        const t = e.publishedAt?.getTime?.();
+        if (Number.isFinite(t) && t < floor) continue;
+      }
+      if (!byKey.has(e.key)) byKey.set(e.key, e);
     }
   }
-  return parsed;
+  if (byKey.size === 0 && fallback) {
+    return parseScoreboard(await client.get(base), league);
+  }
+  return { league: meta, events: [...byKey.values()] };
 }
 
 /* ----------------------------------------------------------------- cursor -- */
@@ -1278,8 +1355,11 @@ export const espnLive = defineAdapter({
     const items = [];
     let failed = 0;
     let live = 0;
+    // Back far enough to write a final from the last twelve hours; forward only as
+    // far as anything this tick would emit or watch. Each ESPN day is a request,
+    // so this is one board a league most of the day and two around US midnight.
     const from = new Date(now - 12 * HOUR_MS);
-    const to = new Date(now + 12 * HOUR_MS);
+    const to = new Date(now + WATCH_LEAD_MS);
     const stopAt = deadline - DEADLINE_MARGIN_MS;
     await pool(targets, 6, stopAt, async (key) => {
       const league = byKey.get(key);

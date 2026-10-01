@@ -8,6 +8,8 @@ import {
   drawBelongsTo,
   earliestUpcoming,
   espnCatalogue,
+  espnDay,
+  espnDays,
   espnLive,
   espnSchedule,
   fetchSchedule,
@@ -34,6 +36,7 @@ import {
   proxyUsable,
   regionFor,
   resetProxyBreaker,
+  scheduleQueries,
   skipSportsOf,
   slugFromRef,
   startOf,
@@ -757,51 +760,165 @@ describe('espn fetchSchedule', () => {
   };
   const notFound = () => Object.assign(new Error('espn 404'), { status: 404 });
 
-  test('a 404 on a date window falls back to the undated board only when asked', async () => {
-    const { client, calls } = clientFor((url) => (url.includes('dates=') ? notFound() : nfl));
-    const from = new Date('2026-09-10T00:00:00Z');
-    const to = new Date('2026-09-12T00:00:00Z');
-    const r = await fetchSchedule(client, { league: NFL, from, to });
-    expect(r.events.length).toBe(2);
-    expect(calls.length).toBe(2);
-    expect(calls[0]).toContain('dates=20260910-20260912');
-    expect(calls[1]).not.toContain('dates=');
+  const badRequest = () =>
+    Object.assign(new Error('espn 400 Failed to get events endpoint.'), { status: 400 });
+  const ev = (id, date) => ({
+    id,
+    date,
+    name: 'G',
+    status: { type: { state: 'pre' } },
+    competitions: [{ status: { type: { state: 'pre' } }, competitors: [] }],
+  });
+  const datesOf = (url) => /[?&]dates=([^&]+)/.exec(url)?.[1] ?? null;
+  // ESPN stopped answering ranges on 2026-09-30, so the fake refuses them too.
+  const espnLike = (byDates) => (url) => {
+    const d = datesOf(url);
+    if (d?.includes('-')) return badRequest();
+    return d in byDates ? byDates[d] : { events: [] };
+  };
 
-    const quiet = await fetchSchedule(client, { league: NFL, from, to, fallback: false });
-    expect(quiet.events).toEqual([]);
+  test('ESPN days are US Eastern, so a late West Coast game is on the day before', () => {
+    // 02:00Z on 1 October is 22:00 on 30 September in New York.
+    expect(espnDay(new Date('2026-10-01T02:00:00Z'))).toBe('20260930');
+    expect(espnDay(new Date('2026-10-01T05:00:00Z'))).toBe('20261001');
+    // Standard time in winter: midnight Eastern is 05:00Z.
+    expect(espnDay(new Date('2026-12-01T04:59:00Z'))).toBe('20261130');
+    expect(espnDays(new Date('2026-09-30T12:05:00Z'), new Date('2026-10-01T02:05:00Z'))).toEqual([
+      '20260930',
+    ]);
+    expect(espnDays(new Date('2026-09-29T23:00:00Z'), new Date('2026-10-02T12:00:00Z'))).toEqual([
+      '20260929',
+      '20260930',
+      '20261001',
+      '20261002',
+    ]);
+    // Never empty and never backwards, even for an inverted window.
+    expect(espnDays(new Date('2026-10-02T12:00:00Z'), new Date('2026-10-01T12:00:00Z'))).toEqual([
+      '20261002',
+    ]);
   });
 
-  test('a full page is split by date, never into a backwards range', async () => {
-    const ranges = [];
-    const { client } = clientFor((url) => {
-      const m = /dates=(\d{8})-(\d{8})/.exec(url);
-      if (m) ranges.push([m[1], m[2]]);
-      return {
-        events: Array.from({ length: 100 }, (_, i) => ({
-          id: `${ranges.length}-${i}`,
-          date: '2026-08-25T12:00Z',
-          name: 'G',
-          status: { type: { state: 'pre' } },
-          competitions: [{ status: { type: { state: 'pre' } }, competitors: [] }],
-        })),
-      };
-    });
+  test('a short window is asked a day at a time, a long one by month with a ragged edge', () => {
+    const near = scheduleQueries(
+      new Date('2026-09-30T18:00:00Z'),
+      new Date('2026-10-03T18:00:00Z'),
+    );
+    expect(near).toEqual([
+      { dates: '20260930' },
+      { dates: '20261001' },
+      { dates: '20261002' },
+      { dates: '20261003' },
+    ]);
+    // The 30-day horizon from the last evening of September: one day of it, then
+    // October as a month. Two requests rather than thirty-one.
+    const horizon = scheduleQueries(
+      new Date('2026-09-30T22:00:00Z'),
+      new Date('2026-10-31T04:00:00Z'),
+    );
+    expect(horizon.map((q) => q.dates)).toEqual(['20260930', '202610']);
+    expect(horizon[1].days.length).toBe(31);
+    // Mid-month: a month for the rest of this one, a month for the start of the next.
+    const mid = scheduleQueries(new Date('2026-10-15T12:00:00Z'), new Date('2026-11-14T12:00:00Z'));
+    expect(mid.map((q) => q.dates)).toEqual(['202610', '202611']);
+    // Never a range.
+    for (const q of [...near, ...horizon, ...mid]) expect(q.dates).not.toContain('-');
+  });
+
+  test('asks one day at a time and merges the days by fixture, never a range', async () => {
+    const { client, calls } = clientFor(
+      espnLike({
+        20260930: { ...nfl, events: [ev('1', '2026-09-30T23:00Z'), ev('2', '2026-10-01T02:00Z')] },
+        // ESPN lists a game on both boards now and then; it must come out once.
+        20261001: { events: [ev('2', '2026-10-01T02:00Z'), ev('3', '2026-10-01T23:00Z')] },
+      }),
+    );
     const r = await fetchSchedule(client, {
       league: NFL,
-      from: new Date('2026-08-01T00:00:00Z'),
-      to: new Date('2026-08-29T00:00:00Z'),
+      from: new Date('2026-09-30T12:00:00Z'),
+      to: new Date('2026-10-01T14:00:00Z'),
+      fallback: false,
     });
-    expect(ranges.length).toBeGreaterThan(1);
-    for (const [a, b] of ranges) expect(Number(a)).toBeLessThanOrEqual(Number(b));
-    expect(new Set(r.events.map((e) => e.key)).size).toBe(r.events.length);
+    expect(calls.map(datesOf)).toEqual(['20260930', '20261001']);
+    expect(calls.every((u) => u.includes('limit=1000'))).toBe(true);
+    expect(r.events.map((e) => e.key)).toEqual([
+      'football/nfl/1',
+      'football/nfl/2',
+      'football/nfl/3',
+    ]);
+    expect(r.league.name).toBe('National Football League');
+  });
 
-    ranges.length = 0;
-    await fetchSchedule(client, {
-      league: NFL,
-      from: new Date('2026-08-30T00:00:00Z'),
-      to: new Date('2026-08-31T00:00:00Z'),
+  test('a 404 day is a quiet day; an empty window falls back to the undated board only when asked', async () => {
+    const { client, calls } = clientFor((url) => (url.includes('dates=') ? notFound() : nfl));
+    const from = new Date('2026-09-10T12:00:00Z');
+    const to = new Date('2026-09-12T12:00:00Z');
+    const r = await fetchSchedule(client, { league: NFL, from, to });
+    expect(r.events.length).toBe(2);
+    expect(calls.map(datesOf)).toEqual(['20260910', '20260911', '20260912', null]);
+
+    calls.length = 0;
+    const quiet = await fetchSchedule(client, { league: NFL, from, to, fallback: false });
+    expect(quiet.events).toEqual([]);
+    expect(calls.every((u) => u.includes('dates='))).toBe(true);
+  });
+
+  test('a failing day throws without fallback, and goes to the undated board with it', async () => {
+    const boom = () => Object.assign(new Error('espn 500'), { status: 500 });
+    const { client, calls } = clientFor((url) => (url.includes('dates=') ? boom() : nfl));
+    const from = new Date('2026-09-10T12:00:00Z');
+    const to = new Date('2026-09-11T12:00:00Z');
+    await expect(fetchSchedule(client, { league: NFL, from, to, fallback: false })).rejects.toThrow(
+      /500/,
+    );
+    calls.length = 0;
+    const r = await fetchSchedule(client, { league: NFL, from, to });
+    expect(r.events.length).toBe(2);
+    expect(calls.map(datesOf)).toEqual(['20260910', null]);
+  });
+
+  test('a month ESPN refuses, or that comes back full, is asked again by day', async () => {
+    const from = new Date('2026-10-15T12:00:00Z');
+    const to = new Date('2026-11-14T12:00:00Z');
+    const refused = clientFor((url) => {
+      const d = datesOf(url);
+      if (d.length === 6) return badRequest();
+      return { events: d === '20261020' ? [ev('9', '2026-10-20T23:00Z')] : [] };
     });
-    expect(ranges).toEqual([['20260830', '20260831']]);
+    const r = await fetchSchedule(refused.client, { league: NFL, from, to, fallback: false });
+    expect(r.events.map((e) => e.key)).toEqual(['football/nfl/9']);
+    const asked = refused.calls.map(datesOf);
+    expect(asked.slice(0, 2)).toEqual(['202610', '202611']);
+    expect(asked.filter((d) => d.length === 8).length).toBe(31);
+
+    const full = clientFor((url) => {
+      const d = datesOf(url);
+      if (d === '202610') {
+        return { events: Array.from({ length: 1000 }, (_, i) => ev(`m${i}`, '2026-10-20T23:00Z')) };
+      }
+      return { events: [] };
+    });
+    await fetchSchedule(full.client, { league: NFL, from, to, fallback: false });
+    const fullAsked = full.calls.map(datesOf);
+    expect(fullAsked.filter((d) => d.startsWith('202610') && d.length === 8).length).toBe(17);
+    expect(fullAsked.some((d) => d.startsWith('202611') && d.length === 8)).toBe(false);
+  });
+
+  test('a month drops what started well before the window', async () => {
+    const { client } = clientFor(() => ({
+      events: [
+        ev('old', '2026-10-01T23:00Z'),
+        ev('on', '2026-10-12T23:00Z'),
+        ev('in', '2026-10-20T23:00Z'),
+      ],
+    }));
+    const r = await fetchSchedule(client, {
+      league: NFL,
+      from: new Date('2026-10-15T12:00:00Z'),
+      to: new Date('2026-10-31T12:00:00Z'),
+      fallback: false,
+    });
+    // `on` started three days before the window: inside the week of slack.
+    expect(r.events.map((e) => e.key)).toEqual(['football/nfl/on', 'football/nfl/in']);
   });
 });
 
@@ -938,9 +1055,20 @@ describe('espn-schedule pull', () => {
     expect(r1.cursor.queue).toEqual([]);
     expect(r1.items.length).toBe(2);
     expect(r1.items[0].data.league.name).toBe('National Football League');
-    // Every league asked once, with a 30-day window; tennis skipped.
-    expect(boards.length).toBe(3);
-    expect(boards.every((u) => /dates=\d{8}-\d{8}/.test(u))).toBe(true);
+    // Every league asked across a 30-day window by day or month, never by range,
+    // in a handful of requests; the two with nothing in it fall back once to the
+    // undated board for their next fixture; tennis skipped.
+    const dated = boards.filter((u) => u.includes('dates='));
+    expect(dated.every((u) => /dates=\d{6}(\d{2})?&/.test(u))).toBe(true);
+    for (const league of ['football/nfl', 'soccer/eng.1']) {
+      const n = dated.filter((u) => u.includes(league)).length;
+      expect(n).toBeGreaterThanOrEqual(1);
+      expect(n).toBeLessThanOrEqual(5);
+    }
+    expect(boards.filter((u) => !u.includes('dates=')).length).toBe(2);
+    expect(
+      boards.filter((u) => !u.includes('dates=')).some((u) => u.includes('football/nfl')),
+    ).toBe(false);
     expect(boards.some((u) => u.includes('tennis'))).toBe(false);
     // Learned: NFL has a fixture, the others have none.
     expect(r1.cursor.upcoming['football/nfl']).toBeTruthy();
@@ -953,8 +1081,10 @@ describe('espn-schedule pull', () => {
     expect(r2.note).toMatch(/^near:/);
     // Only the league whose next fixture is inside the window is asked. The NFL
     // fixture in the sample is in the past by now, which reads as "refresh it".
-    expect(boards.length).toBe(1);
-    expect(boards[0]).toContain('football/nfl');
+    // A 72-hour window is four or five ESPN days, one request each.
+    expect(boards.length).toBeGreaterThanOrEqual(4);
+    expect(boards.length).toBeLessThanOrEqual(5);
+    expect(boards.every((u) => u.includes('football/nfl') && /dates=\d{8}&/.test(u))).toBe(true);
   });
 
   test('a run that hits its deadline carries the queue over and asks to be run again', async () => {
@@ -1018,8 +1148,13 @@ describe('espn-live pull', () => {
       ctx(http, { config: { ...espnLive.defaults, leagues: ['football-nfl'] } }),
     );
     const asked = http.urls.filter((u) => u.url.includes('/scoreboard')).map((u) => u.url);
-    expect(asked.length).toBe(1);
-    expect(asked[0]).toContain('football/nfl');
+    // Twelve hours back to two ahead: one ESPN day, or two either side of US midnight.
+    const now = Date.now();
+    const days = espnDays(new Date(now - 12 * 3_600_000), new Date(now + 2 * 3_600_000));
+    expect(asked.length).toBe(days.length);
+    expect(asked.length).toBeLessThanOrEqual(2);
+    expect(asked.every((u) => u.includes('football/nfl'))).toBe(true);
+    expect(asked.map((u) => /dates=(\d+)/.exec(u)?.[1])).toEqual(days);
     expect(r.cursor.scanIdx).toBe(0);
   });
 });
