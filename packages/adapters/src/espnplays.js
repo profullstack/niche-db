@@ -19,6 +19,7 @@ import {
   SITE,
   SKIP_SPORTS_FIELD,
   WATCH_GRACE_MS,
+  WATCH_LEAD_MS,
 } from './espn.js';
 
 /**
@@ -70,7 +71,11 @@ export const RECAP_LOOKBACK_MS = 6 * HOUR_MS;
 /** How long a `recapped` / `read` stamp lives in the cursor. */
 export const STAMP_TTL_MS = 24 * HOUR_MS;
 
-/** The summary probe reaches half a day either way, like the live tick. */
+/**
+ * The summary probe reaches half a day back, like the live tick, and forward only
+ * as far as the watch lead: nothing later is read or watched, and every ESPN day
+ * the window touches is another scoreboard request through the proxy.
+ */
 const SCHEDULE_REACH_MS = 12 * HOUR_MS;
 
 export const playsSupportedFor = (sport) => !NO_PLAYS.has(sport);
@@ -599,7 +604,7 @@ export const espnPlays = defineAdapter({
     const candidates = [];
     let boardsFailed = 0;
     const from = new Date(now - SCHEDULE_REACH_MS);
-    const to = new Date(now + SCHEDULE_REACH_MS);
+    const to = new Date(now + WATCH_LEAD_MS);
     await pool(targets, 6, stopAt, async (key) => {
       const league = byKey.get(key);
       try {
