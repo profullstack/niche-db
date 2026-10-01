@@ -25,6 +25,6 @@
     "@nichedb/config": "workspace:*",
     "@nichedb/core": "workspace:*",
     "@nichedb/knowledge": "workspace:*",
-    "@profullstack/openprofile": "^0.1.0"
+    "@profullstack/openprofile": "^0.1.2"
   }
 }
