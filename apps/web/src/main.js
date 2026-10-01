@@ -5,7 +5,7 @@ import { buildBigIndexesOnce } from '@nichedb/db/build-indexes';
 import { migrate } from '@nichedb/db/migrate';
 import { onUnhandledRejection, retryTransient } from '@nichedb/db/resilience';
 import { configurePayments } from '@nichedb/payments';
-import { closeQueues, installSchedules } from '@nichedb/queue';
+import { closeQueues, installSchedules, pruneHistory } from '@nichedb/queue';
 import { startWorkers } from '@nichedb/queue/workers';
 import { app } from './app.js';
 
@@ -55,6 +55,8 @@ let workers = [];
 if (config.roles.includes('worker')) {
   await preflight('redis', () => installSchedules());
   workers = startWorkers();
+  // History written under the old, looser retention. Paced, never awaited.
+  pruneHistory().catch((err) => console.error('[queue] retention pass', err));
   /*
    * Large indexes build here rather than in a migration: after boot, outside a
    * transaction, CONCURRENTLY, so no write ever waits on one. Deliberately not

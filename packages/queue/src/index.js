@@ -2,6 +2,9 @@ import { config } from '@nichedb/config';
 import { Queue } from 'bullmq';
 import IORedis from 'ioredis';
 import { enqueueSourceRun } from './ingest-scheduling.js';
+import { pruneQueues, retention, streams } from './retention.js';
+
+export { streams } from './retention.js';
 
 /**
  * BullMQ needs `maxRetriesPerRequest: null` on the connection it blocks on.
@@ -32,9 +35,14 @@ export const QUEUES = {
   tlds: 'tld-sync',
 };
 
-const defaults = {
-  removeOnComplete: { age: 3600, count: 5000 },
-  removeOnFail: { age: 86400 },
+/*
+ * Retention lives in retention.js. BullMQ merges these into every add()
+ * shallowly, so an add that passes its own options (a repeat, a jobId,
+ * attempts) still inherits removeOnComplete/removeOnFail unless it names them
+ * -- and none does.
+ */
+export const defaults = {
+  ...retention,
   attempts: 3,
   backoff: { type: 'exponential', delay: 5000 },
 };
@@ -42,7 +50,7 @@ const defaults = {
 export const queues = Object.fromEntries(
   Object.entries(QUEUES).map(([k, name]) => [
     k,
-    new Queue(name, { connection, defaultJobOptions: defaults }),
+    new Queue(name, { connection, defaultJobOptions: defaults, streams }),
   ]),
 );
 
@@ -122,6 +130,14 @@ export async function installSchedules({ log = console.log } = {}) {
     await queues.tlds.add('sync', {}, { jobId: `tlds-boot-${minuteStamp()}`, delay: 60_000 });
   }
   log('[queue] schedules installed');
+}
+
+/**
+ * Bring what is already in Redis inside the retention caps: the options above
+ * only govern jobs added from now on. Idempotent; see pruneQueues.
+ */
+export function pruneHistory({ log = console.log } = {}) {
+  return pruneQueues(Object.values(queues), { log });
 }
 
 /** Ask for one source to run now, from a button or the API. */
