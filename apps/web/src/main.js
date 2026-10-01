@@ -30,7 +30,7 @@ async function preflight(what, fn) {
     // exiting into a restart loop. Bad SQL or a rejected password still throws
     // at once. Nothing listens until this passes, so /healthz never answers
     // for a process that cannot serve.
-    return what === 'postgres' ? await retryTransient(fn, { label: what }) : await fn();
+    return what === 'postgres' ? await retryTransient(fn, { label: `[boot] ${what}` }) : await fn();
   } catch (err) {
     const target = what === 'postgres' ? config.databaseUrl : config.redisUrl;
     let host = 'unparseable';

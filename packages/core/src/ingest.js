@@ -2,6 +2,7 @@ import { ADAPTERS, adapterByName } from '@nichedb/adapters';
 import { config } from '@nichedb/config';
 import * as profiles from '@nichedb/db/profiles';
 import * as q from '@nichedb/db/queries';
+import { retryTransient } from '@nichedb/db/resilience';
 import { normaliseItem } from './adapter.js';
 import { makeHttp } from './http.js';
 import { profileItem } from './profiles.js';
@@ -50,7 +51,7 @@ export function envFor() {
  */
 export async function runSource(
   sourceId,
-  { log = console.log, resolveAdapter = adapterByName } = {},
+  { log = console.log, resolveAdapter = adapterByName, closeRetry = {} } = {},
 ) {
   const source = await q.getSourceById(sourceId);
   if (!source) return { skipped: 'no such source' };
@@ -154,7 +155,19 @@ export async function runSource(
   } catch (err) {
     const message = String(err?.message ?? err).slice(0, 1000);
     const nextRunAt = await retryAt(source).catch(() => null);
-    await q.finishRun({ runId, sourceId: source.id, status: 'error', error: message, nextRunAt });
+    /*
+     * A run that died because Postgres went away must still be closed once it
+     * is back. Left 'running', the row parks the source: `dueSources` treats it
+     * as in flight until it is older than the longest adapter budget plus ten
+     * minutes (130 minutes in this build), so on dev2 2026-10-01 one crash
+     * recovery at 01:56 stopped espn-live for over an hour. So the write
+     * that records the failure waits out a database blip, a few minutes at
+     * most, before giving up and leaving the row to the reaper as before.
+     */
+    await retryTransient(
+      () => q.finishRun({ runId, sourceId: source.id, status: 'error', error: message, nextRunAt }),
+      { label: `${tag} closing the run`, log: l, budgetMs: 3 * 60_000, ...closeRetry },
+    );
     l(`failed: ${message}${nextRunAt ? `; retrying at ${nextRunAt.toISOString()}` : ''}`);
     return { error: message };
   }

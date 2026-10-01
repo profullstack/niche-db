@@ -4,7 +4,7 @@ process.env.DATABASE_URL ??= 'postgres://test:test@localhost:5432/test';
 process.env.SITE_URL ??= 'https://nichedb.test';
 
 const calls = [];
-const state = { source: null, dedupes: false, failUpsertOn: null };
+const state = { source: null, dedupes: false, failUpsertOn: null, finishFails: [] };
 const realQueries = await import('../packages/db/src/queries.js');
 mock.module('../packages/db/src/queries.js', () => ({
   ...realQueries,
@@ -12,6 +12,8 @@ mock.module('../packages/db/src/queries.js', () => ({
   startRun: async () => 7,
   finishRun: async (args) => {
     calls.push(['finishRun', args]);
+    const fail = state.finishFails.shift();
+    if (fail) throw fail;
   },
   saveCursor: async (sourceId, cursor) => {
     calls.push(['saveCursor', { sourceId, cursor }]);
@@ -45,6 +47,7 @@ function useAdapter(spec) {
     cursor: '{"version":"v1","skip":0}',
   };
   state.failUpsertOn = null;
+  state.finishFails = [];
   calls.length = 0;
 }
 const only = (kind) => calls.filter((c) => c[0] === kind).map((c) => c[1]);
@@ -191,5 +194,45 @@ describe('streaming ingest', () => {
     expect(out).toEqual({ error: 'xz exited 1: corrupt' });
     expect(only('saveCursor')).toEqual([{ sourceId: 42, cursor: { skip: 2 } }]);
     expect(only('finishRun')[0].status).toBe('error');
+  });
+
+  test('a run killed by a database blip is still closed once Postgres is back', async () => {
+    // dev2, 2026-10-01 01:56: crash recovery under an espn-live run. The pull
+    // dies on the dropped connection and the first attempts to record that
+    // meet the recovering server; left 'running', the row parks the source.
+    const closed = Object.assign(new Error('Connection closed'), {
+      code: 'ERR_POSTGRES_CONNECTION_CLOSED',
+    });
+    const recovering = () =>
+      Object.assign(new Error('the database system is in recovery mode'), { errno: '57P03' });
+    useAdapter({
+      pull: async () => {
+        throw closed;
+      },
+    });
+    state.finishFails = [recovering(), recovering()];
+    const sleeps = [];
+    const out = await runSource(42, {
+      log: () => {},
+      closeRetry: { sleep: async (ms) => sleeps.push(ms) },
+    });
+    expect(out).toEqual({ error: 'Connection closed' });
+    const finishes = only('finishRun');
+    expect(finishes.length).toBe(3);
+    expect(finishes.every((f) => f.status === 'error' && f.runId === 7)).toBe(true);
+    expect(sleeps).toEqual([1000, 2000]);
+  });
+
+  test('a failure to record the run that is not the database being away is not retried', async () => {
+    useAdapter({
+      pull: async () => {
+        throw new Error('upstream 500');
+      },
+    });
+    state.finishFails = [Object.assign(new Error('value too long'), { errno: '22001' })];
+    await expect(
+      runSource(42, { log: () => {}, closeRetry: { sleep: async () => {} } }),
+    ).rejects.toThrow(/value too long/);
+    expect(only('finishRun').length).toBe(1);
   });
 });
