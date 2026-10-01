@@ -36,12 +36,18 @@ async function populationCollectionId(db) {
   return row.id;
 }
 
-/** A read under the statement timeout, on a client that can open a transaction. */
+/**
+ * A read under the statement timeout, on a client that can open a transaction.
+ * Built on the pool and run on the transaction, for the reason `bounded` in
+ * queries.js gives: fragments made with a transaction's tag become unhandled
+ * rejections when its connection drops.
+ */
 function bounded(db, fn) {
   if (typeof db.begin !== 'function') return fn(db);
+  const query = fn(db);
   return db.begin(async (tx) => {
     await tx.unsafe(`set local statement_timeout = ${TIMEOUT_MS}`);
-    return fn(tx);
+    return tx`${query}`;
   });
 }
 

@@ -35,12 +35,22 @@ export const RECOUNT_BELOW = 200_000;
  * and the statement is cancelled at that point; `isStatementTimeout` tells the
  * route what happened. `begin` is Bun's; the PGlite shim in the tests has none,
  * so there the read runs unbounded, which is what a test wants.
+ *
+ * The statement is BUILT on the pool and only RUN on the transaction, as
+ * tx`${query}`. Bun (1.4.0) tracks every tx`...` it creates as a query of that
+ * connection, fragments included, and when the connection drops it rejects each
+ * fragment's promise too; nobody awaits a fragment, so each one is an unhandled
+ * rejection, and an unhandled rejection ends the process. That is how dev2
+ * restarted every time earlyoom terminated a backend under a page read. Built
+ * on the pool, a fragment is never tracked, and the caller still gets the one
+ * error that matters. `fn` must build synchronously and run nothing itself.
  */
-async function bounded(db, timeoutMs, fn) {
+export async function bounded(db, timeoutMs, fn) {
   if (!timeoutMs || typeof db.begin !== 'function') return fn(db);
+  const query = fn(db);
   return db.begin(async (tx) => {
     await tx.unsafe(`set local statement_timeout = ${Math.floor(timeoutMs)}`);
-    return fn(tx);
+    return tx`${query}`;
   });
 }
 
