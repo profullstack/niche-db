@@ -10,7 +10,7 @@ import { startWorkers } from '@nichedb/queue/workers';
 /** Workers on their own, for when one instance stops being enough. */
 process.on('unhandledRejection', (reason) => onUnhandledRejection(reason));
 configurePayments({ sql, coinpay: config.coinpay, siteUrl: config.siteUrl });
-await retryTransient(() => migrate(), { label: 'postgres' });
+await retryTransient(() => migrate(), { label: '[boot] postgres' });
 await installSchedules();
 const workers = startWorkers();
 /*

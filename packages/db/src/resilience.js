@@ -68,7 +68,7 @@ export function isTransientDbError(err) {
 export async function retryTransient(
   fn,
   {
-    label = 'database',
+    label = '[db]',
     log = console.error,
     budgetMs = 5 * 60_000,
     baseMs = 1_000,
@@ -86,11 +86,11 @@ export async function retryTransient(
       const waited = now() - started;
       const delay = Math.min(maxMs, baseMs * 2 ** (attempt - 1));
       if (waited + delay > budgetMs) {
-        log(`[boot] ${label}: still failing after ${Math.round(waited / 1000)}s, giving up`);
+        log(`${label}: still failing after ${Math.round(waited / 1000)}s, giving up`);
         throw err;
       }
       log(
-        `[boot] ${label}: ${err?.message ?? err} (attempt ${attempt}); retrying in ${Math.round(delay / 1000)}s`,
+        `${label}: ${err?.message ?? err} (attempt ${attempt}); retrying in ${Math.round(delay / 1000)}s`,
       );
       await sleep(delay);
     }
