@@ -3,6 +3,10 @@ import { readdir, readFile } from 'node:fs/promises';
 import { PGlite } from '@electric-sql/pglite';
 import { citext } from '@electric-sql/pglite/contrib/citext';
 import { pg_trgm } from '@electric-sql/pglite/contrib/pg_trgm';
+import { pgliteSql } from './helpers/pglite.js';
+
+process.env.DATABASE_URL ??= 'postgres://test:test@localhost:5432/test';
+const q = await import('../packages/db/src/queries.js');
 
 /**
  * A source with a run in flight must not be enqueued again.
@@ -53,19 +57,9 @@ async function run(sourceId, { status = 'running', minutesAgo = 0 } = {}) {
   );
 }
 
-/** The statement `dueSources` runs, kept identical to the query. */
-const DUE = `
-  select id, slug, adapter, next_run_at from sources s
-  where enabled and ($1 or next_run_at <= now())
-    and not exists (
-      select 1 from runs r
-      where r.source_id = s.id and r.status = 'running'
-        and r.started_at > now() - ($2)::interval
-    )
-  order by next_run_at limit $3`;
-
+/** The real `dueSources`, on this database. */
 const due = async ({ force = false, runningMinutes = 70, limit = 50 } = {}) =>
-  (await rows(DUE, [force, `${runningMinutes} minutes`, limit])).map((r) => r.id);
+  (await q.dueSources({ force, runningMinutes, limit, db: pgliteSql(db) })).map((r) => r.id);
 
 describe('dueSources and a run in flight', () => {
   test('an overdue source with a run inside the window is not due', async () => {
@@ -102,12 +96,8 @@ describe('dueSources and a run in flight', () => {
     const id = await source();
     await run(id, { minutesAgo: 100 });
     expect(await due({ runningMinutes: 70 })).toContain(id);
-    // The reaper's statement, as in queries.js: a run past the window is an error.
-    await db.query(
-      `update runs set status = 'error', finished_at = now(), error = 'abandoned (process exited)'
-       where status = 'running' and started_at < now() - ($1)::interval`,
-      ['70 minutes'],
-    );
+    // The real reaper: a run past the window is an error.
+    await q.reapStaleRuns({ minutes: 70, db: pgliteSql(db) });
     const left = await rows(`select status from runs where source_id = $1`, [id]);
     expect(left.map((r) => r.status)).toEqual(['error']);
     expect(await due({ runningMinutes: 70 })).toContain(id);

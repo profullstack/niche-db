@@ -15,7 +15,7 @@ import { sendEmail, sendPush } from '@nichedb/notify';
 import { buildEvent, sendWebhook } from '@profullstack/autoblog';
 import { Worker } from 'bullmq';
 import { connection, QUEUES, queues } from './index.js';
-import { scheduleDueRuns } from './ingest-scheduling.js';
+import { scheduleDueRuns, staleMinutesByAdapter } from './ingest-scheduling.js';
 
 const log = (...a) => console.log('[worker]', ...a);
 
@@ -30,13 +30,16 @@ const longestRunMs = () =>
  * and page past queued sources so new sources can enter a busy queue.
  */
 async function runTick(job) {
-  // One window for both: a run younger than this is in flight and must not be
-  // enqueued again; one older than it was just marked abandoned and may be.
+  // One window per adapter, used by both: a run younger than it is in flight
+  // and must not be enqueued again; one older than it was just marked
+  // abandoned and may be. The longest budget is only the fallback now, for a
+  // source whose adapter this build does not know.
   const runningMinutes = Math.ceil(longestRunMs() / 60_000) + 10;
-  await q.reapStaleRuns({ minutes: runningMinutes });
+  const minutesByAdapter = staleMinutesByAdapter(ADAPTERS, config.ingest.runDeadlineMs);
+  await q.reapStaleRuns({ minutes: runningMinutes, minutesByAdapter });
   const result = await scheduleDueRuns({
     queue: queues.run,
-    readDue: q.dueSources,
+    readDue: (args) => q.dueSources({ ...args, minutesByAdapter }),
     force: Boolean(job.data?.force),
     runningMinutes,
   });

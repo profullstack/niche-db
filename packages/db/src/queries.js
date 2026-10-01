@@ -513,6 +513,8 @@ export async function dueSources({
   offset = 0,
   force = false,
   runningMinutes = 30,
+  minutesByAdapter = {},
+  db = sql,
 } = {}) {
   /*
    * A source whose run is still in flight is not due, whatever its clock says.
@@ -525,18 +527,35 @@ export async function dueSources({
    * from ever parking a source for good: a run older than `runningMinutes` is
    * what the reaper marks abandoned on the same tick, so past that it no longer
    * counts, and `force` (the boot sweep) gets the same guard because the old
-   * container may still be draining exactly those runs.
+   * container may still be draining exactly those runs. The window is the
+   * source's own adapter's (see `staleAfter`), `runningMinutes` where the
+   * adapter is not in the map.
    */
-  return sql`
+  return db`
     select id, slug, adapter, next_run_at from sources s
     where enabled and (${force} or next_run_at <= now())
       and not exists (
         select 1 from runs r
         where r.source_id = s.id and r.status = 'running'
-          and r.started_at > now() - (${`${runningMinutes} minutes`})::interval
+          and r.started_at > now() - ${staleAfter(db, minutesByAdapter, runningMinutes)}
       )
     order by next_run_at, s.id limit ${limit} offset ${offset}
   `;
+}
+
+/**
+ * How long a run of source `s` may stay 'running' before it is taken for
+ * abandoned: its adapter's minutes from `minutesByAdapter`, else `fallback`.
+ *
+ * Per adapter, not one window for all. One window had to fit the longest
+ * budget in the build (a two-hour dump walk), so a one-minute live-scores run
+ * that died with Postgres (dev2, 2026-10-01 01:56) parked its source for 130
+ * minutes. Built on `db` from the caller, and only ever interpolated.
+ */
+function staleAfter(db, minutesByAdapter, fallback) {
+  return db`make_interval(mins => coalesce(
+    (${JSON.stringify(minutesByAdapter ?? {})}::text::jsonb ->> s.adapter)::int,
+    ${Math.ceil(Number(fallback) || 30)}::int))`;
 }
 
 /**
@@ -708,15 +727,17 @@ export async function listRuns(sourceId, { limit = 20 } = {}) {
  * pages read a month apart meant a redeploy in the wrong minute parked the
  * list for a month with nothing to show. A killed run is not a run.
  */
-export async function reapStaleRuns({ minutes = 30 } = {}) {
-  const rows = await sql`
-    update runs set status = 'error', finished_at = now(), error = 'abandoned (process exited)'
-    where status = 'running' and started_at < now() - (${`${minutes} minutes`})::interval
-    returning id, source_id
+export async function reapStaleRuns({ minutes = 30, minutesByAdapter = {}, db = sql } = {}) {
+  const rows = await db`
+    update runs r set status = 'error', finished_at = now(), error = 'abandoned (process exited)'
+    from sources s
+    where s.id = r.source_id and r.status = 'running'
+      and r.started_at < now() - ${staleAfter(db, minutesByAdapter, minutes)}
+    returning r.id, r.source_id
   `;
   const sources = [...new Set(rows.map((r) => r.source_id))];
   if (sources.length > 0) {
-    await sql`
+    await db`
       update sources set next_run_at = now(), updated_at = now()
       where id = any(${pgArray(sources)}::int[]) and enabled
     `;

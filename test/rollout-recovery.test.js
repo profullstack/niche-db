@@ -3,6 +3,10 @@ import { readdir, readFile } from 'node:fs/promises';
 import { PGlite } from '@electric-sql/pglite';
 import { citext } from '@electric-sql/pglite/contrib/citext';
 import { pg_trgm } from '@electric-sql/pglite/contrib/pg_trgm';
+import { pgliteSql } from './helpers/pglite.js';
+
+process.env.DATABASE_URL ??= 'postgres://test:test@localhost:5432/test';
+const q = await import('../packages/db/src/queries.js');
 
 /**
  * A deploy that adds adapters strands the sources it just seeded.
@@ -165,18 +169,16 @@ describe('the slot a failed lookup costs', () => {
   });
 });
 
-/**
- * The statements `reapStaleRuns` runs, kept identical to the query: a run
- * abandoned by a container that died is marked, and its source is asked to
- * run again now rather than a whole cadence later.
- */
-const REAP = `
-  update runs set status = 'error', finished_at = now(), error = 'abandoned (process exited)'
-  where status = 'running' and started_at < now() - ($1)::interval
-  returning id, source_id`;
-const REQUEUE = `
-  update sources set next_run_at = now(), updated_at = now()
-  where id = any($1::int[]) and enabled`;
+/** The real `reapStaleRuns`, on this database: the reaped runs' source ids. */
+const reap = async (minutes) => {
+  const d = pgliteSql(db);
+  const before = await rows(`select id, source_id from runs where status = 'running'`);
+  await q.reapStaleRuns({ minutes, db: d });
+  const after = new Set(
+    (await rows(`select id from runs where status = 'running'`)).map((r) => r.id),
+  );
+  return before.filter((r) => !after.has(r.id));
+};
 
 describe('a run killed by a redeploy does not park its source for a cadence', () => {
   test('the abandoned run is marked and the source is due again now', async () => {
@@ -191,9 +193,8 @@ describe('a run killed by a redeploy does not park its source for a cadence', ()
       [id],
     );
     expect(before.parked).toBe(true);
-    const reaped = await rows(REAP, ['40 minutes']);
+    const reaped = await reap(40);
     expect(reaped.map((r) => r.source_id)).toContain(id);
-    await rows(REQUEUE, [[...new Set(reaped.map((r) => r.source_id))]]);
     const run = await one(`select status, error from runs where source_id = $1`, [id]);
     expect(run.status).toBe('error');
     expect(run.error).toBe('abandoned (process exited)');
@@ -217,10 +218,9 @@ describe('a run killed by a redeploy does not park its source for a cadence', ()
       `insert into runs (source_id, started_at) values ($1, now() - interval '2 hours') returning id`,
       [paused],
     );
-    const reaped = await rows(REAP, ['40 minutes']);
+    const reaped = await reap(40);
     expect(reaped.map((r) => r.source_id)).not.toContain(fresh);
     expect(reaped.map((r) => r.source_id)).toContain(paused);
-    await rows(REQUEUE, [[...new Set(reaped.map((r) => r.source_id))]]);
     expect(
       (await one(`select next_run_at > now() as later from sources where id = $1`, [fresh])).later,
     ).toBe(true);
