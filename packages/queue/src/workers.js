@@ -14,7 +14,7 @@ import * as q from '@nichedb/db/queries';
 import { sendEmail, sendPush } from '@nichedb/notify';
 import { buildEvent, sendWebhook } from '@profullstack/autoblog';
 import { Worker } from 'bullmq';
-import { connection, QUEUES, queues } from './index.js';
+import { connection, QUEUES, queues, streams } from './index.js';
 import { scheduleDueRuns, staleMinutesByAdapter } from './ingest-scheduling.js';
 
 const log = (...a) => console.log('[worker]', ...a);
@@ -157,24 +157,27 @@ async function sendItemWebhooks(target, { feed, items }) {
 
 export function startWorkers() {
   const workers = [
-    new Worker(QUEUES.tick, runTick, { connection, concurrency: 1 }),
+    new Worker(QUEUES.tick, runTick, { connection, streams, concurrency: 1 }),
     new Worker(QUEUES.run, (job) => runSource(job.data.sourceId, { log }), {
       connection,
+      streams,
       concurrency: config.ingest.concurrency,
       lockDuration: longestRunMs() + 60_000,
     }),
-    new Worker(QUEUES.scan, runScan, { connection, concurrency: 1 }),
-    new Worker(QUEUES.deliver, runDeliver, { connection, concurrency: 8 }),
+    new Worker(QUEUES.scan, runScan, { connection, streams, concurrency: 1 }),
+    new Worker(QUEUES.deliver, runDeliver, { connection, streams, concurrency: 8 }),
     // One at a time: the enrichers talk to rate-limited third parties and
     // pace themselves inside a run; two runs at once would double that rate.
     new Worker(QUEUES.enrich, () => enrichPending({ log }), {
       connection,
+      streams,
       concurrency: 1,
       lockDuration: 10 * 60_000,
     }),
     // One at a time: each collection's recount is a scan of that collection.
     new Worker(QUEUES.stats, () => refreshCollectionStats({ log }), {
       connection,
+      streams,
       concurrency: 1,
       lockDuration: config.stats.budgetMs + config.stats.statementTimeoutMs + 60_000,
     }),
@@ -201,6 +204,7 @@ export function startWorkers() {
       },
       {
         connection,
+        streams,
         concurrency: 1,
         lockDuration: config.maintenance.ginStatementTimeoutMs + 60_000,
       },
@@ -210,6 +214,7 @@ export function startWorkers() {
     workers.push(
       new Worker(QUEUES.tlds, async () => log('[tlds]', JSON.stringify(await syncTlds({ log }))), {
         connection,
+        streams,
         concurrency: 1,
         lockDuration: 20 * 60_000,
       }),
@@ -218,6 +223,7 @@ export function startWorkers() {
     workers.push(
       new Worker(QUEUES.dumps, () => generateDump({ log }), {
         connection,
+        streams,
         concurrency: 1,
         lockDuration: 60 * 60_000,
       }),
