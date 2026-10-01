@@ -3,6 +3,7 @@ import { ensureDefaults, envFor } from '@nichedb/core';
 import { close as closeDb, healthcheck, sql } from '@nichedb/db';
 import { buildBigIndexesOnce } from '@nichedb/db/build-indexes';
 import { migrate } from '@nichedb/db/migrate';
+import { onUnhandledRejection, retryTransient } from '@nichedb/db/resilience';
 import { configurePayments } from '@nichedb/payments';
 import { closeQueues, installSchedules } from '@nichedb/queue';
 import { startWorkers } from '@nichedb/queue/workers';
@@ -15,9 +16,21 @@ import { app } from './app.js';
 configurePayments({ sql, coinpay: config.coinpay, siteUrl: config.siteUrl });
 assertCoinpayMerchantKey();
 
+/*
+ * Installed before the first query: a dropped Postgres connection must not end
+ * the process, at boot or after it. See @nichedb/db/resilience for why the
+ * database on dev2 goes away, and what still counts as fatal.
+ */
+process.on('unhandledRejection', (reason) => onUnhandledRejection(reason));
+
 async function preflight(what, fn) {
   try {
-    return await fn();
+    // Postgres in crash recovery, restarting, or refusing for a minute is
+    // waited out here (1s doubling to 30s, five minutes in all) rather than
+    // exiting into a restart loop. Bad SQL or a rejected password still throws
+    // at once. Nothing listens until this passes, so /healthz never answers
+    // for a process that cannot serve.
+    return what === 'postgres' ? await retryTransient(fn, { label: what }) : await fn();
   } catch (err) {
     const target = what === 'postgres' ? config.databaseUrl : config.redisUrl;
     let host = 'unparseable';
@@ -33,8 +46,10 @@ async function preflight(what, fn) {
 }
 
 await preflight('postgres', () => migrate());
-if (!(await healthcheck())) throw new Error('database healthcheck failed at boot');
-await ensureDefaults({ env: envFor() });
+await preflight('postgres', async () => {
+  if (!(await healthcheck())) throw new Error('database healthcheck failed at boot');
+});
+await preflight('postgres', () => ensureDefaults({ env: envFor() }));
 
 let workers = [];
 if (config.roles.includes('worker')) {

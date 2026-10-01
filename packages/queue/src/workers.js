@@ -223,6 +223,9 @@ export function startWorkers() {
     w.on('failed', (job, err) =>
       console.error(`[worker] ${w.name} job ${job?.id} failed:`, err?.message),
     );
+    // A Worker is an EventEmitter: an 'error' with no listener is thrown, and
+    // a thrown error ends the process. Log it; BullMQ carries on by itself.
+    w.on('error', (err) => console.error(`[worker] ${w.name} error:`, err?.message ?? err));
   }
   log(`started ${workers.length} workers`);
   return workers;

@@ -2,13 +2,15 @@ import { config } from '@nichedb/config';
 import { close as closeDb, sql } from '@nichedb/db';
 import { buildBigIndexesOnce } from '@nichedb/db/build-indexes';
 import { migrate } from '@nichedb/db/migrate';
+import { onUnhandledRejection, retryTransient } from '@nichedb/db/resilience';
 import { configurePayments } from '@nichedb/payments';
 import { closeQueues, installSchedules } from '@nichedb/queue';
 import { startWorkers } from '@nichedb/queue/workers';
 
 /** Workers on their own, for when one instance stops being enough. */
+process.on('unhandledRejection', (reason) => onUnhandledRejection(reason));
 configurePayments({ sql, coinpay: config.coinpay, siteUrl: config.siteUrl });
-await migrate();
+await retryTransient(() => migrate(), { label: 'postgres' });
 await installSchedules();
 const workers = startWorkers();
 /*

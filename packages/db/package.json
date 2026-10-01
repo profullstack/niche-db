@@ -18,7 +18,8 @@
     "./account": "./src/account.js",
     "./build-indexes": "./src/build-indexes.js",
     "./gin-maintenance": "./src/gin-maintenance.js",
-    "./tlds": "./src/tlds.js"
+    "./tlds": "./src/tlds.js",
+    "./resilience": "./src/resilience.js"
   },
   "dependencies": {
     "@nichedb/config": "workspace:*",
