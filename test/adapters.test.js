@@ -1,5 +1,10 @@
 import { describe, expect, test } from 'bun:test';
 import { readFile } from 'node:fs/promises';
+import {
+  academicDatasets,
+  toItem as datasetItem,
+  rejectReason as datasetReject,
+} from '../packages/adapters/src/academic-datasets.js';
 import { parseFeed as parseArxiv } from '../packages/adapters/src/arxiv.js';
 import {
   advance as dhtAdvance,
@@ -84,6 +89,7 @@ describe('registry', () => {
         'sites',
         'coupons',
         'dht',
+        'datasets',
         'algorithms',
         'models',
         'parts',
@@ -352,6 +358,123 @@ describe('new niches', () => {
       'impact-minor',
       'git operations',
     ]);
+  });
+});
+
+describe('academic-datasets', () => {
+  const pullFixture = async () => {
+    const doc = JSON.parse(await fixture('academic-datasets.json'));
+    const lines = [];
+    const out = await academicDatasets.pull({
+      config: academicDatasets.defaults,
+      cursor: {},
+      env: {},
+      http: { json: async () => doc },
+      log: (m) => lines.push(m),
+      deadline: Date.now() + 60_000,
+    });
+    return { doc, out, lines };
+  };
+
+  test('is registered under its own collection with one default source and three feeds', () => {
+    expect(adapterByName('academic-datasets').collection).toBe('datasets');
+    expect(academicDatasets.kinds).toEqual(['dataset']);
+    expect(academicDatasets.cadenceMinutes).toBe(1440);
+    expect(academicDatasets.defaultSources.map((s) => s.slug)).toEqual(['academic-datasets']);
+    expect(academicDatasets.defaults.url).toBe('https://bittorrented.com/api/public/datasets');
+    expect(DEFAULT_FEEDS.filter((f) => f.collection === 'datasets').map((f) => f.slug)).toEqual([
+      'datasets-latest',
+      'datasets-mirrored',
+      'datasets-public-domain',
+    ]);
+  });
+
+  test('a public-domain, mirrored dataset with no description gets a built summary', async () => {
+    const { out } = await pullFixture();
+    const item = out.items[0];
+    expect(item.externalId).toBe('cab7744573688b0b39c521ef66453435785762ac');
+    expect(item.kind).toBe('dataset');
+    expect(item.title).toBe(
+      'LUMINOUS Database: Lumbar Multifidus Muscle Segmentation From Ultrasound',
+    );
+    expect(item.url).toBe(
+      'https://academictorrents.com/details/cab7744573688b0b39c521ef66453435785762ac',
+    );
+    expect(item.summary).toBe('Dataset, 58 MB, public domain');
+    expect(item.tags).toEqual([
+      'license:public-domain',
+      'verdict:public-domain',
+      'basis:public-domain',
+      'category:dataset',
+      'mirrored',
+    ]);
+    expect(item.data).toEqual({
+      infohash: 'cab7744573688b0b39c521ef66453435785762ac',
+      sizeBytes: 61234567,
+      magnet: 'magnet:?xt=urn:btih:cab7744573688b0b39c521ef66453435785762ac&dn=LUMINOUS',
+      webseeds: ['https://archive.org/download/'],
+      attestation: { basis: 'public-domain' },
+      verdict: 'public-domain',
+      terms: 'sellable without restriction',
+      mirrored: { id: 'sha256:3f1d2a', at: '2026-10-04T14:24:00.000Z' },
+      spec: 'openfile',
+      publisher: { name: 'bittorrented.com dataset mirror', web: 'https://bittorrented.com' },
+    });
+    expect(normaliseItem(item).tags).toContain('mirrored');
+  });
+
+  test('an open-licence course keeps its SPDX id and its own description', async () => {
+    const { out } = await pullFixture();
+    const item = out.items[1];
+    expect(item.summary).toBe('Lecture videos and notes for an introduction to algorithms.');
+    expect(item.tags).toEqual([
+      'license:cc-by-sa-4.0',
+      'verdict:share-alike',
+      'basis:open-license',
+      'category:course',
+    ]);
+    expect(item.data.attestation).toEqual({ basis: 'open-license', license: 'CC-BY-SA-4.0' });
+    expect(item.data.mirrored).toBeNull();
+    expect(item.data.webseeds).toEqual([]);
+  });
+
+  test('a record without a public-domain or open-licence basis is skipped and logged', async () => {
+    const { doc, out, lines } = await pullFixture();
+    expect(out.items.map((i) => i.externalId)).not.toContain(
+      'fedcba9876543210fedcba9876543210fedcba98',
+    );
+    expect(out.items).toHaveLength(2);
+    expect(lines.some((l) => l.includes('fedcba98') && l.includes('fair-use'))).toBe(true);
+    expect(out.cursor).toEqual({ updated: '2026-10-04T15:00:00.000Z' });
+    expect(out.note).toContain('1 skipped');
+    expect(datasetItem(doc.datasets[2])).toBeNull();
+  });
+
+  test('the gate turns away malformed records too', () => {
+    const ok = {
+      infohash: '0123456789abcdef0123456789abcdef01234567',
+      name: 'x',
+      attestation: { basis: 'open-license', license: 'CC-BY-4.0' },
+    };
+    expect(datasetReject(ok)).toBeNull();
+    expect(datasetReject({ ...ok, infohash: 'nope' })).toContain('40 hex');
+    expect(datasetReject({ ...ok, attestation: null })).toBe('no attestation');
+    expect(datasetReject({ ...ok, attestation: { basis: 'open-license' } })).toContain('SPDX');
+    expect(datasetReject({ ...ok, attestation: { basis: 'proprietary' } })).toContain('basis');
+    expect(datasetReject(null)).toBe('not an object');
+  });
+
+  test('a document without a datasets array fails the run', async () => {
+    await expect(
+      academicDatasets.pull({
+        config: academicDatasets.defaults,
+        cursor: {},
+        env: {},
+        http: { json: async () => ({ error: 'not found' }) },
+        log: () => {},
+        deadline: Date.now() + 60_000,
+      }),
+    ).rejects.toThrow('datasets');
   });
 });
 

@@ -1,3 +1,4 @@
+import { academicDatasets } from './academic-datasets.js';
 import { adsbFlights } from './adsb.js';
 import { agenticjobs } from './agenticjobs.js';
 import { aiid } from './aiid.js';
@@ -377,6 +378,8 @@ export const ADAPTERS = [
   opensite,
   outreachgraph,
   bittorrentedDht,
+  // Datasets: licence-checked Academic Torrents datasets, read off bittorrented.com's OpenFile-attested list.
+  academicDatasets,
   // Research: OpenAlex works, newest first, under a topic or a search.
   openalex,
   // Algorithms: the NIST dictionary, Wikidata's algorithms and data structures, the Papers With Code
