@@ -5,6 +5,11 @@ import { humanSize } from './bittorrented.js';
  * Academic Torrents datasets that are legal to resell, as bittorrented.com
  * publishes them.
  *
+ * RETIRED 2026-10-04: pulled from nichedb.dev on request. This adapter is not
+ * in ADAPTERS, its collection and feeds are not seeded, and migration 0035
+ * moved its items to `retired_items` and removed the collection. The code is
+ * kept so it can be switched back on; the migration says how.
+ *
  * bittorrented.com mirrors the Academic Torrents catalogue
  * (academictorrents.com/database.xml) and checks every entry's licence before
  * listing it. `/api/public/datasets` is the result: one keyless JSON document

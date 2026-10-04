@@ -31,7 +31,7 @@ import { looseDate, normaliseItem, xmlItems } from '../packages/core/src/adapter
 // import. It needs the variable to exist, not to connect: nothing here queries.
 process.env.DATABASE_URL ??= 'postgres://test:test@localhost:5432/test';
 process.env.SITE_URL ??= 'https://nichedb.test';
-const { DEFAULT_FEEDS } = await import('../packages/core/src/seed.js');
+const { COLLECTIONS, DEFAULT_FEEDS } = await import('../packages/core/src/seed.js');
 
 const fixture = (name) =>
   readFile(new URL(`../packages/adapters/test/fixtures/${name}`, import.meta.url), 'utf8');
@@ -91,7 +91,6 @@ describe('registry', () => {
         'sites',
         'coupons',
         'dht',
-        'datasets',
         'algorithms',
         'models',
         'parts',
@@ -378,17 +377,16 @@ describe('academic-datasets', () => {
     return { doc, out, lines };
   };
 
-  test('is registered under its own collection with one default source and three feeds', () => {
-    expect(adapterByName('academic-datasets').collection).toBe('datasets');
-    expect(academicDatasets.kinds).toEqual(['dataset']);
-    expect(academicDatasets.cadenceMinutes).toBe(1440);
+  test('is retired: not registered, and neither its collection nor its feeds are seeded', () => {
+    // Pulled on 2026-10-04 (migration 0035). The module stays so it can come back.
+    expect(adapterByName('academic-datasets')).toBeNull();
+    expect(ADAPTERS).not.toContain(academicDatasets);
+    expect(COLLECTIONS.map((c) => c.slug)).not.toContain('datasets');
+    expect(DEFAULT_FEEDS.filter((f) => f.collection === 'datasets')).toEqual([]);
+    expect(DEFAULT_FEEDS.map((f) => f.slug).filter((s) => s.startsWith('datasets-'))).toEqual([]);
+    // What it would seed, were it registered again.
+    expect(academicDatasets.collection).toBe('datasets');
     expect(academicDatasets.defaultSources.map((s) => s.slug)).toEqual(['academic-datasets']);
-    expect(academicDatasets.defaults.url).toBe('https://bittorrented.com/api/public/datasets');
-    expect(DEFAULT_FEEDS.filter((f) => f.collection === 'datasets').map((f) => f.slug)).toEqual([
-      'datasets-latest',
-      'datasets-mirrored',
-      'datasets-public-domain',
-    ]);
   });
 
   test('a public-domain, mirrored dataset with no description gets a built summary', async () => {

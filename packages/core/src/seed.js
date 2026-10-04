@@ -282,12 +282,6 @@ export const COLLECTIONS = [
       'Torrents as they appear on the BitTorrent DHT, observed by the bittorrented.com crawler and read from its own database: infohash, name, size, file count, the swarm as it stood when crawled and the content class the crawler gave it. Adult material is left out. Follow the newest, the seeded, or one class of content.',
   },
   {
-    slug: 'datasets',
-    name: 'Datasets',
-    description:
-      'Research datasets and courses from Academic Torrents that are public domain or carry an open licence, as bittorrented.com checks and publishes them under an OpenFile attestation: infohash, size, magnet and web seeds, the SPDX licence and what it lets you do. Follow everything, the ones bittorrented mirrors, or the public domain.',
-  },
-  {
     slug: 'algorithms',
     name: 'Algorithms',
     description:
@@ -2436,27 +2430,12 @@ export const DEFAULT_FEEDS = [
     name: 'Books',
     query: { kinds: ['torrent'], tags: ['type:ebook'] },
   },
-  {
-    collection: 'datasets',
-    slug: 'datasets-latest',
-    name: 'Every licence-checked dataset',
-    description: 'Every Academic Torrents dataset and course that passed the licence check.',
-    query: { kinds: ['dataset'] },
-  },
-  {
-    collection: 'datasets',
-    slug: 'datasets-mirrored',
-    name: 'Mirrored by bittorrented',
-    description: 'Datasets bittorrented.com keeps its own copy of.',
-    query: { kinds: ['dataset'], tags: ['mirrored'] },
-  },
-  {
-    collection: 'datasets',
-    slug: 'datasets-public-domain',
-    name: 'Public domain datasets',
-    description: 'No licence terms at all: use, change and sell without credit.',
-    query: { kinds: ['dataset'], tags: ['verdict:public-domain'] },
-  },
+  /*
+   * The `datasets` collection (Academic Torrents via bittorrented.com) and its
+   * three feeds were pulled on 2026-10-04: migration 0035 archives its items
+   * and removes it. They are not seeded, so a boot does not bring them back;
+   * the migration says how to restore them.
+   */
 ];
 
 /**
