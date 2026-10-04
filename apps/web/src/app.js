@@ -13,6 +13,7 @@ import { registerAgents } from './routes/agents.js';
 import { registerApi } from './routes/api.js';
 import { registerAuth } from './routes/auth.js';
 import { registerAutomotive } from './routes/automotive.js';
+import { registerCrawlStatus } from './routes/crawlstatus.js';
 import { registerDataDumps } from './routes/data-dumps.js';
 import { registerKnowledge } from './routes/knowledge.js';
 import { registerManage } from './routes/manage.js';
@@ -139,6 +140,7 @@ registerPages(app);
 registerManage(app);
 registerSubmit(app);
 registerApi(app);
+registerCrawlStatus(app);
 /** People: /c/profiles/<slug>-<id>, the file next to it, claim and edit; after the API middleware so /api/v1/profiles is metered like the rest. */
 registerProfiles(app);
 /** Sites: /c/sites/<host>/<path>, one OpenSite record per page, and /c/sites/add, which reads any address now. */

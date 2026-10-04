@@ -1754,3 +1754,71 @@ table.kv td {
 .money .ok {
   color: var(--ok);
 }
+
+/* /crawlstatus: tiles and a day of runs as bars, both from the theme tokens. */
+.crawl-health {
+  margin: 0.5rem 0 0;
+  text-align: right;
+}
+.crawl-health .status {
+  font-size: 1rem;
+}
+.crawl-tiles {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+  gap: 0.5rem;
+}
+.crawl-tile {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.6rem 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+  background: var(--panel);
+}
+.crawl-n {
+  font-size: 1.35rem;
+  font-weight: 600;
+}
+.crawl-tile.ok .crawl-n {
+  color: var(--ok);
+}
+.crawl-tile.err .crawl-n {
+  color: var(--err);
+}
+.crawl-tile.warn .crawl-n {
+  color: var(--accent);
+}
+.crawl-bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 3px;
+  height: 5rem;
+  padding: 0.25rem 0;
+  border-bottom: 1px solid var(--line);
+}
+.crawl-bar {
+  flex: 1;
+  height: 100%;
+  display: flex;
+  flex-direction: column-reverse;
+}
+.crawl-bar i {
+  display: block;
+  min-height: 0;
+}
+.crawl-bar i.ok {
+  background: var(--ok);
+}
+.crawl-bar i.err {
+  background: var(--err);
+}
+@media (max-width: 52rem) {
+  .crawl-health {
+    text-align: left;
+  }
+}
