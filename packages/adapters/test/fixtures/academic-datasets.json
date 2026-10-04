@@ -16,7 +16,36 @@
       "terms": "sellable without restriction",
       "magnet": "magnet:?xt=urn:btih:cab7744573688b0b39c521ef66453435785762ac&dn=LUMINOUS",
       "webseeds": ["https://archive.org/download/"],
-      "mirrored": { "id": "sha256:3f1d2a", "at": "2026-10-04T14:24:00.000Z" }
+      "mirrored": { "id": "sha256:3f1d2a", "at": "2026-10-04T14:24:00.000Z" },
+      "creator": "Albert Cui and Howard Chung and Nicholas Hanson-Holtry",
+      "published": "2015-12-17T04:24:54.000Z",
+      "organizations": [
+        {
+          "name": "Stanford University",
+          "domain": "stanford.edu",
+          "type": "education",
+          "country": "US",
+          "website": "https://www.stanford.edu",
+          "wikidata": "Q41506",
+          "ror": "https://ror.org/00f54p054",
+          "lei": "JIUV0DC2REIJXQ26CR37",
+          "opencorporates": "us_ca/C1264149",
+          "via": "ror",
+          "employees": 17000
+        },
+        {
+          "name": "École Polytechnique Fédérale de Lausanne",
+          "domain": "epfl.ch",
+          "type": "education",
+          "country": "ch",
+          "website": "javascript:alert(1)",
+          "wikidata": "wd:262760",
+          "ror": "https://example.com/02s376052",
+          "lei": "not-a-real-lei",
+          "via": "wikidata"
+        },
+        { "name": "   ", "domain": "nameless.example", "via": "ror" }
+      ]
     },
     {
       "infohash": "0123456789abcdef0123456789abcdef01234567",
@@ -30,7 +59,10 @@
       "terms": "sellable with credit, derivatives under the same licence",
       "magnet": "magnet:?xt=urn:btih:0123456789abcdef0123456789abcdef01234567",
       "webseeds": [],
-      "mirrored": null
+      "mirrored": null,
+      "creator": null,
+      "published": null,
+      "organizations": []
     },
     {
       "infohash": "fedcba9876543210fedcba9876543210fedcba98",
