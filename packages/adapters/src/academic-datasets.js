@@ -18,6 +18,14 @@ import { humanSize } from './bittorrented.js';
  * never imported, whatever else it says. Nor is one without a 40-hex
  * infohash, which is its identity on both sides.
  *
+ * Where the endpoint knows them it also names who made a dataset (`creator`),
+ * when it was published, and the organizations behind it, matched against
+ * open company and institution registries (ROR, Wikidata, GLEIF LEI,
+ * OpenCorporates). Each organization becomes an `org:` tag and its country a
+ * `country:` tag; identifiers are checked against their own shapes and kept
+ * in `data.organizations`. All of it is optional: an older document without
+ * these fields still imports.
+ *
  * The document is a full snapshot, a few hundred rows, so every run reads all
  * of it and the hashed upserts make an unchanged row cost nothing. The cursor
  * only remembers the snapshot's `updated` stamp for the run log.
@@ -37,6 +45,67 @@ const clean = (s) =>
 
 const HTTP = /^https?:\/\//i;
 const urlOrNull = (v) => (typeof v === 'string' && HTTP.test(v.trim()) ? v.trim() : null);
+
+/** Most organizations a dataset gets tags for; with countries and the five fixed tags this stays well under the 40-tag cap. */
+const MAX_ORG_TAGS = 15;
+const MAX_COUNTRY_TAGS = 10;
+/** Most organizations kept in `data`. */
+const MAX_ORGS = 50;
+
+const VIA = new Set(['ror', 'wikidata']);
+const WIKIDATA = /^Q\d+$/;
+const LEI = /^[A-Z0-9]{20}$/;
+const COUNTRY = /^[A-Z]{2}$/;
+const ROR = 'https://ror.org/';
+
+/** A tag-safe slug: lower case, diacritics stripped, anything else to '-', at most 60 characters. */
+export function slugify(s) {
+  return String(s ?? '')
+    .normalize('NFKD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 60)
+    .replace(/-+$/, '');
+}
+
+const str = (v) => (typeof v === 'string' ? clean(v) || null : null);
+const matching = (v, re) => {
+  const s = str(v);
+  return s && re.test(s) ? s : null;
+};
+
+/**
+ * One organization from the endpoint, reduced to the keys this collection
+ * stores, every identifier checked against its own shape; one that fails is
+ * null rather than wrong. An organization without a name is dropped.
+ */
+export function cleanOrganization(o) {
+  if (!o || typeof o !== 'object') return null;
+  const name = str(o.name);
+  if (!name) return null;
+  const country = str(o.country)?.toUpperCase() ?? null;
+  const ror = str(o.ror);
+  return {
+    name,
+    domain: str(o.domain)?.toLowerCase() ?? null,
+    type: str(o.type)?.toLowerCase() ?? null,
+    country: country && COUNTRY.test(country) ? country : null,
+    website: urlOrNull(o.website),
+    wikidata: matching(o.wikidata, WIKIDATA),
+    ror: ror?.startsWith(ROR) && ror.length > ROR.length ? ror : null,
+    lei: matching(o.lei, LEI),
+    opencorporates: str(o.opencorporates),
+    via: VIA.has(o.via) ? o.via : null,
+  };
+}
+
+const toDate = (v) => {
+  if (typeof v !== 'string' || !v.trim()) return null;
+  const d = new Date(v);
+  return Number.isNaN(d.getTime()) ? null : d;
+};
 
 /**
  * Why a record cannot be imported, or null when it can. Kept apart from the
@@ -73,6 +142,18 @@ export function toItem(row, publisher = null) {
       : null;
   const webseeds = Array.isArray(row.webseeds) ? row.webseeds.map(urlOrNull).filter(Boolean) : [];
   const name = clean(row.name);
+  const published = toDate(row.published);
+  const organizations = Array.isArray(row.organizations)
+    ? row.organizations.map(cleanOrganization).filter(Boolean).slice(0, MAX_ORGS)
+    : [];
+  const orgTags = [...new Set(organizations.map((o) => slugify(o.name)).filter(Boolean))]
+    .slice(0, MAX_ORG_TAGS)
+    .map((s) => `org:${s}`);
+  const countryTags = [
+    ...new Set(organizations.map((o) => o.country?.toLowerCase()).filter(Boolean)),
+  ]
+    .slice(0, MAX_COUNTRY_TAGS)
+    .map((c) => `country:${c}`);
 
   const description = String(row.description ?? '').trim();
   const summary =
@@ -86,14 +167,15 @@ export function toItem(row, publisher = null) {
     summary: summary.slice(0, 4000),
     url: urlOrNull(row.url) ?? `https://academictorrents.com/details/${infohash}`,
     imageUrl: null,
-    // The endpoint carries no publication date; when it was mirrored is not one.
-    publishedAt: null,
+    publishedAt: published,
     tags: [
       `license:${(license ?? 'public-domain').toLowerCase()}`,
       verdict ? `verdict:${verdict}` : null,
       `basis:${basis}`,
       `category:${category.toLowerCase()}`,
       mirrored ? 'mirrored' : null,
+      ...orgTags,
+      ...countryTags,
     ].filter(Boolean),
     data: {
       infohash,
@@ -107,6 +189,9 @@ export function toItem(row, publisher = null) {
       verdict,
       terms: clean(row.terms) || null,
       mirrored,
+      creator: str(row.creator),
+      published: published ? published.toISOString() : null,
+      organizations,
       spec: 'openfile',
       publisher,
     },
@@ -118,7 +203,7 @@ export const academicDatasets = defineAdapter({
   title: 'Academic Torrents datasets (licence-checked)',
   collection: 'datasets',
   description:
-    'Datasets and courses from Academic Torrents that are public domain or carry an open licence, as bittorrented.com checks and publishes them: infohash, size, magnet and web seeds, the OpenFile attestation (basis and SPDX licence), what the licence lets you do with it, and whether bittorrented mirrors it. Anything without a public-domain or open-licence basis is never imported.',
+    'Datasets and courses from Academic Torrents that are public domain or carry an open licence, as bittorrented.com checks and publishes them: infohash, size, magnet and web seeds, the OpenFile attestation (basis and SPDX licence), what the licence lets you do with it, whether bittorrented mirrors it, and where known its creator, publication date and the organizations behind it with their open registry ids (ROR, Wikidata, LEI, OpenCorporates). Anything without a public-domain or open-licence basis is never imported.',
   docs: 'https://logicsrc.com/openfile',
   kinds: ['dataset'],
   cadenceMinutes: 1440,

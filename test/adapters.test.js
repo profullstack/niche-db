@@ -2,8 +2,10 @@ import { describe, expect, test } from 'bun:test';
 import { readFile } from 'node:fs/promises';
 import {
   academicDatasets,
+  cleanOrganization,
   toItem as datasetItem,
   rejectReason as datasetReject,
+  slugify,
 } from '../packages/adapters/src/academic-datasets.js';
 import { parseFeed as parseArxiv } from '../packages/adapters/src/arxiv.js';
 import {
@@ -407,7 +409,12 @@ describe('academic-datasets', () => {
       'basis:public-domain',
       'category:dataset',
       'mirrored',
+      'org:stanford-university',
+      'org:ecole-polytechnique-federale-de-lausanne',
+      'country:us',
+      'country:ch',
     ]);
+    expect(item.publishedAt.toISOString()).toBe('2015-12-17T04:24:54.000Z');
     expect(item.data).toEqual({
       infohash: 'cab7744573688b0b39c521ef66453435785762ac',
       sizeBytes: 61234567,
@@ -417,10 +424,100 @@ describe('academic-datasets', () => {
       verdict: 'public-domain',
       terms: 'sellable without restriction',
       mirrored: { id: 'sha256:3f1d2a', at: '2026-10-04T14:24:00.000Z' },
+      creator: 'Albert Cui and Howard Chung and Nicholas Hanson-Holtry',
+      published: '2015-12-17T04:24:54.000Z',
+      organizations: [
+        // Only the listed keys survive: `employees` is not one of them.
+        {
+          name: 'Stanford University',
+          domain: 'stanford.edu',
+          type: 'education',
+          country: 'US',
+          website: 'https://www.stanford.edu',
+          wikidata: 'Q41506',
+          ror: 'https://ror.org/00f54p054',
+          lei: 'JIUV0DC2REIJXQ26CR37',
+          opencorporates: 'us_ca/C1264149',
+          via: 'ror',
+        },
+        // Every identifier that fails its own shape is null, not passed on.
+        {
+          name: 'École Polytechnique Fédérale de Lausanne',
+          domain: 'epfl.ch',
+          type: 'education',
+          country: 'CH',
+          website: null,
+          wikidata: null,
+          ror: null,
+          lei: null,
+          opencorporates: null,
+          via: 'wikidata',
+        },
+        // The nameless third organization is dropped.
+      ],
       spec: 'openfile',
       publisher: { name: 'bittorrented.com dataset mirror', web: 'https://bittorrented.com' },
     });
-    expect(normaliseItem(item).tags).toContain('mirrored');
+    const stored = normaliseItem(item);
+    expect(stored.tags).toContain('mirrored');
+    expect(stored.tags.length).toBeLessThan(40);
+    expect(stored.publishedAt.toISOString()).toBe('2015-12-17T04:24:54.000Z');
+  });
+
+  test('a dataset with no organizations gets no org or country tags', async () => {
+    const { out } = await pullFixture();
+    const item = out.items[1];
+    expect(item.tags.some((t) => t.startsWith('org:') || t.startsWith('country:'))).toBe(false);
+    expect(item.publishedAt).toBeNull();
+    expect(item.data.creator).toBeNull();
+    expect(item.data.published).toBeNull();
+    expect(item.data.organizations).toEqual([]);
+  });
+
+  test('an older document without creator, published or organizations still imports', async () => {
+    const { doc } = await pullFixture();
+    const { creator, published, organizations, ...old } = doc.datasets[0];
+    const item = datasetItem(old);
+    expect(item.publishedAt).toBeNull();
+    expect(item.data.creator).toBeNull();
+    expect(item.data.organizations).toEqual([]);
+    expect(item.tags).toEqual([
+      'license:public-domain',
+      'verdict:public-domain',
+      'basis:public-domain',
+      'category:dataset',
+      'mirrored',
+    ]);
+    expect(datasetItem({ ...old, published: 'last spring' }).publishedAt).toBeNull();
+    expect(datasetItem({ ...old, organizations: 'Stanford' }).data.organizations).toEqual([]);
+  });
+
+  test('org slugs strip diacritics and punctuation and stop at 60 characters', () => {
+    expect(slugify('École Polytechnique Fédérale de Lausanne')).toBe(
+      'ecole-polytechnique-federale-de-lausanne',
+    );
+    expect(slugify('  AT&T Labs, Inc. ')).toBe('at-t-labs-inc');
+    expect(slugify('x'.repeat(59) + ' y z').length).toBeLessThanOrEqual(60);
+    expect(slugify('x'.repeat(59) + ' y z').endsWith('-')).toBe(false);
+    expect(slugify('***')).toBe('');
+  });
+
+  test('a dataset with many organizations stays well under the tag cap', () => {
+    const many = Array.from({ length: 60 }, (_, i) => ({
+      name: `Org ${i}`,
+      domain: `org${i}.example`,
+      country: `A${String.fromCharCode(65 + (i % 26))}`,
+      via: 'ror',
+    }));
+    const item = datasetItem({
+      infohash: '0123456789abcdef0123456789abcdef01234567',
+      name: 'x',
+      attestation: { basis: 'public-domain' },
+      organizations: many,
+    });
+    expect(item.tags.length).toBeLessThanOrEqual(30);
+    expect(item.data.organizations).toHaveLength(50);
+    expect(cleanOrganization({ domain: 'a.example' })).toBeNull();
   });
 
   test('an open-licence course keeps its SPDX id and its own description', async () => {
