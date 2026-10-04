@@ -1,4 +1,3 @@
-import { academicDatasets } from './academic-datasets.js';
 import { adsbFlights } from './adsb.js';
 import { agenticjobs } from './agenticjobs.js';
 import { aiid } from './aiid.js';
@@ -378,8 +377,8 @@ export const ADAPTERS = [
   opensite,
   outreachgraph,
   bittorrentedDht,
-  // Datasets: licence-checked Academic Torrents datasets, read off bittorrented.com's OpenFile-attested list.
-  academicDatasets,
+  // Not registered: academic-datasets.js (Academic Torrents via bittorrented.com) was pulled on
+  // 2026-10-04 and its collection removed by migration 0035. The code stays to bring it back.
   // Research: OpenAlex works, newest first, under a topic or a search.
   openalex,
   // Algorithms: the NIST dictionary, Wikidata's algorithms and data structures, the Papers With Code
