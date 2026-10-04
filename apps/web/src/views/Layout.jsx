@@ -198,6 +198,21 @@ export const Layout = (props) => (
           <a href="/crawl">Crawl access</a> · <a href="/crawlstatus">Crawl status</a> ·{' '}
           <a href="/opportunities">Opportunities</a>
         </p>
+        <nav class="webring muted" aria-label="Profullstack webring">
+          <a
+            href="https://rssamplifier.com/ring/profullstack/previous?from=https%3A%2F%2Fnichedb.dev%2F"
+            rel="prev"
+          >
+            {'<<'}
+          </a>{' '}
+          <a href="https://rssamplifier.com/ring/profullstack">Profullstack</a>{' '}
+          <a
+            href="https://rssamplifier.com/ring/profullstack/next?from=https%3A%2F%2Fnichedb.dev%2F"
+            rel="next"
+          >
+            {'>>'}
+          </a>
+        </nav>
       </footer>
 
       <script src={assetUrl('vendor-webauthn.js')} defer />
