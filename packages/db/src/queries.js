@@ -745,6 +745,82 @@ export async function reapStaleRuns({ minutes = 30, minutesByAdapter = {}, db = 
   return rows.length;
 }
 
+/**
+ * What the crawler is doing, for /crawlstatus: every source by state, the last
+ * day of runs in total and by hour, and the sources that need looking at.
+ *
+ * A source is failing while its last finished run errored (finishRun clears
+ * last_error on success), waiting until its first success, and overdue when
+ * its turn came more than `overdueMinutes` ago and nothing picked it up: the
+ * queue is behind, which a failing count alone never shows.
+ *
+ * The day of runs reads runs_started_idx (build-indexes.js). Sums are float8
+ * because a day of dump walks can see more rows than an int holds.
+ */
+export async function crawlStatus({ db = sql, overdueMinutes = 30, limit = 25 } = {}) {
+  const [[sources], [day], hourly, failing, late, recent] = await Promise.all([
+    db`
+      select
+        count(*)::int as total,
+        count(*) filter (where enabled)::int as enabled,
+        count(*) filter (where not enabled)::int as paused,
+        count(*) filter (where enabled and last_error is not null)::int as failing,
+        count(*) filter (where enabled and last_error is null and last_ok_at is null)::int as waiting,
+        count(*) filter (where enabled and last_error is null and last_ok_at is not null)::int as ok,
+        count(*) filter (
+          where enabled and next_run_at < now() - make_interval(mins => ${overdueMinutes})
+        )::int as overdue,
+        coalesce(sum(item_count), 0)::float8 as items,
+        max(last_ok_at) as last_ok_at
+      from sources
+    `,
+    db`
+      select
+        count(*)::int as runs,
+        count(*) filter (where status = 'ok')::int as ok,
+        count(*) filter (where status = 'error')::int as errors,
+        count(*) filter (where status = 'running')::int as running,
+        count(distinct source_id)::int as sources,
+        coalesce(sum(seen), 0)::float8 as seen,
+        coalesce(sum(added), 0)::float8 as added,
+        coalesce(sum(updated), 0)::float8 as updated
+      from runs where started_at > now() - interval '24 hours'
+    `,
+    db`
+      select date_trunc('hour', started_at) as hour,
+        count(*) filter (where status = 'ok')::int as ok,
+        count(*) filter (where status = 'error')::int as errors,
+        count(*) filter (where status = 'running')::int as running
+      from runs where started_at > now() - interval '24 hours'
+      group by 1 order by 1
+    `,
+    db`
+      select s.slug, s.name, s.adapter, c.name as collection_name,
+        s.last_ok_at, s.last_run_at, s.last_error
+      from sources s join collections c on c.id = s.collection_id
+      where s.enabled and s.last_error is not null
+      order by s.last_ok_at asc nulls first, s.id
+      limit ${limit}
+    `,
+    db`
+      select s.slug, s.name, s.adapter, c.name as collection_name,
+        s.next_run_at, s.last_ok_at, s.cadence_minutes
+      from sources s join collections c on c.id = s.collection_id
+      where s.enabled and s.next_run_at < now() - make_interval(mins => ${overdueMinutes})
+      order by s.next_run_at asc, s.id
+      limit ${limit}
+    `,
+    db`
+      select r.started_at, r.finished_at, r.status, r.seen, r.added, r.updated, r.error,
+        s.slug, s.name, s.adapter
+      from runs r join sources s on s.id = r.source_id
+      order by r.started_at desc, r.id desc
+      limit ${limit}
+    `,
+  ]);
+  return { sources, day, hourly, failing, overdue: late, recent };
+}
+
 /* ------------------------------------------------------------------- items -- */
 
 /**

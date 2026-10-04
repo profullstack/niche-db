@@ -57,6 +57,8 @@ export const RESERVED_NICHE_SLUGS = new Set([
   'assets',
   'c',
   'crawl',
+  'crawlstats',
+  'crawlstatus',
   'dashboard',
   'docs',
   'f',

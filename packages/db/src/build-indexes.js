@@ -47,6 +47,13 @@ export const BIG_INDEXES = [
     create:
       'create index concurrently items_collection_kind_tags_idx on items using gin (collection_id, kind, tags)',
   },
+  {
+    name: 'runs_started_idx',
+    // /crawlstatus reads the last day of runs across every source. Runs are
+    // never pruned and the only other index leads with source_id, so without
+    // this that read is a scan of every run the deployment has ever made.
+    create: 'create index concurrently runs_started_idx on runs (started_at)',
+  },
 ];
 
 const LOCK_TIMEOUT_MS = 5000;

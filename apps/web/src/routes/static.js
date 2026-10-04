@@ -187,6 +187,7 @@ export function registerStatic(app, gateway) {
       { loc: '/' },
       { loc: '/about' },
       { loc: '/sources' },
+      { loc: '/crawlstatus' },
       { loc: '/feeds' },
       { loc: '/submit' },
       { loc: '/docs/api' },
