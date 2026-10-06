@@ -166,13 +166,28 @@ export async function absorb({ app, sourceUrl, pageUrl, doc, sourceId, collectio
   return { profile: out.profile, built: out.built, created, merged };
 }
 
-export async function listProfiles({ q = null, since = null, limit = 50, publicOnly = true } = {}) {
+/**
+ * `tags` are professional facets (`title:…`, `company:…`, `seniority:…`, as
+ * `facetFilter` in the core writes them); a profile must carry every one.
+ * They live in `data.facets`, written by a rebuild, so a profile not rebuilt
+ * since they were introduced matches none until its next pull or edit.
+ */
+export async function listProfiles({
+  q = null,
+  since = null,
+  limit = 50,
+  publicOnly = true,
+  tags = [],
+} = {}) {
   const cap = Math.max(1, Math.min(Number(limit) || 50, 500));
   const term = q ? `%${String(q).trim()}%` : null;
+  const facets = Array.isArray(tags) && tags.length ? JSON.stringify(tags.map(String)) : null;
   const rows = await sql`
     select ${detail} from profiles p left join users u on u.id = p.owner_user_id
     where (${!publicOnly} or p.public)
       and (${term}::text is null or p.name ilike ${term} or p.headline ilike ${term} or p.doc ilike ${term})
+      and (${facets}::text is null
+           or coalesce(p.data->'facets', '[]'::jsonb) @> ${facets}::text::jsonb)
       and (${since}::timestamptz is null or p.updated_at > ${since}::timestamptz)
     order by p.updated_at desc, p.id desc
     limit ${cap}

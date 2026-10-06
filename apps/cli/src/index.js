@@ -225,9 +225,22 @@ export const COMMANDS = [
   },
   {
     name: 'profiles',
-    usage: 'profiles [<query>] [--since <iso>] [--mine]',
-    summary: 'People with an OpenProfile.md: search them, or list the ones your key owns.',
-    options: ['--since <iso>', '--mine', '--limit', '--json', '--urls'],
+    usage:
+      'profiles [<query>] [--title …] [--company …] [--seniority …] [--tags …] [--linkedin <url>] [--since <iso>] [--mine]',
+    summary:
+      'People with an OpenProfile.md: search them (by text, or the job title, company and seniority they publish), find the one a LinkedIn URL belongs to, or list the ones your key owns.',
+    options: [
+      '--title <job title>',
+      '--company <domain|url|name>',
+      '--seniority <c-suite|vp|director|manager|senior|entry>',
+      '--tags <title:…,company:…,seniority:…>',
+      '--linkedin <url>',
+      '--since <iso>',
+      '--mine',
+      '--limit',
+      '--json',
+      '--urls',
+    ],
   },
   {
     name: 'profile',
@@ -409,6 +422,16 @@ const pad = (s, n) =>
     .padEnd(n)
     .slice(0, n);
 const when = (d) => (d ? new Date(d).toISOString().slice(0, 16).replace('T', ' ') : '-');
+
+/** `CTO, Example (example.com) [c-suite]` for a profile that publishes them; '' when it does not. */
+export function professionalLine(p) {
+  const company = p?.company
+    ? [p.company.name, p.company.domain ? `(${p.company.domain})` : null].filter(Boolean).join(' ')
+    : '';
+  const head = [p?.title, company].filter(Boolean).join(', ');
+  if (!head && !p?.seniority) return '';
+  return [head, p?.seniority ? `[${p.seniority}]` : null].filter(Boolean).join(' ');
+}
 
 function printItems(items, { json, urls }) {
   if (json) return out(JSON.stringify(items, null, 2));
@@ -968,6 +991,8 @@ export async function run(
       if (flags.since) qs.set('since', flags.since);
       if (flags.limit) qs.set('limit', flags.limit);
       if (flags.mine) qs.set('mine', '1');
+      for (const f of ['title', 'company', 'seniority', 'tags', 'linkedin'])
+        if (typeof flags[f] === 'string' && flags[f]) qs.set(f, flags[f]);
       const { profiles } = await client.get(`/api/v1/profiles?${qs}`);
       if (json) {
         out(JSON.stringify(profiles, null, 2));
@@ -980,6 +1005,8 @@ export async function run(
         }
         const name = `${p.emoji ? `${p.emoji} ` : ''}${p.name}${p.pronouns ? ` (${p.pronouns})` : ''}`;
         out(`${pad(p.ref, 34)} ${pad(p.kind ?? '', 12)} ${name}${p.claimed ? ' (claimed)' : ''}`);
+        const work = professionalLine(p);
+        if (work) out(`      ${work}`);
         if (p.headline) out(`      ${p.headline}`);
       }
       if (profiles.length === 0) out('(nobody yet)');

@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'bun:test';
-import { COMMANDS, makeClient, parseArgs, run } from '../src/index.js';
+import { COMMANDS, makeClient, parseArgs, professionalLine, run } from '../src/index.js';
 
 describe('parseArgs', () => {
   test('flags, repeated config, positionals', () => {
@@ -165,6 +165,38 @@ describe('profiles: Emoji, Pronouns and Web', () => {
     });
     expect(text).toContain('🐛 Grace Hopper (she/her)');
     expect(text).toMatch(/ Ada Lovelace\n/);
+  });
+
+  test('the professional filters and the LinkedIn lookup go to the API; the listing shows the work line', async () => {
+    const { calls, text } = await capture(
+      [
+        'profiles',
+        '--seniority',
+        'vp',
+        '--company',
+        'acme.com',
+        '--linkedin',
+        'linkedin.com/in/ada',
+      ],
+      {
+        profiles: [
+          {
+            ref: 'ada-lovelace-12',
+            kind: 'person',
+            name: 'Ada Lovelace',
+            title: 'VP Engineering',
+            company: { name: 'Acme', domain: 'acme.com' },
+            seniority: 'vp',
+          },
+        ],
+      },
+    );
+    const u = new URL(calls[0].url);
+    expect(u.searchParams.get('seniority')).toBe('vp');
+    expect(u.searchParams.get('company')).toBe('acme.com');
+    expect(u.searchParams.get('linkedin')).toBe('linkedin.com/in/ada');
+    expect(text).toContain('VP Engineering, Acme (acme.com) [vp]');
+    expect(professionalLine({ title: null, company: null, seniority: null })).toBe('');
   });
 
   test('profile edit sets them alone, without opening an editor; --pronouns= clears', async () => {

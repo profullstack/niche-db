@@ -853,8 +853,12 @@ export function founderDoc(f, c) {
       ),
   );
   if (web) lines.push(`- **Web**: ${web}`);
-  lines.push('');
   const role = f.title ? oneLine(f.title) : 'Founder';
+  // The professional facets, as the company's own markup states them. `Company`
+  // is not an identity key (only Web, Accounts, Email and DID are), so the
+  // company's URL here cannot fuse a founder into the organization profile.
+  lines.push(`- **Title**: ${role}`, `- **Company**: ${oneLine(c.name)} (https://${c.domain})`);
+  lines.push('');
   lines.push(
     `${role} of ${oneLine(c.name)} (https://${c.domain}), Y Combinator ${c.row.batch}. Compiled by NicheDB from ${c.name}'s homepage${f.accounts.some((u) => u.includes('wikidata.org')) ? ' and Wikidata' : ''}.`,
   );

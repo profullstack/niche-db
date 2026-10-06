@@ -14,7 +14,7 @@ import {
   schemaOrgOf,
 } from '../packages/adapters/src/installmap.js';
 import { normaliseItem } from '../packages/core/src/adapter.js';
-import { keysOf } from '../packages/core/src/profiles.js';
+import { keysOf, professionalFields } from '../packages/core/src/profiles.js';
 
 const row = (over = {}) => ({
   domain: 'example.com',
@@ -264,6 +264,17 @@ describe('people', () => {
       for (const k of keysOf(f.data.doc)) expect(orgKeys.has(k)).toBe(false);
     }
     expect(keysOf(ada.data.doc).some((k) => k.includes('linkedin.com/in/ada'))).toBe(true);
+    // Founders carry the professional facets, and the company URL in them is no identity key.
+    expect(ada.data.doc).toContain('- **Title**: CEO');
+    expect(bob.data.doc).toContain('- **Title**: Founder');
+    expect(professionalFields(ada.data.doc)).toEqual({
+      title: 'CEO',
+      company: { name: 'Example', domain: c.domain },
+      seniority: 'c-suite',
+    });
+    expect(professionalFields(bob.data.doc).seniority).toBe('c-suite');
+    for (const f of [ada, bob])
+      expect(keysOf(f.data.doc).some((k) => k.includes(c.domain))).toBe(false);
     for (const i of items) expect(i.data.doc).not.toMatch(/[—–]/);
   });
 });

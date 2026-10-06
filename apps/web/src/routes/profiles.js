@@ -1,3 +1,4 @@
+import { facetFilter } from '@nichedb/core/profiles';
 import * as profiles from '@nichedb/db/profiles';
 import { MEDIA_TYPE } from '@profullstack/openprofile';
 import { cached, render, respond } from '../lib/http.js';
@@ -9,6 +10,7 @@ import {
   fieldsOf,
   mdUrlOf,
   pathOf,
+  profileByLinkedin,
   profileOut,
   resolveRef,
   urlOf,
@@ -154,12 +156,30 @@ export function registerProfiles(app) {
 
   app.get('/api/v1/profiles', async (c) => {
     const user = await actor(c);
-    const rows = await profiles.listProfiles({
-      q: c.req.query('q') || null,
-      since: c.req.query('since') || null,
-      limit: c.req.query('limit') || 50,
-      publicOnly: true,
-    });
+    let tags;
+    try {
+      // Professional facets: ?tags=seniority:vp,company:acme.com, or ?title= ?company= ?seniority=.
+      tags = facetFilter({
+        tags: c.req.query('tags'),
+        title: c.req.query('title'),
+        company: c.req.query('company'),
+        seniority: c.req.query('seniority'),
+      });
+    } catch (err) {
+      if (err instanceof RangeError) throw new Denied(err.message, 400);
+      throw err;
+    }
+    // ?linkedin=<url>: the one person that LinkedIn page is, or nobody. Never by email.
+    const linkedin = c.req.query('linkedin');
+    const rows = linkedin
+      ? [await profileByLinkedin(linkedin)].filter(Boolean)
+      : await profiles.listProfiles({
+          q: c.req.query('q') || null,
+          since: c.req.query('since') || null,
+          limit: c.req.query('limit') || 50,
+          publicOnly: true,
+          tags,
+        });
     const mine = c.req.query('mine') && user ? await profiles.profilesOf(user.id) : null;
     c.header('cache-control', c.req.query('since') ? 'no-store' : 'public, max-age=60');
     return c.json({
