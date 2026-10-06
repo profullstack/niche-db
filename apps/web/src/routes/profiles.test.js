@@ -57,12 +57,31 @@ const BOB = {
   headline: '<b>not bold</b>',
 };
 
+const GRACE = {
+  ...ADA,
+  id: 14,
+  slug: 'grace-hopper',
+  handle: 'grace',
+  name: 'Grace Hopper',
+  headline: 'Rear admiral.',
+  doc: '# Grace Hopper\n\n- **Emoji**: 🐛\n- **Pronouns**: she/her\n- **Website**: https://grace.example\n\nRear admiral.\n',
+  // A row built before OpenProfile 0.4: the view still says `website`.
+  data: {
+    identity: { website: 'https://grace.example' },
+    accounts: [],
+    topics: [],
+    broadcasts: [],
+  },
+};
+
 const store = {
   overrides: {},
   async getProfile(id) {
+    if (Number(id) === 14) return { ...GRACE };
     return Number(id) === 12 ? { ...ADA } : Number(id) === 13 ? { ...BOB } : null;
   },
   async getProfileByHandle(h) {
+    if (h === 'grace') return { ...GRACE };
     return h === 'bob' ? { ...BOB } : null;
   },
   async listProfiles() {
@@ -196,6 +215,74 @@ describe('the page', () => {
     const anon = await appAs(null).request('/c/profiles/ada-lovelace-12/edit');
     expect(anon.status).toBe(303);
     expect(anon.headers.get('location')).toContain('/login?next=');
+  });
+});
+
+describe('Emoji, Pronouns and Web (OpenProfile 0.4)', () => {
+  const graceOwner = { id: 'u-owner', email: 'grace@example.com', role: 'user', timezone: 'UTC' };
+
+  test('the page shows the emoji beside the name and the pronouns beside the handle', async () => {
+    const html = await (await appAs(stranger).request('/c/profiles/grace')).text();
+    expect(html).toContain('<span class="mark">🐛</span> Grace Hopper</h1>');
+    expect(html).toContain('<span class="pronouns">she/her</span>');
+    // Shown in the header, so not again in the identity list; Website still is.
+    expect(html).not.toContain('<dt>Pronouns</dt>');
+    expect(html).toContain('<dt>Website</dt>');
+  });
+
+  test('a profile with none of them reads as before', async () => {
+    const html = await (await appAs(stranger).request('/c/profiles/ada-lovelace-12')).text();
+    expect(html).toContain('<h1>Ada Lovelace</h1>');
+    expect(html).not.toContain('class="pronouns"');
+  });
+
+  test('the editor offers each once, and the alias in place of a second Web field', async () => {
+    const html = await (await appAs(graceOwner).request('/c/profiles/grace/edit')).text();
+    expect(html).toContain('name="identity.Emoji" value="🐛"');
+    expect(html).toContain('name="identity.Pronouns" value="she/her"');
+    expect(html).toContain('name="identity.Website" value="https://grace.example"');
+    expect(html).not.toContain('name="identity.Web"');
+    const ada = await (await appAs(owner).request('/c/profiles/ada-lovelace-12/edit')).text();
+    expect(ada).toContain('name="identity.Emoji" value=""');
+    expect(ada).toContain('name="identity.Web" value="https://ada.example"');
+  });
+
+  test('the API answers them from the Markdown, Website as web', async () => {
+    const one = await (await appAs(null).request('/api/v1/profiles/grace')).json();
+    expect(one.profile.emoji).toBe('🐛');
+    expect(one.profile.pronouns).toBe('she/her');
+    expect(one.profile.web).toBe('https://grace.example');
+    const ada = await (await appAs(null).request('/api/v1/profiles/12')).json();
+    expect(ada.profile.pronouns).toBeNull();
+    expect(ada.profile.emoji).toBeNull();
+  });
+
+  test('an owner sets them by name over the API, and an empty value removes one', async () => {
+    const r = await appAs(owner).request('/api/v1/profiles/12', {
+      method: 'PUT',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ emoji: '🧮', pronouns: '', web: 'https://lovelace.example' }),
+    });
+    expect(r.status).toBe(200);
+    expect(store.overrides.identity).toEqual({
+      Emoji: '🧮',
+      Pronouns: null,
+      Web: 'https://lovelace.example',
+    });
+  });
+
+  test('and from the page form, as identity fields', async () => {
+    const form = new FormData();
+    form.set('name', 'Ada Lovelace');
+    form.set('identity.Emoji', '⚙️');
+    form.set('identity.Pronouns', 'she/her');
+    const r = await appAs(owner).request('/c/profiles/ada-lovelace-12/edit', {
+      method: 'POST',
+      body: form,
+    });
+    expect(r.status).toBe(303);
+    expect(store.overrides.identity.Emoji).toBe('⚙️');
+    expect(store.overrides.identity.Pronouns).toBe('she/her');
   });
 });
 

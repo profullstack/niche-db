@@ -244,10 +244,20 @@ export const COMMANDS = [
   },
   {
     name: 'profile edit',
-    usage: 'profile edit <ref> [--file openprofile.md] [--handle …] [--public|--private]',
+    usage:
+      'profile edit <ref> [--file openprofile.md] [--emoji …] [--pronouns …] [--web …] [--handle …] [--public|--private]',
     summary:
-      'Edit a profile you own (key required). Opens $EDITOR on the file when no --file is given.',
-    options: ['--file <path>', '--handle <handle>', '--public', '--private', '--json'],
+      'Edit a profile you own (key required). Opens $EDITOR on the file when nothing else is given. --emoji, --pronouns and --web set those identity keys alone (--pronouns= clears).',
+    options: [
+      '--file <path>',
+      '--emoji <emoji|:shortcode:>',
+      '--pronouns <as written>',
+      '--web <url>',
+      '--handle <handle>',
+      '--public',
+      '--private',
+      '--json',
+    ],
   },
   {
     name: 'profile handle',
@@ -968,7 +978,8 @@ export async function run(
           out(p.page);
           continue;
         }
-        out(`${pad(p.ref, 34)} ${pad(p.kind ?? '', 12)} ${p.name}${p.claimed ? ' (claimed)' : ''}`);
+        const name = `${p.emoji ? `${p.emoji} ` : ''}${p.name}${p.pronouns ? ` (${p.pronouns})` : ''}`;
+        out(`${pad(p.ref, 34)} ${pad(p.kind ?? '', 12)} ${name}${p.claimed ? ' (claimed)' : ''}`);
         if (p.headline) out(`      ${p.headline}`);
       }
       if (profiles.length === 0) out('(nobody yet)');
@@ -1000,11 +1011,22 @@ export async function run(
       }
       if (sub === 'edit') {
         if (!arg)
-          throw new Error('profile edit <ref> [--file …] [--handle …] [--public|--private]');
+          throw new Error(
+            'profile edit <ref> [--file …] [--emoji …] [--pronouns …] [--web …] [--handle …] [--public|--private]',
+          );
         const ref = encodeURIComponent(arg);
+        // Emoji, Pronouns and Web on their own; an empty value (--pronouns=) removes the key.
+        const fields = {};
+        for (const f of ['emoji', 'pronouns', 'web'])
+          if (flags[f] !== undefined) fields[f] = flags[f] === true ? '' : String(flags[f]);
         let markdown = null;
         if (flags.file) markdown = await readFile(String(flags.file), 'utf8');
-        else if (!flags.handle && !flags.public && !flags.private) {
+        else if (
+          !flags.handle &&
+          !flags.public &&
+          !flags.private &&
+          Object.keys(fields).length === 0
+        ) {
           // No file and nothing else to set: the editor, on the file as served.
           const current = await client.text(`/api/v1/profiles/${ref}/openprofile.md`);
           const path = join(tmpdir(), `nichedb-profile-${Date.now()}.md`);
@@ -1029,7 +1051,7 @@ export async function run(
             markdown,
             'text/markdown; charset=utf-8',
           );
-        const patch = {};
+        const patch = { ...fields };
         if (flags.handle) patch.handle = String(flags.handle);
         if (flags.public) patch.public = true;
         if (flags.private) patch.public = false;

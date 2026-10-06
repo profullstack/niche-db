@@ -6,6 +6,7 @@ import {
   canEdit,
   claimProfile,
   editProfile,
+  fieldsOf,
   mdUrlOf,
   pathOf,
   profileOut,
@@ -171,7 +172,7 @@ export function registerProfiles(app) {
         page: urlOf(p),
         updatedAt: new Date(p.updated_at).toISOString(),
         accounts: (p.data?.accounts ?? []).map((a) => a.url),
-        web: p.data?.identity?.web ?? null,
+        web: fieldsOf(p).web,
       })),
       next: null,
     });
@@ -212,6 +213,9 @@ export function registerProfiles(app) {
         headline: body.headline,
         prose: body.prose,
         identity: body.identity,
+        emoji: body.emoji,
+        pronouns: body.pronouns,
+        web: body.web,
         sections: body.sections,
       };
       if (body.handle !== undefined) handle = body.handle;

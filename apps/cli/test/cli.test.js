@@ -132,3 +132,62 @@ describe('tlds and check', () => {
     expect(text).not.toContain('available');
   });
 });
+
+describe('profiles: Emoji, Pronouns and Web', () => {
+  const capture = async (argv, body) => {
+    const calls = [];
+    const fetchImpl = async (url, init = {}) => {
+      calls.push({ url: String(url), method: init.method ?? 'GET', body: init.body ?? null });
+      return new Response(JSON.stringify(body), {
+        headers: { 'content-type': 'application/json' },
+      });
+    };
+    const chunks = [];
+    const orig = process.stdout.write;
+    process.stdout.write = (s) => {
+      chunks.push(String(s));
+      return true;
+    };
+    try {
+      expect(await run([...argv, '--api', 'https://x', '--key', 'ndb_1'], { fetchImpl })).toBe(0);
+    } finally {
+      process.stdout.write = orig;
+    }
+    return { calls, text: chunks.join('') };
+  };
+
+  test('the listing puts the emoji before the name and the pronouns after it', async () => {
+    const { text } = await capture(['profiles'], {
+      profiles: [
+        { ref: 'grace', kind: 'person', name: 'Grace Hopper', emoji: '🐛', pronouns: 'she/her' },
+        { ref: 'ada-lovelace-12', kind: 'person', name: 'Ada Lovelace', emoji: null },
+      ],
+    });
+    expect(text).toContain('🐛 Grace Hopper (she/her)');
+    expect(text).toMatch(/ Ada Lovelace\n/);
+  });
+
+  test('profile edit sets them alone, without opening an editor; --pronouns= clears', async () => {
+    const { calls, text } = await capture(
+      [
+        'profile',
+        'edit',
+        'grace',
+        '--emoji',
+        '⚓',
+        '--pronouns=',
+        '--web',
+        'https://hopper.example',
+      ],
+      { profile: { page: 'https://x/c/profiles/grace' } },
+    );
+    expect(calls).toHaveLength(1);
+    expect(calls[0].method).toBe('PUT');
+    expect(JSON.parse(calls[0].body)).toEqual({
+      emoji: '⚓',
+      pronouns: '',
+      web: 'https://hopper.example',
+    });
+    expect(text).toContain('Saved: https://x/c/profiles/grace');
+  });
+});

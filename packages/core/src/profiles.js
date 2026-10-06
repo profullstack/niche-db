@@ -2,15 +2,19 @@ import {
   accounts,
   applyOverrides,
   broadcasts,
+  emoji,
   guest,
   identityKeys,
+  identityMap,
   identityValue,
   kindOf,
   mergeProfiles,
   networkOf,
   parseOpenProfile,
+  pronouns,
   renderOpenProfile,
   topics,
+  web,
 } from '@profullstack/openprofile';
 import { slugify } from './adapter.js';
 
@@ -25,15 +29,31 @@ import { slugify } from './adapter.js';
  * absence is unstated. Two shows are two `### <show>` groups, never one blur.
  */
 
+/**
+ * The three identity fields OpenProfile 0.4 makes defaults, read the way the
+ * spec says: `Emoji` is the person's mark (one grapheme, or an OpenEmoji
+ * `:shortcode:` kept as written while there is no resolver here), `Pronouns`
+ * as written and null when unstated (never inferred), `Web` through its
+ * aliases (`Website`, `Homepage`, `Site`). Takes a parsed document or the
+ * Markdown itself, which is canonical.
+ */
+export function identityFields(docOrMarkdown) {
+  const doc =
+    typeof docOrMarkdown === 'string' || docOrMarkdown == null
+      ? parseOpenProfile(String(docOrMarkdown ?? ''))
+      : docOrMarkdown;
+  return { emoji: emoji(doc), pronouns: pronouns(doc), web: web(doc) };
+}
+
 /** The parsed view kept in `profiles.data` and on the item: what a reader wants without parsing. */
 export function profileView(doc) {
-  const identity = {};
-  for (const e of doc.identity)
-    if (!(e.key.toLowerCase() in identity)) identity[e.key.toLowerCase()] = e.value;
+  // Keyed by canonical key, so a document that says `Website` is read as `web`.
+  const identity = identityMap(doc);
   return {
     name: doc.name,
     kind: kindOf(doc),
     headline: doc.headline,
+    ...identityFields(doc),
     identity,
     accounts: accounts(doc).map((a) => ({ ...a, network: networkOf(a.url) })),
     topics: topics(doc),
@@ -113,7 +133,7 @@ export function build({ sourceDocs, overrides }) {
     kind: kindOf(doc),
     headline: doc.headline,
     avatar: identityValue(doc, 'Avatar'),
-    web: identityValue(doc, 'Web'),
+    web: web(doc),
   };
 }
 
