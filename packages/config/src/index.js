@@ -279,6 +279,8 @@ export const config = {
     currency: opt('PREMIUM_CURRENCY', 'USD'),
     /** Credits granted on the first member visit each calendar month. */
     monthlyCredits: num('PREMIUM_MONTHLY_CREDITS', 1000),
+    /** `CODE:percent[:YYYY-MM-DD]`, comma separated. Empty string runs no promo. */
+    promoCodes: opt('PREMIUM_PROMO_CODES', '50OFF:50'),
     get enabled() {
       return Boolean(config.coinpay.enabled);
     },

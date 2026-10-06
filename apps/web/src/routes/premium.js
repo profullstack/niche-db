@@ -11,7 +11,6 @@ import { config } from '@nichedb/config';
 import { sql } from '@nichedb/db';
 import * as premiumDb from '@nichedb/db/premium';
 import * as q from '@nichedb/db/queries';
-import { priceFor } from '@nichedb/payments/referrals';
 import {
   APP_ICONS,
   awardCost,
@@ -25,6 +24,7 @@ import {
   termOptions,
 } from '@nichedb/premium';
 import { comparisonRows, REDDIT } from '@nichedb/premium/comparison';
+import { promoDiscountCents } from '@nichedb/premium/promo';
 import { render, requireUser, respond, wantsJson } from '../lib/http.js';
 import {
   awardCheck,
@@ -34,7 +34,7 @@ import {
   premiumSnapshot,
   requirePremium,
 } from '../lib/premium.js';
-import { prices, startPremiumCheckout } from '../lib/premium-checkout.js';
+import { prices, promoFor, quotePremium, startPremiumCheckout } from '../lib/premium-checkout.js';
 import { Denied } from '../lib/service.js';
 import { LoungePage, PremiumPage } from '../views/premium.jsx';
 
@@ -55,20 +55,18 @@ export function registerPremium(app, { checkout = startPremiumCheckout } = {}) {
   app.get('/premium', async (c) => {
     const user = c.get('user');
     const plan = planOf(c);
+    const typed = c.req.query('promo') ?? '';
+    const promo = promoFor(typed);
     const terms = termOptions(prices());
     const quotedTerms = await Promise.all(
       terms.map(async (term) => {
-        const quote = user
-          ? await priceFor(sql, {
-              userId: user.id,
-              referredBy: user.referred_by,
-              amountCents: term.cents,
-            }).catch(() => null)
-          : null;
+        const quote = await quotePremium(user, term, promo).catch(() => null);
         return {
           ...term,
           checkoutCents: quote?.amountCents ?? term.cents,
           discountCents: quote?.discountCents ?? 0,
+          promoCode: quote?.promoCode ?? null,
+          promoPercent: quote?.promoPercent ?? 0,
         };
       }),
     );
@@ -88,22 +86,38 @@ export function registerPremium(app, { checkout = startPremiumCheckout } = {}) {
           snapshot={snapshot}
           selectedTerm={termById(c.req.query('term'), prices())?.id ?? 'month'}
           enabled={config.premium.enabled}
+          promo={promo}
+          promoTyped={typed}
           notice={c.req.query('notice')}
-          error={c.req.query('error')}
+          error={
+            c.req.query('error') ?? (typed && !promo ? 'That promo code is not valid.' : undefined)
+          }
         />,
       ),
     );
   });
 
   /** Membership pricing and entitlements, distinct from account-free crawl access. */
-  app.get('/api/v1/premium', (c) =>
-    c.json({
+  app.get('/api/v1/premium', (c) => {
+    const promo = promoFor(c.req.query('promo'));
+    return c.json({
       plan: planOf(c),
       entitlements: entitlementsOf(c),
       pricing: {
         currency: config.premium.currency,
-        terms: termOptions(prices()),
+        terms: termOptions(prices()).map((term) =>
+          promo
+            ? {
+                ...term,
+                promo_code: promo.code,
+                checkout_cents: term.cents - promoDiscountCents(term.cents, promo),
+              }
+            : term,
+        ),
         purchase: `${config.siteUrl}/api/premium/buy`,
+        promo: promo
+          ? { code: promo.code, percent: promo.percent, ends: promo.ends?.toISOString() ?? null }
+          : null,
         renews: false,
         data: {
           cents: config.dataDumps.priceCents,
@@ -123,8 +137,8 @@ export function registerPremium(app, { checkout = startPremiumCheckout } = {}) {
         sources: REDDIT.sources.map((s) => s.url),
         rows: rowsForSite(),
       },
-    }),
-  );
+    });
+  });
 
   /* ---------------------------------------------------------------- buying -- */
 
@@ -134,7 +148,8 @@ export function registerPremium(app, { checkout = startPremiumCheckout } = {}) {
       ? await c.req.json().catch(() => ({}))
       : await c.req.parseBody().catch(() => ({}));
     const wanted = String(body?.term ?? c.req.query('term') ?? 'month');
-    const { checkoutUrl } = await checkout(user, wanted);
+    const promoCode = String(body?.promo ?? c.req.query('promo') ?? '');
+    const { checkoutUrl } = await checkout(user, wanted, { promoCode });
     // Keep the provider's origin: the generic respond() helper only redirects locally.
     return wantsJson(c) ? c.json({ checkoutUrl }) : c.redirect(checkoutUrl, 303);
   });

@@ -71,7 +71,14 @@ const TermCard = ({ term, user, enabled, selected }) => {
       </p>
       <h3>{titles[term.id]}</h3>
       <p class="premium-term-price">
-        {money(term.cents)} <span>{term.label}</span>
+        {term.promoCode ? (
+          <>
+            <s class="muted">{money(term.cents)}</s> {money(term.checkoutCents)}{' '}
+          </>
+        ) : (
+          <>{money(term.cents)} </>
+        )}
+        <span>{term.label}</span>
       </p>
       <p class="small muted">
         ${(term.perDayCents / 100).toFixed(2)}/day · {durations[term.id]} of Premium
@@ -81,7 +88,11 @@ const TermCard = ({ term, user, enabled, selected }) => {
           ? `Keep ${money(term.savedCents)} compared with buying ${term.days} individual days.`
           : 'Every Premium perk. One upfront payment.'}
       </p>
-      {term.discountCents > 0 ? (
+      {term.promoCode ? (
+        <p class="small premium-referral">
+          {term.promoCode}: {term.promoPercent}% off, you save {money(term.discountCents)}.
+        </p>
+      ) : term.discountCents > 0 ? (
         <p class="small premium-referral">
           Your referral saves {money(term.discountCents)} on this term.
         </p>
@@ -90,6 +101,7 @@ const TermCard = ({ term, user, enabled, selected }) => {
         user ? (
           <form method="post" action="/api/premium/buy">
             <input type="hidden" name="term" value={term.id} />
+            {term.promoCode ? <input type="hidden" name="promo" value={term.promoCode} /> : null}
             <button type="submit" class={selected ? 'cta' : 'ghost'}>
               Get {durations[term.id]} · {money(term.checkoutCents ?? term.cents)}
             </button>
@@ -97,7 +109,9 @@ const TermCard = ({ term, user, enabled, selected }) => {
         ) : (
           <a
             class={`button ${selected ? 'cta' : 'ghost'}`}
-            href={`/login?next=${encodeURIComponent(`/premium?term=${term.id}#plans`)}`}
+            href={`/login?next=${encodeURIComponent(
+              `/premium?term=${term.id}${term.promoCode ? `&promo=${term.promoCode}` : ''}#plans`,
+            )}`}
           >
             Sign in for {durations[term.id]}
           </a>
@@ -119,6 +133,8 @@ export const PremiumPage = ({
   snapshot,
   enabled,
   selectedTerm = 'month',
+  promo,
+  promoTyped = '',
   notice,
   error,
 }) => {
@@ -282,6 +298,22 @@ export const PremiumPage = ({
             The same Premium benefits in every term. Prices in {config.premium.currency}; paid
             upfront through CoinPay in crypto.
           </p>
+          <form method="get" action="/premium#plans" class="row premium-promo">
+            <input type="hidden" name="term" value={selectedTerm} />
+            <label class="small" for="promo">
+              Have a promo code?
+            </label>
+            <input id="promo" name="promo" value={promo?.code ?? promoTyped} placeholder="50OFF" />
+            <button type="submit" class="ghost">
+              Apply
+            </button>
+            {promo ? (
+              <span class="small ok">
+                {promo.code} applied: {promo.percent}% off every term
+                {promo.ends ? `, through ${promo.ends.toISOString().slice(0, 10)}` : ''}.
+              </span>
+            ) : null}
+          </form>
           <div class="premium-terms">
             {terms.map((term) => (
               <TermCard

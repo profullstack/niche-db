@@ -28,8 +28,9 @@ afterEach(() => {
 
 function build(user = USER) {
   const calls = [];
-  const checkout = (buyer, term) =>
+  const checkout = (buyer, term, opts = {}) =>
     startPremiumCheckout(buyer, term, {
+      ...opts,
       createCheckout: async (args) => {
         calls.push(args);
         return { checkoutUrl: CHECKOUT };
@@ -59,6 +60,67 @@ const json = (body) => ({
 });
 
 describe('Premium checkout', () => {
+  test('promo code 50OFF halves every term and is recorded on the payment', async () => {
+    const { app, calls } = build();
+    for (const [term, cents] of [
+      ['day', prices().dayCents],
+      ['month', prices().monthCents],
+      ['year', prices().yearCents],
+    ]) {
+      const res = await app.request('/api/premium/buy', {
+        method: 'POST',
+        body: new URLSearchParams({ term, promo: '50off' }),
+      });
+      expect(res.status).toBe(303);
+      const purchase = calls.at(-1);
+      expect(purchase.amountCents).toBe(cents / 2);
+      expect(purchase.metadata).toMatchObject({
+        promo_code: '50OFF',
+        referral_code: '',
+        list_price_cents: String(cents),
+      });
+    }
+  });
+  test('an unknown promo code is refused rather than charged at full price', async () => {
+    const { app, calls } = build();
+    const res = await app.request('/api/premium/buy', json({ term: 'month', promo: 'NOPE' }));
+    expect(res.status).toBe(400);
+    expect(calls).toEqual([]);
+  });
+  test('promo and referral never stack: the bigger discount wins alone', async () => {
+    const calls = [];
+    const referralPrice = async (_sql, { amountCents }) => ({
+      amountCents: amountCents - amountCents * 0.2,
+      discountCents: amountCents * 0.2,
+      code: 'FRIEND',
+    });
+    const createCheckout = async (args) => {
+      calls.push(args);
+      return { checkoutUrl: CHECKOUT };
+    };
+    const buyer = { ...USER, referred_by: 'FRIEND' };
+    await startPremiumCheckout(buyer, 'month', {
+      promoCode: '50OFF',
+      referralPrice,
+      createCheckout,
+    });
+    expect(calls[0].amountCents).toBe(prices().monthCents / 2);
+    expect(calls[0].metadata.referral_code).toBe('');
+    await startPremiumCheckout(buyer, 'month', { referralPrice, createCheckout });
+    expect(calls[1].amountCents).toBe(prices().monthCents * 0.8);
+    expect(calls[1].metadata).toMatchObject({ referral_code: 'FRIEND', promo_code: '' });
+  });
+  test('the pricing page and API quote the promo', async () => {
+    const { app } = build(null);
+    const html = await (await app.request('/premium?promo=50OFF')).text();
+    expect(html).toContain('50OFF applied');
+    const api = await (await app.request('/api/v1/premium?promo=50OFF')).json();
+    expect(api.pricing.promo).toMatchObject({ code: '50OFF', percent: 50 });
+    const month = api.pricing.terms.find((t) => t.id === 'month');
+    expect(month.checkout_cents).toBe(prices().monthCents / 2);
+    const bad = await (await app.request('/premium?promo=NOPE')).text();
+    expect(bad).toContain('That promo code is not valid.');
+  });
   test('all three forms buy membership and redirect to the actual payment provider', async () => {
     const { app, calls } = build();
     for (const [term, days, cents] of [
