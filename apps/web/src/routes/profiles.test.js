@@ -45,6 +45,8 @@ const ADA = {
   created_at: '2026-09-13T04:00:00.000Z',
   updated_at: '2026-09-13T05:00:00.000Z',
 };
+const ADA_WORK =
+  '# Ada Lovelace\n\n- **Kind**: person\n- **Title**: Co-founder & CTO\n- **Company**: Analytical Engines (https://engines.example)\n\nHost of The Analytical Engine.\n\n## Accounts\n\n- https://www.linkedin.com/in/ada-lovelace\n';
 const BOB = {
   ...ADA,
   id: 13,
@@ -84,8 +86,17 @@ const store = {
     if (h === 'grace') return { ...GRACE };
     return h === 'bob' ? { ...BOB } : null;
   },
-  async listProfiles() {
+  listArgs: null,
+  async listProfiles(args) {
+    store.listArgs = args;
     return [{ ...ADA }, { ...BOB }];
+  },
+  keysAsked: null,
+  async findByKeys(keys) {
+    store.keysAsked = keys;
+    if (keys.includes('account:linkedin.com/in/ada-lovelace')) return { ...ADA, doc: ADA_WORK };
+    if (keys.includes('account:linkedin.com/in/hidden')) return { ...ADA, public: false };
+    return null;
   },
   async profilesOf() {
     return [{ ...ADA }];
@@ -327,6 +338,59 @@ describe('the API', () => {
     // Sections the file left out are removed from the merge, not kept.
     expect(store.overrides.sections.broadcast).toBe('none');
     expect(store.overrides.sections.accounts).toBe('none');
+  });
+
+  test('the answers carry title, company and seniority; a profile without them says null', async () => {
+    const body = await (await appAs(null).request('/api/v1/profiles')).json();
+    expect(body.profiles[0].title).toBeNull();
+    expect(body.profiles[0].company).toBeNull();
+    expect(body.profiles[0].seniority).toBeNull();
+    expect(body.profiles[0].facets).toEqual([]);
+  });
+
+  test('the list filters on professional facets, normalised the way the tags are written', async () => {
+    const r = await appAs(null).request(
+      '/api/v1/profiles?seniority=VP&company=https://www.acme.com/about&title=Head%20of%20Data&tags=Title:cto',
+    );
+    expect(r.status).toBe(200);
+    expect(store.listArgs.tags).toEqual([
+      'title:cto',
+      'title:head-of-data',
+      'company:acme.com',
+      'seniority:vp',
+    ]);
+    const bad = await appAs(null).request('/api/v1/profiles?seniority=emperor');
+    expect(bad.status).toBe(400);
+  });
+
+  test('a LinkedIn URL finds its public profile; a private one, an email or another site finds nothing', async () => {
+    const r = await appAs(null).request(
+      `/api/v1/profiles?linkedin=${encodeURIComponent('https://uk.linkedin.com/in/Ada-Lovelace/')}`,
+    );
+    expect(r.status).toBe(200);
+    const body = await r.json();
+    expect(store.keysAsked).toEqual([
+      'account:linkedin.com/in/ada-lovelace',
+      'web:linkedin.com/in/ada-lovelace',
+    ]);
+    expect(body.count).toBe(1);
+    expect(body.profiles[0]).toMatchObject({
+      title: 'Co-founder & CTO',
+      company: { name: 'Analytical Engines', domain: 'engines.example' },
+      seniority: 'c-suite',
+      facets: ['title:co-founder-cto', 'company:engines.example', 'seniority:c-suite'],
+    });
+    const hidden = await (
+      await appAs(null).request('/api/v1/profiles?linkedin=linkedin.com/in/hidden')
+    ).json();
+    expect(hidden.count).toBe(0);
+    store.keysAsked = null;
+    for (const q of ['ada@example.com', 'https://x.com/ada', 'mailto:ada@example.com']) {
+      const no = await appAs(null).request(`/api/v1/profiles?linkedin=${encodeURIComponent(q)}`);
+      expect(no.status).toBe(400);
+    }
+    // Nothing that is not a LinkedIn page ever reaches the identity table.
+    expect(store.keysAsked).toBeNull();
   });
 
   test('a claim is proven by the email the profile lists', async () => {

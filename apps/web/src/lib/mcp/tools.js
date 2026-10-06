@@ -3,6 +3,7 @@ import { describeAdapters, describeEnrichers } from '@nichedb/core';
 import { geoQueryFields, geoSchema } from '@nichedb/core/geo';
 import { cleanChannelName, parseName } from '@nichedb/core/names';
 import { CHILD_LEVELS, normaliseKey, normaliseZip, zipKey } from '@nichedb/core/population';
+import { facetFilter, linkedinKey, SENIORITY_LEVELS } from '@nichedb/core/profiles';
 import {
   buildRows,
   checkNames,
@@ -17,7 +18,13 @@ import * as q from '@nichedb/db/queries';
 import * as tldStore from '@nichedb/db/tlds';
 import { enqueueRun } from '@nichedb/queue';
 import { areaOut } from '../population.js';
-import { claimProfile, editProfile, profileOut, resolveRef } from '../profiles.js';
+import {
+  claimProfile,
+  editProfile,
+  profileByLinkedin,
+  profileOut,
+  resolveRef,
+} from '../profiles.js';
 import { allowedEnrichers, collectionOut, feedOut, itemOut, sourceOut } from '../serialize.js';
 import { addSource, createFeed, Denied, editSource } from '../service.js';
 import { submissionOut, submitFeed } from '../submissions.js';
@@ -415,23 +422,54 @@ export const TOOLS = [
   {
     name: 'search_profiles',
     description:
-      'People: one entry per person assembled from every app that serves their OpenProfile.md (podcasters from p0dcasters, public profiles from OutreachGraph). Search by name, headline or anything in the document; newest change first. Each answer carries the page, the openprofile.md URL, accounts, topics, Broadcast shows and the Guest section.',
+      'People: one entry per person assembled from every app that serves their OpenProfile.md (podcasters from p0dcasters, public profiles from OutreachGraph). Search by name, headline or anything in the document; newest change first. Each answer carries the page, the openprofile.md URL, accounts, topics, Broadcast shows, the Guest section, and the job title, company and seniority the person published (filter on them with title, company, seniority or tags).',
     inputSchema: {
       type: 'object',
       properties: {
         q: str('Text to match against the name, headline and document (optional)'),
         since: str('ISO time: only profiles changed after it (optional)'),
+        title: str('Job title, matched as its tag (`CTO` is title:cto) (optional)'),
+        company: str('Company domain, URL or name (optional)'),
+        seniority: {
+          type: 'string',
+          enum: SENIORITY_LEVELS,
+          description: 'Seniority derived from the title (optional)',
+        },
+        tags: list('Facet tags every result must carry: title:…, company:…, seniority:…'),
         limit: int('Default 30, max 200'),
       },
     },
-    run: async ({ q: term, since, limit }) =>
-      (
+    run: async ({ q: term, since, limit, title, company, seniority, tags }) => {
+      let facets;
+      try {
+        facets = facetFilter({ title, company, seniority, tags });
+      } catch (err) {
+        throw toolError(err.message);
+      }
+      return (
         await profiles.listProfiles({
           q: term ?? null,
           since: since ?? null,
           limit: Math.min(Number(limit) || 30, 200),
+          tags: facets,
         })
-      ).map(profileOut),
+      ).map(profileOut);
+    },
+  },
+  {
+    name: 'find_profile_by_linkedin',
+    description:
+      'The public profile a LinkedIn profile or company URL belongs to (linkedin.com/in/… or /company/…), or null. LinkedIn only: profiles are never looked up by email.',
+    inputSchema: {
+      type: 'object',
+      properties: { url: str('A LinkedIn URL, e.g. https://www.linkedin.com/in/ada') },
+      required: ['url'],
+    },
+    run: async ({ url }) => {
+      if (!linkedinKey(url)) throw toolError('Not a LinkedIn profile or company URL.');
+      const profile = await profileByLinkedin(String(url));
+      return profile ? { profile: profileOut(profile), markdown: profile.doc } : null;
+    },
   },
   {
     name: 'get_profile',

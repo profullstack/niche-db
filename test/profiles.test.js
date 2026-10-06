@@ -21,13 +21,20 @@ import {
   assemble,
   build,
   cleanHandle,
+  companyKey,
+  facetFilter,
   identityFields,
   keysOf,
+  linkedinKey,
+  parseCompany,
   parseRef,
+  professionalFields,
   profileItem,
   profilePath,
   profileRef,
   profileSlug,
+  SENIORITY_LEVELS,
+  seniorityOf,
 } from '../packages/core/src/profiles.js';
 
 process.env.DATABASE_URL ??= 'postgres://test:test@localhost:5432/test';
@@ -414,6 +421,124 @@ describe('Emoji, Pronouns and Web (OpenProfile 0.4)', () => {
   });
 });
 
+describe('professional facets: title, company, seniority', () => {
+  const ada =
+    '# Ada Lovelace\n\n- **Kind**: person\n- **title**: Co-Founder & CTO\n- COMPANY: Analytical Engines (https://www.engines.example/about)\n\nMathematician.\n\n## Accounts\n\n- https://www.linkedin.com/in/ada\n';
+
+  test('the seniority rules: most senior keyword wins, an unstated level is null', () => {
+    const cases = {
+      'Co-Founder & CEO': 'c-suite',
+      Founder: 'c-suite',
+      CTO: 'c-suite',
+      'Chief Revenue Officer': 'c-suite',
+      President: 'c-suite',
+      Owner: 'c-suite',
+      'Product Owner': null,
+      'Vice President, Sales': 'vp',
+      'VP of Engineering': 'vp',
+      'SVP Product': 'vp',
+      'Director of Marketing': 'director',
+      'Head of Growth': 'director',
+      'Engineering Manager': 'manager',
+      'Sr. Software Engineer': 'senior',
+      'Staff Engineer': 'senior',
+      'Principal Designer': 'senior',
+      'Marketing Intern': 'entry',
+      'Junior Developer': 'entry',
+      'Entry-level Analyst': 'entry',
+      'Software Engineer': null,
+      '': null,
+    };
+    for (const [title, level] of Object.entries(cases))
+      expect([title, seniorityOf(title)]).toEqual([title, level]);
+    expect(SENIORITY_LEVELS).toEqual(['c-suite', 'vp', 'director', 'manager', 'senior', 'entry']);
+  });
+
+  test('Title and Company are read case-insensitively, with the company domain from the URL', () => {
+    expect(professionalFields(ada)).toEqual({
+      title: 'Co-Founder & CTO',
+      company: { name: 'Analytical Engines', domain: 'engines.example' },
+      seniority: 'c-suite',
+    });
+    // Role and Employer are the same keys; `X at Y` names both when Company is absent.
+    expect(professionalFields('# B\n\n- Role: Head of Data at Foo Corp\n')).toEqual({
+      title: 'Head of Data',
+      company: { name: 'Foo Corp', domain: null },
+      seniority: 'director',
+    });
+    expect(professionalFields('# C\n\n- Employer: acme.io\n')).toEqual({
+      title: null,
+      company: { name: null, domain: 'acme.io' },
+      seniority: null,
+    });
+    // Nothing is guessed from the headline.
+    expect(professionalFields('# D\n\nCEO of Something.\n')).toEqual({
+      title: null,
+      company: null,
+      seniority: null,
+    });
+  });
+
+  test('a company is written several ways; a social page is no domain, an email is never kept', () => {
+    expect(parseCompany('[Acme](https://acme.com)')).toEqual({ name: 'Acme', domain: 'acme.com' });
+    expect(parseCompany('Acme Inc., acme.io')).toEqual({ name: 'Acme Inc.', domain: 'acme.io' });
+    expect(parseCompany('https://www.linkedin.com/company/acme')).toBeNull();
+    expect(parseCompany('Acme (https://linkedin.com/company/acme)')).toEqual({
+      name: 'Acme',
+      domain: null,
+    });
+    expect(parseCompany('bob@acme.com')).toBeNull();
+    expect(companyKey({ name: 'Acme Inc.', domain: null })).toBe('acme-inc');
+    expect(companyKey({ name: 'Acme', domain: 'acme.com' })).toBe('acme.com');
+  });
+
+  test('the view, the item tags and the identity keys: Company never becomes a key', () => {
+    const built = build({ sourceDocs: [ada], overrides: null });
+    expect(built.view.title).toBe('Co-Founder & CTO');
+    expect(built.view.seniority).toBe('c-suite');
+    expect(built.view.facets).toEqual([
+      'title:co-founder-cto',
+      'company:engines.example',
+      'seniority:c-suite',
+    ]);
+    expect(built.keys).toEqual(['account:linkedin.com/in/ada']);
+    // The keys survive a render: a rebuilt profile still reads them.
+    expect(built.markdown).toContain('Co-Founder & CTO');
+    const item = normaliseItem(
+      profileItem(
+        { id: 9, name: built.name, slug: 'ada-lovelace', sources: [] },
+        'https://n.test',
+        built,
+      ),
+    );
+    for (const t of ['title:co-founder-cto', 'company:engines.example', 'seniority:c-suite'])
+      expect(item.tags).toContain(t);
+    // A profile that states none of them keeps the view it had: no new keys, no new tags.
+    const plain = build({ sourceDocs: ['# Plain\n\n- **Kind**: person\n'], overrides: null });
+    expect('title' in plain.view || 'facets' in plain.view || 'seniority' in plain.view).toBe(
+      false,
+    );
+  });
+
+  test('a search filter is normalised the way the tags are written; an unknown level is refused', () => {
+    expect(
+      facetFilter({ tags: 'Seniority:VP, ', company: 'https://www.acme.com/x', title: 'CEO' }),
+    ).toEqual(['seniority:vp', 'title:ceo', 'company:acme.com']);
+    expect(facetFilter({})).toEqual([]);
+    expect(() => facetFilter({ seniority: 'emperor' })).toThrow(RangeError);
+  });
+
+  test('LinkedIn is the only outside lookup: a profile or company page, never an email', () => {
+    expect(linkedinKey('https://www.linkedin.com/in/Ada-L/')).toBe('linkedin.com/in/ada-l');
+    expect(linkedinKey('uk.linkedin.com/in/ada/details/experience')).toBe('linkedin.com/in/ada');
+    expect(linkedinKey('https://linkedin.com/company/acme/')).toBe('linkedin.com/company/acme');
+    expect(linkedinKey('ada@example.com')).toBeNull();
+    expect(linkedinKey('https://x.com/ada')).toBeNull();
+    expect(linkedinKey('https://linkedin.com/feed')).toBeNull();
+    expect(linkedinKey('')).toBeNull();
+  });
+});
+
 describe('the URL shapes', () => {
   test('slug-id: the id resolves, the name is cosmetic; a handle is its own shape', () => {
     expect(profileSlug('Ada Lovelace')).toBe('ada-lovelace');
@@ -534,5 +659,29 @@ describe('the tables', () => {
     expect(
       await one(`select 1 from profile_identities where key = 'web:x.example'`),
     ).toBeUndefined();
+  });
+
+  test('the facet filter listProfiles runs: every tag must be in data.facets, none stored is no match', async () => {
+    const view = build({
+      sourceDocs: ['# Vee\n\n- **Title**: VP Sales\n- **Company**: acme.com\n'],
+      overrides: null,
+    }).view;
+    const v = await one(
+      `insert into profiles (slug, name, data) values ('vee', 'Vee', $1::text::jsonb) returning id`,
+      [JSON.stringify(view)],
+    );
+    await one(`insert into profiles (slug, name) values ('none', 'None') returning id`);
+    // The where clause of listProfiles, verbatim.
+    const match = async (tags) =>
+      (
+        await db.query(
+          `select id from profiles p where ($1::text is null
+             or coalesce(p.data->'facets', '[]'::jsonb) @> $1::text::jsonb) order by id`,
+          [tags ? JSON.stringify(tags) : null],
+        )
+      ).rows.map((r) => r.id);
+    expect(await match(['seniority:vp', 'company:acme.com'])).toEqual([v.id]);
+    expect(await match(['seniority:vp', 'company:other.com'])).toEqual([]);
+    expect((await match(null)).length).toBeGreaterThan(1);
   });
 });

@@ -2,7 +2,10 @@ import { config } from '@nichedb/config';
 import {
   cleanHandle,
   identityFields,
+  linkedinKey,
   parseRef,
+  professionalFields,
+  professionalTags,
   profilePath,
   profileRef,
 } from '@nichedb/core/profiles';
@@ -32,6 +35,19 @@ export const mdUrlOf = (p) => `${urlOf(p)}/openprofile.md`;
  * `Website` as its Web page without waiting for a rebuild.
  */
 export const fieldsOf = (p) => identityFields(p?.doc ?? '');
+
+/**
+ * The profile a LinkedIn URL belongs to, when it is public; null otherwise
+ * (and for anything that is not a LinkedIn profile or company page). LinkedIn
+ * is the one identity looked up from outside: an email lookup would tell a
+ * stranger whether an address they hold belongs to someone listed here.
+ */
+export async function profileByLinkedin(url) {
+  const key = linkedinKey(url);
+  if (!key) throw new Denied('Send a LinkedIn profile or company URL (linkedin.com/in/…).', 400);
+  const p = await profiles.findByKeys([`account:${key}`, `web:${key}`]);
+  return p?.public ? p : null;
+}
 
 /** The profile a URL segment names, and whether the segment was its canonical form. */
 export async function resolveRef(ref) {
@@ -259,7 +275,10 @@ export async function editProfile(user, profile, { markdown, patch, handle, isPu
 /* -------------------------------------------------------------- shapes -- */
 
 export function profileOut(p) {
-  const { emoji, pronouns, web } = fieldsOf(p);
+  // Read from the Markdown, so a row not rebuilt since these fields existed still answers them.
+  const doc = parseOpenProfile(p?.doc ?? '');
+  const { emoji, pronouns, web } = identityFields(doc);
+  const work = professionalFields(doc);
   return {
     id: Number(p.id),
     ref: profileRef(p),
@@ -270,6 +289,10 @@ export function profileOut(p) {
     web,
     kind: p.kind ?? null,
     headline: p.headline ?? null,
+    title: work.title,
+    company: work.company,
+    seniority: work.seniority,
+    facets: professionalTags(work),
     public: p.public,
     claimed: Boolean(p.claimed_at),
     claim_method: p.claim_method ?? null,
