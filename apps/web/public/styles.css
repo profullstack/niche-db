@@ -1303,6 +1303,12 @@ td.evidence {
 .profile .accounts li {
   margin: 0.25rem 0;
 }
+.profile h1 .mark.shortcode {
+  font-size: 0.6em;
+  font-family: var(--mono, ui-monospace, monospace);
+  color: var(--muted, #8a93a6);
+  vertical-align: middle;
+}
 
 /* /c/sites: the card each consumer would draw, and the tags it was read from. */
 .cardprevs {

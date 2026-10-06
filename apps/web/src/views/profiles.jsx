@@ -1,6 +1,6 @@
 import { config } from '@nichedb/config';
-import { parseOpenProfile } from '@profullstack/openprofile';
-import { mdUrlOf, pathOf } from '../lib/profiles.js';
+import { canonicalKey, parseOpenProfile } from '@profullstack/openprofile';
+import { fieldsOf, mdUrlOf, pathOf } from '../lib/profiles.js';
 import { Notice, Relative } from './components.jsx';
 import { Layout } from './Layout.jsx';
 
@@ -85,12 +85,16 @@ function renderInline(text) {
 }
 
 const HIDDEN = new Set(['accounts', 'topics']);
+/** Identity keys the header shows already (Emoji beside the name, Pronouns under it). */
+const IN_HEADER = new Set(['avatar', 'emoji', 'pronouns']);
+const isShortcode = (v) => /^:[a-z0-9_+-]+:$/i.test(String(v));
 
 export const ProfilePage = ({ user, profile, canEdit, notice, error }) => {
   const view = profile.data ?? {};
   const doc = parseOpenProfile(profile.doc);
-  const identity = doc.identity.filter((e) => !/^avatar$/i.test(e.key));
+  const identity = doc.identity.filter((e) => !IN_HEADER.has(canonicalKey(e.key)));
   const avatar = view.identity?.avatar ?? null;
+  const { emoji, pronouns } = fieldsOf(profile);
   const md = mdUrlOf(profile);
   return (
     <Layout
@@ -106,7 +110,19 @@ export const ProfilePage = ({ user, profile, canEdit, notice, error }) => {
       <Notice notice={notice} error={error} />
       <article class="detail profile">
         {avatar ? <img class="hero-img avatar" src={avatar} alt="" width="160" /> : null}
-        <h1>{profile.name}</h1>
+        {emoji ? (
+          <h1>
+            <span
+              class={isShortcode(emoji) ? 'mark shortcode' : 'mark'}
+              title={isShortcode(emoji) ? 'OpenEmoji shortcode' : undefined}
+            >
+              {emoji}
+            </span>{' '}
+            {profile.name}
+          </h1>
+        ) : (
+          <h1>{profile.name}</h1>
+        )}
         {profile.headline ? <p class="lede">{profile.headline}</p> : null}
         <p class="item-meta">
           {view.kind ? (
@@ -115,6 +131,12 @@ export const ProfilePage = ({ user, profile, canEdit, notice, error }) => {
             <span class="kind muted">kind unstated</span>
           )}
           {profile.handle ? <> · @{profile.handle}</> : null}
+          {pronouns ? (
+            <>
+              {' · '}
+              <span class="pronouns">{pronouns}</span>
+            </>
+          ) : null}
           {' · '}
           {profile.claimed_at ? (
             <span title={`claimed by ${profile.claim_method}`}>claimed</span>
@@ -262,11 +284,12 @@ export const ProfilePage = ({ user, profile, canEdit, notice, error }) => {
 
 const KNOWN_KEYS = [
   'Kind',
+  'Emoji',
+  'Pronouns',
   'Handle',
   'Web',
   'Email',
   'Location',
-  'Pronouns',
   'Timezone',
   'Languages',
   'Avatar',
@@ -274,6 +297,11 @@ const KNOWN_KEYS = [
   'Pay',
   'Resume',
 ];
+const IDENTITY_HINTS = {
+  emoji: 'Your mark, shown next to your name: one emoji, or an OpenEmoji :shortcode:.',
+  pronouns: 'Shown exactly as you write them (she/her, they/them, any). Empty means unstated.',
+  web: 'Your home page. Website, Homepage and Site mean the same key.',
+};
 const SECTION_HINTS = {
   broadcast:
     'OpenBroadcast keys: Show, Kind, Format, Live, Cadence, Length, Language, Audience, Since, Feed, Listen, Topics, Seeking, Not, Slots, Remote, Book, Pays, Charges. Two shows: two `### Show name` groups.',
@@ -286,7 +314,14 @@ const SECTION_HINTS = {
 
 export const ProfileEditPage = ({ user, profile, notice, error }) => {
   const doc = parseOpenProfile(profile.doc);
-  const identityKeys = [...new Set([...doc.identity.map((e) => e.key), ...KNOWN_KEYS])];
+  // One field per canonical key: a document that says `Website` is edited as that, not twice.
+  const identityKeys = [];
+  const seen = new Set();
+  for (const k of [...doc.identity.map((e) => e.key), ...KNOWN_KEYS]) {
+    if (seen.has(canonicalKey(k))) continue;
+    seen.add(canonicalKey(k));
+    identityKeys.push(k);
+  }
   const sectionNames = ['accounts', 'topics', 'broadcast', 'guest', 'about', 'links'];
   const sections = [...doc.sections];
   for (const n of sectionNames)
@@ -334,7 +369,8 @@ export const ProfileEditPage = ({ user, profile, notice, error }) => {
         <fieldset class="stack">
           <legend>Identity</legend>
           {identityKeys.map((k) => {
-            const cur = doc.identity.find((e) => e.key.toLowerCase() === k.toLowerCase());
+            const cur = doc.identity.find((e) => canonicalKey(e.key) === canonicalKey(k));
+            const hint = IDENTITY_HINTS[canonicalKey(k)];
             return (
               <div class="field" key={k}>
                 <label class="label" for={`identity.${k}`}>
@@ -346,6 +382,7 @@ export const ProfileEditPage = ({ user, profile, notice, error }) => {
                   value={cur?.value ?? ''}
                   maxlength="500"
                 />
+                {hint ? <p class="help small muted">{hint}</p> : null}
               </div>
             );
           })}

@@ -21,6 +21,7 @@ import {
   assemble,
   build,
   cleanHandle,
+  identityFields,
   keysOf,
   parseRef,
   profileItem,
@@ -377,6 +378,39 @@ describe('one person from several apps', () => {
 
   test('an empty set of sources is still a document', () => {
     expect(assemble([], null).name).toBe('Unnamed');
+  });
+});
+
+describe('Emoji, Pronouns and Web (OpenProfile 0.4)', () => {
+  const grace =
+    '# Grace Hopper\n\n- **Emoji**: 🐛\n- **Pronouns**: she/her\n- **Website**: https://grace.example\n\nRear admiral.\n';
+
+  test('the view carries all three, and `Website` is read as Web everywhere', () => {
+    const built = build({ sourceDocs: [grace], overrides: null });
+    expect(built.view.emoji).toBe('🐛');
+    expect(built.view.pronouns).toBe('she/her');
+    expect(built.view.web).toBe('https://grace.example');
+    expect(built.web).toBe('https://grace.example');
+    expect(built.view.identity.web).toBe('https://grace.example');
+    expect(built.view.identity.website).toBeUndefined();
+    expect(built.keys).toContain('web:grace.example');
+  });
+
+  test('absent pronouns are unstated, never guessed; a shortcode is kept as written', () => {
+    const f = identityFields('# Ada\n\n- **Emoji**: :telescope:\n');
+    expect(f).toEqual({ emoji: ':telescope:', pronouns: null, web: null });
+    expect(identityFields('')).toEqual({ emoji: null, pronouns: null, web: null });
+  });
+
+  test('the owner overrides them through the alias: Web replaces a source’s Website', () => {
+    const built = build({
+      sourceDocs: [grace],
+      overrides: { identity: { Web: 'https://hopper.example', Pronouns: null, Emoji: '⚓' } },
+    });
+    expect(built.web).toBe('https://hopper.example');
+    expect(built.view.pronouns).toBeNull();
+    expect(built.view.emoji).toBe('⚓');
+    expect(built.markdown).not.toContain('grace.example');
   });
 });
 

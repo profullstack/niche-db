@@ -471,7 +471,7 @@ export const TOOLS = [
   {
     name: 'update_profile',
     description:
-      'Edit a profile you own (needs a key). Send `markdown`, a whole OpenProfile.md that replaces what you wrote before, or any of `name`, `headline`, `identity` (key: value, null removes), `sections` (name: body, `none` removes), `handle`, `public`. What you write wins over every source and survives every re-read.',
+      'Edit a profile you own (needs a key). Send `markdown`, a whole OpenProfile.md that replaces what you wrote before, or any of `name`, `headline`, `emoji`, `pronouns`, `web`, `identity` (key: value, null removes), `sections` (name: body, `none` removes), `handle`, `public`. What you write wins over every source and survives every re-read.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -479,9 +479,15 @@ export const TOOLS = [
         markdown: str('A complete OpenProfile.md'),
         name: str('The name'),
         headline: str('One line'),
+        emoji: str(
+          'Your mark next to your name: one emoji or an OpenEmoji :shortcode:; empty removes',
+        ),
+        pronouns: str('As you write them (she/her, they/them, any); empty removes, never inferred'),
+        web: str('Your home page (Website, Homepage and Site are the same key); empty removes'),
         identity: {
           type: 'object',
-          description: 'Identity keys: Kind, Web, Email, Location, ...; null removes',
+          description:
+            'Identity keys: Kind, Emoji, Pronouns, Web, Email, Location, ...; null removes',
         },
         sections: {
           type: 'object',
@@ -502,6 +508,9 @@ export const TOOLS = [
         patch: {
           name: args.name,
           headline: args.headline,
+          emoji: args.emoji,
+          pronouns: args.pronouns,
+          web: args.web,
           identity: args.identity,
           sections: args.sections,
         },

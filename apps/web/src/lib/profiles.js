@@ -1,5 +1,11 @@
 import { config } from '@nichedb/config';
-import { cleanHandle, parseRef, profilePath, profileRef } from '@nichedb/core/profiles';
+import {
+  cleanHandle,
+  identityFields,
+  parseRef,
+  profilePath,
+  profileRef,
+} from '@nichedb/core/profiles';
 import * as profiles from '@nichedb/db/profiles';
 import * as q from '@nichedb/db/queries';
 import { mergeOverrides, overridesFromDocument, parseOpenProfile } from '@profullstack/openprofile';
@@ -19,6 +25,13 @@ const site = () => config.siteUrl;
 export const pathOf = (p) => profilePath(p);
 export const urlOf = (p) => `${site()}${profilePath(p)}`;
 export const mdUrlOf = (p) => `${urlOf(p)}/openprofile.md`;
+
+/**
+ * Emoji, Pronouns and Web for a stored profile, read from its Markdown (the
+ * canonical copy), so a row built before OpenProfile 0.4 still answers
+ * `Website` as its Web page without waiting for a rebuild.
+ */
+export const fieldsOf = (p) => identityFields(p?.doc ?? '');
 
 /** The profile a URL segment names, and whether the segment was its canonical form. */
 export async function resolveRef(ref) {
@@ -142,9 +155,7 @@ export async function proveClaim(user, profile, { fetcher = fetch, adminFor = nu
   const principalProfile = user.openaccess?.profile ?? null;
   if (principalProfile && profile.sources.some((s) => s.source_url === principalProfile))
     return 'openaccess';
-  const pages = [profile.data?.identity?.web, ...profile.sources.map((s) => s.page_url)].filter(
-    Boolean,
-  );
+  const pages = [fieldsOf(profile).web, ...profile.sources.map((s) => s.page_url)].filter(Boolean);
   const deadline = Date.now() + LINKBACK_TOTAL_MS;
   for (const page of pages.slice(0, 6)) {
     const left = deadline - Date.now();
@@ -205,11 +216,19 @@ export async function editProfile(user, profile, { markdown, patch, handle, isPu
       clean.headline = patch.headline === null ? null : String(patch.headline).slice(0, 500);
     if (patch.prose !== undefined)
       clean.prose = patch.prose === null ? null : String(patch.prose).slice(0, 8000);
-    if (patch.identity && typeof patch.identity === 'object') {
+    const identity = patch.identity && typeof patch.identity === 'object' ? patch.identity : {};
+    // The three OpenProfile 0.4 defaults may also be sent on their own.
+    const named = { emoji: 'Emoji', pronouns: 'Pronouns', web: 'Web' };
+    const own = Object.entries(named).filter(([f]) => patch[f] !== undefined);
+    if (Object.keys(identity).length || own.length) {
       clean.identity = {};
-      for (const [k, v] of Object.entries(patch.identity).slice(0, 40)) {
+      for (const [k, v] of Object.entries(identity).slice(0, 40)) {
         const key = String(k).trim().slice(0, 40);
         if (key) clean.identity[key] = v === null || v === '' ? null : String(v).slice(0, 500);
+      }
+      for (const [f, key] of own) {
+        const v = patch[f];
+        clean.identity[key] = v === null || v === '' ? null : String(v).trim().slice(0, 500);
       }
     }
     if (patch.sections && typeof patch.sections === 'object') {
@@ -240,11 +259,15 @@ export async function editProfile(user, profile, { markdown, patch, handle, isPu
 /* -------------------------------------------------------------- shapes -- */
 
 export function profileOut(p) {
+  const { emoji, pronouns, web } = fieldsOf(p);
   return {
     id: Number(p.id),
     ref: profileRef(p),
     handle: p.handle ?? null,
     name: p.name,
+    emoji,
+    pronouns,
+    web,
     kind: p.kind ?? null,
     headline: p.headline ?? null,
     public: p.public,
