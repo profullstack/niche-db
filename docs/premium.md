@@ -79,3 +79,12 @@ The source URLs and verification date live in `packages/premium/src/comparison.j
 Data adds hourly full public-data snapshots to all Pro benefits for $1,999 per
 30 days. It is a separate monthly plan, not part of $1/day Premium. See
 [data-dumps.md](data-dumps.md) for delivery, access and storage configuration.
+
+## Promo codes
+
+`PREMIUM_PROMO_CODES` lists the codes a buyer may type at /premium, as
+`CODE:percent[:YYYY-MM-DD]` separated by commas (the date is the last day, inclusive,
+UTC). The default is `50OFF:50`; set it to an empty string to run no promo. A code
+applies to every Premium term. It never stacks with a referral: the bigger discount
+wins, and when the promo wins no referral commission is attached. Links can carry
+it: `/premium?promo=50OFF`, and `/api/v1/premium?promo=50OFF` quotes it.
