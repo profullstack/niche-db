@@ -906,6 +906,10 @@ export function scheduleQueries(from, to) {
  * fails outright, is answered by the undated scoreboard, which carries the NEXT
  * fixtures, so an out-of-season league shows its season opener. Without it a
  * failure is thrown, so the caller counts the league as failed rather than quiet.
+ *
+ * `complete` says whether the answer is the whole window: true when every day
+ * was answered (a 404 is an answer: nothing on), false when it is the undated
+ * board standing in. Only a complete answer can say a fixture is gone.
  */
 export async function fetchSchedule(client, { league, from, to, fallback = true }) {
   const base = `${SITE}/${league.key}/scoreboard`;
@@ -927,7 +931,7 @@ export async function fetchSchedule(client, { league, from, to, fallback = true 
       }
       if (err?.status === 404) continue;
       if (!fallback) throw err;
-      return parseScoreboard(await client.get(base), league);
+      return { ...parseScoreboard(await client.get(base), league), complete: false };
     }
     if (q.days && (data?.events ?? []).length >= QUERY_LIMIT) {
       queue.push(...q.days.map((dates) => ({ dates })));
@@ -944,9 +948,9 @@ export async function fetchSchedule(client, { league, from, to, fallback = true 
     }
   }
   if (byKey.size === 0 && fallback) {
-    return parseScoreboard(await client.get(base), league);
+    return { ...parseScoreboard(await client.get(base), league), complete: false };
   }
-  return { league: meta, events: [...byKey.values()] };
+  return { league: meta, events: [...byKey.values()], complete: true };
 }
 
 /* ----------------------------------------------------------------- cursor -- */
@@ -1136,6 +1140,53 @@ export function earliestUpcoming(events, now) {
   return best === null ? null : new Date(best).toISOString();
 }
 
+/**
+ * How far back the schedule pass looks for a fixture still held as upcoming.
+ *
+ * ESPN does not cancel an "if necessary" playoff game, it deletes it: the NLDS
+ * Game 5 between the Padres and the Brewers (401908006) left every scoreboard
+ * the moment Milwaukee won Game 4, so nothing ever wrote over the `pre` it had
+ * last been given, and it sat on the calendar as scheduled through the time it
+ * would have started. Three days covers a pass that missed it by a day or two
+ * without re-asking a week of boards for every league.
+ */
+export const VANISHED_REACH_MS = 3 * DAY_MS;
+
+/** The held rows a complete board no longer lists. */
+export function vanishedFixtures(held, events) {
+  const listed = new Set(events.map((e) => `${PROVIDER}:fixture:${e.key}`));
+  return (held ?? []).filter((r) => !listed.has(r.external_id));
+}
+
+/**
+ * A held fixture, written as cancelled: ESPN's own word for a game called off
+ * (`STATUS_CANCELED` is `post` with "Canceled"), so a consumer that already
+ * knows how to show a finished game with no score shows this one right, and
+ * one that only counts `pre` as upcoming stops listing it.
+ */
+export function cancelledItem(row) {
+  return {
+    externalId: row.external_id,
+    kind: row.kind ?? 'fixture',
+    title: row.title,
+    summary: row.summary ?? null,
+    url: row.url ?? null,
+    imageUrl: row.image_url ?? null,
+    publishedAt: row.published_at,
+    timeKnown: row.time_known ?? true,
+    precision: row.precision ?? 'minute',
+    tags: [...(row.tags ?? []).filter((t) => !t.startsWith('state:')), 'state:post', 'canceled'],
+    data: {
+      ...(row.data ?? {}),
+      state: 'post',
+      statusDetail: 'Canceled',
+      canceled: true,
+      period: null,
+      displayClock: null,
+    },
+  };
+}
+
 export const espnSchedule = defineAdapter({
   name: 'espn-schedule',
   title: 'ESPN: fixtures',
@@ -1171,7 +1222,7 @@ export const espnSchedule = defineAdapter({
     },
   ],
   async pull(ctx) {
-    const { config, cursor: prev, env, http, log, deadline } = ctx;
+    const { config, cursor: prev, env, http, log, deadline, held: heldOf } = ctx;
     const client = makeEspnClient({ env, http, log });
     const cursor = { ...prev };
     const now = Date.now();
@@ -1200,6 +1251,7 @@ export const espnSchedule = defineAdapter({
     const items = [];
     let failed = 0;
     let done = 0;
+    let cancelled = 0;
     const stopAt = deadline - DEADLINE_MARGIN_MS;
     const leftover = await pool(queue, 4, stopAt, async (key) => {
       const league = byKey.get(key);
@@ -1212,14 +1264,38 @@ export const espnSchedule = defineAdapter({
             .then((j) => parseLeagueDetail(j)?.region ?? null)
             .catch(() => null);
         }
-        const { league: meta, events } = await fetchSchedule(client, {
+        // What we hold as still to come, back to VANISHED_REACH_MS: the board is
+        // asked from the earliest of them, so a fixture ESPN has since deleted
+        // is noticed even once its start has passed out of the window.
+        const held = heldOf
+          ? await heldOf({
+              tags: [`league:${league.slug}`, 'state:pre'],
+              from: new Date(now - VANISHED_REACH_MS),
+              to: window.to,
+            })
+          : [];
+        const earliest = Math.min(
+          window.from.getTime(),
+          ...held.map((r) => new Date(r.published_at).getTime()).filter(Number.isFinite),
+        );
+        const {
+          league: meta,
+          events,
+          complete,
+        } = await fetchSchedule(client, {
           league,
-          from: window.from,
+          from: new Date(earliest),
           to: window.to,
           fallback: mode === 'full',
         });
         const metaWithRegion = { ...(meta ?? {}), region: regions[key] ?? null };
         for (const f of events) items.push(fixtureItem(f, league, metaWithRegion));
+        if (complete) {
+          for (const row of vanishedFixtures(held, events)) {
+            items.push(cancelledItem(row));
+            cancelled += 1;
+          }
+        }
         upcoming[key] = earliestUpcoming(events, now);
         done += 1;
       } catch (err) {
@@ -1242,7 +1318,7 @@ export const espnSchedule = defineAdapter({
       items,
       cursor: next,
       nextInMinutes: finished ? undefined : 1,
-      note: `${mode}: ${items.length} fixtures from ${done} leagues, ${failed} failed${finished ? '' : `, ${leftover.length} left for the next run`}`,
+      note: `${mode}: ${items.length} fixtures from ${done} leagues, ${failed} failed${cancelled ? `, ${cancelled} gone upstream (cancelled)` : ''}${finished ? '' : `, ${leftover.length} left for the next run`}`,
     };
   },
 });

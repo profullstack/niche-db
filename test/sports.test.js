@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises';
 
 import {
   ambiguousAbbreviations,
+  cancelledItem,
   canonicalBroadcaster,
   catalogueFresh,
   drawBelongsTo,
@@ -44,6 +45,8 @@ import {
   teamItem,
   USER_AGENT,
   utcDay,
+  VANISHED_REACH_MS,
+  vanishedFixtures,
   yyyymmdd,
 } from '../packages/adapters/src/espn.js';
 import {
@@ -1104,6 +1107,94 @@ describe('espn-schedule pull', () => {
     );
     expect(r2.note).toMatch(/^full:/);
     expect(r2.cursor.fullDay).toBe(utcDay());
+  });
+});
+
+describe('fixtures ESPN deleted', () => {
+  /** A stored row as heldItems returns it, for a fixture `id` in the NFL. */
+  const row = (id, at) => ({
+    external_id: `espn:fixture:football/nfl/${id}`,
+    kind: 'fixture',
+    title: 'San Diego Padres at Milwaukee Brewers',
+    summary: 'SD @ MIL',
+    url: null,
+    image_url: null,
+    published_at: at,
+    time_known: true,
+    precision: 'minute',
+    tags: ['fixture', 'football', 'league:football-nfl', 'state:pre', 'team:football-nfl-1'],
+    data: { state: 'pre', statusDetail: '10/9 - 8:00 PM EDT', home: { score: null } },
+  });
+
+  test('a held fixture the board no longer lists is written as cancelled', () => {
+    const at = new Date(Date.now() - 3_600_000);
+    const gone = vanishedFixtures([row('1', at), row('2', at)], [{ key: 'football/nfl/2' }]);
+    expect(gone.map((r) => r.external_id)).toEqual(['espn:fixture:football/nfl/1']);
+
+    const item = cancelledItem(gone[0]);
+    expect(item.externalId).toBe('espn:fixture:football/nfl/1');
+    expect(item.title).toBe('San Diego Padres at Milwaukee Brewers');
+    expect(item.publishedAt).toBe(at);
+    expect(item.tags).toContain('state:post');
+    expect(item.tags).toContain('canceled');
+    expect(item.tags).not.toContain('state:pre');
+    expect(item.data.state).toBe('post');
+    expect(item.data.statusDetail).toBe('Canceled');
+    expect(item.data.canceled).toBe(true);
+  });
+
+  test('the schedule pass cancels what ESPN dropped, and asks back far enough to see it', async () => {
+    const board = soon(nfl);
+    const listedId = String(board.events[0].id);
+    // Game 5: started 30 hours ago, outside the six-hour window, never written again.
+    const staleAt = new Date(Date.now() - 30 * 3_600_000);
+    const boards = [];
+    const http = fakeEspn({
+      onScoreboard: (url) => {
+        boards.push(url);
+        return url.includes('football/nfl') ? json(board) : json({ events: [] });
+      },
+    });
+    const asked = [];
+    const held = async (opts) => {
+      asked.push(opts);
+      return opts.tags[0] === 'league:football-nfl'
+        ? [row('401908006', staleAt), row(listedId, new Date(board.events[0].date))]
+        : [];
+    };
+    const r = await espnSchedule.pull(ctx(http, { config: { ...espnSchedule.defaults }, held }));
+
+    expect(asked.every((o) => o.tags[1] === 'state:pre')).toBe(true);
+    expect(asked[0].from.getTime()).toBeLessThanOrEqual(Date.now() - VANISHED_REACH_MS + 1000);
+    const gone = r.items.filter((i) => i.tags.includes('canceled'));
+    expect(gone.map((i) => i.externalId)).toEqual(['espn:fixture:football/nfl/401908006']);
+    expect(r.note).toMatch(/1 gone upstream/);
+    // The fixture still on the board is written as ESPN says, not cancelled.
+    const kept = r.items.find((i) => i.externalId === `espn:fixture:football/nfl/${listedId}`);
+    expect(kept.tags).not.toContain('canceled');
+    // The board reached back to the day the stale fixture was on.
+    const nflDated = boards.filter((u) => u.includes('football/nfl') && u.includes('dates='));
+    const staleDay = espnDay(staleAt);
+    expect(
+      nflDated.some(
+        (u) => u.includes(`dates=${staleDay}&`) || u.includes(`dates=${staleDay.slice(0, 6)}&`),
+      ),
+    ).toBe(true);
+  });
+
+  test('an undated stand-in board cancels nothing', async () => {
+    const http = fakeEspn({
+      onScoreboard: (url) => (url.includes('dates=') ? json({ events: [] }, 500) : json(soon(nfl))),
+    });
+    const held = async () => [row('401908006', new Date(Date.now() - 3_600_000))];
+    const r = await espnSchedule.pull(ctx(http, { config: { ...espnSchedule.defaults }, held }));
+    expect(r.items.some((i) => i.tags.includes('canceled'))).toBe(false);
+  });
+
+  test('without a store to ask, the pass behaves as before', async () => {
+    const http = fakeEspn({ onScoreboard: () => json(soon(nfl)) });
+    const r = await espnSchedule.pull(ctx(http, { config: { ...espnSchedule.defaults } }));
+    expect(r.items.some((i) => i.tags.includes('canceled'))).toBe(false);
   });
 });
 
