@@ -168,6 +168,19 @@ export function registerStatic(app, gateway) {
     return c.body(await f.arrayBuffer());
   });
 
+  /**
+   * The OpenWebring descriptor (logicsrc.com/openwebring): NicheDB's
+   * membership in the Profullstack ring. Static bytes, like openaccess.json.
+   */
+  app.get('/.well-known/openwebring.json', async (c) => {
+    const f = Bun.file(
+      new URL('../../public/.well-known/openwebring.json', import.meta.url).pathname,
+    );
+    c.header('content-type', 'application/json');
+    c.header('cache-control', 'public, max-age=3600');
+    return c.body(await f.arrayBuffer());
+  });
+
   const xmlEsc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
   const urlset = (urls) =>
     `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls

@@ -110,6 +110,7 @@ export function gatewayOptions(priceCents) {
     // on the page ranking it cannot read the case for buying a pass.
     openPaths: [
       '/llms.txt',
+      '/.well-known/openwebring.json',
       '/mcp',
       '/api/',
       '/healthz',
