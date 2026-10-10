@@ -1152,6 +1152,31 @@ export function earliestUpcoming(events, now) {
  */
 export const VANISHED_REACH_MS = 3 * DAY_MS;
 
+/**
+ * How many off-the-board fixtures one run asks ESPN about.
+ *
+ * A board is not the whole league everywhere: college football's answers 25
+ * games a day whatever `limit` says, so the first pass of this read 53 FBS
+ * games -- Georgia at Alabama among them -- as deleted. Each one is therefore
+ * asked about by id before it is called off (the core event, ~10 KB, 404 once
+ * ESPN has deleted it), and the cap keeps a league the board under-reports
+ * from spending a run's proxy budget re-asking about the same games.
+ */
+export const VANISHED_CHECKS_PER_RUN = 60;
+
+/**
+ * Whether ESPN still has a fixture: false only on a 404 for its core event. Any
+ * other failure is not evidence, so it answers true and nothing is cancelled.
+ */
+export async function fixtureExists(client, league, id) {
+  try {
+    await client.get(`${CORE}/sports/${league.sport}/leagues/${league.leagueKey}/events/${id}`);
+    return true;
+  } catch (err) {
+    return err?.status !== 404;
+  }
+}
+
 /** The held rows a complete board no longer lists. */
 export function vanishedFixtures(held, events) {
   const listed = new Set(events.map((e) => `${PROVIDER}:fixture:${e.key}`));
@@ -1252,6 +1277,7 @@ export const espnSchedule = defineAdapter({
     let failed = 0;
     let done = 0;
     let cancelled = 0;
+    let checks = 0;
     const stopAt = deadline - DEADLINE_MARGIN_MS;
     const leftover = await pool(queue, 4, stopAt, async (key) => {
       const league = byKey.get(key);
@@ -1292,6 +1318,10 @@ export const espnSchedule = defineAdapter({
         for (const f of events) items.push(fixtureItem(f, league, metaWithRegion));
         if (complete) {
           for (const row of vanishedFixtures(held, events)) {
+            if (checks >= VANISHED_CHECKS_PER_RUN) break;
+            checks += 1;
+            const id = row.data?.id ?? row.external_id.split('/').pop();
+            if (await fixtureExists(client, league, id)) continue;
             items.push(cancelledItem(row));
             cancelled += 1;
           }
