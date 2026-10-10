@@ -1043,6 +1043,26 @@ export async function previousItemData({ sourceId, externalIds }) {
   return out;
 }
 
+/**
+ * What this source holds under all of `tags` with a start inside [from, to], as
+ * the stored rows. For an adapter that has to notice what its provider STOPPED
+ * saying -- a fixture deleted upstream is never fetched again, so nothing would
+ * ever overwrite the last thing it said about it.
+ */
+export async function heldItems({ sourceId, tags = [], from, to, limit = 500 }) {
+  return sql`
+    select external_id, kind, title, summary, url, image_url, published_at, time_known,
+           precision, tags, data
+    from items
+    where source_id = ${sourceId}
+      and tags @> ${pgArray(tags)}::text[]
+      and published_at >= ${from}
+      and published_at <= ${to}
+    order by published_at
+    limit ${limit}
+  `;
+}
+
 const itemSelection = (db) => db`
   i.*, s.slug as source_slug, s.name as source_name, s.adapter,
   c.slug as collection_slug, c.name as collection_name, c.early_access

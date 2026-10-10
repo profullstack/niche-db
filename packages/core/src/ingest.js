@@ -107,6 +107,9 @@ export async function runSource(
       // What this source wrote last time for these ids, so an adapter that
       // keeps a rolling window per item can extend it rather than restate it.
       previous: (externalIds) => q.previousItemData({ sourceId: source.id, externalIds }),
+      // What this source holds under some tags in a time window, as stored. How
+      // an adapter finds the rows its provider has since deleted.
+      held: (opts) => q.heldItems({ sourceId: source.id, ...opts }),
     });
 
     /*
