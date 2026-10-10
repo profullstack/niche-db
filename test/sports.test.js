@@ -14,6 +14,7 @@ import {
   espnLive,
   espnSchedule,
   fetchSchedule,
+  fixtureExists,
   fixtureItem,
   fixtureTitle,
   horizonWindow,
@@ -1149,17 +1150,32 @@ describe('fixtures ESPN deleted', () => {
     // Game 5: started 30 hours ago, outside the six-hour window, never written again.
     const staleAt = new Date(Date.now() - 30 * 3_600_000);
     const boards = [];
-    const http = fakeEspn({
+    const fake = fakeEspn({
       onScoreboard: (url) => {
         boards.push(url);
         return url.includes('football/nfl') ? json(board) : json({ events: [] });
       },
     });
+    // ESPN's core event: deleted for Game 5, still there for a game the board
+    // merely left off (college football's board stops at 25).
+    const http = {
+      urls: fake.urls,
+      request: (url, opts) =>
+        url.includes('/events/401908006')
+          ? Promise.resolve(json({ error: 'gone' }, 404))
+          : url.includes('/events/')
+            ? Promise.resolve(json({ id: '1' }))
+            : fake.request(url, opts),
+    };
     const asked = [];
     const held = async (opts) => {
       asked.push(opts);
       return opts.tags[0] === 'league:football-nfl'
-        ? [row('401908006', staleAt), row(listedId, new Date(board.events[0].date))]
+        ? [
+            row('401908006', staleAt),
+            row('401856712', staleAt),
+            row(listedId, new Date(board.events[0].date)),
+          ]
         : [];
     };
     const r = await espnSchedule.pull(ctx(http, { config: { ...espnSchedule.defaults }, held }));
@@ -1180,6 +1196,20 @@ describe('fixtures ESPN deleted', () => {
         (u) => u.includes(`dates=${staleDay}&`) || u.includes(`dates=${staleDay.slice(0, 6)}&`),
       ),
     ).toBe(true);
+  });
+
+  test('only a 404 for the event itself says it is gone', async () => {
+    const client = (status) => ({
+      get: async () => {
+        if (status === 200) return {};
+        throw Object.assign(new Error('x'), { status });
+      },
+    });
+    const league = { sport: 'baseball', leagueKey: 'mlb' };
+    expect(await fixtureExists(client(404), league, '1')).toBe(false);
+    expect(await fixtureExists(client(200), league, '1')).toBe(true);
+    expect(await fixtureExists(client(500), league, '1')).toBe(true);
+    expect(await fixtureExists(client(402), league, '1')).toBe(true);
   });
 
   test('an undated stand-in board cancels nothing', async () => {
