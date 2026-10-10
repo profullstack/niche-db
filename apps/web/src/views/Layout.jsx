@@ -1,5 +1,7 @@
 import { config } from '@nichedb/config';
 import { appIconFor, themeFor } from '@nichedb/premium';
+import { bundledTemplate, latestTemplate, renderFooter } from '@profullstack/footer';
+import { raw } from 'hono/html';
 import { assetUrl } from '../lib/asset-version.js';
 import { currentModules } from '../lib/modules.js';
 
@@ -17,6 +19,45 @@ const faviconFor = (user) => {
  * the appearance a page gets is always one the reader is currently entitled
  * to. The same call is what makes an unknown value impossible to render.
  */
+const FOOTER = {
+  site: 'https://nichedb.dev/',
+  links: [
+    { label: 'About', href: '/about' },
+    { label: 'Submit a feed', href: '/submit' },
+    { label: 'API', href: '/docs/api' },
+    { label: 'CLI', href: '/docs/cli' },
+    { label: 'MCP', href: '/docs/mcp' },
+    { label: 'llms.txt', href: '/llms.txt' },
+    { label: 'Data dumps', href: '/dumps' },
+    { label: 'Premium', href: '/premium' },
+    { label: 'Pro', href: '/pro' },
+    { label: 'Crawl access', href: '/crawl' },
+    { label: 'Crawl status', href: '/crawlstatus' },
+    { label: 'Opportunities', href: '/opportunities' },
+  ],
+};
+
+/*
+ * @profullstack/footer, rendered on the server from the package's @latest
+ * template. Rendered synchronously from the last template fetched (refreshed in
+ * the background, cached an hour by the package) rather than awaited: Layout is
+ * a sync component, and the x402 gateway's crawl page renders it without await.
+ */
+let footerTemplate = bundledTemplate;
+const refreshFooterTemplate = () =>
+  latestTemplate().then(
+    (t) => {
+      footerTemplate = t;
+    },
+    () => {},
+  );
+refreshFooterTemplate();
+
+const ProfullstackFooter = () => {
+  refreshFooterTemplate();
+  return raw(renderFooter(footerTemplate, FOOTER));
+};
+
 export const Layout = (props) => (
   <html
     lang="en"
@@ -190,39 +231,10 @@ export const Layout = (props) => (
           <a href="https://github.com/profullstack/niche-db">profullstack/niche-db</a>. Times are
           shown in <span data-tz-label>your device's</span> time zone.
         </p>
-        <p class="muted">
-          <a href="/about">About</a> · <a href="/submit">Submit a feed</a> ·{' '}
-          <a href="/docs/api">API</a> · <a href="/docs/cli">CLI</a> · <a href="/docs/mcp">MCP</a> ·{' '}
-          <a href="/llms.txt">llms.txt</a> · <a href="/dumps">Data dumps</a> ·{' '}
-          <a href="/premium">Premium</a> · <a href="/pro">Pro</a> ·{' '}
-          <a href="/crawl">Crawl access</a> · <a href="/crawlstatus">Crawl status</a> ·{' '}
-          <a href="/opportunities">Opportunities</a>
-        </p>
-        <nav class="webring muted" aria-label="Profullstack webring">
-          <a
-            href="https://rssamplifier.com/ring/profullstack/previous?from=https%3A%2F%2Fnichedb.dev%2F"
-            rel="prev"
-            title="Previous site"
-          >
-            {'<<'}
-          </a>{' '}
-          <a href="https://rssamplifier.com/ring/profullstack">Profullstack</a>{' '}
-          <a
-            href="https://rssamplifier.com/ring/profullstack/next?from=https%3A%2F%2Fnichedb.dev%2F"
-            rel="next"
-            title="Next site"
-          >
-            {'>>'}
-          </a>{' '}
-          <a
-            href="https://rssamplifier.com/ring/profullstack/random?from=https%3A%2F%2Fnichedb.dev%2F"
-            title="Random site"
-            aria-label="Random site"
-          >
-            {'⚄'}
-          </a>
-        </nav>
       </footer>
+      {/* The bottom bar: @profullstack/footer (links, copyright, the webring),
+          the same on every Profullstack site. */}
+      <ProfullstackFooter />
 
       <script src={assetUrl('vendor-webauthn.js')} defer />
       <script src={assetUrl('app.js')} defer />

@@ -213,6 +213,15 @@ footer {
   color: var(--muted);
 }
 
+/* @profullstack/footer follows the site footer and brings its own layout. */
+footer.pfs-footer {
+  max-width: none;
+  padding: 0 0 1.5rem;
+  border-top: 0;
+  color: var(--fg);
+  --pfs-footer-muted: var(--muted);
+}
+
 /* controls
 
    One vocabulary for every form control on the site, following shadcn/ui's

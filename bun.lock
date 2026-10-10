@@ -34,6 +34,7 @@
         "@nichedb/payments": "workspace:*",
         "@nichedb/premium": "workspace:*",
         "@nichedb/queue": "workspace:*",
+        "@profullstack/footer": "latest",
         "@profullstack/leaderboard": "^0.3.0",
         "@profullstack/nichedb": "workspace:*",
         "@profullstack/notifications": "^0.1.0",
@@ -329,6 +330,8 @@
     "@profullstack/emailer": ["@profullstack/emailer@1.0.3", "", {}, "sha512-VyAtCcfnSI6LOwJvWogCr3ZNmEsaZw+iuWrqnosLsdcKsbRyCrCmXigMNZJZEjlgYlR+lK//PwNPG+xtCFvWAw=="],
 
     "@profullstack/favicon-generator": ["@profullstack/favicon-generator@1.2.1", "", { "dependencies": { "inquirer": "^10.2.2", "sharp": "^0.33.5" }, "bin": { "fav": "bin/cli.js" } }, "sha512-1w+EcoEmi60TXXQd97Brs7kN/BmlaoOcNvE39ZombUWSCBFBNe6fFm2mA7HORXb7TM39mHklNTIoG20glLsgVA=="],
+
+    "@profullstack/footer": ["@profullstack/footer@0.2.1", "", { "peerDependencies": { "react": ">=18" }, "optionalPeers": ["react"], "bin": { "profullstack-footer": "bin/profullstack-footer.js" } }, "sha512-KHmKVwrlzCBrSAAJ4zobNFCxTg8VF0gvNMeAut00dX3+gbWCtk6eOwIR2AaqEC7smj6Aio6cIexzt/dUnv1McA=="],
 
     "@profullstack/keys": ["@profullstack/keys@0.1.0", "", {}, "sha512-Vys47LvS5ivhdZu4SYOxh9Le3DEmWhjP0+CtrU45RhXAbY0ZFG/2Dk9V1bIIUGDp8UWMJqctvUD21JrNjfh04w=="],
 
