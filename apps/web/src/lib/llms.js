@@ -71,7 +71,7 @@ export async function llmsTxt() {
     '',
     `- API: ${base}/api/v1 (JSON; documentation at ${base}/docs/api)`,
     `- MCP: ${base}/mcp (Streamable HTTP, stateless; documentation at ${base}/docs/mcp)`,
-    `- CLI: npm install -g @profullstack/nichedb; nichedb --api ${base}`,
+    `- CLI: curl -fsSL ${base}/install.sh | sh (or npm install -g @profullstack/nichedb); nichedb --api ${base}`,
     `- Every feed: ${base}/f/<slug>.rss and .json`,
     `- Search: ${base}/api/v1/search?q=<terms>`,
     '',

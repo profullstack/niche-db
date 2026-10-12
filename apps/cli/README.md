@@ -3,7 +3,7 @@
 The CLI for a [NicheDB](https://github.com/profullstack/niche-db) deployment, and an MCP server over stdio.
 
 ```sh
-npm install -g @profullstack/nichedb
+curl -fsSL https://nichedb.dev/install.sh | sh   # or: npm install -g @profullstack/nichedb
 nichedb login --api https://nichedb.dev     # paste a key from /settings
 nichedb collections
 nichedb feeds --collection packages

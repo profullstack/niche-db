@@ -737,7 +737,7 @@ export const CliDocs = ({ user, commands }) => (
       <code>nichedb</code> is a zero-dependency Node script that talks to this API. It is also an
       MCP server: <code>nichedb mcp</code> speaks stdio for Claude Code, Cursor and friends.
     </p>
-    <pre class="data">{`npm install -g @profullstack/nichedb
+    <pre class="data">{`curl -fsSL ${config.siteUrl}/install.sh | sh   # or: npm install -g @profullstack/nichedb
 nichedb login --api ${config.siteUrl}      # paste a key from /settings
 nichedb collections
 nichedb feeds --collection packages

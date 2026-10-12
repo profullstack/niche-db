@@ -12,6 +12,8 @@ const STATIC_FILES = [
   ['/logo.svg', 'logo.svg', 'image/svg+xml'],
   ['/favicon.svg', 'favicon.svg', 'image/svg+xml'],
   ['/favicon.ico', 'icons/favicon.ico', 'image/x-icon'],
+  // The CLI installer: curl -fsSL https://nichedb.dev/install.sh | sh
+  ['/install.sh', 'install.sh', 'text/x-sh; charset=utf-8'],
 ];
 /** Files served out of a package rather than out of public/. */
 const PACKAGE_FILES = [['/vendor-notifications.js', '@profullstack/notifications/client']];
@@ -54,7 +56,7 @@ export function registerStatic(app, gateway) {
     app.get(route, async (c) => {
       const f = Bun.file(new URL(`../../public/${file}`, import.meta.url).pathname);
       c.header('content-type', type);
-      if (file === 'sw.js') c.header('cache-control', 'no-cache');
+      if (file === 'sw.js' || file === 'install.sh') c.header('cache-control', 'no-cache');
       else if (isCurrentVersion(file, c.req.query('v')))
         c.header('cache-control', 'public, max-age=31536000, immutable');
       else c.header('cache-control', 'public, max-age=60, must-revalidate');
