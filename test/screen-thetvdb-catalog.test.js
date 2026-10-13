@@ -1,4 +1,4 @@
-import { describe, expect, test } from 'bun:test';
+import { afterAll, beforeEach, describe, expect, setSystemTime, test } from 'bun:test';
 
 import {
   ATTRIBUTION,
@@ -38,6 +38,15 @@ const UNAUTHORIZED = fixture('unauthorized');
 
 const KEY = 'test-api-key-0123456789abcdef';
 const TOKEN = LOGIN.data.token;
+// The fixture JWT's `exp` claim (2026-10-13T18:15:21Z), in milliseconds.
+const TOKEN_EXPIRES = 1_791_915_321_000;
+
+// Pin the clock well before the fixture token expires. The adapter renews a
+// token within a day of its expiry, so against the real clock these tests
+// started failing once that day arrived. Fixed, they cannot rot again.
+const NOW = new Date('2026-09-20T00:00:00.000Z');
+beforeEach(() => setSystemTime(NOW));
+afterAll(() => setSystemTime());
 
 const json = (body, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { 'content-type': 'application/json' } });
@@ -107,7 +116,7 @@ const run = (config, cursor, p, env = { thetvdbApiKey: KEY }) =>
     deadline: Number.POSITIVE_INFINITY,
   });
 
-const FRESH = { token: TOKEN, tokenExpires: Date.now() + 20 * 86_400_000 };
+const FRESH = { token: TOKEN, tokenExpires: NOW.getTime() + 20 * 86_400_000 };
 
 describe('rows', () => {
   test('a list row becomes a title item in the screen shape, with attribution on every row', () => {
@@ -219,7 +228,7 @@ describe('rows', () => {
     expect(lastPage(PAGE0)).toBe(false);
     expect(lastPage(PAGE_END)).toBe(true);
     expect(lastPage({ data: [{ id: 1 }], links: { next: null } })).toBe(true);
-    expect(tokenExpiry(TOKEN)).toBe(1791915321000);
+    expect(tokenExpiry(TOKEN)).toBe(TOKEN_EXPIRES);
     const t0 = 1_000_000;
     expect(tokenExpiry('not-a-jwt', t0)).toBe(t0 + 29 * 86_400_000);
     expect(redact(`401 from https://x/?k=${KEY} with ${TOKEN}`, KEY, TOKEN)).toBe(
@@ -273,7 +282,7 @@ describe('the first pass', () => {
     expect(out.cursor.walkedAt).toMatch(/^\d{4}-/);
     expect(out.cursor.startedAt).toBe(out.cursor.refreshedAt);
     expect(out.cursor.token).toBe(TOKEN);
-    expect(out.cursor.tokenExpires).toBe(1791915321000);
+    expect(out.cursor.tokenExpires).toBe(TOKEN_EXPIRES);
     expect(out.nextInMinutes).toBeUndefined();
     expect(out.note).toContain('catalogue is walked');
     expect(p.calls.map((c) => c.method)).toEqual(['POST', 'GET', 'GET', 'GET']);
@@ -319,7 +328,8 @@ describe('the first pass', () => {
     expect(first.cursor.startedAt).toMatch(/^\d{4}-/);
     expect(first.nextInMinutes).toBe(10);
     expect(first.note).toContain('at the cap');
-    await new Promise((r) => setTimeout(r, 5));
+    // the clock is pinned, so move it on rather than sleeping
+    setSystemTime(new Date(Date.now() + 60_000));
     const second = await run({ pagesPerRun: 5 }, first.cursor, p);
     expect(second.items.map((i) => i.externalId)).toEqual([
       'thetvdb:series:70909',
