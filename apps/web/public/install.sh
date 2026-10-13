@@ -18,6 +18,11 @@ have() { command -v "$1" >/dev/null 2>&1; }
 say "Installing nichedb (NicheDB CLI + MCP server)..."
 
 if have bun; then
+  # Without its own package.json, `bun add -g` writes into the nearest
+  # package.json above the global dir (possibly ~/package.json).
+  BUN_GLOBAL="${BUN_INSTALL:-$HOME/.bun}/install/global"
+  mkdir -p "$BUN_GLOBAL"
+  [ -f "$BUN_GLOBAL/package.json" ] || printf '{}\n' > "$BUN_GLOBAL/package.json"
   bun add -g "$PKG@latest"
   BIN_DIR="${BUN_INSTALL:-$HOME/.bun}/bin"
 elif have npm && have node; then
