@@ -197,7 +197,7 @@ Migrations apply themselves on boot. Every collection, its default sources and i
 - **Web**: a PWA. `/sources` manages sources (status, last run, next run, run now, pause, edit config). `/feeds/new` builds a feed with a live preview. `/settings` holds passkeys, API keys and notifications.
 - **RSS / JSON Feed**: `/f/<slug>.rss`, `/f/<slug>.json`.
 - **API**: `/api/v1`, documented at `/docs/api`. Reads need no key.
-- **CLI**: `npm i -g @profullstack/nichedb` → `nichedb`. Documented at `/docs/cli`.
+- **CLI**: `curl -fsSL https://nichedb.dev/install.sh | sh` (bun if present, else npm with Node 22+, no sudo), or `npm i -g @profullstack/nichedb` → `nichedb`. Documented at `/docs/cli`.
 - **MCP**: `/mcp` (Streamable HTTP, stateless) or `nichedb mcp` over stdio. Documented at `/docs/mcp`.
 - **llms.txt**: `/llms.txt` describes the whole deployment in one document.
 

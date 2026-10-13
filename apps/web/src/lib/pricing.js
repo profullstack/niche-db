@@ -111,6 +111,8 @@ export function gatewayOptions(priceCents) {
     openPaths: [
       '/llms.txt',
       '/.well-known/openwebring.json',
+      // The CLI installer is fetched by curl; a 402 here breaks the one-liner.
+      '/install.sh',
       '/mcp',
       '/api/',
       '/healthz',
