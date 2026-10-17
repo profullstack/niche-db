@@ -186,6 +186,7 @@ export const Layout = (props) => (
           <a href="/vin">VIN</a>
           <a href="/business">Business</a>
           <a href="/tlds">TLDs</a>
+          <a href="/traffic">Bad IPs</a>
           {props.user?.role === 'admin' || props.user?.moderates ? (
             <a href="/admin/submissions">Queue</a>
           ) : null}

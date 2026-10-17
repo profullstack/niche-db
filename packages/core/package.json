@@ -1,6 +1,6 @@
 {
   "name": "@nichedb/core",
-  "version": "0.37.0",
+  "version": "0.38.0",
   "private": true,
   "type": "module",
   "exports": {
@@ -14,7 +14,8 @@
     "./data-dumps": "./src/data-dumps.js",
     "./geo": "./src/geo.js",
     "./population": "./src/population.js",
-    "./tlds": "./src/tlds/index.js"
+    "./tlds": "./src/tlds/index.js",
+    "./traffic": "./src/traffic/index.js"
   },
   "dependencies": {
     "@nichedb/adapters": "workspace:*",

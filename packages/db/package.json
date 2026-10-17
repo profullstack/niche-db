@@ -1,6 +1,6 @@
 {
   "name": "@nichedb/db",
-  "version": "0.37.0",
+  "version": "0.38.0",
   "private": true,
   "type": "module",
   "exports": {
@@ -19,7 +19,8 @@
     "./build-indexes": "./src/build-indexes.js",
     "./gin-maintenance": "./src/gin-maintenance.js",
     "./tlds": "./src/tlds.js",
-    "./resilience": "./src/resilience.js"
+    "./resilience": "./src/resilience.js",
+    "./traffic": "./src/traffic.js"
   },
   "dependencies": {
     "@nichedb/config": "workspace:*",

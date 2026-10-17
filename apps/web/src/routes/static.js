@@ -211,6 +211,7 @@ export function registerStatic(app, gateway) {
       { loc: '/tlds' },
       { loc: '/tlds/changes' },
       { loc: '/tlds/check' },
+      { loc: '/traffic' },
       ...collections.map((x) => ({ loc: `/c/${x.slug}` })),
       ...sources.map((x) => ({ loc: `/s/${x.slug}`, lastmod: x.updated_at })),
       ...feeds.map((x) => ({ loc: `/f/${x.slug}`, lastmod: x.updated_at })),
