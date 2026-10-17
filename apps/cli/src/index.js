@@ -15,7 +15,7 @@ import { homedir, tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createInterface } from 'node:readline';
 
-export const VERSION = '0.38.0';
+export const VERSION = '0.39.0';
 const GEO_FLAGS = ['lat', 'long', 'radius', 'unit', 'bbox', 'sort', 'offset'];
 const DEFAULT_API = process.env.NICHEDB_API ?? 'https://nichedb.dev';
 const CONFIG_DIR = join(process.env.XDG_CONFIG_HOME ?? join(homedir(), '.config'), 'nichedb');
@@ -235,6 +235,20 @@ export const COMMANDS = [
       '--ein <ein>',
       '--json',
     ],
+  },
+  {
+    name: 'reputation',
+    usage: 'reputation <ip-or-domain>',
+    summary:
+      'Is an IP or a domain on a blocklist? nichedb /traffic (human-reviewed bans), abuse.ch malware feeds and SURBL in one answer. Exits 1 when listed.',
+    options: ['--json'],
+  },
+  {
+    name: 'traffic',
+    usage: 'traffic [<ip>] [--days <n>] [--category <c>] [--txt]',
+    summary:
+      'The human-reviewed /traffic IP blocklist: newest approvals, one address, or --txt for a fail2ban/nftables-ready list. Exits 1 when an address is listed.',
+    options: ['--days <n>', '--category <c>', '--limit <n>', '--offset <n>', '--txt', '--json'],
   },
   {
     name: 'profiles',
@@ -1046,6 +1060,50 @@ export async function run(
       }
       out('');
       for (const l of r.lookUpYourself) out(`${pad(l.name, 44)} ${l.url}`);
+      return 0;
+    }
+    case 'reputation': {
+      const indicator = rest[0];
+      if (!indicator) throw new Error('reputation <ip-or-domain>');
+      const r = await client.get(`/api/v1/reputation/${encodeURIComponent(indicator)}`);
+      if (json) {
+        out(JSON.stringify(r, null, 2));
+        return 0;
+      }
+      out(`${r.query}: ${r.listed ? `LISTED, score ${r.score}/100` : 'not listed'}`);
+      for (const reason of r.reasons) out(`  ${reason}`);
+      if (r.note) out(`  ${r.note}`);
+      out(`  checked: ${r.checked.map((c) => c.name).join('; ')}`);
+      out(`  deeper: ${r.deeper.url}`);
+      return r.listed ? 1 : 0;
+    }
+    case 'traffic': {
+      const qs = new URLSearchParams();
+      for (const k of ['days', 'category', 'limit', 'offset'])
+        if (flags[k] && flags[k] !== true) qs.set(k, String(flags[k]));
+      if (rest[0]) {
+        const r = await client.get(`/api/v1/traffic/ip/${encodeURIComponent(rest[0])}`);
+        if (json) out(JSON.stringify(r, null, 2));
+        else if (!r.listed) out(`${r.ip}: not on /traffic`);
+        else
+          out(
+            `${r.ip}: listed (${r.category}), ${r.servers} servers, ${r.blocks} bans, last seen ${String(r.last_seen).slice(0, 10)}`,
+          );
+        return r.listed ? 1 : 0;
+      }
+      if (flags.txt) {
+        out(await client.text(`/traffic/blocklist.txt${qs.size ? `?${qs}` : ''}`));
+        return 0;
+      }
+      const r = await client.get(`/api/v1/traffic${qs.size ? `?${qs}` : ''}`);
+      if (json) {
+        out(JSON.stringify(r, null, 2));
+        return 0;
+      }
+      for (const x of r.addresses ?? r.rows ?? [])
+        out(
+          `${pad(x.ip, 40)} ${pad(x.category ?? 'other', 12)} ${String(x.last_seen ?? '').slice(0, 10)}`,
+        );
       return 0;
     }
     case 'profiles': {

@@ -241,11 +241,12 @@ describe('the threats collection is registered', () => {
     expect(openthreat.cadenceMinutes).toBe(60);
     expect(openthreat.needsEnv).toBeUndefined();
     expect(openthreat.kinds).toEqual(['reporter', ...KINDS]);
-    // Beside it, the NVD's CVE catalogue and SURBL's lists (test/nist.test.js, test/surbl.test.js).
+    // Beside it, the NVD's CVE catalogue, SURBL's lists and abuse.ch's indicators (test/nist.test.js, test/surbl.test.js, test/reputation.test.js).
     expect(ADAPTERS.filter((a) => a.collection === 'threats').map((a) => a.name)).toEqual([
       'openthreat',
       'nvd',
       'surbl',
+      'abusech',
     ]);
     const [src] = openthreat.defaultSources;
     expect(src.slug).toBe('threatcrush-discovery');
