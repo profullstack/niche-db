@@ -25,6 +25,28 @@ import { repoSlug, repoUrl } from './catalogs.js';
  *     ({ text, url, listing }): the site renders it beside the row wherever
  *     the row appears, and it travels with the item through the API and feeds.
  *
+ * ONLY QUALITY-SCORED SERVERS (Anthony, 2026-10-17). Glama lists every repository
+ * anyone points it at, and the bulk is clone spam: random accounts re-uploading a
+ * popular server (`julie85552/Vibe-Coder-MCP`, 1,424 listings with the slug `mcp`).
+ * They are copies, not GitHub forks (a 600-repo sample on 2026-10-17 found two
+ * forks), and the API has no fork flag, so the signal is Glama's own
+ * `qualityScore`: its 0-5 estimate of tool-definition quality, null until Glama
+ * has built and inspected the server. Measured over the whole catalogue that
+ * day: 101,385 servers, 62,045 never scored, 36,343 at 3 or more, 26,899 at 3.5
+ * or more, 12,467 at 4 or more. The spam is the unscored mass. `keepReason`
+ * keeps a server only when
+ *
+ *   * it has a score of at least `minQuality` (default 3.5, about a quarter of
+ *     the directory), and
+ *   * its repository belongs to the namespace that listed it: a GitHub or GitLab
+ *     owner that is not the Glama namespace is somebody else's code re-listed
+ *     (127 of 101,385; 16 of them would pass the score). The two together
+ *     keep 26,883.
+ *
+ * `author:official` alone does not admit a server (3,943 official listings are
+ * unscored): the rule is the quality signal, and an official server Glama has
+ * scored passes on its score like any other.
+ *
  * THE WALK. `GET /v1/servers?sort=added-at:desc` is the order Glama documents
  * for full catalogue synchronisation: newest first, forward-only cursors
  * (`after` = the previous page's `endCursor`, opaque, never parsed), and the
@@ -113,6 +135,38 @@ export function toItem(s) {
   };
 }
 
+export const MIN_QUALITY = 3.5;
+
+const OWNED_HOSTS = new Set(['github.com', 'gitlab.com']);
+
+/**
+ * Why a server is left out, or null when it is kept. See the top of the file.
+ *
+ * @param {object} s  one server as the API returns it
+ * @param {{ minQuality?: number }} [opts]
+ * @returns {'unscored'|'below-threshold'|'not-owner'|null}
+ */
+export function rejectReason(s, { minQuality = MIN_QUALITY } = {}) {
+  const q = s?.qualityScore;
+  if (q === null || q === undefined || !Number.isFinite(Number(q))) return 'unscored';
+  if (Number(q) < minQuality) return 'below-threshold';
+  try {
+    const u = new URL(String(s.repository?.url ?? ''));
+    const host = u.hostname.toLowerCase().replace(/^www\./, '');
+    const owner = u.pathname.split('/').filter(Boolean)[0]?.toLowerCase();
+    if (
+      OWNED_HOSTS.has(host) &&
+      owner &&
+      s.namespace &&
+      owner !== String(s.namespace).toLowerCase()
+    )
+      return 'not-owner';
+  } catch {
+    // No repository URL: nothing to compare, the score decides.
+  }
+  return null;
+}
+
 /**
  * A repository URL that two servers in the same batch both claim names
  * neither of them (one row would swallow the other in a collection that
@@ -137,7 +191,7 @@ export const glamaMcp = defineAdapter({
   title: 'Glama MCP directory',
   collection: 'mcp',
   description:
-    "Servers in Glama's MCP directory (glama.ai/mcp/servers), with their tools, licence, hosting mode and Glama's tool-definition quality score. Needs GLAMA_API_KEY. Glama overlaps the other sources heavily, so it runs last and adds only the servers they lack. Licensed data: every row credits Glama and links to its Glama listing.",
+    "Servers in Glama's MCP directory (glama.ai/mcp/servers), with their tools, licence, hosting mode and Glama's tool-definition quality score. Needs GLAMA_API_KEY. Only servers Glama has quality-scored at 3.5 or more (of 5) and whose repository belongs to the lister are kept, which leaves out the clone spam. Glama overlaps the other sources heavily, so it runs last and adds only the servers they lack. Licensed data: every row credits Glama and links to its Glama listing.",
   docs: 'https://glama.ai/api/mcp/openapi.json',
   kinds: ['mcp-server'],
   cadenceMinutes: 60 * 24,
@@ -147,14 +201,25 @@ export const glamaMcp = defineAdapter({
     { key: 'pagesPerRun', label: 'Pages per run', type: 'number', placeholder: '20' },
     { key: 'pageSize', label: 'Page size', type: 'number', placeholder: '100' },
     { key: 'delayMs', label: 'Pause between pages (ms)', type: 'number', placeholder: '1000' },
+    {
+      key: 'minQuality',
+      label: 'Minimum Glama quality score (0-5)',
+      type: 'number',
+      placeholder: String(MIN_QUALITY),
+      help: 'Unscored servers are always left out; they are where the clone spam is.',
+    },
   ],
-  defaults: { pagesPerRun: 20, pageSize: 100, delayMs: 1000 },
+  defaults: { pagesPerRun: 20, pageSize: 100, delayMs: 1000, minQuality: MIN_QUALITY },
   defaultSources: [{ slug: 'glama-servers', name: 'MCP servers on Glama' }],
   async pull({ config, cursor, env, http, log, deadline }) {
     if (!env?.glamaApiKey) throw new Error('GLAMA_API_KEY is not set');
     const pageSize = Math.min(Math.max(Number(config.pageSize) || 100, 10), 100);
     const budget = Math.min(Math.max(Number(config.pagesPerRun) || 20, 1), 60);
     const delay = Math.max(Number(config.delayMs ?? 1000) || 0, 0);
+    const minQuality = Number.isFinite(Number(config.minQuality))
+      ? Number(config.minQuality)
+      : MIN_QUALITY;
+    const skipped = { unscored: 0, 'below-threshold': 0, 'not-owner': 0 };
     const headers = { authorization: `Bearer ${env.glamaApiKey}`, accept: 'application/json' };
 
     let after = typeof cursor?.after === 'string' && cursor.after ? cursor.after : null;
@@ -192,6 +257,11 @@ export const glamaMcp = defineAdapter({
       pages++;
 
       for (const s of Array.isArray(page?.servers) ? page.servers : []) {
+        const why = rejectReason(s, { minQuality });
+        if (why) {
+          skipped[why] += 1;
+          continue;
+        }
         const item = toItem(s);
         if (!item || seen.has(item.externalId)) continue;
         seen.add(item.externalId);
@@ -217,13 +287,14 @@ export const glamaMcp = defineAdapter({
       sweeps += 1;
     }
     const rows = collapse(items);
+    const left = skipped.unscored + skipped['below-threshold'] + skipped['not-owner'];
     log(
-      `${rows.length} servers in ${pages} page(s)${done ? ', sweep complete' : ''}${stopped ? `, stopped on ${stopped}` : ''}`,
+      `${rows.length} servers kept, ${left} left out (${skipped.unscored} unscored, ${skipped['below-threshold']} below ${minQuality}, ${skipped['not-owner']} not the lister's repo) in ${pages} page(s)${done ? ', sweep complete' : ''}${stopped ? `, stopped on ${stopped}` : ''}`,
     );
     return {
       items: rows,
       cursor: { after, sweeps },
-      note: `${rows.length} server(s), ${pages} page(s)${done ? ', sweep complete' : ', more remain'}`,
+      note: `${rows.length} server(s) kept, ${left} below the quality bar, ${pages} page(s)${done ? ', sweep complete' : ', more remain'}`,
       // Mid-sweep, come back in half an hour; a finished sweep waits the daily cadence.
       ...(done ? {} : { nextInMinutes: stopped === 429 || stopped === 403 ? 60 : 30 }),
     };

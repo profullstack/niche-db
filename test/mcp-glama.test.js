@@ -1,7 +1,14 @@
 import { describe, expect, test } from 'bun:test';
 import { buildRss } from '../apps/web/src/lib/rss.js';
 import { ItemList } from '../apps/web/src/views/components.jsx';
-import { CREDIT, collapse, glamaMcp, toItem } from '../packages/adapters/src/glama.js';
+import {
+  CREDIT,
+  collapse,
+  glamaMcp,
+  MIN_QUALITY,
+  rejectReason,
+  toItem,
+} from '../packages/adapters/src/glama.js';
 import { ADAPTERS, adapterByName } from '../packages/adapters/src/index.js';
 import { normaliseItem } from '../packages/core/src/adapter.js';
 
@@ -136,6 +143,69 @@ describe('Glama: a server as a row', () => {
     expect(rows[0].data.sharedRepository).toBe(
       'https://github.com/ccastillo2488/mcp-read-website-fast',
     );
+  });
+});
+
+describe('Glama: only quality-scored servers, not the clone spam', () => {
+  test('the threshold is 3.5 and a scored server that owns its repository passes', () => {
+    expect(MIN_QUALITY).toBe(3.5);
+    expect(rejectReason(server({ qualityScore: 3.5 }))).toBeNull();
+    expect(rejectReason(server({ qualityScore: 4.9 }))).toBeNull();
+  });
+
+  test('an unscored server is left out, official or not', () => {
+    expect(rejectReason(server({ qualityScore: null }))).toBe('unscored');
+    expect(rejectReason(server({ qualityScore: null, attributes: ['author:official'] }))).toBe(
+      'unscored',
+    );
+  });
+
+  test('a score under the bar is left out; the bar is configurable', () => {
+    expect(rejectReason(server({ qualityScore: 3.4 }))).toBe('below-threshold');
+    expect(rejectReason(server({ qualityScore: 3.4 }), { minQuality: 3 })).toBeNull();
+  });
+
+  test("somebody else's repository re-listed under another namespace is left out", () => {
+    // Recorded shape: a random account listing a copy of a popular server.
+    const clone = server({
+      namespace: 'julie85552',
+      repository: { url: 'https://github.com/freshtechbro/vibe-coder-mcp' },
+      qualityScore: 4.1,
+    });
+    expect(rejectReason(clone)).toBe('not-owner');
+    // Owner comparison ignores case, and a host other than GitHub/GitLab is not judged.
+    expect(rejectReason(server({ namespace: 'CCASTILLO2488', qualityScore: 4 }))).toBeNull();
+    expect(
+      rejectReason(
+        server({
+          namespace: 'x',
+          repository: { url: 'https://codeberg.org/y/z' },
+          qualityScore: 4,
+        }),
+      ),
+    ).toBeNull();
+    expect(rejectReason(server({ repository: null, qualityScore: 4 }))).toBeNull();
+  });
+
+  test('the walk keeps only what passes, and still advances the cursor past the rest', async () => {
+    const http = fakeHttp([
+      {
+        body: page(
+          [
+            server({ id: 'aaaaaaaaaa', qualityScore: 4 }),
+            server({ id: 'bbbbbbbbbb', qualityScore: null }),
+            server({ id: 'cccccccccc', qualityScore: 2.1 }),
+          ],
+          { next: 'c1' },
+        ),
+      },
+      { body: page([server({ id: 'dddddddddd', qualityScore: null })], { next: 'c2' }) },
+    ]);
+    const out = await run(http, {}, { pagesPerRun: 2 });
+    expect(out.items.map((i) => i.externalId)).toEqual(['glama:aaaaaaaaaa']);
+    expect(out.cursor).toEqual({ after: 'c2', sweeps: 0 });
+    expect(out.note).toContain('1 server(s) kept, 3 below the quality bar');
+    expect(out.nextInMinutes).toBe(30);
   });
 });
 
