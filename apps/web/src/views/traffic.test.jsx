@@ -4,9 +4,7 @@ process.env.DATABASE_URL ??= 'postgres://test:test@localhost:5432/test';
 process.env.SITE_URL ??= 'https://nichedb.test';
 
 const { render } = await import('../lib/http.js');
-const { TrafficIpPage, TrafficPage, TrafficReviewPage } = await import(
-  './traffic.jsx'
-);
+const { TrafficIpPage, TrafficPage, TrafficReviewPage } = await import('./traffic.jsx');
 
 const row = {
   ip: '45.148.10.7',
