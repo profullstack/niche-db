@@ -15,7 +15,8 @@
     "./geo": "./src/geo.js",
     "./population": "./src/population.js",
     "./tlds": "./src/tlds/index.js",
-    "./traffic": "./src/traffic/index.js"
+    "./traffic": "./src/traffic/index.js",
+    "./lyrics": "./src/lyrics.js"
   },
   "dependencies": {
     "@nichedb/adapters": "workspace:*",

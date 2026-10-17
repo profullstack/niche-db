@@ -111,11 +111,15 @@ export const keys = createApiKeyManager({
   rateLimit: { windowMs: 3600_000, maxRequests: config.api.freePerHour },
 });
 
-export async function createApiKey({ userId, name }) {
+/**
+ * `permissions` adds to the default read and write; `{ lyrics: true }` is the
+ * only extra one today (scripts/lyrics-key.js).
+ */
+export async function createApiKey({ userId, name, permissions = {} }) {
   const created = await keys.createKey({
     userId,
     name: name || 'default',
-    permissions: { read: true, write: true },
+    permissions: { read: true, write: true, ...permissions },
   });
   return { key: created.key, id: created.id, prefix: created.key.slice(0, 12) };
 }

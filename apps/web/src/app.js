@@ -17,6 +17,7 @@ import { registerBusiness } from './routes/business.js';
 import { registerCrawlStatus } from './routes/crawlstatus.js';
 import { registerDataDumps } from './routes/data-dumps.js';
 import { registerKnowledge } from './routes/knowledge.js';
+import { registerLyrics } from './routes/lyrics.js';
 import { registerManage } from './routes/manage.js';
 import { registerMcp } from './routes/mcp.js';
 import { registerOpenSaaS } from './routes/opensaas.js';
@@ -162,6 +163,8 @@ registerTlds(app);
 registerTraffic(app);
 /** Reputation: one IP-or-domain answer from /traffic, abuse.ch, SURBL and live DNSBLs, and /api/v1/reputation. */
 registerReputation(app);
+/** Lyrics for our own bands: /lyrics and /api/v1/lyrics, read and written by the nixamp radio servers. */
+registerLyrics(app);
 registerMcp(app);
 
 /**
