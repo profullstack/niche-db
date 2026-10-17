@@ -71,6 +71,7 @@ export const RESERVED_NICHE_SLUGS = new Set([
   'leaderboard',
   'llms.txt',
   'login',
+  'lyrics',
   'logout',
   'manifest.webmanifest',
   'mcp',

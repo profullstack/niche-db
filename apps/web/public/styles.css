@@ -1837,3 +1837,16 @@ table.kv td {
     text-align: left;
   }
 }
+
+/* Lyrics: the words as written, line breaks kept, in the reading face. */
+pre.lyrics {
+  font-family: inherit;
+  font-size: 1rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background: none;
+  border: 0;
+  padding: 0;
+  margin: 1rem 0 2rem;
+}
