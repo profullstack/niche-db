@@ -63,6 +63,7 @@ import { gdelt } from './gdelt.js';
 import { geonamesCities } from './geonames-cities.js';
 import { githubAgentTopics, githubMcpTopics } from './ghtopics.js';
 import { githubReleases } from './github.js';
+import { glamaMcp } from './glama.js';
 import { goModules } from './golang.js';
 import { gutenbergCatalog } from './gutenberg-catalog.js';
 import { hetznerPlans } from './hetzner.js';
@@ -273,6 +274,10 @@ export const ADAPTERS = [
   // Last: a third party's crawl of which YC companies run one. Where the
   // registry already carries the same endpoint, the registry's row stands.
   installmapYcMcp,
+  // Glama's directory is built from most of the above, so it goes after all of
+  // them and adds only what none of them carry. Keyed and licensed: every row
+  // it does add credits Glama and links to the Glama listing.
+  glamaMcp,
   /*
    * Agent workflows, and the four things people install, each in the
    * collection somebody looking for one would open: skills, subagents, slash

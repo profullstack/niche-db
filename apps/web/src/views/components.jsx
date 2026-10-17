@@ -1,3 +1,4 @@
+import { adapterByName } from '@nichedb/adapters';
 import { Badges } from './enrichment.jsx';
 
 /** Shared bits of markup. Small and dumb on purpose. */
@@ -101,6 +102,55 @@ export const Tags = ({ tags, collection, limit = 6 }) => {
 const BLANK_GIF = 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
 const ON_IMG_ERROR = `this.onerror=null;this.src='${BLANK_GIF}';this.classList.add('blank')`;
 
+/**
+ * The credit a licensed source requires beside each of its rows, from the
+ * row's own `data.credit` ({ name, text, url, listing }). Glama's API Data
+ * License is the case that made it: every page showing the data names Glama
+ * with a followed link, and every server shown links to its Glama listing as
+ * well as wherever else the row points. So no `rel` on either link.
+ */
+export const creditOf = (item) => {
+  let d = item?.data;
+  if (typeof d === 'string') {
+    try {
+      d = JSON.parse(d);
+    } catch {
+      return null;
+    }
+  }
+  const c = d?.credit;
+  return c && typeof c === 'object' && c.url && c.text ? c : null;
+};
+
+export const Credit = ({ item }) => {
+  const c = creditOf(item);
+  if (!c) return null;
+  return (
+    <span class="credit">
+      {c.listing ? (
+        <>
+          {' · '}
+          <a href={c.listing}>on {c.name ?? 'source'}</a>
+        </>
+      ) : null}
+      {' · '}
+      <a href={c.url}>{c.text}</a>
+    </span>
+  );
+};
+
+/** The same credit at source level, for an adapter that declares `attribution`. */
+export const SourceCredit = ({ adapter }) => {
+  const a = adapter ? adapterByName(adapter)?.attribution : null;
+  if (!a?.url || !a?.text) return null;
+  return (
+    <span class="credit">
+      {' · '}
+      <a href={a.url}>{a.text}</a>
+    </span>
+  );
+};
+
 // Most collections are government and data-API rows that carry no picture at all, so a
 // placeholder there is just a column of grey boxes. Reserve the slot only to keep a mixed list
 // aligned; when nothing in the list has an image, drop it and let the text start at the edge.
@@ -146,6 +196,7 @@ export const ItemRow = ({ item, showSource = true, enrichers = null, reserveThum
             </a>
           </>
         ) : null}
+        <Credit item={item} />
       </p>
       <Tags tags={item.tags} collection={item.collection_slug} />
       <Badges

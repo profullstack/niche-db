@@ -11,7 +11,7 @@ export function buildRss({ title, link, description, selfUrl, items, siteUrl, en
   const entries = items
     .map((i) => {
       const url = i.url ?? `${siteUrl}/i/${i.id}`;
-      const extra = enrichmentText(i, enrichers);
+      const extra = [enrichmentText(i, enrichers), creditText(i)].filter(Boolean).join('\n\n');
       const when = i.published_at ? new Date(i.published_at) : new Date(i.first_seen_at);
       return [
         '<item>',
@@ -41,6 +41,26 @@ export function buildRss({ title, link, description, selfUrl, items, siteUrl, en
     '</channel>',
     '</rss>',
   ].join('\n');
+}
+
+/**
+ * The credit a licensed source requires with each row (`data.credit`, Glama's
+ * API Data License): its name with a link, and the row's own listing there.
+ */
+function creditText(i) {
+  let d = i.data;
+  if (typeof d === 'string') {
+    try {
+      d = JSON.parse(d);
+    } catch {
+      return '';
+    }
+  }
+  const c = d?.credit;
+  if (!c?.text || !c?.url) return '';
+  return [`${c.text}: ${c.url}`, c.listing ? `On ${c.name ?? 'the source'}: ${c.listing}` : null]
+    .filter(Boolean)
+    .join('\n');
 }
 
 /** A few lines of enrichment for readers that only show text. */
