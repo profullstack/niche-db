@@ -42,6 +42,23 @@ the repositories tagged for all of it.
 | aitmpl MCP configs | `aitmpl-mcps` | 104 | a ready-made config and an install count | 12 h |
 | GitHub topic search | `github-mcp-topics` | 400 a run, 30,246 matched | what was tagged this morning | 1 h |
 | Installmap YC crawl | `installmap-yc-mcp` | 182 companies, 53 with an endpoint, 14 online | which Y Combinator companies run a server, their batch, whether they also have a public API or an llms.txt, and the evidence | 7 d |
+| Glama directory | `glama-servers` | 2,000 a run (20 pages of 100), about 25,000 listed | tools, licence, hosting mode and Glama's tool-definition quality score; mostly what the others already carry, so it runs last and keeps only the rest | 30 min mid-sweep, then daily |
+
+**Glama needs a key and attribution.** `glama-mcp` reads
+`GET https://glama.ai/api/mcp/v1/servers?sort=added-at:desc` (the order Glama
+documents for full synchronisation) with `Authorization: Bearer $GLAMA_API_KEY`,
+following `pageInfo.endCursor` forward. A run reads 20 pages of 100 a second
+apart, saves the cursor and comes back in 30 minutes until the sweep ends, then
+starts over daily. It stops the run (cursor kept) on a 429, 403 or 5xx instead of
+retrying, because ten consecutive 429s earn a ban that does not lift by itself.
+Glama's API Data License requires a visible credit to Glama on every page showing
+its data and a link to each server's own Glama listing wherever it is shown, both
+as followed links. Every Glama row therefore carries `data.credit`
+(`{ name, text, url, listing }`); the item row, the item page and RSS render it
+("on Glama", "MCP data from Glama"), the JSON API, JSON Feed and MCP pass it
+through in `data`, and the adapter declares `attribution`, which the collection
+and source pages show beside the source. Rows from other sources are untouched,
+and a server another source already carries stays theirs with no Glama data in it.
 
 The Installmap rows are OpenMCP records ([logicsrc.com/openmcp](https://logicsrc.com/docs/openmcp)),
 under `data.openmcp`: `id`, `descriptor`, `tools`, `server`, `verified`, `online`,

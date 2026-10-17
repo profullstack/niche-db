@@ -8,12 +8,14 @@ const locationLink = (base, geo, extra = {}) =>
 import { config } from '@nichedb/config';
 import { currentModules } from '../lib/modules.js';
 import {
+  Credit,
   FeedCard,
   ItemList,
   Notice,
   Num,
   Pager,
   Relative,
+  SourceCredit,
   Status,
   Tags,
   When,
@@ -131,6 +133,7 @@ export const CollectionPage = ({
               <Status source={s} /> <a href={`/s/${s.slug}`}>{s.name}</a>{' '}
               <span class="muted small">
                 <Num n={s.item_count} /> items
+                <SourceCredit adapter={s.adapter} />
               </span>
             </li>
           ))}
@@ -384,6 +387,7 @@ export const ItemPage = ({
             </a>
           </>
         ) : null}
+        <Credit item={item} />
       </p>
       {item.summary ? <p class="lede">{item.summary}</p> : null}
       {item.kind === 'police-update' ? (

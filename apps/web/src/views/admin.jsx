@@ -1,6 +1,6 @@
 import { config } from '@nichedb/config';
 import { describeConfig, parseJson, progressOf } from '../lib/source-config.js';
-import { FeedCard, ItemList, Notice, Num, Relative, Status } from './components.jsx';
+import { FeedCard, ItemList, Notice, Num, Relative, SourceCredit, Status } from './components.jsx';
 import { Layout } from './Layout.jsx';
 import { describeQuery } from './pages.jsx';
 
@@ -298,6 +298,12 @@ export const SourcePage = ({ user, source, adapter, runs, items, canEdit, notice
           · next <Relative at={source.next_run_at} />
         </p>
         {source.description ? <p class="muted">{source.description}</p> : null}
+        {adapter?.attribution ? (
+          <p class="small">
+            Licensed data
+            <SourceCredit adapter={source.adapter} />
+          </p>
+        ) : null}
         {source.last_error ? <p class="feedback error">{source.last_error}</p> : null}
       </div>
       {canEdit ? (

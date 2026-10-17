@@ -178,6 +178,8 @@ export const config = {
     /** NVD CVE API: keyless at 5 requests per 30 s; a free key (nvd.nist.gov/developers/request-an-api-key) allows 50. */
     nvdApiKey: opt('NVD_API_KEY'),
     courtlistenerToken: opt('COURTLISTENER_TOKEN'),
+    /** Glama's MCP directory API (glama.ai/settings/api-keys). Licensed: rows must credit Glama. */
+    glamaApiKey: opt('GLAMA_API_KEY'),
     /**
      * Alpaca, for US corporate actions and the market news wire.
      *

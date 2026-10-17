@@ -309,7 +309,7 @@ export const COLLECTIONS = [
     slug: 'mcp',
     name: 'MCP servers',
     description:
-      'Every Model Context Protocol server anyone has published, from six sources that each know something the others do not: the official registry knows what was published and with which packages, Docker knows what has been packaged and how often it is pulled, Smithery knows how often each is actually called, the big community lists know the servers that were never published anywhere, and GitHub knows what was tagged this morning. The same server is in most of them, so the collection deduplicates on URL and the first source to carry a server keeps it.',
+      "Every Model Context Protocol server anyone has published, from six sources that each know something the others do not: the official registry knows what was published and with which packages, Docker knows what has been packaged and how often it is pulled, Smithery knows how often each is actually called, the big community lists know the servers that were never published anywhere, and GitHub knows what was tagged this morning. The same server is in most of them, so the collection deduplicates on URL and the first source to carry a server keeps it. Glama's directory runs last and fills in only what none of the others carry; those rows are Glama's licensed data and each one says so, with a link to its Glama listing.",
   },
   {
     slug: 'workflows',

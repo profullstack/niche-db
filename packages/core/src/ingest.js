@@ -24,6 +24,7 @@ export function envFor() {
     githubToken: config.adapters.githubToken,
     nvdApiKey: config.adapters.nvdApiKey,
     courtlistenerToken: config.adapters.courtlistenerToken,
+    glamaApiKey: config.adapters.glamaApiKey,
     alpacaKeyId: config.adapters.alpacaKeyId,
     alpacaSecretKey: config.adapters.alpacaSecretKey,
     alpacaFeed: config.adapters.alpacaFeed,
