@@ -17,6 +17,7 @@ import * as profiles from '@nichedb/db/profiles';
 import * as q from '@nichedb/db/queries';
 import * as tldStore from '@nichedb/db/tlds';
 import { enqueueRun } from '@nichedb/queue';
+import { businessReport, hasInput, normaliseInput, rdapLookup } from '../business.js';
 import { areaOut } from '../population.js';
 import {
   claimProfile,
@@ -716,6 +717,26 @@ export const TOOLS = [
         truncated,
         results: results.map((r) => ({ ...r, cheapest: byTld.get(r.tld)?.best ?? null })),
       };
+    },
+  },
+  {
+    name: 'business_standing',
+    description:
+      "Is a business on anybody's list? Give its `name`, and any of `domain`, `state` (two letters), `number` (state entity number) and `ein`. Answers with `standing` (flagged, incomplete or clear; clear only when every list was checked and found nothing), the `findings` behind it, and each section: US Treasury OFAC sanctions (SDN and consolidated, aliases included), GLEIF LEI records, SEC EDGAR filers, state registry status (OpenCorporates) and SAM.gov exclusions when keyed, and the domain over RDAP plus Spamhaus/URIBL/SURBL/Safe Browsing when the operator enabled them. A name match is not an identity: confirm against address and identifiers.",
+    inputSchema: {
+      type: 'object',
+      properties: {
+        name: str('Company name, e.g. Profullstack, Inc.'),
+        domain: str('Its website or mail domain (optional)'),
+        state: str('Two-letter US state it is registered in (optional)'),
+        number: str('State entity number, e.g. 4218574 (optional)'),
+        ein: str('US EIN, kept to identify it, never checked (optional)'),
+      },
+    },
+    run: async (args) => {
+      const input = normaliseInput(args);
+      if (!hasInput(input)) throw toolError('Give a name, a domain or an entity number.');
+      return businessReport(input, { rdap: rdapLookup });
     },
   },
 ];
