@@ -1,5 +1,6 @@
 import * as items from '@nichedb/db/reputation';
 import * as traffic from '@nichedb/db/traffic';
+import { liveReputationDeps } from '../lib/dnsbl.js';
 import { render } from '../lib/http.js';
 import { parseIndicator, reputationReport } from '../lib/reputation.js';
 import { ReputationPage } from '../views/reputation.jsx';
@@ -7,11 +8,13 @@ import { meterLookup } from './traffic.js';
 
 /**
  * Reputation: /reputation, /reputation/<ip-or-domain> and
- * /api/v1/reputation/<ip-or-domain>. One answer from /traffic, abuse.ch and
- * SURBL; metered with the /traffic lookups (one allowance, not two).
+ * /api/v1/reputation/<ip-or-domain>. One answer from /traffic, abuse.ch,
+ * SURBL and the live DNS blocklists, a domain's A/AAAA addresses included;
+ * metered with the /traffic lookups (one allowance, not two).
  */
 
 const deps = {
+  ...liveReputationDeps,
   items: (probes) => items.itemsByAdapterIds(probes),
   traffic: (ip) => traffic.lookupIp(ip),
 };

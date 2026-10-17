@@ -1,5 +1,8 @@
 import { Resolver } from 'node:dns/promises';
 import { config } from '@nichedb/config';
+import { authoritativeResolveFor, decodeZone, ZONES, zoneLookup } from './dnsbl.js';
+
+export { decodeZone, ZONES, zoneLookup };
 
 /**
  * The business standing report: one company, every list it could be on.
@@ -33,11 +36,8 @@ import { config } from '@nichedb/config';
  * deployment that does not charge), and when off the section links the free
  * self-service checks instead.
  *
- * Blocklist answers are asked of each zone's own nameservers, never of the
- * system resolver: public resolvers (8.8.8.8, 1.1.1.1) are refused by the
- * lists, and a refusal reads as "not listed" to anyone who forgets to look.
- * Each zone is proven with its always-listed test entry before an answer from
- * it is believed.
+ * Blocklist answers come from ./dnsbl.js, which asks each zone's own
+ * nameservers and proves each zone with its test entry first.
  */
 
 const UA = `nichedb.dev business (+${config.siteUrl ?? 'https://nichedb.dev'})`;
@@ -518,180 +518,6 @@ export function registryLinks({ name, state, number }) {
 
 /* ----------------------------------------------------------------- domain -- */
 
-/**
- * The reputation zones, how each says "listed", and the entry each always
- * lists so a zone that answers nothing can be told from a zone that refused.
- */
-export const ZONES = {
-  dbl: {
-    zone: 'dbl.spamhaus.org',
-    dqs: 'dbl.dq.spamhaus.net',
-    canary: 'dbltest.com',
-    name: 'Spamhaus DBL',
-  },
-  zen: {
-    zone: 'zen.spamhaus.org',
-    dqs: 'zen.dq.spamhaus.net',
-    canary: '127.0.0.2',
-    name: 'Spamhaus ZEN',
-  },
-  uribl: { zone: 'multi.uribl.com', canary: 'test.uribl.com', name: 'URIBL' },
-  // multi.surbl.org is delegated to its own servers, which a resolver that
-  // will not recurse never names; ask them directly.
-  surbl: {
-    zone: 'multi.surbl.org',
-    canary: 'test.surbl.org',
-    name: 'SURBL',
-    ns: ['b.surbl.org', 'c.surbl.org', 'd.surbl.org'],
-  },
-};
-
-const DBL_CODES = {
-  2: 'spam domain',
-  4: 'phishing domain',
-  5: 'malware domain',
-  6: 'botnet C&C domain',
-  102: 'abused legitimate spam',
-  103: 'abused spammed redirector',
-  104: 'abused legitimate phish',
-  105: 'abused legitimate malware',
-  106: 'abused legitimate botnet C&C',
-};
-const ZEN_CODES = {
-  2: 'SBL (Spamhaus block list)',
-  3: 'SBL CSS (snowshoe spam)',
-  4: 'XBL (exploited host)',
-  5: 'XBL (exploited host)',
-  6: 'XBL (exploited host)',
-  7: 'XBL (exploited host)',
-  9: 'SBL DROP (hijacked or criminal network)',
-  10: 'PBL (end-user address, policy only)',
-  11: 'PBL (end-user address, policy only)',
-};
-const URIBL_BITS = [
-  [2, 'black'],
-  [4, 'grey'],
-  [8, 'red'],
-];
-const SURBL_BITS = [
-  [4, 'disposable mail'],
-  [8, 'phishing'],
-  [16, 'malware'],
-  [32, 'click tracker'],
-  [64, 'abuse'],
-  [128, 'cracked'],
-];
-
-/**
- * What one zone's answer means: `refused` when the zone declined to answer
- * this resolver, otherwise the reasons it is listed (empty when none). PBL is
- * a statement about the kind of address, not about behaviour, so it is kept
- * but marked `policy` and does not count against anyone.
- */
-export function decodeZone(kind, addresses) {
-  const reasons = [];
-  let refused = false;
-  for (const a of Array.isArray(addresses) ? addresses : []) {
-    const m = String(a).match(/^127\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
-    if (!m) continue;
-    const [, b, c, d] = m.map(Number);
-    if (kind === 'dbl' || kind === 'zen') {
-      if (b === 255 && c === 255) {
-        refused = true;
-        continue;
-      }
-      const code = kind === 'dbl' ? (c === 1 ? d : null) : c === 0 ? d : null;
-      const label = (kind === 'dbl' ? DBL_CODES : ZEN_CODES)[code];
-      if (label)
-        reasons.push({ code: a, label, policy: kind === 'zen' && (code === 10 || code === 11) });
-    } else {
-      // 127.0.0.1 is the refusal on both. SURBL's test entry is on every list,
-      // so its 127.0.0.254 is all bits set, a real answer.
-      if (d === 1) {
-        refused = true;
-        continue;
-      }
-      for (const [bit, label] of kind === 'uribl' ? URIBL_BITS : SURBL_BITS)
-        if (d & bit) reasons.push({ code: a, label, policy: false });
-    }
-  }
-  return { refused, reasons };
-}
-
-const reverseIp = (ip) => ip.split('.').reverse().join('.');
-const NOT_LISTED = new Set(['ENOTFOUND', 'ENODATA', 'NXDOMAIN']);
-
-const zoneResolvers = new Map();
-
-/** A resolver pointed at the zone's own nameservers, so the answer is the list's, not 8.8.8.8's. */
-async function authoritativeResolver(zone) {
-  if (zoneResolvers.has(zone)) return zoneResolvers.get(zone);
-  const p = (async () => {
-    const sys = new Resolver({ timeout: 5000, tries: 2 });
-    const labels = zone.split('.');
-    let ns = Object.values(ZONES).find((z) => z.zone === zone)?.ns ?? [];
-    for (let i = 0; i < labels.length - 1 && !ns.length; i++)
-      ns = await sys.resolveNs(labels.slice(i).join('.')).catch(() => []);
-    const ips = (
-      await Promise.all(ns.slice(0, 3).map((h) => sys.resolve4(h).catch(() => [])))
-    ).flat();
-    if (!ips.length) throw new Error(`no nameserver address for ${zone}`);
-    const r = new Resolver({ timeout: 5000, tries: 2 });
-    r.setServers(ips);
-    return r;
-  })();
-  zoneResolvers.set(zone, p);
-  p.catch(() => zoneResolvers.delete(zone));
-  return p;
-}
-
-/** The question for one zone: the DQS zone under the key when there is one, else the public zone. */
-function zoneQuery(kind, subject, dqsKey) {
-  const z = ZONES[kind];
-  const name = /^\d+\.\d+\.\d+\.\d+$/.test(subject) ? reverseIp(subject) : subject;
-  return dqsKey && z.dqs ? `${name}.${dqsKey}.${z.dqs}` : `${name}.${z.zone}`;
-}
-
-/** One subject against one zone, with the canary proving the zone answers us. */
-export async function zoneLookup(kind, subject, { resolve, dqsKey } = {}) {
-  const z = ZONES[kind];
-  const ask = async (s) => {
-    try {
-      return { addrs: await resolve(zoneQuery(kind, s, dqsKey)) };
-    } catch (err) {
-      return NOT_LISTED.has(err?.code)
-        ? { addrs: [] }
-        : { error: err?.code ?? String(err?.message ?? err) };
-    }
-  };
-  const [canary, answer] = await Promise.all([ask(z.canary), ask(subject)]);
-  const tested = canary.error ? null : decodeZone(kind, canary.addrs);
-  const proven = tested && !tested.refused && tested.reasons.length > 0;
-  if (!proven)
-    return {
-      list: z.name,
-      subject,
-      status: 'unknown',
-      note: 'The list did not answer its own test entry, so silence from it means nothing.',
-    };
-  if (answer.error) return { list: z.name, subject, status: 'unknown', error: answer.error };
-  const { refused, reasons } = decodeZone(kind, answer.addrs);
-  if (refused)
-    return {
-      list: z.name,
-      subject,
-      status: 'unknown',
-      note: 'Refused by the list (over its free allowance, or this server must register).',
-    };
-  const counted = reasons.filter((r) => !r.policy);
-  return {
-    list: z.name,
-    subject,
-    status: counted.length ? 'listed' : 'clear',
-    reasons,
-  };
-}
-
 /** Google Safe Browsing's public status for a site, as the Transparency Report shows it. */
 export async function safeBrowsing(domain, { fetchImpl = fetch } = {}) {
   const base = { list: 'Google Safe Browsing', subject: domain };
@@ -736,12 +562,7 @@ export async function domainSection(domain, deps = {}) {
     rdap = null,
     blocklists = config.business?.blocklists ?? false,
     dqsKey = config.business?.spamhausDqsKey ?? null,
-    resolveFor = async (kind) => {
-      const r = await authoritativeResolver(
-        dqsKey && ZONES[kind].dqs ? ZONES[kind].dqs : ZONES[kind].zone,
-      );
-      return (n) => r.resolve4(n);
-    },
+    resolveFor = authoritativeResolveFor(dqsKey),
     resolveA = (d) => new Resolver({ timeout: 5000, tries: 2 }).resolve4(d),
     fetchImpl = fetch,
   } = deps;

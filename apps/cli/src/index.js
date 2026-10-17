@@ -240,7 +240,7 @@ export const COMMANDS = [
     name: 'reputation',
     usage: 'reputation <ip-or-domain>',
     summary:
-      'Is an IP or a domain on a blocklist? nichedb /traffic (human-reviewed bans), abuse.ch malware feeds and SURBL in one answer. Exits 1 when listed.',
+      'Is an IP or a domain on a blocklist? nichedb /traffic (human-reviewed bans), abuse.ch malware feeds, SURBL and live DNS blocklists (Spamhaus ZEN/DBL, SpamCop, PSBL, Mailspike, URIBL) in one answer; a domain is also checked on each address it resolves to. Exits 1 when listed.',
     options: ['--json'],
   },
   {
@@ -1072,6 +1072,9 @@ export async function run(
       }
       out(`${r.query}: ${r.listed ? `LISTED, score ${r.score}/100` : 'not listed'}`);
       for (const reason of r.reasons) out(`  ${reason}`);
+      for (const a of r.addresses ?? [])
+        out(`  resolves to ${a.ip}: ${a.listed ? 'LISTED' : 'not listed'}`);
+      if (r.unknown?.length) out(`  could not ask: ${r.unknown.join(', ')}`);
       if (r.note) out(`  ${r.note}`);
       out(`  checked: ${r.checked.map((c) => c.name).join('; ')}`);
       out(`  deeper: ${r.deeper.url}`);

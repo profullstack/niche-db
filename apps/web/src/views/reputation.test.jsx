@@ -50,4 +50,32 @@ describe('ReputationPage', () => {
     expect(html).toContain('not a clean bill of health');
     expect(html).toContain('ThreatCrush bans');
   });
+
+  test('a domain shows the live lists and the listed address it serves from', async () => {
+    const report = await reputationReport('dev2.profullstack.com', {
+      items: async () => [],
+      traffic: async (ip) => ({ ip, listed: false }),
+      resolve: async () => ['23.95.228.174'],
+      dnsbl: {
+        lists: () => ['Spamhaus ZEN'],
+        check: async (t, s) =>
+          t === 'ip'
+            ? [
+                {
+                  list: 'Spamhaus ZEN',
+                  subject: s,
+                  status: 'listed',
+                  reasons: [{ code: '127.0.0.4', label: 'XBL (exploited host)', policy: false }],
+                },
+              ]
+            : [{ list: 'Spamhaus DBL', subject: s, status: 'clear', reasons: [] }],
+      },
+    });
+    const html = await render(<ReputationPage query="dev2.profullstack.com" report={report} />);
+    expect(html).toContain('Listed.');
+    expect(html).toContain('The addresses it resolves to');
+    expect(html).toContain('23.95.228.174');
+    expect(html).toContain('XBL (exploited host) (127.0.0.4)');
+    expect(html).toContain('Live DNS blocklists');
+  });
 });

@@ -258,6 +258,78 @@ describe('reputation lookup', () => {
     expect(await itemsByAdapterIds([], { db: sql })).toEqual([]);
   });
 
+  const zen = (subject) => ({
+    list: 'Spamhaus ZEN',
+    subject,
+    status: 'listed',
+    reasons: [
+      { code: '127.0.0.2', label: 'SBL (Spamhaus block list)', policy: false },
+      { code: '127.0.0.3', label: 'SBL CSS (snowshoe spam)', policy: false },
+      { code: '127.0.0.4', label: 'XBL (exploited host)', policy: false },
+    ],
+  });
+  const liveDeps = (byIp = {}, byDomain = {}) => ({
+    items: async () => [],
+    traffic: async (ip) => ({ ip, listed: false }),
+    resolve: async () => ['23.95.228.174', '10.0.0.9'],
+    dnsbl: {
+      lists: (t) => (t === 'ip' ? ['Spamhaus ZEN', 'SpamCop'] : ['Spamhaus DBL']),
+      check: async (t, s) => (t === 'ip' ? (byIp[s] ?? []) : (byDomain[s] ?? [])),
+    },
+  });
+
+  test('a domain on no list, served from a listed address, is listed, and says which address', async () => {
+    const r = await reputationReport(
+      'dev2.profullstack.com',
+      liveDeps({ '23.95.228.174': [zen('23.95.228.174')] }),
+    );
+    expect(r.listed).toBe(true);
+    expect(r.addresses.map((a) => a.ip)).toEqual(['23.95.228.174']);
+    expect(r.addresses[0].listed).toBe(true);
+    expect(r.reasons.join(' ')).toContain('23.95.228.174 (A record) on Spamhaus ZEN: SBL');
+    expect(r.reasons.join(' ')).toContain('XBL');
+    expect(r.score).toBeGreaterThan(0);
+    expect(r.checked.map((c) => c.name).join(' ')).toContain('Spamhaus ZEN (live DNS)');
+  });
+
+  test('a domain and its parents are asked of the domain lists', async () => {
+    const asked = [];
+    const deps = liveDeps();
+    deps.dnsbl.check = async (t, s) => {
+      asked.push(`${t}:${s}`);
+      return [];
+    };
+    await reputationReport('dev2.profullstack.com', deps);
+    expect(asked.sort()).toEqual([
+      'domain:dev2.profullstack.com',
+      'domain:profullstack.com',
+      'ip:23.95.228.174',
+    ]);
+  });
+
+  test('a list that could not be asked is named, and not counted as a miss', async () => {
+    const r = await reputationReport(
+      '45.148.10.8',
+      liveDeps({ '45.148.10.8': [{ list: 'SpamCop', subject: '45.148.10.8', status: 'unknown' }] }),
+    );
+    expect(r.listed).toBe(false);
+    expect(r.unknown).toEqual(['SpamCop']);
+    expect(r.note).toContain('Could not ask: SpamCop');
+  });
+
+  test('an IP listed live is listed on its own', async () => {
+    const r = await reputationReport(
+      '23.95.228.174',
+      liveDeps({ '23.95.228.174': [zen('23.95.228.174')] }),
+    );
+    expect(r.listed).toBe(true);
+    expect(r.score).toBe(75);
+    expect(r.reasons[0]).toBe(
+      'Spamhaus ZEN: SBL (Spamhaus block list), SBL CSS (snowshoe spam), XBL (exploited host)',
+    );
+    expect(r.addresses).toBeUndefined();
+  });
+
   test('/reputation is a reserved niche slug', () => {
     expect(isReservedNicheSlug('reputation')).toBe(true);
   });

@@ -21,6 +21,7 @@ import * as tldStore from '@nichedb/db/tlds';
 import * as trafficStore from '@nichedb/db/traffic';
 import { enqueueRun } from '@nichedb/queue';
 import { businessReport, hasInput, normaliseInput, rdapLookup } from '../business.js';
+import { liveReputationDeps } from '../dnsbl.js';
 import { areaOut } from '../population.js';
 import {
   claimProfile,
@@ -746,7 +747,7 @@ export const TOOLS = [
   {
     name: 'reputation_lookup',
     description:
-      'Is an IP address or a domain on a blocklist? Give `indicator` (an IPv4/IPv6 address or a domain; a URL is reduced to its host). Answers `listed`, a rough 0-100 `score` with the `reasons` behind it, the nichedb /traffic record (addresses our own servers banned and a person approved), the abuse.ch indicators (ThreatFox, URLhaus, Feodo Tracker: botnet C2, malware hosts, card skimmers; a domain is checked with its parent domains) and the SURBL standing of a watched domain, plus which lists were `checked`. Not listed is not the same as clean.',
+      'Is an IP address or a domain on a blocklist? Give `indicator` (an IPv4/IPv6 address or a domain; a URL is reduced to its host). Answers `listed`, a rough 0-100 `score` with the `reasons` behind it, the nichedb /traffic record (addresses our own servers banned and a person approved), the abuse.ch indicators (ThreatFox, URLhaus, Feodo Tracker; a domain is checked with its parent domains), the SURBL standing of a watched domain, and live DNS blocklists in `dnsbl` (an address: Spamhaus ZEN with SBL/CSS/XBL/PBL decoded, SpamCop, PSBL, Mailspike; a domain and its parents: Spamhaus DBL, URIBL, SURBL). A domain is also resolved and each A/AAAA address is checked the same way, in `addresses` (each with `ip`, `listed`, `traffic`, `indicators`, `dnsbl`). A list whose own test entry failed is named in `unknown`, not treated as a miss. Not listed is not the same as clean.',
     inputSchema: {
       type: 'object',
       properties: { indicator: str('An IP address or a domain, e.g. 203.0.113.9 or evil.example') },
@@ -754,6 +755,7 @@ export const TOOLS = [
     },
     run: async ({ indicator }) => {
       const report = await reputationReport(indicator, {
+        ...liveReputationDeps,
         items: (probes) => reputationStore.itemsByAdapterIds(probes),
         traffic: (ip) => trafficStore.lookupIp(ip),
       });
