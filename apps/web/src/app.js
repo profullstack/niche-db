@@ -160,7 +160,7 @@ registerPopulation(app);
 registerTlds(app);
 /** Bad traffic: /traffic, the human-reviewed IP blocklist, and /api/v1/traffic. */
 registerTraffic(app);
-/** Reputation: one IP-or-domain answer from /traffic, abuse.ch and SURBL, and /api/v1/reputation. */
+/** Reputation: one IP-or-domain answer from /traffic, abuse.ch, SURBL and live DNSBLs, and /api/v1/reputation. */
 registerReputation(app);
 registerMcp(app);
 

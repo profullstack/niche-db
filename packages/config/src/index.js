@@ -390,6 +390,18 @@ export const config = {
   },
 
   /**
+   * /reputation's live DNS blocklist lookups (Spamhaus ZEN and DBL, SpamCop,
+   * PSBL, Mailspike, URIBL, SURBL), asked of each list's own nameservers and
+   * held an hour. REPUTATION_SPAMHAUS_DNSBL drops Spamhaus alone: its free
+   * service excludes commercial use, so whether a paid deployment may keep it
+   * on (or needs SPAMHAUS_DQS_KEY) is the operator's call.
+   */
+  reputation: {
+    dnsbl: bool('REPUTATION_DNSBL', true),
+    spamhausDnsbl: bool('REPUTATION_SPAMHAUS_DNSBL', true),
+  },
+
+  /**
    * The business standing report (/business): sanctions, registries and
    * domain reputation for one company. Metered like the VIN lookups and
    * covered by the same pass.
