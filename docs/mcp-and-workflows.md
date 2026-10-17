@@ -42,7 +42,7 @@ the repositories tagged for all of it.
 | aitmpl MCP configs | `aitmpl-mcps` | 104 | a ready-made config and an install count | 12 h |
 | GitHub topic search | `github-mcp-topics` | 400 a run, 30,246 matched | what was tagged this morning | 1 h |
 | Installmap YC crawl | `installmap-yc-mcp` | 182 companies, 53 with an endpoint, 14 online | which Y Combinator companies run a server, their batch, whether they also have a public API or an llms.txt, and the evidence | 7 d |
-| Glama directory | `glama-servers` | 2,000 a run (20 pages of 100), about 25,000 listed | tools, licence, hosting mode and Glama's tool-definition quality score; mostly what the others already carry, so it runs last and keeps only the rest | 30 min mid-sweep, then daily |
+| Glama directory | `glama-servers` | 2,000 a run (20 pages of 100); 101,285 listed on 2026-10-17, 8,944 already carried by another source, so about 92,000 added over a sweep of about 25 h | tools, licence, hosting mode and Glama's tool-definition quality score; mostly what the others already carry, so it runs last and keeps only the rest | 30 min mid-sweep, then daily |
 
 **Glama needs a key and attribution.** `glama-mcp` reads
 `GET https://glama.ai/api/mcp/v1/servers?sort=added-at:desc` (the order Glama
