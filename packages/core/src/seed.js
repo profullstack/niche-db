@@ -2197,6 +2197,31 @@ export const DEFAULT_FEEDS = [
     description: 'Watched domains that SURBL currently lists, with the lists they are on.',
     query: { kinds: ['reputation'], tags: ['status:listed'] },
   },
+  // abuse.ch: malware infrastructure, one row per IP or domain.
+  {
+    collection: 'threats',
+    slug: 'malware-ips',
+    name: 'Malware IPs (abuse.ch)',
+    description:
+      'Botnet command-and-control servers and malware download hosts by IP address, from abuse.ch ThreatFox, URLhaus and Feodo Tracker, refreshed hourly. Free to use with credit to abuse.ch.',
+    query: { kinds: ['indicator'], tags: ['ioc:ip'] },
+  },
+  {
+    collection: 'threats',
+    slug: 'malware-domains',
+    name: 'Malware domains (abuse.ch)',
+    description:
+      'Domains serving malware, running botnet command-and-control or skimming cards, from abuse.ch ThreatFox and URLhaus, refreshed hourly. Free to use with credit to abuse.ch.',
+    query: { kinds: ['indicator'], tags: ['ioc:domain'] },
+  },
+  {
+    collection: 'threats',
+    slug: 'botnet-c2',
+    name: 'Botnet C2 servers',
+    description:
+      'Every address and domain abuse.ch reports as a botnet command-and-control server, newest first.',
+    query: { kinds: ['indicator'], tags: ['threat:botnet_cc'] },
+  },
   // Webrings: the rings, the members, and the members by who makes them.
   {
     collection: 'webrings',

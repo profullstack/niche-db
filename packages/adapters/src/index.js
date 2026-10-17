@@ -1,3 +1,4 @@
+import { abusech } from './abusech.js';
 import { adsbFlights } from './adsb.js';
 import { agenticjobs } from './agenticjobs.js';
 import { aiid } from './aiid.js';
@@ -373,6 +374,8 @@ export const ADAPTERS = [
   // The NVD's CVE catalogue, and SURBL's lists with watched domains checked against them.
   nvd,
   surbl,
+  // abuse.ch: malware IPs and domains (ThreatFox, URLhaus, Feodo), one row per address.
+  abusech,
   // Webrings: the rings a host runs and who is in them, read off the host's own descriptor.
   openwebring,
   // SaaS: the way in and the way out of a service's plans, read off its own OpenSaaS descriptor.

@@ -12,10 +12,13 @@ import {
   queryTlds,
   tldOut,
 } from '@nichedb/core/tlds';
+import { CATEGORIES as TRAFFIC_CATEGORIES } from '@nichedb/core/traffic';
 import * as pop from '@nichedb/db/population';
 import * as profiles from '@nichedb/db/profiles';
 import * as q from '@nichedb/db/queries';
+import * as reputationStore from '@nichedb/db/reputation';
 import * as tldStore from '@nichedb/db/tlds';
+import * as trafficStore from '@nichedb/db/traffic';
 import { enqueueRun } from '@nichedb/queue';
 import { businessReport, hasInput, normaliseInput, rdapLookup } from '../business.js';
 import { areaOut } from '../population.js';
@@ -26,6 +29,7 @@ import {
   profileOut,
   resolveRef,
 } from '../profiles.js';
+import { reputationReport } from '../reputation.js';
 import { allowedEnrichers, collectionOut, feedOut, itemOut, sourceOut } from '../serialize.js';
 import { addSource, createFeed, Denied, editSource } from '../service.js';
 import { submissionOut, submitFeed } from '../submissions.js';
@@ -737,6 +741,55 @@ export const TOOLS = [
       const input = normaliseInput(args);
       if (!hasInput(input)) throw toolError('Give a name, a domain or an entity number.');
       return businessReport(input, { rdap: rdapLookup });
+    },
+  },
+  {
+    name: 'reputation_lookup',
+    description:
+      'Is an IP address or a domain on a blocklist? Give `indicator` (an IPv4/IPv6 address or a domain; a URL is reduced to its host). Answers `listed`, a rough 0-100 `score` with the `reasons` behind it, the nichedb /traffic record (addresses our own servers banned and a person approved), the abuse.ch indicators (ThreatFox, URLhaus, Feodo Tracker: botnet C2, malware hosts, card skimmers; a domain is checked with its parent domains) and the SURBL standing of a watched domain, plus which lists were `checked`. Not listed is not the same as clean.',
+    inputSchema: {
+      type: 'object',
+      properties: { indicator: str('An IP address or a domain, e.g. 203.0.113.9 or evil.example') },
+      required: ['indicator'],
+    },
+    run: async ({ indicator }) => {
+      const report = await reputationReport(indicator, {
+        items: (probes) => reputationStore.itemsByAdapterIds(probes),
+        traffic: (ip) => trafficStore.lookupIp(ip),
+      });
+      if (report.error) throw toolError(report.error);
+      return report;
+    },
+  },
+  {
+    name: 'traffic_list',
+    description:
+      'The nichedb /traffic blocklist: IP addresses our own servers banned for exploit attempts, scanning, brute force or spam, each published only after a person reviewed the evidence and approved it. Newest approvals first. Optional `days` keeps addresses seen in the last N days, `category` one of exploit, brute-force, scanner, spam, other. Without an API key the newest 100 are returned; with one, `limit` (up to 1000) and `offset` page the whole list.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        days: { type: 'number', description: 'Only addresses seen in the last N days (optional)' },
+        category: str('exploit, brute-force, scanner, spam or other (optional)'),
+        limit: { type: 'number', description: 'Rows to return, up to 1000 with an API key' },
+        offset: { type: 'number', description: 'Rows to skip, with an API key' },
+      },
+    },
+    run: async ({ days, category, limit, offset }, ctx) => {
+      const full = Boolean(ctx?.user);
+      const n = Number(days);
+      const params = {
+        limit: full
+          ? Math.min(1000, Math.max(1, Number(limit) || 100))
+          : config.traffic.anonymousListLimit,
+        offset: full ? Math.max(0, Number(offset) || 0) : 0,
+        maxAgeDays: Number.isFinite(n) && n > 0 ? Math.min(n, 3650) : null,
+        category: Object.hasOwn(TRAFFIC_CATEGORIES, category ?? '') ? category : null,
+      };
+      const [stats, rows] = await Promise.all([
+        trafficStore.trafficStats(),
+        trafficStore.listPublished(params),
+      ]);
+      return { approved: stats.approved, full, ...params, addresses: rows };
     },
   },
 ];

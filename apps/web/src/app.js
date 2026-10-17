@@ -24,6 +24,7 @@ import { registerPages } from './routes/pages.js';
 import { registerPopulation } from './routes/population.js';
 import { registerPremium } from './routes/premium.js';
 import { registerProfiles } from './routes/profiles.js';
+import { registerReputation } from './routes/reputation.js';
 import { registerRevenue } from './routes/revenue.js';
 import { registerSites } from './routes/sites.js';
 import { registerStatic } from './routes/static.js';
@@ -159,6 +160,8 @@ registerPopulation(app);
 registerTlds(app);
 /** Bad traffic: /traffic, the human-reviewed IP blocklist, and /api/v1/traffic. */
 registerTraffic(app);
+/** Reputation: one IP-or-domain answer from /traffic, abuse.ch and SURBL, and /api/v1/reputation. */
+registerReputation(app);
 registerMcp(app);
 
 /**

@@ -24,7 +24,7 @@ const MAX_PAGE = 1000;
 /** Signed in, an API key, or a paying crawler: the whole list. */
 const fullAccess = (c) => Boolean(c.get('user') || c.get('modules')?.paid);
 
-async function meterLookup(c) {
+export async function meterLookup(c) {
   if (c.get('modules')?.paid) return null;
   const user = c.get('user');
   const limit = user ? config.traffic.accountLookupsPerHour : config.traffic.freeLookupsPerHour;
