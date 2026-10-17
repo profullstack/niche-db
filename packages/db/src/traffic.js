@@ -67,11 +67,15 @@ export async function listPublished(
 }
 
 /** Every approved address as text, for the plain blocklist. */
-export async function listPublishedIps({ maxAgeDays = null } = {}, { db = sql } = {}) {
+export async function listPublishedIps(
+  { maxAgeDays = null, category = null } = {},
+  { db = sql } = {},
+) {
   const rows = await db`
     select host(ip) as ip from traffic_ips
     where status = 'approved'
       and (${maxAgeDays}::int is null or last_seen > now() - make_interval(days => ${maxAgeDays}::int))
+      and (${category}::text is null or category = ${category}::text)
     order by ip
   `;
   return rows.map((r) => r.ip);
@@ -141,6 +145,66 @@ export async function reviewIps({ ips, status, userId, note = null }, { db = sql
     returning ip
   `;
   return rows.length;
+}
+
+/**
+ * Every decided address, for ThreatCrush (token-gated): an approval lets it
+ * list a source on a reviewer's say, a rejection keeps it off its feed too.
+ */
+export async function listDecisions({ db = sql } = {}) {
+  const rows = await db`
+    select host(ip) as ip, status from traffic_ips where status in ('approved', 'rejected') order by ip
+  `;
+  return {
+    approved: rows.filter((r) => r.status === 'approved').map((r) => r.ip),
+    rejected: rows.filter((r) => r.status === 'rejected').map((r) => r.ip),
+  };
+}
+
+/** A delisting request for a listed address. Returns the row, or null when the address is not listed. */
+export async function addDelistRequest({ ip, email, reason }, { db = sql } = {}) {
+  const [row] = await db`
+    insert into traffic_delist_requests (ip, email, reason)
+    select ${ip}::inet, ${email}, ${reason}
+    where exists (select 1 from traffic_ips where ip = ${ip}::inet and status = 'approved')
+    returning id, host(ip) as ip, status, created_at
+  `;
+  return row ?? null;
+}
+
+export async function listDelistRequests({ status = 'open', limit = 50 } = {}, { db = sql } = {}) {
+  return db`
+    select d.id, host(d.ip) as ip, d.email, d.reason, d.status, d.created_at, d.decided_at, d.decision_note,
+           t.category, t.servers, t.blocks, t.last_seen
+    from traffic_delist_requests d left join traffic_ips t on t.ip = d.ip
+    where d.status = ${status}
+    order by d.created_at asc
+    limit ${limit}
+  `;
+}
+
+/**
+ * Decide a request. `delist` takes the address off the list (it becomes
+ * rejected, so a later import never brings it back); `decline` leaves it.
+ * Returns whether an open request was decided.
+ */
+export async function decideDelistRequest({ id, action, userId, note = null }, { db = sql } = {}) {
+  const status = action === 'delist' ? 'delisted' : 'declined';
+  const [row] = await db`
+    update traffic_delist_requests set status = ${status}, decided_by = ${userId}, decided_at = now(),
+      decision_note = ${note}
+    where id = ${id} and status = 'open'
+    returning host(ip) as ip
+  `;
+  if (!row) return false;
+  if (action === 'delist') {
+    await db`
+      update traffic_ips set status = 'rejected', reviewed_by = ${userId}, reviewed_at = now(),
+        review_note = ${note ?? 'Delisted on the owner’s request.'}, updated_at = now()
+      where ip = ${row.ip}::inet
+    `;
+  }
+  return true;
 }
 
 export async function getSync(source, { db = sql } = {}) {

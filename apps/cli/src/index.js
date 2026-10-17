@@ -15,7 +15,7 @@ import { homedir, tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createInterface } from 'node:readline';
 
-export const VERSION = '0.40.0';
+export const VERSION = '0.41.0';
 const GEO_FLAGS = ['lat', 'long', 'radius', 'unit', 'bbox', 'sort', 'offset'];
 const DEFAULT_API = process.env.NICHEDB_API ?? 'https://nichedb.dev';
 const CONFIG_DIR = join(process.env.XDG_CONFIG_HOME ?? join(homedir(), '.config'), 'nichedb');
@@ -245,10 +245,19 @@ export const COMMANDS = [
   },
   {
     name: 'traffic',
-    usage: 'traffic [<ip>] [--days <n>] [--category <c>] [--txt]',
+    usage: 'traffic [<ip>] [--days <n>] [--category <c>] [--txt|--rpz|--rbldnsd]',
     summary:
       'The human-reviewed /traffic IP blocklist: newest approvals, one address, or --txt for a fail2ban/nftables-ready list. Exits 1 when an address is listed.',
-    options: ['--days <n>', '--category <c>', '--limit <n>', '--offset <n>', '--txt', '--json'],
+    options: [
+      '--days <n>',
+      '--category <c>',
+      '--limit <n>',
+      '--offset <n>',
+      '--txt',
+      '--rpz',
+      '--rbldnsd',
+      '--json',
+    ],
   },
   {
     name: 'profiles',
@@ -1094,8 +1103,9 @@ export async function run(
           );
         return r.listed ? 1 : 0;
       }
-      if (flags.txt) {
-        out(await client.text(`/traffic/blocklist.txt${qs.size ? `?${qs}` : ''}`));
+      const format = flags.rpz ? 'rpz' : flags.rbldnsd ? 'rbldnsd' : flags.txt ? 'txt' : null;
+      if (format) {
+        out(await client.text(`/traffic/blocklist.${format}${qs.size ? `?${qs}` : ''}`));
         return 0;
       }
       const r = await client.get(`/api/v1/traffic${qs.size ? `?${qs}` : ''}`);

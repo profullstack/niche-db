@@ -128,8 +128,25 @@ export function TrafficPage({ user, stats, rows, params, sync, reviewer }) {
             <code>/api/v1/traffic/ip/&lt;address&gt;</code> for one address.
           </li>
           <li>
-            Add <code>?days=90</code> to leave out addresses that have been quiet for 90 days;
-            addresses get reassigned.
+            <a href="/traffic/blocklist.rpz">blocklist.rpz</a>: a DNS Response Policy Zone for BIND,
+            Unbound, PowerDNS or Knot, and{' '}
+            <a href="/traffic/blocklist.rbldnsd">blocklist.rbldnsd</a>: an rbldnsd ip4set, to run
+            the list as your own DNSBL for mail servers.
+          </li>
+          <li>
+            Add <code>?days=90</code> to leave out addresses that have been quiet for 90 days
+            (addresses get reassigned), and <code>?category=exploit</code> (or brute-force, scanner,
+            spam) for one kind of attack. Both work on every list.
+          </li>
+          <li>
+            Malware infrastructure from abuse.ch, free:{' '}
+            <a href="/reputation/malware-ips.txt">malware-ips.txt</a> and{' '}
+            <a href="/reputation/malware-domains.rpz">malware-domains.rpz</a>.
+          </li>
+          <li>
+            Your address is listed and should not be? Open it at{' '}
+            <code>/traffic/ip/&lt;address&gt;</code> and ask for it to come off; a reviewer reads
+            the request beside the evidence.
           </li>
         </ul>
         <pre>
@@ -201,7 +218,30 @@ curl -s ${'https://nichedb.dev'}/traffic/blocklist.txt | grep -v '^#' | sed 's/.
   );
 }
 
-export function TrafficIpPage({ user, query, result, error }) {
+const DelistForm = ({ ip }) => (
+  <details>
+    <summary>This is my address: ask for it to come off</summary>
+    <form method="post" action={`/traffic/ip/${ip}/delist`} class="stack">
+      <p class="small">
+        A reviewer reads your request beside the evidence above and replies by email. If the address
+        is yours and the traffic has stopped (a cleaned-up server, a reassigned IP), say so.
+      </p>
+      <input name="email" type="email" placeholder="you@example.com" aria-label="Email" required />
+      <textarea
+        name="reason"
+        rows={4}
+        minLength={10}
+        maxLength={2000}
+        placeholder="Why it should come off"
+        aria-label="Reason"
+        required
+      />
+      <button type="submit">Send request</button>
+    </form>
+  </details>
+);
+
+export function TrafficIpPage({ user, query, result, error, notice }) {
   return (
     <Layout
       user={user}
@@ -214,6 +254,7 @@ export function TrafficIpPage({ user, query, result, error }) {
           <code>{query}</code>
         </h1>
         {error ? <p class="error">{error}</p> : null}
+        {notice ? <p class="notice">{notice}</p> : null}
         {result && !result.listed ? (
           <p class="lede">
             Not on the list. Either our servers never banned it, or a person reviewed the evidence
@@ -254,6 +295,7 @@ export function TrafficIpPage({ user, query, result, error }) {
                 ) : null}
               </tbody>
             </table>
+            <DelistForm ip={query} />
           </>
         ) : null}
         <Lookup value={query} />
@@ -265,7 +307,68 @@ export function TrafficIpPage({ user, query, result, error }) {
   );
 }
 
-export function TrafficReviewPage({ user, rows, stats, status, offset, notice }) {
+const DelistRequests = ({ delists }) =>
+  delists?.length ? (
+    <section>
+      <h2>Delisting requests ({delists.length})</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Address</th>
+            <th>From</th>
+            <th>Reason</th>
+            <th>Evidence</th>
+            <th>Decide</th>
+          </tr>
+        </thead>
+        <tbody>
+          {delists.map((d) => (
+            <tr>
+              <td>
+                <a href={`/traffic/ip/${d.ip}`}>
+                  <code>{d.ip}</code>
+                </a>
+                <div class="small muted">{day(d.created_at)}</div>
+              </td>
+              <td class="small">
+                <a
+                  href={`mailto:${d.email}?subject=${encodeURIComponent(`nichedb.dev/traffic: ${d.ip}`)}`}
+                >
+                  {d.email}
+                </a>
+              </td>
+              <td class="small">{d.reason}</td>
+              <td class="small">
+                {categoryName(d.category)}, {d.servers} servers, {d.blocks} bans, last{' '}
+                {day(d.last_seen)}
+              </td>
+              <td>
+                <form method="post" action="/traffic/review/delist" class="stack">
+                  <input type="hidden" name="id" value={String(d.id)} />
+                  <input
+                    name="note"
+                    placeholder="Note (required to decline)"
+                    aria-label="Decision note"
+                    maxLength={1000}
+                  />
+                  <span>
+                    <button name="action" value="delist" type="submit">
+                      Take off the list
+                    </button>{' '}
+                    <button name="action" value="decline" type="submit">
+                      Decline
+                    </button>
+                  </span>
+                </form>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </section>
+  ) : null;
+
+export function TrafficReviewPage({ user, rows, stats, status, offset, notice, delists = [] }) {
   return (
     <Layout user={user} wide title="Review bad traffic" noindex>
       <section>
@@ -290,6 +393,7 @@ export function TrafficReviewPage({ user, rows, stats, status, offset, notice })
         </p>
         {notice ? <p class="notice">{notice}</p> : null}
       </section>
+      <DelistRequests delists={delists} />
       <form method="post" action="/traffic/review">
         <input type="hidden" name="status" value={status} />
         <table>

@@ -20,3 +20,22 @@ export async function itemsByAdapterIds(probes, { db = sql } = {}) {
     order by i.published_at desc nulls last
   `;
 }
+
+/**
+ * The abuse.ch indicators of one type (`ip` or `domain`) listed by a feed in
+ * the last `days` days, as bare values, for the downloadable lists. A row the
+ * feeds dropped longer ago stays in the collection as history but leaves the
+ * blocklist.
+ */
+export async function listedIndicators({ type, days = 7 }, { db = sql } = {}) {
+  const tag = type === 'ip' ? 'ioc:ip' : 'ioc:domain';
+  const rows = await db`
+    select i.data->>'indicator' as value
+    from items i join sources s on s.id = i.source_id
+    where s.adapter = 'abusech'
+      and ${tag}::text = any(i.tags)
+      and (i.data->>'lastListed')::date >= current_date - ${days}::int
+    order by 1
+  `;
+  return rows.map((r) => r.value).filter(Boolean);
+}

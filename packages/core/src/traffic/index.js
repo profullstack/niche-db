@@ -82,6 +82,74 @@ export function isPublicIp(ip) {
   return false;
 }
 
+/* --------------------------------------------------------- list formats -- */
+
+/** A v6 address with every group written out: 2001:db8::1 → 2001:0db8:0000:…:0001. */
+export function expandV6(ip) {
+  const [head, tail = ''] = ip.toLowerCase().split('::');
+  const h = head ? head.split(':') : [];
+  const t = tail ? tail.split(':') : [];
+  const groups = ip.includes('::') ? [...h, ...Array(8 - h.length - t.length).fill('0'), ...t] : h;
+  return groups.map((g) => g.padStart(4, '0'));
+}
+
+/** The RPZ trigger name for one address: 32.<reversed octets>.rpz-ip, or 128.<reversed groups>.rpz-ip. */
+export function rpzIpName(ip) {
+  if (isIP(ip) === 4) return `32.${ip.split('.').reverse().join('.')}.rpz-ip`;
+  return `128.${expandV6(ip)
+    .map((g) => g.replace(/^0+(?=.)/, ''))
+    .reverse()
+    .join('.')}.rpz-ip`;
+}
+
+const serialOf = (now) => Math.floor(now.getTime() / 1000);
+
+function rpzHeader(title, now) {
+  return [
+    `; ${title}`,
+    `; Generated ${now.toISOString()}. Free to use. ${config.siteUrl}/traffic`,
+    '$TTL 300',
+    `@ IN SOA localhost. hostmaster.nichedb.dev. ${serialOf(now)} 3600 600 86400 300`,
+    '  IN NS localhost.',
+  ];
+}
+
+/**
+ * A Response Policy Zone that drops connections to the addresses (BIND,
+ * Unbound, PowerDNS, Knot): load it as a policy zone and every answer that
+ * resolves to a listed address becomes NXDOMAIN.
+ */
+export function rpzForIps(
+  ips,
+  { now = new Date(), title = 'nichedb.dev bad traffic (reviewed by a person)' } = {},
+) {
+  return `${[...rpzHeader(title, now), ...ips.map((ip) => `${rpzIpName(ip)} CNAME .`)].join('\n')}\n`;
+}
+
+/** An RPZ that refuses the domains and every name under them. */
+export function rpzForDomains(
+  domains,
+  { now = new Date(), title = 'nichedb.dev malware domains (abuse.ch)' } = {},
+) {
+  const lines = [];
+  for (const d of domains) lines.push(`${d} CNAME .`, `*.${d} CNAME .`);
+  return `${[...rpzHeader(title, now), ...lines].join('\n')}\n`;
+}
+
+/**
+ * An rbldnsd ip4set, so anyone can run the list as a DNSBL
+ * (`<reversed-ip>.bl.example` answering 127.0.0.2). IPv4 only: rbldnsd keeps
+ * v6 in a separate ip6tset dataset, which is the plain list's job here.
+ */
+export function rbldnsdIp4set(ips, { now = new Date() } = {}) {
+  const v4 = ips.filter((ip) => isIP(ip) === 4);
+  return `${[
+    `# nichedb.dev bad traffic, rbldnsd ip4set, ${now.toISOString()}. ${config.siteUrl}/traffic`,
+    `:127.0.0.2:Listed: reviewed attack source, see ${config.siteUrl}/traffic/ip/$`,
+    ...v4,
+  ].join('\n')}\n`;
+}
+
 /** One feed candidate as a traffic_ips row, or null to drop it. */
 export function toRow(candidate) {
   const ip = normaliseIp(candidate?.ip);
