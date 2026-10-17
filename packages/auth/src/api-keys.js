@@ -15,6 +15,23 @@ import { createApiKeyManager } from '@profullstack/api-key-manager';
 
 const hash = (key) => createHash('sha256').update(String(key)).digest();
 
+/**
+ * A jsonb column as the object it holds. Rows written before migration 0038
+ * (and any driver that hands jsonb back as text) arrive as a string, possibly
+ * a string of a string; unwrap until it is not one.
+ */
+export function jsonObject(v) {
+  let out = v;
+  for (let i = 0; i < 8 && typeof out === 'string'; i++) {
+    try {
+      out = JSON.parse(out);
+    } catch {
+      return {};
+    }
+  }
+  return out && typeof out === 'object' && !Array.isArray(out) ? out : {};
+}
+
 function toRecord(row) {
   if (!row) return null;
   return {
@@ -24,12 +41,12 @@ function toRecord(row) {
     userId: row.user_id,
     name: row.name,
     prefix: row.prefix,
-    permissions: row.permissions ?? {},
+    permissions: jsonObject(row.permissions),
     isActive: row.is_active && !row.revoked_at,
     createdAt: row.created_at,
     lastUsedAt: row.last_used_at,
     expiresAt: row.expires_at,
-    metadata: row.metadata ?? {},
+    metadata: jsonObject(row.metadata),
   };
 }
 
@@ -39,9 +56,9 @@ export class PostgresAdapter {
       insert into api_keys (id, user_id, name, prefix, key_hash, permissions, is_active,
                             expires_at, metadata, created_at)
       values (${apiKey.id}, ${apiKey.userId}::uuid, ${apiKey.name}, ${apiKey.key.slice(0, 12)},
-              ${hash(apiKey.key)}, ${JSON.stringify(apiKey.permissions ?? {})}::jsonb,
+              ${hash(apiKey.key)}, ${JSON.stringify(apiKey.permissions ?? {})}::text::jsonb,
               ${apiKey.isActive !== false}, ${apiKey.expiresAt ?? null},
-              ${JSON.stringify(apiKey.metadata ?? {})}::jsonb, ${apiKey.createdAt ?? new Date()})
+              ${JSON.stringify(apiKey.metadata ?? {})}::text::jsonb, ${apiKey.createdAt ?? new Date()})
     `;
   }
 
@@ -72,8 +89,8 @@ export class PostgresAdapter {
         revoked_at = case when ${updated.isActive === false} then now() else revoked_at end,
         last_used_at = coalesce(${updated.lastUsedAt ?? null}, last_used_at),
         expires_at = ${updated.expiresAt ?? null},
-        permissions = coalesce(${updated.permissions ? JSON.stringify(updated.permissions) : null}::jsonb, permissions),
-        metadata = coalesce(${updated.metadata ? JSON.stringify(updated.metadata) : null}::jsonb, metadata)
+        permissions = coalesce(${updated.permissions ? JSON.stringify(updated.permissions) : null}::text::jsonb, permissions),
+        metadata = coalesce(${updated.metadata ? JSON.stringify(updated.metadata) : null}::text::jsonb, metadata)
       where id = ${String(id)}
       returning *
     `;
