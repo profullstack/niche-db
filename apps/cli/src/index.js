@@ -248,7 +248,16 @@ export const COMMANDS = [
     usage: 'traffic [<ip>] [--days <n>] [--category <c>] [--txt|--rpz|--rbldnsd]',
     summary:
       'The human-reviewed /traffic IP blocklist: newest approvals, one address, or --txt for a fail2ban/nftables-ready list. Exits 1 when an address is listed.',
-    options: ['--days <n>', '--category <c>', '--limit <n>', '--offset <n>', '--txt', '--rpz', '--rbldnsd', '--json'],
+    options: [
+      '--days <n>',
+      '--category <c>',
+      '--limit <n>',
+      '--offset <n>',
+      '--txt',
+      '--rpz',
+      '--rbldnsd',
+      '--json',
+    ],
   },
   {
     name: 'profiles',
