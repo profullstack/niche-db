@@ -42,7 +42,18 @@ the repositories tagged for all of it.
 | aitmpl MCP configs | `aitmpl-mcps` | 104 | a ready-made config and an install count | 12 h |
 | GitHub topic search | `github-mcp-topics` | 400 a run, 30,246 matched | what was tagged this morning | 1 h |
 | Installmap YC crawl | `installmap-yc-mcp` | 182 companies, 53 with an endpoint, 14 online | which Y Combinator companies run a server, their batch, whether they also have a public API or an llms.txt, and the evidence | 7 d |
-| Glama directory | `glama-servers` | 2,000 a run (20 pages of 100); 101,285 listed on 2026-10-17, 8,944 already carried by another source, so about 92,000 added over a sweep of about 25 h | tools, licence, hosting mode and Glama's tool-definition quality score; mostly what the others already carry, so it runs last and keeps only the rest | 30 min mid-sweep, then daily |
+| Glama directory | `glama-servers` | 101,385 listed on 2026-10-17; 26,883 pass the filter (quality-scored 3.5+ and the lister's own repository), 4,270 of those already carried by another source, so about 22,600 added; read 2,000 a run | tools, licence, hosting mode and Glama's tool-definition quality score; mostly what the others already carry, so it runs last and keeps only the rest | 30 min mid-sweep, then daily |
+
+**Glama is filtered to quality-scored servers.** Most of Glama's 101,385 listings
+(2026-10-17) are clone spam: random accounts re-uploading a popular server, 1,424 of
+them under the slug `mcp` alone. They are copies rather than GitHub forks (two forks
+in a 600-repository sample) and the API has no fork flag, so the filter is Glama's
+`qualityScore` (0-5, tool-definition quality, null until Glama has inspected the
+server): 62,045 are unscored, 36,343 score 3 or more, 26,899 score 3.5 or more and
+12,467 score 4 or more. `glama-mcp` keeps a server only when it scores at least
+`minQuality` (default 3.5, a source config field) and, on GitHub or GitLab, its
+repository owner is the namespace that listed it (127 listings are somebody else's
+repository; 16 of them score 3.5 or more). Applied to the whole catalogue the filter keeps 26,883. `author:official` alone does not admit an unscored server.
 
 **Glama needs a key and attribution.** `glama-mcp` reads
 `GET https://glama.ai/api/mcp/v1/servers?sort=added-at:desc` (the order Glama
