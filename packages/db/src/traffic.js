@@ -20,7 +20,7 @@ export async function upsertCandidates(rows, { db = sql } = {}) {
   if (!rows?.length) return 0;
   const [{ added }] = await db`
     with incoming as (
-      select * from jsonb_to_recordset(${doc(rows)}::jsonb) as r(
+      select * from jsonb_to_recordset(${doc(rows)}::text::jsonb) as r(
         ip text, score int, category text, first_seen timestamptz, last_seen timestamptz,
         blocks int, servers int, rules jsonb, max_severity text, evidence jsonb
       )
@@ -137,7 +137,7 @@ export async function reviewIps({ ips, status, userId, note = null }, { db = sql
     update traffic_ips set
       status = ${status}, reviewed_by = ${userId}, reviewed_at = now(),
       review_note = ${note}, updated_at = now()
-    where ip in (select (value #>> '{}')::inet from jsonb_array_elements(${doc(ips)}::jsonb))
+    where ip in (select (value #>> '{}')::inet from jsonb_array_elements(${doc(ips)}::text::jsonb))
     returning ip
   `;
   return rows.length;
