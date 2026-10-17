@@ -40,6 +40,9 @@ export const CATEGORIES = {
 
 export function categoryFor(rules = []) {
   for (const [rule, category] of RULE_CATEGORY) if (rules.includes(rule)) return category;
+  // Bans recorded without a rule id come through as `attack-<kind>`, read from
+  // the reason ("Attack [PATH_TRAVERSAL]: GET /.env"): secret-file and exploit probes.
+  if (rules.some((r) => r.startsWith('attack-'))) return 'exploit';
   return 'other';
 }
 

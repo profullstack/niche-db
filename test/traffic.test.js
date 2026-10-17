@@ -39,6 +39,8 @@ describe('categoryFor / toRow', () => {
     expect(traffic.categoryFor(['ssh-brute-force'])).toBe('brute-force');
     expect(traffic.categoryFor(['web-scanner-user-agent'])).toBe('scanner');
     expect(traffic.categoryFor([])).toBe('other');
+    expect(traffic.categoryFor(['attack-path_traversal'])).toBe('exploit');
+    expect(traffic.categoryFor(['paywall-hammering'])).toBe('other');
   });
   test('drops a private address and bounds the evidence', () => {
     expect(traffic.toRow({ ip: '10.1.1.1', rules: [] })).toBeNull();
