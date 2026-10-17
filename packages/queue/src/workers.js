@@ -8,6 +8,7 @@ import {
 } from '@nichedb/core';
 import { generateDump } from '@nichedb/core/data-dumps';
 import { syncTlds } from '@nichedb/core/tlds';
+import { syncTraffic } from '@nichedb/core/traffic';
 import { buildBigIndexesOnce } from '@nichedb/db/build-indexes';
 import { cleanGinPendingLists } from '@nichedb/db/gin-maintenance';
 import * as q from '@nichedb/db/queries';
@@ -218,6 +219,19 @@ export function startWorkers() {
         concurrency: 1,
         lockDuration: 20 * 60_000,
       }),
+    );
+  if (config.traffic.feedToken)
+    workers.push(
+      new Worker(
+        QUEUES.traffic,
+        async () => log('[traffic]', JSON.stringify(await syncTraffic({ log }))),
+        {
+          connection,
+          streams,
+          concurrency: 1,
+          lockDuration: 10 * 60_000,
+        },
+      ),
     );
   if (config.dataDumps.enabled)
     workers.push(

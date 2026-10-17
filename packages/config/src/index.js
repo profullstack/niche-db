@@ -373,6 +373,23 @@ export const config = {
   },
 
   /**
+   * Bad traffic (/traffic): addresses our servers banned, published once a
+   * reviewer approved them. See packages/core/src/traffic.
+   */
+  traffic: {
+    /** ThreatCrush's ban-candidate feed; the token is shared with threatcrush.com. */
+    feedUrl: opt('TRAFFIC_FEED_URL', 'https://threatcrush.com/api/v1/ban-candidates'),
+    feedToken: opt('TRAFFIC_FEED_TOKEN', ''),
+    /** Hourly, a few minutes past, after the fleet's daemons have synced. */
+    cron: opt('TRAFFIC_CRON', '7 * * * *'),
+    /** The newest approved addresses anyone may read without an account. */
+    anonymousListLimit: num('TRAFFIC_ANON_LIST_LIMIT', 100),
+    /** Single-address lookups a caller gets free per hour; signed-in and paid callers get more. */
+    freeLookupsPerHour: num('TRAFFIC_FREE_LOOKUPS_PER_HOUR', 120),
+    accountLookupsPerHour: num('TRAFFIC_ACCOUNT_LOOKUPS_PER_HOUR', 2000),
+  },
+
+  /**
    * The business standing report (/business): sanctions, registries and
    * domain reputation for one company. Metered like the VIN lookups and
    * covered by the same pass.

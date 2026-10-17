@@ -33,6 +33,8 @@ export const QUEUES = {
   maintain: 'db-maintenance',
   /** Daily: IANA's top-level domain list diffed, and every registrar's prices read. */
   tlds: 'tld-sync',
+  /** Hourly: ThreatCrush's ban candidates merged into the /traffic review queue. */
+  traffic: 'traffic-sync',
 };
 
 /*
@@ -74,6 +76,7 @@ export async function installSchedules({ log = console.log } = {}) {
     queues.stats,
     queues.maintain,
     queues.tlds,
+    queues.traffic,
   ]) {
     for (const r of await queue.getRepeatableJobs()) await queue.removeRepeatableByKey(r.key);
   }
@@ -128,6 +131,14 @@ export async function installSchedules({ log = console.log } = {}) {
     // Once at boot as well: an unchanged list costs one fetch, and a fresh
     // deployment (or a new registrar) should not wait a day for its first rows.
     await queues.tlds.add('sync', {}, { jobId: `tlds-boot-${minuteStamp()}`, delay: 60_000 });
+  }
+  if (config.traffic.feedToken) {
+    await queues.traffic.add(
+      'sync',
+      {},
+      { repeat: { pattern: config.traffic.cron, tz: 'UTC' }, jobId: 'traffic-sync' },
+    );
+    await queues.traffic.add('sync', {}, { jobId: `traffic-boot-${minuteStamp()}`, delay: 90_000 });
   }
   log('[queue] schedules installed');
 }

@@ -88,6 +88,7 @@ export const RESERVED_NICHE_SLUGS = new Set([
   'sources',
   'sw.js',
   'tlds',
+  'traffic',
   'well-known',
 ]);
 
