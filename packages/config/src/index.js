@@ -372,6 +372,29 @@ export const config = {
     maxNamesPerCheck: num('TLDS_MAX_NAMES_PER_CHECK', 25),
   },
 
+  /**
+   * The business standing report (/business): sanctions, registries and
+   * domain reputation for one company. Metered like the VIN lookups and
+   * covered by the same pass.
+   */
+  business: {
+    freeLookupsPerHour: num('BUSINESS_FREE_LOOKUPS_PER_HOUR', 25),
+    /**
+     * Query Spamhaus, URIBL, SURBL and Google Safe Browsing. Off by default:
+     * their free services exclude products that charge, so an operator turns
+     * this on only with a licence (or a deployment that does not charge).
+     */
+    blocklists: bool('BUSINESS_BLOCKLISTS', false),
+    /** A Spamhaus Data Query Service key; with it DBL and ZEN go to the licensed zones. */
+    spamhausDqsKey: opt('SPAMHAUS_DQS_KEY') || null,
+    /** OpenCorporates API token: state registry status. Unset, the report links the registries instead. */
+    openCorporatesToken: opt('OPENCORPORATES_API_TOKEN') || null,
+    /** api.sam.gov key: federal exclusions. Unset, the report links SAM.gov instead. */
+    samApiKey: opt('SAM_API_KEY') || null,
+    /** How long the downloaded OFAC lists are held before they are fetched again. */
+    sanctionsTtlHours: num('BUSINESS_SANCTIONS_TTL_HOURS', 24),
+  },
+
   automotive: {
     /* Generous enough that a person comparing a few cars never meets it, and
        only new decodes are counted at all. The meter is there for agents

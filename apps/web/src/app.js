@@ -13,6 +13,7 @@ import { registerAgents } from './routes/agents.js';
 import { registerApi } from './routes/api.js';
 import { registerAuth } from './routes/auth.js';
 import { registerAutomotive } from './routes/automotive.js';
+import { registerBusiness } from './routes/business.js';
 import { registerCrawlStatus } from './routes/crawlstatus.js';
 import { registerDataDumps } from './routes/data-dumps.js';
 import { registerKnowledge } from './routes/knowledge.js';
@@ -149,6 +150,8 @@ registerPremium(app);
 registerDataDumps(app);
 registerOpenSaaS(app);
 registerAutomotive(app);
+/** Business standing: /business and /api/v1/business, metered like the VIN lookups. */
+registerBusiness(app);
 /** Population: /population, the tree from the world to the ZIP code, and /api/v1/population. */
 registerPopulation(app);
 /** Top-level domains: /tlds and /api/v1/tlds, after the API middleware so the API half is metered. */

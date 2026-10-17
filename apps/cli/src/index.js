@@ -15,7 +15,7 @@ import { homedir, tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createInterface } from 'node:readline';
 
-export const VERSION = '0.36.0';
+export const VERSION = '0.37.0';
 const GEO_FLAGS = ['lat', 'long', 'radius', 'unit', 'bbox', 'sort', 'offset'];
 const DEFAULT_API = process.env.NICHEDB_API ?? 'https://nichedb.dev';
 const CONFIG_DIR = join(process.env.XDG_CONFIG_HOME ?? join(homedir(), '.config'), 'nichedb');
@@ -222,6 +222,19 @@ export const COMMANDS = [
     summary:
       'Is a domain name registered? Asks the registry over RDAP; a bare word is tried under each ending.',
     options: ['--tlds <list>', '--json'],
+  },
+  {
+    name: 'business',
+    usage: 'business <name> [--domain <d>] [--state <st>] [--number <n>] [--ein <ein>]',
+    summary:
+      "Is a business on anybody's list? OFAC sanctions, LEI and SEC registrations, state registry, federal exclusions and its domain's reputation, in one standing report.",
+    options: [
+      '--domain <domain>',
+      '--state <two letters>',
+      '--number <entity number>',
+      '--ein <ein>',
+      '--json',
+    ],
   },
   {
     name: 'profiles',
@@ -982,6 +995,57 @@ export async function run(
         out(`${pad(x.name, 32)} ${pad(word[x.status] ?? x.status, 15)} ${detail}`);
       }
       if (r.truncated) out('(only the first names were checked)');
+      return 0;
+    }
+    case 'business': {
+      const qs = new URLSearchParams();
+      const name = rest.join(' ');
+      if (name) qs.set('name', name);
+      for (const k of ['domain', 'state', 'number', 'ein'])
+        if (flags[k] && flags[k] !== true) qs.set(k, String(flags[k]));
+      if (![...qs.keys()].length)
+        throw new Error('business <name> [--domain <d>] [--state <st>] [--number <n>]');
+      const r = await client.get(`/api/v1/business?${qs}`);
+      if (json) {
+        out(JSON.stringify(r, null, 2));
+        return 0;
+      }
+      out(`standing: ${r.standing}`);
+      for (const f of r.findings) out(`  ${pad(f.severity, 8)} ${f.text}`);
+      if (r.notChecked.length) out(`  not checked: ${r.notChecked.join('; ')}`);
+      const s = r.sections;
+      out('');
+      out(
+        `${pad('sanctions', 16)} ${s.sanctions.status === 'checked' ? (s.sanctions.hits.length ? s.sanctions.hits.map((h) => `${h.match}: ${h.name}`).join('; ') : 'not listed') : s.sanctions.status}`,
+      );
+      out(
+        `${pad('lei', 16)} ${s.gleif.status === 'checked' ? s.gleif.records.map((x) => `${x.name} (${x.registrationStatus})`).join('; ') || 'none' : s.gleif.status}`,
+      );
+      out(
+        `${pad('sec', 16)} ${s.edgar.status === 'checked' ? s.edgar.filers.map((x) => `${x.name} CIK ${x.cik}`).join('; ') || 'never filed' : s.edgar.status}`,
+      );
+      out(
+        `${pad('registry', 16)} ${s.opencorporates.status === 'checked' ? s.opencorporates.companies.map((x) => `${x.name} ${x.status}`).join('; ') || 'no record' : s.opencorporates.status}`,
+      );
+      out(
+        `${pad('exclusions', 16)} ${s.sam.status === 'checked' ? s.sam.exclusions.map((x) => x.name).join('; ') || 'none' : s.sam.status}`,
+      );
+      if (s.domain.status !== 'skipped') {
+        const reg = s.domain.registration;
+        out(
+          `${pad('domain', 16)} ${s.domain.domain}${reg ? ` ${reg.status}${reg.registrar ? ` at ${reg.registrar}` : ''}` : ''}`,
+        );
+        for (const l of s.domain.lists ?? [])
+          out(
+            `  ${pad(l.list, 22)} ${pad(l.subject, 22)} ${l.status}${l.reasons?.length ? ` ${l.reasons.map((x) => x.label).join(', ')}` : ''}`,
+          );
+        if (s.domain.status === 'unconfigured')
+          out(
+            `  reputation lists not checked here: ${s.domain.selfChecks.map((x) => x.url).join(' ')}`,
+          );
+      }
+      out('');
+      for (const l of r.lookUpYourself) out(`${pad(l.name, 44)} ${l.url}`);
       return 0;
     }
     case 'profiles': {
