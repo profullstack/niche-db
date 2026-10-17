@@ -3,9 +3,9 @@ import { describe, expect, test } from 'bun:test';
 process.env.DATABASE_URL ??= 'postgres://test:test@localhost:5432/test';
 process.env.SITE_URL ??= 'https://nichedb.test';
 
-const { render } = await import('../apps/web/src/lib/http.js');
+const { render } = await import('../lib/http.js');
 const { TrafficIpPage, TrafficPage, TrafficReviewPage } = await import(
-  '../apps/web/src/views/traffic.jsx'
+  './traffic.jsx'
 );
 
 const row = {
