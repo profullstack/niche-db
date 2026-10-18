@@ -17,7 +17,10 @@ const args = new Set(process.argv.slice(2));
 const queue = await store.pendingForReview();
 
 if (args.has('--pending')) {
-  process.stdout.write(`${queue.map((r) => r.ip).join('\n')}\n`);
+  // Awaited: process.stdout.write into a pipe is asynchronous, and exiting
+  // right after it cut the list off (9,213 of 14,539 addresses reached the
+  // evidence step on 2026-10-18).
+  await Bun.write(Bun.stdout, `${queue.map((r) => r.ip).join('\n')}\n`);
   process.exit(0);
 }
 
