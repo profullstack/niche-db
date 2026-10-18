@@ -5,8 +5,8 @@
  * and DATABASE_URL; ops/traffic-review/run.sh drives it hourly as root on
  * dev2, because the nginx and sshd evidence is root-only.
  *
- *   bun scripts/traffic-review.js --pending          print the queue's addresses
- *   bun scripts/traffic-review.js [--dry-run] < ev   decide with the evidence on stdin
+ *   bun apps/worker/src/traffic-review.js --pending          print the queue's addresses
+ *   bun apps/worker/src/traffic-review.js [--dry-run] < ev   decide with the evidence on stdin
  *                                                    ({ ip: { n, status, paths, ssh_* } })
  *                                                    and write the decisions as riotcoder
  */
