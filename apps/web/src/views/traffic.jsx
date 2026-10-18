@@ -139,6 +139,13 @@ export function TrafficPage({ user, stats, rows, params, sync, reviewer }) {
             the list as your own DNSBL for mail servers.
           </li>
           <li>
+            Or query ours: <code>bl.nichedb.dev</code> is the full list as a DNSBL, refreshed every
+            15 minutes. A listed IPv4 address answers <code>127.0.0.2</code> with a TXT record
+            linking its page; <code>2.0.0.127.bl.nichedb.dev</code> is the always-listed test entry.
+            Postfix: <code>reject_rbl_client bl.nichedb.dev</code>; SpamAssassin, rspamd and
+            fail2ban take it the same way as any DNSBL.
+          </li>
+          <li>
             Add <code>?days=90</code> to leave out addresses that have been quiet for 90 days
             (addresses get reassigned), and <code>?category=exploit</code> (or brute-force, scanner,
             spam) for one kind of attack. Both work on every list.
