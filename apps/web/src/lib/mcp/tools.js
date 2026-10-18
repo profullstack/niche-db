@@ -766,7 +766,7 @@ export const TOOLS = [
   {
     name: 'traffic_list',
     description:
-      'The nichedb /traffic blocklist: IP addresses our own servers banned for exploit attempts, scanning, brute force or spam, each published only after a person reviewed the evidence and approved it. Newest approvals first. Optional `days` keeps addresses seen in the last N days, `category` one of exploit, brute-force, scanner, spam, other. Without an API key the newest 100 are returned; with one, `limit` (up to 1000) and `offset` page the whole list.',
+      'The nichedb /traffic blocklist: IP addresses our own servers banned for exploit attempts, scanning, brute force or spam, each published only after a reviewer (a person, or riotcoder applying published rules) read the evidence and approved it. Newest approvals first. Optional `days` keeps addresses seen in the last N days, `category` one of exploit, brute-force, scanner, spam, other. Without an API key the newest 100 are returned; with one, `limit` (up to 1000) and `offset` page the whole list.',
     inputSchema: {
       type: 'object',
       properties: {

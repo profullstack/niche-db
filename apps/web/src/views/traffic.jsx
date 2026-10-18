@@ -3,7 +3,8 @@ import { Num, Relative } from './components.jsx';
 import { Layout } from './Layout.jsx';
 
 /**
- * Bad traffic: addresses our servers banned, each one approved by a person.
+ * Bad traffic: addresses our servers banned, each one reviewed against its evidence
+ * (by a person, or by riotcoder applying the published rules) before it is published.
  *
  * The page leads with how an address gets here, because that is what makes
  * the list worth using: a blocklist built by a machine alone blocks Googlebot
@@ -42,9 +43,13 @@ const Vetting = () => (
         on how many of our servers, how often, and what it asked for.
       </li>
       <li>
-        <strong>A person reads the evidence and decides.</strong> Approved addresses are published.
-        Rejected ones are never published, and a later ban of the same address does not overturn the
-        decision.
+        <strong>A reviewer reads the evidence and decides</strong>: a person, or riotcoder, our
+        review agent, applying these rules to what the address actually requested. Approved: an
+        exploit probe in a request path (secret files, path traversal, injection, known exploit
+        endpoints) or SSH brute force with no successful login. Rejected: an address whose requests
+        were ordinary pages, feeds and API calls, a shared CDN or resolver address, or one that
+        logged in. Anything else waits for more evidence. Every decision is kept with its reason,
+        shown on the address's own page, and a later ban of the same address does not overturn it.
       </li>
       <li>
         Private ranges, our own servers, verified search crawlers and visitors whose only offence
@@ -75,15 +80,15 @@ export function TrafficPage({ user, stats, rows, params, sync, reviewer }) {
       user={user}
       wide
       canonical="/traffic"
-      title="Bad traffic: a human-reviewed IP blocklist"
-      description="IP addresses that attacked our servers, each one reviewed and approved by a person before it is published. Free lookups, a free blocklist and a JSON API."
+      title="Bad traffic: a reviewed IP blocklist"
+      description="IP addresses that attacked our servers, each one reviewed against what it actually requested before it is published, with the reason shown. Free lookups, free blocklists (plain, RPZ, rbldnsd) and a JSON API."
     >
       <section class="hero">
-        <h1>Bad traffic, checked by a person</h1>
+        <h1>Bad traffic, checked against the evidence</h1>
         <p class="lede">
           IP addresses that attacked our servers: exploit probes, vulnerability scanners, SQL
-          injection, SSH brute force. Every address here was reviewed and approved by a human before
-          it was published. Free to look up, free to block.
+          injection, SSH brute force. Every address here was reviewed against what it actually
+          requested before it was published, and its page says why. Free to look up, free to block.
         </p>
         <p class="stats">
           <Num n={stats.approved} /> approved by {stats.reviewers} reviewer
@@ -164,7 +169,7 @@ curl -s ${'https://nichedb.dev'}/traffic/blocklist.txt | grep -v '^#' | sed 's/.
             Nothing is published yet.{' '}
             {stats.pending ? (
               <>
-                <Num n={stats.pending} /> addresses are waiting for a person to look at them;{' '}
+                <Num n={stats.pending} /> addresses are waiting for enough evidence to decide;{' '}
               </>
             ) : null}
             an address appears here only once it has been reviewed and approved.
@@ -257,15 +262,18 @@ export function TrafficIpPage({ user, query, result, error, notice }) {
         {notice ? <p class="notice">{notice}</p> : null}
         {result && !result.listed ? (
           <p class="lede">
-            Not on the list. Either our servers never banned it, or a person reviewed the evidence
-            and it has not been approved. We only publish addresses a human has approved.
+            Not on the list. Either our servers never banned it, or the evidence was reviewed and it
+            has not been approved. We only publish addresses whose evidence shows an attack.
           </p>
         ) : null}
         {result?.listed ? (
           <>
             <p class="lede">
-              <strong>Listed.</strong> {CATEGORIES[result.category] ?? 'Abuse'}. A person reviewed
-              the evidence and approved it on {day(result.reviewed_at)}.
+              <strong>Listed.</strong> {CATEGORIES[result.category] ?? 'Abuse'}. Reviewed by{' '}
+              {result.reviewer ?? 'a person'} and approved on {day(result.reviewed_at)}.
+              {result.review_note ? (
+                <> Why: {result.review_note.replace(/^riotcoder review: /, '')}</>
+              ) : null}
             </p>
             <table>
               <tbody>

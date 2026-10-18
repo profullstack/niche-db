@@ -40,7 +40,7 @@ export const DEEPER = {
 
 export const CHECKED = {
   ip: [
-    { list: 'traffic', name: 'nichedb /traffic (ThreatCrush bans, approved by a person)' },
+    { list: 'traffic', name: 'nichedb /traffic (ThreatCrush bans, approved on the evidence)' },
     { list: 'abusech', name: 'abuse.ch ThreatFox, URLhaus and Feodo Tracker' },
   ],
   domain: [

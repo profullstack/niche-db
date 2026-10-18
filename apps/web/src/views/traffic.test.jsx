@@ -29,7 +29,7 @@ const stats = (over = {}) => ({
 });
 
 describe('traffic views', () => {
-  test('the public page says it is human-reviewed and shows approved rows', async () => {
+  test('the public page says how it is reviewed and shows approved rows', async () => {
     const html = String(
       await render(
         <TrafficPage
@@ -41,7 +41,8 @@ describe('traffic views', () => {
         />,
       ),
     );
-    expect(html).toContain('reviewed and approved by a human');
+    expect(html).toContain('reviewed against what it actually');
+    expect(html).toContain('riotcoder');
     expect(html).toContain('45.148.10.7');
     expect(html).toContain('/traffic/blocklist.txt');
   });
@@ -72,7 +73,22 @@ describe('traffic views', () => {
     const listed = String(
       await render(<TrafficIpPage query="45.148.10.7" result={{ listed: true, ...row }} />),
     );
-    expect(listed).toContain('A person reviewed the evidence');
+    expect(listed).toContain('Reviewed by a person');
+    const byAgent = String(
+      await render(
+        <TrafficIpPage
+          query="45.148.10.7"
+          result={{
+            listed: true,
+            ...row,
+            reviewer: 'riotcoder',
+            review_note: 'riotcoder review: exploit probes, e.g. /.env',
+          }}
+        />,
+      ),
+    );
+    expect(byAgent).toContain('riotcoder');
+    expect(byAgent).toContain('exploit probes, e.g. /.env');
   });
 
   test('the review queue shows evidence and the decision buttons', async () => {

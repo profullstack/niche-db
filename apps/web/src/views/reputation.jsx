@@ -235,7 +235,7 @@ export function ReputationPage({ user, query, report, error }) {
       user={user}
       canonical={query ? `/reputation/${query}` : '/reputation'}
       title={title}
-      description="Is an IP address or a domain on a blocklist? Free lookups over the human-reviewed /traffic list, abuse.ch malware feeds, SURBL and live DNS blocklists such as Spamhaus, SpamCop and URIBL."
+      description="Is an IP address or a domain on a blocklist? Free lookups over the reviewed /traffic list, abuse.ch malware feeds, SURBL and live DNS blocklists such as Spamhaus, SpamCop and URIBL."
       noindex={Boolean(query)}
     >
       <section class="hero">
@@ -244,9 +244,9 @@ export function ReputationPage({ user, query, report, error }) {
         {!query ? (
           <p class="lede">
             Is an address or a domain on a list? Free, from data anyone can download: addresses our
-            own servers banned and a person approved, malware infrastructure reported to abuse.ch,
-            and the DNS blocklists mail servers ask. A domain is checked by name and on every
-            address it resolves to.
+            own servers banned and a reviewer approved on the evidence, malware infrastructure
+            reported to abuse.ch, and the DNS blocklists mail servers ask. A domain is checked by
+            name and on every address it resolves to.
           </p>
         ) : null}
         {report && !report.error ? <Report report={report} /> : null}

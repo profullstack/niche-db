@@ -11,6 +11,9 @@ import { sql } from './index.js';
 
 const doc = (rows) => JSON.stringify(rows ?? []);
 
+/** The review agent's account; its decisions are labelled as riotcoder's in public. */
+export const RIOTCODER_EMAIL = 'riotcoder@profullstack.com';
+
 /**
  * Merge a batch of candidates from the feed. New addresses arrive pending;
  * known ones get fresh evidence but keep their decision. Returns how many rows
@@ -86,9 +89,13 @@ export async function listPublishedIps(
  * `listed: false` with no evidence: unreviewed data is never published.
  */
 export async function lookupIp(ip, { db = sql } = {}) {
+  // The reviewer is named only as "riotcoder" or "a person": a moderator's email is never public.
   const [row] = await db`
-    select host(ip) as ip, category, first_seen, last_seen, blocks, servers, rules, max_severity,
-      reviewed_at, evidence, status from traffic_ips where ip = ${ip}::inet
+    select host(t.ip) as ip, t.category, t.first_seen, t.last_seen, t.blocks, t.servers, t.rules,
+      t.max_severity, t.reviewed_at, t.evidence, t.review_note, t.status,
+      case when u.email = ${RIOTCODER_EMAIL} then 'riotcoder' else 'a person' end as reviewer
+    from traffic_ips t left join users u on u.id = t.reviewed_by
+    where t.ip = ${ip}::inet
   `;
   if (!row || row.status !== 'approved') return { ip, listed: false };
   const { status: _status, ...rest } = row;
@@ -205,6 +212,50 @@ export async function decideDelistRequest({ id, action, userId, note = null }, {
     `;
   }
   return true;
+}
+
+/** The queue as the review job reads it: every pending address with its stored paths. */
+export async function pendingForReview({ limit = 100_000 } = {}, { db = sql } = {}) {
+  const rows = await db`
+    select host(ip) as ip, rules, blocks, servers, coalesce(evidence->'paths', '[]'::jsonb) as paths
+    from traffic_ips where status = 'pending' order by score desc, last_seen desc limit ${limit}
+  `;
+  return rows.map((r) => ({
+    ...r,
+    rules: typeof r.rules === 'string' ? JSON.parse(r.rules) : r.rules,
+    paths: typeof r.paths === 'string' ? JSON.parse(r.paths) : r.paths,
+  }));
+}
+
+/**
+ * Write the review job's decisions as riotcoder. Only still-pending rows move,
+ * so a person's decision made meanwhile always wins. Returns rows changed.
+ */
+export async function applyReview(decisions, { db = sql } = {}) {
+  const rows = (decisions ?? [])
+    .filter((d) => d.decision === 'approve' || d.decision === 'reject')
+    .map((d) => ({
+      ip: d.ip,
+      status: d.decision === 'approve' ? 'approved' : 'rejected',
+      note: String(d.note ?? '').slice(0, 1000),
+    }));
+  if (!rows.length) return 0;
+  const [{ id: reviewer } = {}] = await db`
+    insert into users (email) values (${RIOTCODER_EMAIL})
+    on conflict (email) do update set email = excluded.email returning id
+  `;
+  let changed = 0;
+  for (let i = 0; i < rows.length; i += 1000) {
+    const out = await db`
+      update traffic_ips t set status = d.status, review_note = d.note, reviewed_by = ${reviewer},
+        reviewed_at = now(), updated_at = now()
+      from jsonb_to_recordset(${doc(rows.slice(i, i + 1000))}::text::jsonb) as d(ip text, status text, note text)
+      where t.ip = d.ip::inet and t.status = 'pending'
+      returning t.ip
+    `;
+    changed += out.length;
+  }
+  return changed;
 }
 
 export async function getSync(source, { db = sql } = {}) {

@@ -21,7 +21,8 @@ import { TrafficIpPage, TrafficPage, TrafficReviewPage } from '../views/traffic.
  *
  * A free service. Anyone can look up an address and read the newest approved
  * ones; a free account reads the whole list and the plain-text blocklist.
- * Every published address was approved by a person (admins and the moderators
+ * Every published address was approved by a reviewer (riotcoder, applying the
+ * published rules, or a person: admins and the moderators
  * of the threats collection) after reading the evidence; pending and rejected
  * addresses are never shown to the public, not even as "pending".
  */
@@ -232,7 +233,7 @@ export function registerTraffic(app) {
     );
   });
 
-  /** ThreatCrush reads every human decision, so a rejection here keeps an address off its feed too. */
+  /** ThreatCrush reads every review decision, so a rejection here keeps an address off its feed too. */
   app.get('/api/v1/traffic/decisions', async (c) => {
     if (!isFeedPartner(c)) return c.json({ error: 'not authorized' }, 401);
     c.header('cache-control', 'private, no-store');
@@ -243,7 +244,7 @@ export function registerTraffic(app) {
     const { params, ips } = await listIps(c);
     const header = [
       `# nichedb.dev bad traffic blocklist, ${new Date().toISOString()}`,
-      '# Addresses our servers banned for attacks, each one reviewed and approved by a person.',
+      '# Addresses our servers banned for attacks, each one reviewed against its evidence and approved.',
       `# ${ips.length} addresses. Free to use. ${config.siteUrl}/traffic`,
       params.full
         ? null
@@ -260,7 +261,7 @@ export function registerTraffic(app) {
     const [stats, rows] = await Promise.all([store.trafficStats(), store.listPublished(params)]);
     return c.json({
       about:
-        'IP addresses our servers banned for attacks, published only after a person reviewed the evidence and approved them.',
+        'IP addresses our servers banned for attacks, published only after a reviewer (a person, or riotcoder applying the published rules) read the evidence and approved them. Each decision keeps its reason.',
       access: params.full
         ? 'full'
         : `newest ${config.traffic.anonymousListLimit}; sign in (free) or use an API key for all`,

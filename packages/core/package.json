@@ -1,6 +1,6 @@
 {
   "name": "@nichedb/core",
-  "version": "0.41.0",
+  "version": "0.42.0",
   "private": true,
   "type": "module",
   "exports": {
@@ -16,6 +16,8 @@
     "./population": "./src/population.js",
     "./tlds": "./src/tlds/index.js",
     "./traffic": "./src/traffic/index.js",
+    "./traffic/review": "./src/traffic/review.js",
+    "./traffic/shared": "./src/traffic/shared.js",
     "./lyrics": "./src/lyrics.js"
   },
   "dependencies": {
