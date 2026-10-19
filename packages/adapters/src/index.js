@@ -28,7 +28,7 @@ import { buyvps } from './buyvps.js';
 import { c0upons } from './c0upons.js';
 import { censusAcs } from './census-acs.js';
 import { cfpbComplaints } from './cfpb.js';
-import { ch4nnels } from './ch4nnels.js';
+import { ch4nnels, ch4nnelsIptv } from './ch4nnels.js';
 import { channels } from './channels.js';
 import { clinicalTrials } from './clinicaltrials.js';
 import { coopsWaterLevels } from './coops.js';
@@ -422,6 +422,7 @@ export const ADAPTERS = [
   wikidataFestivals,
   radiobrowser,
   ch4nnels,
+  ch4nnelsIptv,
   searchpeptides,
 ];
 

@@ -587,9 +587,18 @@ describe('ch4nnels', () => {
   test('one read of the register gives every provider and plan', async () => {
     const { ctx: c, seen } = ctx('ch4nnels', {
       'https://ch4nnels.com/api/v1/seedboxes': await fixture('ch4nnels-seedboxes.json'),
+      'https://ch4nnels.com/api/v1/price-checks': await fixture('ch4nnels-price-checks.json'),
     });
     const out = await adapterByName('ch4nnels').pull(c);
-    expect(seen).toEqual(['https://ch4nnels.com/api/v1/seedboxes']);
+    expect(seen).toEqual([
+      'https://ch4nnels.com/api/v1/seedboxes',
+      'https://ch4nnels.com/api/v1/price-checks',
+    ]);
+    // The daily pricing-page check rides along on the provider row.
+    const alpha = out.items.find((i) => i.externalId === 'provider:alpha-seed');
+    expect(alpha.tags).toContain('price:drift');
+    expect(alpha.data.priceCheck.verdict).toBe('drift');
+    expect(out.items.find((i) => i.externalId === 'provider:bravo').data.priceCheck).toBeNull();
     expect(out.items.map((i) => i.externalId)).toEqual([
       'provider:alpha-seed',
       'plan:alpha-seed:small:0',
@@ -678,5 +687,81 @@ describe('searchpeptides', () => {
     ]);
     expect(out.note).toBe('2 vendors, 3 listings');
     for (const it of out.items) expect(normaliseItem(it)).toBeTruthy();
+  });
+});
+
+describe('ch4nnels-iptv', () => {
+  test('a service carries countries, payment and its pricing-page check; the resold one says so', async () => {
+    const { providers } = JSON.parse(await fixture('ch4nnels-iptv.json'));
+    const it = ch4nnels.toIptvProvider(providers[0], {
+      verdict: 'ok',
+      checkedAt: '2026-10-19T12:10:00.000Z',
+      pageUrl: 'https://argontv.nl/pricing',
+    });
+    expect(it.externalId).toBe('iptv:argontv');
+    expect(it.url).toBe('https://ch4nnels.com/p/argontv');
+    expect(it.tags).toEqual([
+      'iptv',
+      'kind:independent',
+      'country:gb',
+      'country:nl',
+      'pay:card',
+      'pay:crypto',
+      'max:4k',
+      'trial',
+      'epg',
+      'catchup',
+      'price:ok',
+    ]);
+    expect(it.data.resoldByCh4nnels).toBe(true);
+    expect(it.data.website).toBe('https://argontv.nl');
+    const bare = ch4nnels.toIptvProvider(providers[1]);
+    expect(bare.data.priceCheck).toBeNull();
+    expect(bare.data.resoldByCh4nnels).toBe(false);
+    expect(ch4nnels.toIptvProvider(providers[2])).toBeNull();
+    expect(normaliseItem(it)).toBeTruthy();
+  });
+
+  test('a plan says what it costs for how long; an unpublished price stays unpublished', async () => {
+    const { providers } = JSON.parse(await fixture('ch4nnels-iptv.json'));
+    const six = ch4nnels.toIptvPlan(providers[0], providers[0].plans[1], 1);
+    expect(six.externalId).toBe('iptv-plan:argontv:6:1');
+    expect(six.summary).toBe('€20 for 6 months, €3.33/mo, 3 devices');
+    const none = ch4nnels.toIptvPlan(providers[1], providers[1].plans[0], 0);
+    expect(none.title).toBe('DirecTV Stream 1 month');
+    expect(none.tags).toContain('unpriced');
+  });
+
+  test('one read of the register and the checks gives every service and plan', async () => {
+    const { ctx: c, seen } = ctx('ch4nnels-iptv', {
+      'https://ch4nnels.com/api/v1/providers': await fixture('ch4nnels-iptv.json'),
+      'https://ch4nnels.com/api/v1/price-checks': await fixture('ch4nnels-price-checks.json'),
+    });
+    const out = await adapterByName('ch4nnels-iptv').pull(c);
+    expect(seen).toEqual([
+      'https://ch4nnels.com/api/v1/providers',
+      'https://ch4nnels.com/api/v1/price-checks',
+    ]);
+    expect(out.items.map((i) => i.externalId)).toEqual([
+      'iptv:argontv',
+      'iptv-plan:argontv:1:0',
+      'iptv-plan:argontv:6:1',
+      'iptv:directv-stream',
+      'iptv-plan:directv-stream:1:0',
+    ]);
+    expect(out.items.find((i) => i.externalId === 'iptv:directv-stream').tags).toContain(
+      'price:down',
+    );
+    expect(out.note).toBe('2 providers, 3 plans');
+    for (const it of out.items) expect(normaliseItem(it)).toBeTruthy();
+  });
+
+  test('without the checks document the register still syncs, with no verdicts', async () => {
+    const { ctx: c } = ctx('ch4nnels-iptv', {
+      'https://ch4nnels.com/api/v1/providers': await fixture('ch4nnels-iptv.json'),
+    });
+    const out = await adapterByName('ch4nnels-iptv').pull(c);
+    expect(out.items.length).toBe(5);
+    expect(out.items[0].data.priceCheck).toBeNull();
   });
 });

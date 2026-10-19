@@ -50,13 +50,12 @@ const Vetting = () => (
         or brute-forces SSH.
       </li>
       <li>
-        <strong>Every ThreatCrush ban is published</strong>, marked{' '}
-        <em>ThreatCrush verified</em>, with its evidence: which rules fired, on how many of our
-        servers, how often, and what it asked for. riotcoder, our review agent, records the
-        strongest reason it can find (an exploit probe in a request path, SSH brute force, or the
-        ban itself). Kept off: shared CDN and resolver addresses (Cloudflare and the like), and
-        anyone who logged in over SSH. A person can reject any address, and a person's decision is
-        never overturned.
+        <strong>Every ThreatCrush ban is published</strong>, marked <em>ThreatCrush verified</em>,
+        with its evidence: which rules fired, on how many of our servers, how often, and what it
+        asked for. riotcoder, our review agent, records the strongest reason it can find (an exploit
+        probe in a request path, SSH brute force, or the ban itself). Kept off: shared CDN and
+        resolver addresses (Cloudflare and the like), and anyone who logged in over SSH. A person
+        can reject any address, and a person's decision is never overturned.
       </li>
       <li>
         Private ranges, our own servers, verified search crawlers and visitors whose only offence

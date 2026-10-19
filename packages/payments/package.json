@@ -1,6 +1,6 @@
 {
   "name": "@nichedb/payments",
-  "version": "0.45.2",
+  "version": "0.46.1",
   "private": true,
   "type": "module",
   "exports": {

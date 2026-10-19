@@ -196,6 +196,18 @@ export function parseAliases(list) {
   return out;
 }
 
+// r4ck.dev's daemon probes every provider domain for /.well-known/openserver.json and lists the hits here (public, keyless).
+const ORIGIN_LIST = 'https://r4ck.dev/api/v1/openserver-origins';
+
+/** The domains a public origin list names, as https origins. Pure. */
+export function originsFromList(doc) {
+  const list = Array.isArray(doc?.origins) ? doc.origins : [];
+  return list
+    .map((o) => (typeof o === 'string' ? o : o?.domain))
+    .filter((d) => typeof d === 'string' && /^[a-z0-9.-]+\.[a-z]{2,}$/i.test(d.trim()))
+    .map((d) => `https://${d.trim().toLowerCase()}`);
+}
+
 export const openserver = defineAdapter({
   name: 'openserver',
   title: 'OpenServer descriptors',
@@ -220,8 +232,15 @@ export const openserver = defineAdapter({
       help: 'host=slug, where the FindHost register lists the company under a different id than its descriptor.',
       placeholder: 'ovhcloud.com=ovh',
     },
+    {
+      key: 'originLists',
+      label: 'Origin lists',
+      type: 'list',
+      help: "Public documents listing origins found publishing a descriptor ({ origins: [{ domain }] }), read on every run and added to the descriptors above. r4ck.dev's updater daemon probes every hosting provider's domain weekly and publishes what it finds.",
+      placeholder: 'https://r4ck.dev/api/v1/openserver-origins',
+    },
   ],
-  defaults: { urls: [], providers: [] },
+  defaults: { urls: [], providers: [], originLists: [ORIGIN_LIST] },
   defaultSources: [
     {
       slug: 'openserver',
@@ -231,12 +250,29 @@ export const openserver = defineAdapter({
     },
   ],
   async pull({ config, http, log, deadline }) {
-    const entries = (
-      Array.isArray(config.urls) ? config.urls : String(config.urls ?? '').split(',')
-    )
-      .map(descriptorUrl)
-      .filter(Boolean)
-      .slice(0, 200);
+    const listed = [];
+    const lists = Array.isArray(config.originLists)
+      ? config.originLists
+      : String(config.originLists ?? '')
+          .split(',')
+          .filter(Boolean);
+    for (const listUrl of lists) {
+      try {
+        listed.push(...originsFromList(await http.json(listUrl, { timeoutMs: 20_000 })));
+      } catch (err) {
+        log(`origin list ${listUrl} unreadable: ${err.message.slice(0, 80)}`);
+      }
+    }
+    const entries = [
+      ...new Set(
+        [
+          ...(Array.isArray(config.urls) ? config.urls : String(config.urls ?? '').split(',')),
+          ...listed,
+        ]
+          .map(descriptorUrl)
+          .filter(Boolean),
+      ),
+    ].slice(0, 200);
     const aliases = parseAliases(config.providers);
     if (entries.length === 0) {
       log('no descriptors configured');

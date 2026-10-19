@@ -208,7 +208,7 @@ export const searchpeptides = defineAdapter({
     'Every research-peptide vendor in the search.peptides register with its lab score and pass/fail counts, payment, shipping, ordering, coupons and a contact card (emails, phones, websites, WhatsApp, Telegram, socials), and every listing with its price, USD per mg and stock, read from the keyless register export once a day.',
   docs: 'https://search.peptides.pit.world/docs',
   kinds: ['vendor', 'listing'],
-  cadenceMinutes: 1440,
+  cadenceMinutes: 360,
   configFields: [
     {
       key: 'url',
