@@ -1,6 +1,6 @@
 {
   "name": "@nichedb/adapters",
-  "version": "0.46.1",
+  "version": "0.47.1",
   "private": true,
   "type": "module",
   "exports": {

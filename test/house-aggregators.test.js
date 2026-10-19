@@ -2,6 +2,7 @@ import { describe, expect, test } from 'bun:test';
 import { readFile } from 'node:fs/promises';
 import * as agenticjobs from '../packages/adapters/src/agenticjobs.js';
 import * as aiornot from '../packages/adapters/src/aiornot.js';
+import * as builtindie from '../packages/adapters/src/builtindie.js';
 import * as c0upons from '../packages/adapters/src/c0upons.js';
 import * as ch4nnels from '../packages/adapters/src/ch4nnels.js';
 import { ADAPTERS, adapterByName } from '../packages/adapters/src/index.js';
@@ -69,6 +70,7 @@ const HOUSE = {
     kinds: ['vendor', 'listing'],
     source: 'searchpeptides-register',
   },
+  builtindie: { collection: 'launches', kinds: ['launch'], source: 'builtindie-launches' },
 };
 
 describe('registration', () => {
@@ -97,6 +99,7 @@ describe('registration', () => {
       'coupons',
       'seedboxes',
       'peptides',
+      'launches',
     ]) {
       expect(COLLECTIONS.some((c) => c.slug === slug)).toBe(true);
     }
@@ -763,5 +766,68 @@ describe('ch4nnels-iptv', () => {
     const out = await adapterByName('ch4nnels-iptv').pull(c);
     expect(out.items.length).toBe(5);
     expect(out.items[0].data.priceCheck).toBeNull();
+  });
+});
+
+describe('builtindie', () => {
+  const NOW = Date.parse('2026-10-19T12:00:00Z');
+
+  test('a launch links the board page, keeps the site in data, and tags what the board knows', async () => {
+    const { products } = JSON.parse(await fixture('builtindie-products.json'));
+    const it = builtindie.toLaunch(products[0], NOW);
+    expect(it.kind).toBe('launch');
+    expect(it.externalId).toBe('launch:nichedb');
+    expect(it.title).toBe('nichedb: Every niche, one feed');
+    expect(it.summary).toBe(
+      'Structured, followable feeds for every niche. Search, API, CLI and MCP.',
+    );
+    expect(it.url).toBe('https://built.indie.pit.world/p/nichedb');
+    expect(it.imageUrl).toBe('https://built.indie.pit.world/m/abc/card.png');
+    expect(it.publishedAt.toISOString()).toBe('2026-10-19T11:02:03.571Z');
+    expect(it.tags).toEqual([
+      'builtindie',
+      'developer',
+      'ai',
+      'verified',
+      'featured',
+      'openstack',
+      'opensaas',
+      'llms-txt',
+    ]);
+    expect(it.data.website).toBe('https://nichedb.dev/');
+    expect(it.data.votes).toBe(3);
+    expect(it.data.videos).toEqual(['https://www.youtube.com/watch?v=x']);
+    expect(it.data.stack).toEqual(['Bun 1.4', 'Postgres 17']);
+    expect(it.data.plans).toEqual([{ name: 'Premium, a month', price: 30, period: 'month' }]);
+    expect(normaliseItem(it)).toBeTruthy();
+  });
+
+  test('a bare launch falls back to its name and the board URL, and an old Featured week is not featured', async () => {
+    const { products } = JSON.parse(await fixture('builtindie-products.json'));
+    const bare = builtindie.toLaunch(products[1], NOW);
+    expect(bare.title).toBe('Bare');
+    expect(bare.summary).toBeNull();
+    expect(bare.url).toBe('https://built.indie.pit.world/p/bare');
+    expect(bare.imageUrl).toBeNull();
+    expect(bare.publishedAt).toBeNull();
+    expect(bare.tags).toEqual(['builtindie']);
+    expect(bare.data.maker).toBeNull();
+    expect(builtindie.toLaunch(products[2], NOW)).toBeNull();
+    expect(builtindie.toLaunch({ ...products[0], status: 'hidden' }, NOW)).toBeNull();
+  });
+
+  test('pages the API until a short page', async () => {
+    const { products } = JSON.parse(await fixture('builtindie-products.json'));
+    const full = Array.from({ length: 100 }, (_, i) => ({ ...products[0], slug: `p${i}` }));
+    const base = 'https://built.indie.pit.world/api/v1/products?window=new';
+    const { ctx: c, seen } = ctx('builtindie', {
+      [`${base}&limit=100&offset=0`]: JSON.stringify({ products: full }),
+      [`${base}&limit=100&offset=100`]: JSON.stringify({ products: [full[0], products[1]] }),
+    });
+    const out = await adapterByName('builtindie').pull(c);
+    expect(seen).toEqual([`${base}&limit=100&offset=0`, `${base}&limit=100&offset=100`]);
+    // The repeat of p0 on page two is dropped.
+    expect(out.items.length).toBe(101);
+    expect(out.note).toBe('101 launches');
   });
 });
