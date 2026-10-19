@@ -383,6 +383,12 @@ export const COLLECTIONS = [
     description:
       'Research-peptide vendors and every listing they sell, from the search.peptides register. Each vendor with its independent lab score and pass/fail counts (Finnrick), payment methods, where it ships from, how you order, coupons, and a contact card read from its own site: emails, phones, websites, WhatsApp, Telegram and socials. Each listing with the peptide, size, price as quoted, USD, USD per mg and stock, flagged where the vendor passed a lab test for that peptide. Not affiliated with Finnrick or any vendor; for research use, not medical advice.',
   },
+  {
+    slug: 'launches',
+    name: 'Launches',
+    description:
+      'Indie product launches from the built.indie launch board: every live product with its tagline and description, its own site, logo, card image and homepage screenshot, votes, categories, the maker, the stack it is built with (from OpenStack) and its plans (from OpenSaaS), and whether the product links back with a verified built.indie badge. Re-read hourly, so votes and the Featured slot stay current. Follow a category, verified launches, or Featured launches.',
+  },
 ];
 
 export const DEFAULT_FEEDS = [
@@ -411,6 +417,38 @@ export const DEFAULT_FEEDS = [
     slug: 'seedbox-price-drift',
     name: 'Seedbox hosts whose page no longer shows the listed price',
     query: { kinds: ['provider'], tags: ['price:drift'] },
+  },
+  {
+    collection: 'launches',
+    slug: 'builtindie-launches',
+    name: 'built.indie launches',
+    description: 'Every product launched on built.indie, newest first.',
+    query: { kinds: ['launch'] },
+  },
+  {
+    collection: 'launches',
+    slug: 'builtindie-verified',
+    name: 'Verified built.indie launches',
+    description: 'Launches whose site shows the built.indie badge, backlink checked.',
+    query: { kinds: ['launch'], tags: ['verified'] },
+  },
+  {
+    collection: 'launches',
+    slug: 'builtindie-featured',
+    name: 'Featured built.indie launches',
+    query: { kinds: ['launch'], tags: ['featured'] },
+  },
+  {
+    collection: 'launches',
+    slug: 'builtindie-developer',
+    name: 'Developer tools launched on built.indie',
+    query: { kinds: ['launch'], tags: ['developer', 'developer-tools'] },
+  },
+  {
+    collection: 'launches',
+    slug: 'builtindie-ai',
+    name: 'AI products launched on built.indie',
+    query: { kinds: ['launch'], tags: ['ai'] },
   },
   {
     collection: 'peptides',
