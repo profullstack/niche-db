@@ -47,6 +47,14 @@ function throttleFor(gateway) {
          * gate: they are the point of the index, not the cost of it.
          */
         { path: '/mcp', limit: 600 },
+        /*
+         * The TLD and feed listings are what the residential swarm walks,
+         * one faceted URL after another. A person paging through them reads
+         * a handful a minute; thirty is plenty and a third of the default.
+         */
+        { path: '/tlds', limit: 30 },
+        { path: '/tlds/', limit: 30 },
+        { path: '/feeds/', limit: 30 },
       ],
     });
     throttles.set(gateway, throttle);
