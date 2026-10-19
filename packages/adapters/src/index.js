@@ -171,6 +171,7 @@ import { usgs } from './usgs.js';
 import { vscodeExtensions } from './vscode.js';
 import { vultrPlans } from './vultr.js';
 import { warnLayoffs } from './warn.js';
+import { weedforcrypto } from './weedforcrypto.js';
 import { wikidataAlgorithms } from './wikidata-algorithms.js';
 import { wikidataFestivals } from './wikidata-festivals.js';
 import { wikidataFilms } from './wikidata-films.js';
@@ -423,6 +424,7 @@ export const ADAPTERS = [
   radiobrowser,
   ch4nnels,
   searchpeptides,
+  weedforcrypto,
 ];
 
 /**

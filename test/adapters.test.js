@@ -107,6 +107,7 @@ describe('registry', () => {
         'radio',
         'seedboxes',
         'peptides',
+        'weed',
       ]).toContain(a.collection);
     }
     expect(adapterByName('steam').title).toContain('Steam');

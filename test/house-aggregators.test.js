@@ -10,6 +10,7 @@ import * as p0dcasters from '../packages/adapters/src/p0dcasters.js';
 import * as saasrow from '../packages/adapters/src/saasrow.js';
 import * as searchpeptides from '../packages/adapters/src/searchpeptides.js';
 import * as tsbb from '../packages/adapters/src/tsbb.js';
+import * as weedforcrypto from '../packages/adapters/src/weedforcrypto.js';
 import { normaliseItem } from '../packages/core/src/adapter.js';
 
 // The seed reaches the config module, which asserts its env at import rather
@@ -69,6 +70,11 @@ const HOUSE = {
     kinds: ['vendor', 'listing'],
     source: 'searchpeptides-register',
   },
+  weedforcrypto: {
+    collection: 'weed',
+    kinds: ['dispensary'],
+    source: 'weedforcrypto-dispensaries',
+  },
 };
 
 describe('registration', () => {
@@ -97,6 +103,7 @@ describe('registration', () => {
       'coupons',
       'seedboxes',
       'peptides',
+      'weed',
     ]) {
       expect(COLLECTIONS.some((c) => c.slug === slug)).toBe(true);
     }
@@ -678,5 +685,79 @@ describe('searchpeptides', () => {
     ]);
     expect(out.note).toBe('2 vendors, 3 listings');
     for (const it of out.items) expect(normaliseItem(it)).toBeTruthy();
+  });
+});
+
+describe('weedforcrypto', () => {
+  test('a dispensary carries place, regime, delivery and crypto as tags and coordinates as geo', async () => {
+    const { dispensaries } = JSON.parse(await fixture('weedforcrypto-dispensaries.json'));
+    const it = weedforcrypto.toDispensary(dispensaries[0]);
+    expect(it.kind).toBe('dispensary');
+    expect(it.externalId).toBe('dispensary:6b1f0c5e-0a6e-4b8e-9a51-0f1a2b3c4d5e');
+    expect(it.url).toBe(
+      'https://weedforcrypto.com/dispensaries/housing-works-cannabis-llc-new-york',
+    );
+    expect(it.tags).toEqual([
+      'cannabis',
+      'country:us',
+      'region:us-ny',
+      'adult-use',
+      'crypto',
+      'coinpay',
+      'claimed',
+      'license:adult-use-conditional-retail-dispensary-license',
+      'geo',
+    ]);
+    expect(it.summary).toBe(
+      'Licensed adult-use cannabis adult-use conditional retail dispensary license in New York, NY, US. Licence OCM-CAURD-22-000001 (active). Takes crypto through CoinPay.',
+    );
+    expect(it.data.lat).toBeCloseTo(40.7302, 3);
+    expect(it.data.long).toBeCloseTo(-73.9927, 3);
+    expect(it.publishedAt.toISOString()).toBe('2026-10-19T12:20:00.000Z');
+    expect(normaliseItem(it)).toBeTruthy();
+  });
+
+  test('a national list names no region tag, unknown coordinates stay off, and a row without an id is dropped', async () => {
+    const { dispensaries } = JSON.parse(await fixture('weedforcrypto-dispensaries.json'));
+    const uy = weedforcrypto.toDispensary(dispensaries[1]);
+    expect(uy.tags).toEqual(['cannabis', 'country:uy', 'adult-use', 'license:pharmacy']);
+    expect(uy.data.lat).toBeUndefined();
+    expect(uy.publishedAt).toBeNull();
+    expect(uy.summary).toBe(
+      'Licensed adult-use cannabis pharmacy in Montevideo, UY. Licence UY-UY-farmacia-pitagoras-montevideo (active).',
+    );
+    expect(weedforcrypto.toDispensary(dispensaries[2])).toBeNull();
+  });
+
+  test('a run walks the pages, saves the next page as it goes and resets when done', async () => {
+    const body = await fixture('weedforcrypto-dispensaries.json');
+    const { ctx: c, seen } = ctx('weedforcrypto', {
+      'https://weedforcrypto.com/api/v1/dispensaries': body,
+    });
+    const run = adapterByName('weedforcrypto').pull(c);
+    const batches = [];
+    let step = await run.next();
+    while (!step.done) {
+      batches.push(step.value);
+      step = await run.next();
+    }
+    expect(seen).toEqual(['https://weedforcrypto.com/api/v1/dispensaries?limit=200&page=1']);
+    expect(batches).toHaveLength(1);
+    expect(batches[0].items).toHaveLength(2);
+    expect(batches[0].cursor).toEqual({});
+    expect(step.value).toEqual({ cursor: {}, note: '2 dispensaries' });
+  });
+
+  test('a run past its deadline stops where it is and comes back in minutes', async () => {
+    const { ctx: c, seen } = ctx(
+      'weedforcrypto',
+      {},
+      { cursor: { page: 7 }, deadline: Date.now() - 1 },
+    );
+    const step = await adapterByName('weedforcrypto').pull(c).next();
+    expect(seen).toEqual([]);
+    expect(step.done).toBe(true);
+    expect(step.value.cursor).toEqual({ page: 7 });
+    expect(step.value.nextInMinutes).toBe(5);
   });
 });
