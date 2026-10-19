@@ -132,6 +132,16 @@ export function gatewayOptions(priceCents) {
       '/opportunities',
       '/opportunities/',
     ],
+    /*
+     * The item, feed and TLD pages are walked by a residential swarm wearing
+     * current browser strings: ~111k item-page hits per 40 minutes from ~96k
+     * addresses on 2026-10-19, with no referrer, and the analytics beacon fired
+     * for ~2% of them. A person's browser runs one line of script once a day
+     * and never sees this again; Googlebot/bingbot/Applebot (verified by
+     * address) and the named retrieval crawlers skip it. The API under /api/
+     * stays open to programs.
+     */
+    challenge: { paths: ['/i/', '/feeds/', '/tlds', '/tlds/'] },
     onSale: async (sale) => {
       console.log('[x402] sold a pass', {
         payer: sale.payer,
