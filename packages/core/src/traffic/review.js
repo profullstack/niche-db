@@ -11,12 +11,11 @@ import { isSharedIp } from './shared.js';
  * page whose query says "docker", `web-scanner-detection` on any burst of
  * 404s and 402s).
  *
- *   approve  an exploit probe in a request path, or SSH brute force with no
- *            successful login
- *   reject   a shared CDN or resolver address; anyone who logged in over
- *            SSH; or an address seen making >= 5 requests with not one probe
- *            and no failed SSH logins (the ban was a false positive)
- *   pending  everything else: not enough evidence either way
+ *   reject   a shared CDN or resolver address, or anyone who logged in over
+ *            SSH (an operator)
+ *   approve  everything else ThreatCrush banned (Anthony, 2026-10-19), with
+ *            the strongest reason we have: an exploit probe in a request
+ *            path, SSH brute force, or the ban itself
  *
  * Every decision carries its reason, published on the address's page.
  */
@@ -191,27 +190,20 @@ export function reviewAddress(row, ev = {}) {
         .map((h) => h.slice(0, 80))
         .join(', ')}`,
     };
-  const n = Number(ev.n) || 0;
   const brute = (row.rules ?? []).some((r) => BRUTE_RULES.has(r));
-  if (brute && (sshBad >= 5 || (Number(row.blocks) >= 3 && sshBad === 0 && n === 0))) {
-    const why = sshBad
-      ? `${sshBad} failed SSH logins`
-      : `banned ${row.blocks}x for SSH brute force on ${row.servers} server(s)`;
+  if (brute && sshBad)
     return {
       decision: 'approve',
-      note: `riotcoder review: SSH brute force, ${why}, never a successful login.`,
+      note: `riotcoder review: SSH brute force, ${sshBad} failed SSH logins, never a successful login.`,
     };
-  }
-  if (n >= 5 && sshBad === 0) {
-    const top = Object.entries(ev.status ?? {})
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 3)
-      .map(([k, v]) => `${k}x${v}`)
-      .join(', ');
-    return {
-      decision: 'reject',
-      note: `riotcoder review: ${n} requests, not one exploit probe (status ${top}); the ban was a false positive.`,
-    };
-  }
-  return { decision: 'pending', note: null };
+  // Every other ThreatCrush ban is listed (Anthony, 2026-10-19: "just approve
+  // all"). Only shared infrastructure and our own operators are kept off.
+  const blocks = Number(row.blocks) || 1;
+  const servers = Number(row.servers) || 1;
+  return {
+    decision: 'approve',
+    note: `riotcoder review: banned by ThreatCrush ${blocks}x on ${servers} server(s)${
+      (row.rules ?? []).length ? ` (${row.rules.slice(0, 3).join(', ')})` : ''
+    }.`,
+  };
 }

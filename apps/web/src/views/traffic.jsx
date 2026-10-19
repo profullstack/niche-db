@@ -12,6 +12,19 @@ import { Layout } from './Layout.jsx';
  */
 
 const day = (iso) => (iso ? new Date(iso).toISOString().slice(0, 10) : '');
+/** Every address here was banned by ThreatCrush on our servers: say so, and link it. */
+export const ThreatCrushBadge = () => (
+  <a
+    class="badge threatcrush-verified"
+    href="https://threatcrush.com"
+    rel="noopener"
+    target="_blank"
+    title="Banned by ThreatCrush on our servers"
+  >
+    ThreatCrush verified
+  </a>
+);
+
 const categoryName = (c) => (c ? (CATEGORIES[c]?.split(' (')[0] ?? c) : 'Other');
 
 const Lookup = ({ value = '' }) => (
@@ -37,19 +50,13 @@ const Vetting = () => (
         or brute-forces SSH.
       </li>
       <li>
-        <strong>Those bans are not published.</strong> Machines get it wrong: a misread port scan
-        once banned our own upstream servers, and the busiest "scraper" in one sweep was real
-        Googlebot. So every ban arrives here as a candidate, with its evidence: which rules fired,
-        on how many of our servers, how often, and what it asked for.
-      </li>
-      <li>
-        <strong>A reviewer reads the evidence and decides</strong>: a person, or riotcoder, our
-        review agent, applying these rules to what the address actually requested. Approved: an
-        exploit probe in a request path (secret files, path traversal, injection, known exploit
-        endpoints) or SSH brute force with no successful login. Rejected: an address whose requests
-        were ordinary pages, feeds and API calls, a shared CDN or resolver address, or one that
-        logged in. Anything else waits for more evidence. Every decision is kept with its reason,
-        shown on the address's own page, and a later ban of the same address does not overturn it.
+        <strong>Every ThreatCrush ban is published</strong>, marked{' '}
+        <em>ThreatCrush verified</em>, with its evidence: which rules fired, on how many of our
+        servers, how often, and what it asked for. riotcoder, our review agent, records the
+        strongest reason it can find (an exploit probe in a request path, SSH brute force, or the
+        ban itself). Kept off: shared CDN and resolver addresses (Cloudflare and the like), and
+        anyone who logged in over SSH. A person can reject any address, and a person's decision is
+        never overturned.
       </li>
       <li>
         Private ranges, our own servers, verified search crawlers and visitors whose only offence
@@ -64,7 +71,8 @@ const Row = ({ r }) => (
     <td>
       <a href={`/traffic/ip/${r.ip}`}>
         <code>{r.ip}</code>
-      </a>
+      </a>{' '}
+      <ThreatCrushBadge />
     </td>
     <td>{categoryName(r.category)}</td>
     <td class="num">{r.servers}</td>
@@ -275,6 +283,9 @@ export function TrafficIpPage({ user, query, result, error, notice }) {
         ) : null}
         {result?.listed ? (
           <>
+            <p>
+              <ThreatCrushBadge />
+            </p>
             <p class="lede">
               <strong>Listed.</strong> {CATEGORIES[result.category] ?? 'Abuse'}. Reviewed by{' '}
               {result.reviewer ?? 'a person'} and approved on {day(result.reviewed_at)}.
@@ -432,7 +443,7 @@ export function TrafficReviewPage({ user, rows, stats, status, offset, notice, d
                   <input type="checkbox" name="ip" value={r.ip} aria-label={`Select ${r.ip}`} />
                 </td>
                 <td>
-                  <code>{r.ip}</code>
+                  <code>{r.ip}</code> <ThreatCrushBadge />
                   <br />
                   <a
                     class="small"

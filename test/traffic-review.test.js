@@ -1,7 +1,7 @@
 /**
  * riotcoder's /traffic review rules, from the real cases of the first review
- * (2026-10-18). What would be embarrassing: approving an ordinary nichedb page
- * because its URL contains "shell", "phpmyadmin" or "../" inside a query;
+ * (2026-10-18). Since 2026-10-19 every ThreatCrush ban is approved, so the
+ * probe tests only decide the reason shown. What would still be embarrassing:
  * approving a Cloudflare address; publishing an operator who logged in; or
  * overwriting a person's decision made while the job ran.
  */
@@ -98,33 +98,24 @@ describe('reviewAddress', () => {
     expect(r.note).toContain('operator');
   });
 
-  test('SSH brute force approves on failures or repeat bans, never with a login', () => {
-    const brute = row('92.118.39.14', { rules: ['ssh-root-login'], blocks: 53, servers: 6 });
-    expect(reviewAddress(brute).decision).toBe('approve');
-    expect(
-      reviewAddress(row('92.118.39.15', { rules: ['ssh-brute-force'] }), { ssh_failed: 9 })
-        .decision,
-    ).toBe('approve');
-    expect(
-      reviewAddress(row('92.118.39.16', { rules: ['ssh-brute-force'], blocks: 1 })).decision,
-    ).toBe('pending');
+  test('SSH brute force approves with the failed logins as the reason', () => {
+    const r = reviewAddress(row('92.118.39.15', { rules: ['ssh-brute-force'] }), { ssh_failed: 9 });
+    expect(r.decision).toBe('approve');
+    expect(r.note).toContain('9 failed SSH logins');
   });
 
-  test('plenty of ordinary requests and no probe means the ban was wrong', () => {
-    const r = reviewAddress(row('17.166.22.207'), {
+  test('every other ThreatCrush ban approves (Anthony, 2026-10-19: "just approve all")', () => {
+    const busy = reviewAddress(row('17.166.22.207', { blocks: 4, servers: 2 }), {
       n: 182,
       status: { 200: 141, 301: 22, 402: 16 },
       paths: ['/candidates?tags=REST%2CPerl', '/i/151620020'],
     });
-    expect(r.decision).toBe('reject');
-    expect(r.note).toContain('182 requests');
-  });
-
-  test('no evidence waits', () => {
+    expect(busy.decision).toBe('approve');
+    expect(busy.note).toContain('banned by ThreatCrush 4x on 2 server(s)');
     expect(reviewAddress(row('187.14.50.217', { rules: ['web-scanner-detection'] })).decision).toBe(
-      'pending',
+      'approve',
     );
-    expect(reviewAddress(row('187.14.50.218'), { n: 3, paths: ['/i/1'] }).decision).toBe('pending');
+    expect(reviewAddress(row('187.14.50.218'), { n: 3, paths: ['/i/1'] }).decision).toBe('approve');
   });
 });
 
@@ -156,7 +147,7 @@ describe('store against PGlite', () => {
     const queue = await store.pendingForReview({}, { db: sql });
     expect(queue.find((r) => r.ip === '45.148.10.7').paths).toEqual(['/.env']);
     const decisions = queue.map((r) => ({ ip: r.ip, ...reviewAddress(r) }));
-    expect(await store.applyReview(decisions, { db: sql })).toBe(1);
+    expect(await store.applyReview(decisions, { db: sql })).toBe(3);
     const pub = await store.lookupIp('45.148.10.7', { db: sql });
     expect(pub.listed).toBe(true);
     expect(pub.reviewer).toBe('riotcoder');
