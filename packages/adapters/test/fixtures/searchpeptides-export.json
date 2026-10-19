@@ -13,17 +13,44 @@
       "latest_test": "2026-04-23",
       "location": "US: FL",
       "country": "US",
-      "ships_from": ["US"],
+      "ships_from": [
+        "US"
+      ],
       "ships_to": "US only",
       "ordering": "checkout",
-      "payments": ["crypto", "zelle"],
-      "payments_raw": ["USDT", "Zelle"],
-      "coupons": [{ "code": "CRYPTO20", "discount": "20% off", "conditions": "paying with crypto" }],
+      "payments": [
+        "crypto",
+        "zelle"
+      ],
+      "payments_raw": [
+        "USDT",
+        "Zelle"
+      ],
+      "coupons": [
+        {
+          "code": "CRYPTO20",
+          "discount": "20% off",
+          "conditions": "paying with crypto"
+        }
+      ],
       "contact": {
-        "emails": ["Sales@acme.example"],
-        "phones": ["+15550109999"],
-        "websites": ["https://acme.example"],
-        "socials": { "telegram": ["https://t.me/acmepeps"], "instagram": ["https://www.instagram.com/acmepeps"] }
+        "emails": [
+          "Sales@acme.example"
+        ],
+        "phones": [
+          "+15550109999"
+        ],
+        "websites": [
+          "https://acme.example"
+        ],
+        "socials": {
+          "telegram": [
+            "https://t.me/acmepeps"
+          ],
+          "instagram": [
+            "https://www.instagram.com/acmepeps"
+          ]
+        }
       },
       "offers": 2,
       "peptides": 2,
@@ -31,7 +58,42 @@
       "shop_url": "https://acme.example",
       "checked_at": "2026-10-19T04:00:10",
       "sponsored": false,
-      "page": "https://search.peptides.pit.world/v/acme-peptides"
+      "page": "https://search.peptides.pit.world/v/acme-peptides",
+      "verification_score": 81,
+      "verification": {
+        "score": 81,
+        "status": "scored",
+        "note": null,
+        "rules_version": 1,
+        "rules": "https://search.peptides.pit.world/rules",
+        "computed_at": "2026-10-19T20:30:00.000Z",
+        "verified_at": "2026-10-19T20:25:00.000Z",
+        "changed_at": "2026-10-19T20:25:00.000Z",
+        "evidence": "https://www.finnrick.com/vendors/acme-peptides",
+        "components": [
+          {
+            "key": "lab",
+            "label": "Lab results",
+            "weight": 35,
+            "points": 35,
+            "status": "ok",
+            "evidence": "6 of 6 classifiable tests in the window passed (100%).",
+            "data": {
+              "passed": 6,
+              "classifiable": 6
+            }
+          },
+          {
+            "key": "rating",
+            "label": "Finnrick rating",
+            "weight": 15,
+            "points": 0,
+            "status": "no data",
+            "evidence": "Finnrick publishes no rating for this vendor.",
+            "data": {}
+          }
+        ]
+      }
     },
     {
       "slug": "zen-bio",
@@ -44,16 +106,106 @@
       "payments": [],
       "payments_raw": [],
       "coupons": [],
-      "contact": { "emails": ["not-an-email"], "phones": [], "websites": [], "socials": {} },
+      "contact": {
+        "emails": [
+          "not-an-email"
+        ],
+        "phones": [],
+        "websites": [],
+        "socials": {}
+      },
       "offers": 1,
-      "checked_at": null
+      "checked_at": null,
+      "verification_score": null,
+      "verification": {
+        "score": null,
+        "status": "insufficient",
+        "note": "Insufficient data: 2 classifiable tests in the window, 3 needed.",
+        "rules_version": 1,
+        "rules": "https://search.peptides.pit.world/rules",
+        "components": []
+      }
     },
-    { "slug": "", "name": "Nameless" }
+    {
+      "slug": "",
+      "name": "Nameless"
+    }
   ],
   "listings": [
-    { "id": 1, "vendor": "acme-peptides", "vendor_name": "Acme Peptides", "vendor_score": 84, "vendor_tests": 6, "peptide": "BPC-157", "peptide_slug": "bpc-157", "name": "BPC-157 10mg", "form": "vial", "amount": 10, "unit": "mg", "pack_qty": 1, "price": 40, "currency": "USD", "price_usd": 40, "total_mg": 10, "usd_per_mg": 4, "in_stock": true, "passed_test": true, "blend": null, "url": "https://acme.example/p/bpc" },
-    { "id": 2, "vendor": "acme-peptides", "vendor_name": "Acme Peptides", "peptide": "BPC-157 + TB-500", "peptide_slug": "bpc-157-plus-tb-500", "name": "Wolverine 20mg", "form": "vial", "amount": 20, "unit": "mg", "pack_qty": 1, "price": null, "price_usd": null, "usd_per_mg": null, "in_stock": false, "passed_test": false, "blend": [{ "peptide": "BPC-157", "mg": 10 }, { "peptide": "TB-500", "mg": 10 }], "url": null },
-    { "id": 3, "vendor": "zen-bio", "vendor_name": "Zen Bio", "peptide": "Tirzepatide", "peptide_slug": "tirzepatide", "name": "Tirz 30mg", "amount": 30, "unit": "mg", "pack_qty": 10, "price": 150, "currency": "USD", "price_usd": 150, "usd_per_mg": 0.5, "in_stock": null, "url": "https://zen.example/t" },
-    { "id": null, "vendor": "zen-bio", "peptide": "Nothing" }
+    {
+      "id": 1,
+      "vendor": "acme-peptides",
+      "vendor_name": "Acme Peptides",
+      "vendor_score": 84,
+      "vendor_tests": 6,
+      "peptide": "BPC-157",
+      "peptide_slug": "bpc-157",
+      "name": "BPC-157 10mg",
+      "form": "vial",
+      "amount": 10,
+      "unit": "mg",
+      "pack_qty": 1,
+      "price": 40,
+      "currency": "USD",
+      "price_usd": 40,
+      "total_mg": 10,
+      "usd_per_mg": 4,
+      "in_stock": true,
+      "passed_test": true,
+      "blend": null,
+      "url": "https://acme.example/p/bpc",
+      "vendor_verification_score": 81,
+      "vendor_verification_status": "scored"
+    },
+    {
+      "id": 2,
+      "vendor": "acme-peptides",
+      "vendor_name": "Acme Peptides",
+      "peptide": "BPC-157 + TB-500",
+      "peptide_slug": "bpc-157-plus-tb-500",
+      "name": "Wolverine 20mg",
+      "form": "vial",
+      "amount": 20,
+      "unit": "mg",
+      "pack_qty": 1,
+      "price": null,
+      "price_usd": null,
+      "usd_per_mg": null,
+      "in_stock": false,
+      "passed_test": false,
+      "blend": [
+        {
+          "peptide": "BPC-157",
+          "mg": 10
+        },
+        {
+          "peptide": "TB-500",
+          "mg": 10
+        }
+      ],
+      "url": null
+    },
+    {
+      "id": 3,
+      "vendor": "zen-bio",
+      "vendor_name": "Zen Bio",
+      "peptide": "Tirzepatide",
+      "peptide_slug": "tirzepatide",
+      "name": "Tirz 30mg",
+      "amount": 30,
+      "unit": "mg",
+      "pack_qty": 10,
+      "price": 150,
+      "currency": "USD",
+      "price_usd": 150,
+      "usd_per_mg": 0.5,
+      "in_stock": null,
+      "url": "https://zen.example/t"
+    },
+    {
+      "id": null,
+      "vendor": "zen-bio",
+      "peptide": "Nothing"
+    }
   ]
 }

@@ -628,7 +628,9 @@ describe('searchpeptides', () => {
     expect(it.kind).toBe('vendor');
     expect(it.externalId).toBe('vendor:acme-peptides');
     expect(it.url).toBe('https://search.peptides.pit.world/v/acme-peptides');
-    expect(it.summary).toBe('score 84/100, 6 of 6 lab tests passed, 2 listings, ships from US');
+    expect(it.summary).toBe(
+      'verification 81/100, Finnrick 84/100, 6 of 6 lab tests passed, 2 listings, ships from US',
+    );
     expect(it.tags).toEqual([
       'peptide-vendor',
       'ships-from:us',
@@ -637,6 +639,9 @@ describe('searchpeptides', () => {
       'lab-tested',
       'all-tests-passed',
       'score:80-plus',
+      'verification:scored',
+      'verified:70-plus',
+      'verified:80-plus',
       'priced',
       'coupon',
       'ordering:checkout',
@@ -648,8 +653,16 @@ describe('searchpeptides', () => {
     expect(it.data.contact.emails).toEqual(['sales@acme.example']);
     expect(it.data.contact.socials.telegram).toEqual(['https://t.me/acmepeps']);
     expect(it.publishedAt.toISOString()).toBe('2026-10-19T00:00:00.000Z');
+    expect(it.data.verificationScore).toBe(81);
+    expect(it.data.verification.components.map((c) => c.key)).toEqual(['lab', 'rating']);
+    expect(it.data.verification.rules).toBe('https://search.peptides.pit.world/rules');
     const bare = searchpeptides.toVendor(vendors[1]);
     expect(bare.data.score).toBeNull();
+    // Too little evidence stays a status, never a number.
+    expect(bare.data.verificationScore).toBeNull();
+    expect(bare.data.verification.status).toBe('insufficient');
+    expect(bare.summary).toContain('verification: insufficient data');
+    expect(bare.tags).toContain('verification:insufficient');
     expect(bare.data.contact.emails).toEqual([]);
     expect(bare.url).toBe('https://search.peptides.pit.world/v/zen-bio');
     expect(searchpeptides.toVendor(vendors[2])).toBeNull();
@@ -672,6 +685,7 @@ describe('searchpeptides', () => {
       'passed-test',
       'lab-tested-vendor',
     ]);
+    expect(bpc.data.vendorVerificationScore).toBe(81);
     const blend = searchpeptides.toListing(listings[1], by);
     expect(blend.data.priceUsd).toBeNull();
     expect(blend.tags).toContain('unpriced');
