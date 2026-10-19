@@ -162,7 +162,8 @@ describe('the sponsored feed item', () => {
 describe('the script challenge (faceted listings, item pages)', async () => {
   const { gatewayOptions } = await import('../apps/web/src/lib/pricing.js');
   const { when, paths } = gatewayOptions(100).challenge;
-  const on = (p) => when(new Request(`https://nichedb.test${p}`), new URL(`https://nichedb.test${p}`));
+  const on = (p) =>
+    when(new Request(`https://nichedb.test${p}`), new URL(`https://nichedb.test${p}`));
 
   test('challenges faceted /tlds and /feeds URLs and every item page', () => {
     expect(paths).toEqual(['/i/', '/feeds/', '/tlds', '/tlds/']);
