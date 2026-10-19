@@ -389,6 +389,12 @@ export const COLLECTIONS = [
     description:
       'Licensed cannabis dispensaries from the weedforcrypto.com directory, built from official regulator licence lists: US state cannabis boards, Canadian provincial registries, Uruguay\u2019s IRCCA pharmacies, Amsterdam coffeeshop permits and Thailand\u2019s DTAM shop licences. Each store with its licence number, type and status, address and coordinates (so near= and sort=distance work), medical or adult-use, licensed delivery, and whether it takes crypto through CoinPay. Re-synced from the regulators daily; a licence that drops off its list drops out. Follow a country, a state or province, delivery, or the stores that take crypto.',
   },
+  {
+    slug: 'launches',
+    name: 'Launches',
+    description:
+      'Indie product launches from the built.indie launch board: every live product with its tagline and description, its own site, logo, card image and homepage screenshot, votes, categories, the maker, the stack it is built with (from OpenStack) and its plans (from OpenSaaS), and whether the product links back with a verified built.indie badge. Re-read hourly, so votes and the Featured slot stay current. Follow a category, verified launches, or Featured launches.',
+  },
 ];
 
 export const DEFAULT_FEEDS = [
@@ -417,6 +423,38 @@ export const DEFAULT_FEEDS = [
     slug: 'seedbox-price-drift',
     name: 'Seedbox hosts whose page no longer shows the listed price',
     query: { kinds: ['provider'], tags: ['price:drift'] },
+  },
+  {
+    collection: 'launches',
+    slug: 'builtindie-launches',
+    name: 'built.indie launches',
+    description: 'Every product launched on built.indie, newest first.',
+    query: { kinds: ['launch'] },
+  },
+  {
+    collection: 'launches',
+    slug: 'builtindie-verified',
+    name: 'Verified built.indie launches',
+    description: 'Launches whose site shows the built.indie badge, backlink checked.',
+    query: { kinds: ['launch'], tags: ['verified'] },
+  },
+  {
+    collection: 'launches',
+    slug: 'builtindie-featured',
+    name: 'Featured built.indie launches',
+    query: { kinds: ['launch'], tags: ['featured'] },
+  },
+  {
+    collection: 'launches',
+    slug: 'builtindie-developer',
+    name: 'Developer tools launched on built.indie',
+    query: { kinds: ['launch'], tags: ['developer', 'developer-tools'] },
+  },
+  {
+    collection: 'launches',
+    slug: 'builtindie-ai',
+    name: 'AI products launched on built.indie',
+    query: { kinds: ['launch'], tags: ['ai'] },
   },
   {
     collection: 'peptides',

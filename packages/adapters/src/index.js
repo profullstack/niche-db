@@ -24,6 +24,7 @@ import { bittorrentedDht } from './bittorrented.js';
 import { bl0ggers } from './bl0ggers.js';
 import { blsSeries } from './bls.js';
 import { brisk } from './brisk.js';
+import { builtindie } from './builtindie.js';
 import { buyvps } from './buyvps.js';
 import { c0upons } from './c0upons.js';
 import { censusAcs } from './census-acs.js';
@@ -426,6 +427,7 @@ export const ADAPTERS = [
   ch4nnelsIptv,
   searchpeptides,
   weedforcrypto,
+  builtindie,
 ];
 
 /**

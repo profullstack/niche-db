@@ -109,6 +109,7 @@ describe('registry', () => {
         'peptides',
         'iptv',
         'weed',
+        'launches',
       ]).toContain(a.collection);
     }
     expect(adapterByName('steam').title).toContain('Steam');

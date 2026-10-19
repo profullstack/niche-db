@@ -1,0 +1,73 @@
+{
+  "window": "new",
+  "products": [
+    {
+      "slug": "nichedb",
+      "name": "nichedb",
+      "tagline": "Every niche, one feed",
+      "description": "Structured, followable feeds for every niche.  Search, API, CLI and MCP.",
+      "url": "https://nichedb.dev/",
+      "domain": "nichedb.dev",
+      "status": "live",
+      "votes": 3,
+      "tags": ["Developer", "AI"],
+      "logo": "https://built.indie.pit.world/m/abc/logo.png",
+      "card_image": "https://built.indie.pit.world/m/abc/card.png",
+      "screenshot": "https://built.indie.pit.world/m/abc/home.png",
+      "images": [],
+      "videos": ["https://www.youtube.com/watch?v=x", "not a url"],
+      "socials": { "github": "https://github.com/profullstack/niche-db" },
+      "llms": { "url": "https://nichedb.dev/llms.txt", "title": "nichedb", "summary": "x" },
+      "profile": null,
+      "maker": { "name": "Profullstack", "profile": null, "verified": false, "page": null },
+      "verified": true,
+      "featured_until": "2099-01-01T00:00:00.000Z",
+      "launched_at": "2026-10-19T11:02:03.571Z",
+      "page": "https://built.indie.pit.world/p/nichedb",
+      "badge": "https://built.indie.pit.world/badge/nichedb.svg",
+      "stack": {
+        "url": "https://nichedb.dev/.well-known/openstack.md",
+        "items": [
+          { "layer": "Runtimes", "name": "Bun 1.4" },
+          { "layer": "Databases", "name": "Postgres 17" }
+        ]
+      },
+      "pricing": {
+        "url": "https://nichedb.dev/.well-known/opensaas.json",
+        "currency": "USD",
+        "plans": [
+          { "name": "Premium, a month", "price": 30, "period": "month" },
+          { "name": "", "price": 1, "period": "day" }
+        ]
+      },
+      "openicon": null,
+      "opensite": "https://built.indie.pit.world/p/nichedb/opensite.json",
+      "openprofile": "https://built.indie.pit.world/p/nichedb/openprofile.md"
+    },
+    {
+      "slug": "bare",
+      "name": "Bare",
+      "tagline": "",
+      "description": "",
+      "url": "https://bare.example/",
+      "domain": "bare.example",
+      "status": "live",
+      "votes": 0,
+      "tags": [],
+      "logo": null,
+      "card_image": null,
+      "screenshot": null,
+      "videos": [],
+      "socials": {},
+      "llms": null,
+      "maker": null,
+      "verified": false,
+      "featured_until": "2020-01-01T00:00:00.000Z",
+      "launched_at": null,
+      "page": null,
+      "stack": null,
+      "pricing": null
+    },
+    { "slug": "", "name": "No slug", "status": "live" }
+  ]
+}

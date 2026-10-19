@@ -8,6 +8,8 @@
  *   bun apps/worker/src/traffic-review.js --pending          print the queue's addresses
  *   ... --rejected [--pending]                               the same over riotcoder's own
  *                                                    rejections: only approvals are written
+ *   ... --approved [--pending]                               the same over riotcoder's own
+ *                                                    approvals: only rejections are written
  *   bun apps/worker/src/traffic-review.js [--dry-run] < ev   decide with the evidence on stdin
  *                                                    ({ ip: { n, status, paths, ssh_* } })
  *                                                    and write the decisions as riotcoder
@@ -16,9 +18,13 @@ import { reviewAddress } from '@nichedb/core/traffic/review';
 import * as store from '@nichedb/db/traffic';
 
 const args = new Set(process.argv.slice(2));
-const from = args.has('--rejected') ? 'rejected' : 'pending';
+const from = args.has('--rejected') ? 'rejected' : args.has('--approved') ? 'approved' : 'pending';
 const queue =
-  from === 'rejected' ? await store.rejectedForReview() : await store.pendingForReview();
+  from === 'rejected'
+    ? await store.rejectedForReview()
+    : from === 'approved'
+      ? await store.approvedForReview()
+      : await store.pendingForReview();
 
 if (args.has('--pending')) {
   // Awaited: process.stdout.write into a pipe is asynchronous, and exiting

@@ -7,13 +7,20 @@ import {
   rpzForDomains,
   rpzForIps,
 } from '@nichedb/core/traffic';
+import { OWNERS_FETCHED_AT, ownerOf, ownersList } from '@nichedb/core/traffic/owners';
+import { rdapLookup } from '@nichedb/core/traffic/rdap';
 import * as q from '@nichedb/db/queries';
 import * as reputation from '@nichedb/db/reputation';
 import * as store from '@nichedb/db/traffic';
 import { callerAddress } from '../lib/auth-throttle.js';
 import { render, wantsJson } from '../lib/http.js';
 import { canReview, Denied } from '../lib/service.js';
-import { TrafficIpPage, TrafficPage, TrafficReviewPage } from '../views/traffic.jsx';
+import {
+  TrafficIpPage,
+  TrafficOwnersPage,
+  TrafficPage,
+  TrafficReviewPage,
+} from '../views/traffic.jsx';
 
 /**
  * Bad traffic: /traffic, /traffic/ip/<ip>, /traffic/blocklist.txt,
@@ -91,7 +98,52 @@ async function requireReviewer(c) {
   return user;
 }
 
+/** Who owns an address: a known owner from the registry, else RDAP. */
+export async function ownerFor(ip, { rdap = rdapLookup } = {}) {
+  const known = ownerOf(ip);
+  if (known) return { known, rdap: null };
+  return { known: null, rdap: await rdap(ip) };
+}
+
+/**
+ * The owner registry with how many addresses ThreatCrush banned in each
+ * network and none of them listed. Counted over every address we hold, so it
+ * is cached for ten minutes.
+ */
+let ownerCounts = { at: 0, value: null };
+async function ownersWithCounts() {
+  if (!ownerCounts.value || ownerCounts.at < Date.now() - 600_000) {
+    const counts = {};
+    for (const { ip } of await store.allStatuses()) {
+      const o = ownerOf(ip);
+      if (o) counts[o.slug] = (counts[o.slug] ?? 0) + 1;
+    }
+    ownerCounts = { at: Date.now(), value: counts };
+  }
+  return ownersList().map((o) => ({ ...o, banned: ownerCounts.value[o.slug] ?? 0 }));
+}
+
 export function registerTraffic(app) {
+  /** Networks we know by name and never list, and why. */
+  app.get('/traffic/owners', async (c) => {
+    const owners = await ownersWithCounts();
+    return c.html(
+      await render(
+        <TrafficOwnersPage user={c.get('user')} owners={owners} fetchedAt={OWNERS_FETCHED_AT} />,
+      ),
+    );
+  });
+
+  app.get('/api/v1/traffic/owners', async (c) => {
+    c.header('cache-control', 'public, max-age=600');
+    return c.json({
+      about:
+        'Networks we know by name (search crawlers, CDNs, public resolvers, company blocks). None is ever listed on /traffic. `banned` counts addresses in each that ThreatCrush banned on our servers.',
+      ranges_fetched_at: OWNERS_FETCHED_AT,
+      owners: await ownersWithCounts(),
+    });
+  });
+
   app.get('/traffic', async (c) => {
     const params = listParams(c);
     const [stats, rows, sync] = await Promise.all([
@@ -133,13 +185,14 @@ export function registerTraffic(app) {
         await render(<TrafficIpPage user={c.get('user')} query={ip} error={blocked} />),
         402,
       );
-    const result = await store.lookupIp(ip);
+    const [result, owner] = await Promise.all([store.lookupIp(ip), ownerFor(ip)]);
     return c.html(
       await render(
         <TrafficIpPage
           user={c.get('user')}
           query={ip}
           result={result}
+          owner={owner}
           notice={c.req.query('notice')}
         />,
       ),
@@ -283,7 +336,8 @@ export function registerTraffic(app) {
     if (!ip) return c.json({ error: 'not a public IP address' }, 400);
     const blocked = await meterLookup(c);
     if (blocked) return c.json({ error: blocked, signup: `${config.siteUrl}/login` }, 402);
-    return c.json(await store.lookupIp(ip));
+    const [result, owner] = await Promise.all([store.lookupIp(ip), ownerFor(ip)]);
+    return c.json({ ...result, owner });
   });
 
   /* -------------------------------------------------------------- review -- */
