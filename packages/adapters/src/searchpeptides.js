@@ -5,7 +5,10 @@ import { decodeEntities, defineAdapter, slugify } from '@nichedb/core/adapter';
  *
  * search.peptides is a house comparison site on a Moshpit name (served to the
  * open web at search.peptides.pit.world). Its register is every vendor with
- * independent lab results (Finnrick's scores and pass/fail counts), how it takes
+ * independent lab results (Finnrick's scores and pass/fail counts), its verification
+ * score (0-100, computed by search.peptides from checkable evidence, every component
+ * with its weight, points and evidence; null with a status when evidence is short;
+ * rules at /rules), how it takes
  * payment, where it ships from, how you order, its coupons, and a contact card
  * read from the vendor's own site (emails, phones, websites, WhatsApp, Telegram
  * and other socials); and every listing (vendor x peptide x size) with its price
@@ -36,6 +39,36 @@ const day = (s) => {
   return d && !Number.isNaN(d.getTime()) ? d : null;
 };
 
+const STATUSES = new Set(['scored', 'insufficient', 'unscored']);
+
+/** search.peptides' verification score: kept as served, components and all; a missing block stays null. */
+function verificationOf(v) {
+  const b = v?.verification;
+  if (!b || typeof b !== 'object') return null;
+  const status = STATUSES.has(b.status) ? b.status : null;
+  if (!status) return null;
+  return {
+    score: status === 'scored' ? fin(b.score) : null,
+    status,
+    note: clean(b.note),
+    rulesVersion: fin(b.rules_version),
+    rules: urlOrNull(b.rules),
+    verifiedAt: clean(b.verified_at),
+    changedAt: clean(b.changed_at),
+    evidence: urlOrNull(b.evidence),
+    components: (Array.isArray(b.components) ? b.components : [])
+      .filter((c) => clean(c?.key))
+      .map((c) => ({
+        key: clean(c.key),
+        label: clean(c.label),
+        weight: fin(c.weight),
+        points: fin(c.points),
+        status: clean(c.status),
+        evidence: clean(c.evidence),
+      })),
+  };
+}
+
 function contactOf(c) {
   const socials = {};
   for (const [k, list] of Object.entries(c?.socials ?? {})) {
@@ -62,10 +95,17 @@ export function toVendor(v) {
   const payments = strings(v.payments).map((p) => p.toLowerCase());
   const contact = contactOf(v.contact);
   const score = fin(v.score);
+  const verification = verificationOf(v);
+  const verified = verification?.score ?? null;
   const pass = fin(v.tests_pass) ?? 0;
   const fail = fin(v.tests_fail) ?? 0;
   const facts = [
-    score !== null ? `score ${score}/100` : null,
+    verified !== null
+      ? `verification ${verified}/100`
+      : verification?.status === 'insufficient'
+        ? 'verification: insufficient data'
+        : null,
+    score !== null ? `Finnrick ${score}/100` : null,
     pass + fail ? `${pass} of ${pass + fail} lab tests passed` : null,
     fin(v.offers) ? `${v.offers} listings` : null,
     shipsFrom.length ? `ships from ${shipsFrom.join(', ')}` : null,
@@ -87,6 +127,9 @@ export function toVendor(v) {
       pass + fail ? 'lab-tested' : null,
       pass + fail && !fail ? 'all-tests-passed' : null,
       score !== null && score >= 80 ? 'score:80-plus' : null,
+      verification ? `verification:${verification.status}` : null,
+      verified !== null && verified >= 70 ? 'verified:70-plus' : null,
+      verified !== null && verified >= 80 ? 'verified:80-plus' : null,
       fin(v.offers) ? 'priced' : null,
       Array.isArray(v.coupons) && v.coupons.length ? 'coupon' : null,
       clean(v.ordering) ? `ordering:${slugify(v.ordering)}` : null,
@@ -97,6 +140,8 @@ export function toVendor(v) {
     ].filter(Boolean),
     data: {
       slug,
+      verificationScore: verified,
+      verification,
       score,
       rank: fin(v.rank),
       labTests: fin(v.tests),
@@ -177,6 +222,7 @@ export function toListing(o, vendorsBySlug = new Map()) {
       vendor,
       vendorName,
       vendorScore: fin(o.vendor_score),
+      vendorVerificationScore: fin(o.vendor_verification_score),
       name,
       form: clean(o.form),
       amount,
@@ -205,7 +251,7 @@ export const searchpeptides = defineAdapter({
   title: 'search.peptides register',
   collection: 'peptides',
   description:
-    'Every research-peptide vendor in the search.peptides register with its lab score and pass/fail counts, payment, shipping, ordering, coupons and a contact card (emails, phones, websites, WhatsApp, Telegram, socials), and every listing with its price, USD per mg and stock, read from the keyless register export once a day.',
+    'Every research-peptide vendor in the search.peptides register with its verification score (components, evidence, rules), Finnrick score and pass/fail counts, payment, shipping, ordering, coupons and a contact card (emails, phones, websites, WhatsApp, Telegram, socials), and every listing with its price, USD per mg and stock, read from the keyless register export once a day.',
   docs: 'https://search.peptides.pit.world/docs',
   kinds: ['vendor', 'listing'],
   cadenceMinutes: 360,
