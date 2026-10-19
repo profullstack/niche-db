@@ -1,0 +1,8 @@
+{
+  "counts": { "ok": 2, "down": 1 },
+  "checks": [
+    { "kind": "iptv", "slug": "argontv", "checked_at": "2026-10-19T12:10:00.000Z", "page_url": "https://argontv.nl/pricing", "verdict": "ok", "missing": [] },
+    { "kind": "iptv", "slug": "directv-stream", "checked_at": "2026-10-19T12:25:49.204Z", "page_url": "https://www.directv.com/stream/", "verdict": "down", "missing": [], "error": "403" },
+    { "kind": "seedbox", "slug": "alpha-seed", "checked_at": "2026-10-19T12:30:00.000Z", "page_url": "https://alpha.example/pricing", "verdict": "drift", "missing": [] }
+  ]
+}
