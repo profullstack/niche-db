@@ -1,9 +1,9 @@
 import { config } from '@nichedb/config';
 import { appIconFor, themeFor } from '@nichedb/premium';
-import { bundledTemplate, latestTemplate, renderFooter } from '@profullstack/footer';
 import { raw } from 'hono/html';
 import { assetUrl } from '../lib/asset-version.js';
 import { currentModules } from '../lib/modules.js';
+import { pitFooterHtml } from '../lib/pit-footer.js';
 
 const faviconFor = (user) => {
   const icon = appIconFor({ plan: currentModules().plan, icon: user?.premium_icon });
@@ -19,45 +19,6 @@ const faviconFor = (user) => {
  * the appearance a page gets is always one the reader is currently entitled
  * to. The same call is what makes an unknown value impossible to render.
  */
-const FOOTER = {
-  site: 'https://nichedb.dev/',
-  links: [
-    { label: 'About', href: '/about' },
-    { label: 'Submit a feed', href: '/submit' },
-    { label: 'API', href: '/docs/api' },
-    { label: 'CLI', href: '/docs/cli' },
-    { label: 'MCP', href: '/docs/mcp' },
-    { label: 'llms.txt', href: '/llms.txt' },
-    { label: 'Data dumps', href: '/dumps' },
-    { label: 'Premium', href: '/premium' },
-    { label: 'Pro', href: '/pro' },
-    { label: 'Crawl access', href: '/crawl' },
-    { label: 'Crawl status', href: '/crawlstatus' },
-    { label: 'Opportunities', href: '/opportunities' },
-  ],
-};
-
-/*
- * @profullstack/footer, rendered on the server from the package's @latest
- * template. Rendered synchronously from the last template fetched (refreshed in
- * the background, cached an hour by the package) rather than awaited: Layout is
- * a sync component, and the x402 gateway's crawl page renders it without await.
- */
-let footerTemplate = bundledTemplate;
-const refreshFooterTemplate = () =>
-  latestTemplate().then(
-    (t) => {
-      footerTemplate = t;
-    },
-    () => {},
-  );
-refreshFooterTemplate();
-
-const ProfullstackFooter = () => {
-  refreshFooterTemplate();
-  return raw(renderFooter(footerTemplate, FOOTER));
-};
-
 export const Layout = (props) => (
   <html
     lang="en"
@@ -209,11 +170,8 @@ export const Layout = (props) => (
         </nav>
       </header>
 
-      <main id="main" class={props.wide ? 'wide' : ''}>
-        {props.children}
-      </main>
-
-      {/* Put the ad-free offer beside the ad it removes. */}
+      {/* The one ad, at the top of the content (never pressed against the
+          footer), with the offer to be rid of it beside it. */}
       {config.ads.enabled && currentModules().ads ? (
         <aside class="ad-slot">
           <div data-cp-ad data-slot={config.ads.slot} data-format="text_link" />
@@ -227,22 +185,27 @@ export const Layout = (props) => (
         </aside>
       ) : null}
 
+      <main id="main" class={props.wide ? 'wide' : ''}>
+        {props.children}
+      </main>
+
       <footer>
         <p>
-          {config.siteName} is open source:{' '}
-          <a href="https://github.com/profullstack/niche-db">profullstack/niche-db</a>. Times are
-          shown in <span data-tz-label>your device's</span> time zone.
+          © {new Date().getFullYear()} {config.siteName} · <a href="/about">About</a> ·{' '}
+          <a href="/docs/api">API</a> · <a href="/docs/cli">CLI</a> · <a href="/docs/mcp">MCP</a> ·{' '}
+          <a href="/premium">Premium</a> · <a href="/crawlstatus">Status</a> ·{' '}
+          <a href="https://github.com/profullstack/niche-db">Code</a>. Times are in{' '}
+          <span data-tz-label>your device's</span> time zone.
         </p>
       </footer>
-      {/* The bottom bar: @profullstack/footer (links, copyright, the webring),
-          the same on every Profullstack site. */}
-      <ProfullstackFooter />
 
       <script src={assetUrl('vendor-webauthn.js')} defer />
       <script src={assetUrl('app.js')} defer />
       {config.ads.enabled && currentModules().ads ? (
         <script src="https://crawlproof.com/ad.js" async />
       ) : null}
+      {/* The pit.world global footer, last in <body>. */}
+      {raw(pitFooterHtml())}
     </body>
   </html>
 );
