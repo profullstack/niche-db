@@ -207,19 +207,10 @@ main.wide {
 footer {
   max-width: 64rem;
   margin: 0 auto;
-  padding: 1rem 1.1rem 3rem;
+  padding: 1rem 1.1rem 1.5rem;
   border-top: 1px solid var(--line);
   font-size: 0.85rem;
   color: var(--muted);
-}
-
-/* @profullstack/footer follows the site footer and brings its own layout. */
-footer.pfs-footer {
-  max-width: none;
-  padding: 0 0 1.5rem;
-  border-top: 0;
-  color: var(--fg);
-  --pfs-footer-muted: var(--muted);
 }
 
 /* controls
