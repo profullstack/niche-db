@@ -137,11 +137,19 @@ export function gatewayOptions(priceCents) {
      * current browser strings: ~111k item-page hits per 40 minutes from ~96k
      * addresses on 2026-10-19, with no referrer, and the analytics beacon fired
      * for ~2% of them. A person's browser runs one line of script once a day
-     * and never sees this again; Googlebot/bingbot/Applebot (verified by
-     * address) and the named retrieval crawlers skip it. The API under /api/
-     * stays open to programs.
+     * and never sees this again; verified search crawlers (Googlebot, bingbot,
+     * Applebot, DuckDuckBot by published address) and the retrieval / AI chat
+     * fetchers skip it. The API under /api/ stays open to programs.
+     *
+     * On /tlds and /feeds/ only the FACETED URLs are challenged (any query
+     * string: ?manager=, ?collection=&tags=...), which is what the swarm walks;
+     * the plain pages stay a normal page for every reader and link preview.
+     * Item pages are challenged whole (Anthony 2026-10-19: "do it").
      */
-    challenge: { paths: ['/i/', '/feeds/', '/tlds', '/tlds/'] },
+    challenge: {
+      paths: ['/i/', '/feeds/', '/tlds', '/tlds/'],
+      when: (_request, url) => url.pathname.startsWith('/i/') || url.search.length > 1,
+    },
     onSale: async (sale) => {
       console.log('[x402] sold a pass', {
         payer: sale.payer,

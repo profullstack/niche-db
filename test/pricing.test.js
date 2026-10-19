@@ -158,3 +158,23 @@ describe('the sponsored feed item', () => {
     expect(sponsoredItem({ ok: true, count: 0, items: [] })).toBeNull();
   });
 });
+
+describe('the script challenge (faceted listings, item pages)', async () => {
+  const { gatewayOptions } = await import('../apps/web/src/lib/pricing.js');
+  const { when, paths } = gatewayOptions(100).challenge;
+  const on = (p) => when(new Request(`https://nichedb.test${p}`), new URL(`https://nichedb.test${p}`));
+
+  test('challenges faceted /tlds and /feeds URLs and every item page', () => {
+    expect(paths).toEqual(['/i/', '/feeds/', '/tlds', '/tlds/']);
+    expect(on('/tlds?manager=Premier+Registry+Limited&type=generic')).toBe(true);
+    expect(on('/feeds/new?collection=packages&tags=holon')).toBe(true);
+    expect(on('/i/445295167')).toBe(true);
+  });
+
+  test('leaves the plain pages alone', () => {
+    expect(on('/tlds')).toBe(false);
+    expect(on('/tlds/com')).toBe(false);
+    expect(on('/feeds/new')).toBe(false);
+    expect(on('/feeds/new?')).toBe(false);
+  });
+});
