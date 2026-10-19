@@ -365,9 +365,59 @@ export const COLLECTIONS = [
     description:
       'Internet radio stations, about 67,000 of them (60,000 with a stream that plays) from the community directory at radio-browser.info: the stream URL, the homepage, country and language, genres, codec and bitrate, whether the stream passed its last check, votes and the last day\u2019s listens, and coordinates where known, so the collection answers near= and sort=distance. Free to use, swept daily. Follow a genre, a country, or only the streams that play.',
   },
+  {
+    slug: 'seedboxes',
+    name: 'Seedboxes',
+    description:
+      'Seedbox providers and every plan they sell, from the ch4nnels.com seedbox register: each host read from its own pricing page, with datacenter countries, the apps a box ships (Plex, qBittorrent, rTorrent, the *arrs), features, payment, refund and trial, and per plan the price as quoted, the monthly price in EUR, EUR per TB, storage and disk kind, traffic (unmetered where the host says so), port speed and location. Unknowns stay unknown; a plan with no published price is tagged unpriced, never zero. Follow a country, an app, unmetered plans or 10 Gbps ports.',
+  },
 ];
 
 export const DEFAULT_FEEDS = [
+  {
+    collection: 'seedboxes',
+    slug: 'seedbox-providers',
+    name: 'Seedbox providers',
+    description: 'Every seedbox host in the register, one row each.',
+    query: { kinds: ['provider'] },
+  },
+  {
+    collection: 'seedboxes',
+    slug: 'seedbox-plans',
+    name: 'Seedbox plans',
+    description: 'Every plan with price, storage, port, traffic and location.',
+    query: { kinds: ['plan'] },
+  },
+  {
+    collection: 'seedboxes',
+    slug: 'seedbox-unmetered',
+    name: 'Unmetered seedbox plans',
+    query: { kinds: ['plan'], tags: ['unmetered'] },
+  },
+  {
+    collection: 'seedboxes',
+    slug: 'seedbox-10gbps',
+    name: '10 Gbps seedbox plans',
+    query: { kinds: ['plan'], tags: ['10gbps'] },
+  },
+  {
+    collection: 'seedboxes',
+    slug: 'seedbox-dedicated',
+    name: 'Dedicated seedboxes',
+    query: { kinds: ['plan'], tags: ['type:dedicated'] },
+  },
+  {
+    collection: 'seedboxes',
+    slug: 'seedbox-plex',
+    name: 'Seedbox hosts with Plex',
+    query: { kinds: ['provider'], tags: ['app:plex'] },
+  },
+  {
+    collection: 'seedboxes',
+    slug: 'seedbox-crypto',
+    name: 'Seedbox hosts that take crypto',
+    query: { kinds: ['provider'], tags: ['pay:crypto'] },
+  },
   {
     collection: 'radio',
     slug: 'radio-stations',
