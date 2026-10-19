@@ -1,5 +1,6 @@
 import { config } from '@nichedb/config';
 import { appIconFor, themeFor } from '@nichedb/premium';
+import { bundledTemplate, latestTemplate, renderFooter } from '@profullstack/footer';
 import { raw } from 'hono/html';
 import { assetUrl } from '../lib/asset-version.js';
 import { currentModules } from '../lib/modules.js';
@@ -19,6 +20,28 @@ const faviconFor = (user) => {
  * the appearance a page gets is always one the reader is currently entitled
  * to. The same call is what makes an unknown value impossible to render.
  */
+/*
+ * @profullstack/footer (copyright and the webring), rendered on the server from
+ * the package's @latest template. Rendered synchronously from the last template
+ * fetched (refreshed in the background, cached an hour by the package): Layout
+ * is a sync component, and the x402 gateway's crawl page renders it without await.
+ */
+const FOOTER = { site: 'https://nichedb.dev/', links: [] };
+let footerTemplate = bundledTemplate;
+const refreshFooterTemplate = () =>
+  latestTemplate().then(
+    (t) => {
+      footerTemplate = t;
+    },
+    () => {},
+  );
+refreshFooterTemplate();
+
+const ProfullstackFooter = () => {
+  refreshFooterTemplate();
+  return raw(renderFooter(footerTemplate, FOOTER));
+};
+
 export const Layout = (props) => (
   <html
     lang="en"
@@ -190,13 +213,15 @@ export const Layout = (props) => (
 
       <footer>
         <p>
-          © {new Date().getFullYear()} {config.siteName} · <a href="/about">About</a> ·{' '}
-          <a href="/docs/api">API</a> · <a href="/docs/cli">CLI</a> · <a href="/docs/mcp">MCP</a> ·{' '}
-          <a href="/premium">Premium</a> · <a href="/crawlstatus">Status</a> ·{' '}
+          <a href="/about">About</a> · <a href="/docs/api">API</a> · <a href="/docs/cli">CLI</a> ·{' '}
+          <a href="/docs/mcp">MCP</a> · <a href="/premium">Premium</a> ·{' '}
+          <a href="/crawlstatus">Status</a> ·{' '}
           <a href="https://github.com/profullstack/niche-db">Code</a>. Times are in{' '}
           <span data-tz-label>your device's</span> time zone.
         </p>
       </footer>
+      {/* The bottom bar: @profullstack/footer (copyright, the webring). */}
+      <ProfullstackFooter />
 
       <script src={assetUrl('vendor-webauthn.js')} defer />
       <script src={assetUrl('app.js')} defer />
