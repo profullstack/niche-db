@@ -1,0 +1,57 @@
+{
+  "query": { "text": "", "filters": {}, "understood": [] },
+  "total": 2,
+  "providers": [
+    {
+      "slug": "alpha-seed",
+      "name": "Alpha Seed",
+      "url": "https://alpha.example",
+      "pricing_url": "https://alpha.example/pricing",
+      "description": "Shared seedboxes in the Netherlands with Plex.",
+      "hq": "NL",
+      "locations": ["NL"],
+      "founded": 2012,
+      "apps": ["plex", "qbittorrent"],
+      "features": ["shared", "10gbps"],
+      "payments": ["card", "bitcoin"],
+      "refund": "14-day",
+      "trial": false,
+      "status": "verified",
+      "checked_at": "2026-10-19",
+      "monthly_eur": 5,
+      "max_storage_gb": 8000,
+      "max_port_gbps": 10,
+      "plans": [
+        { "name": "Small", "type": "shared", "price": 5, "currency": "EUR", "billing": "monthly", "monthly_eur": 5, "storage_gb": 1000, "storage_type": "hdd", "traffic_tb": 10, "port_gbps": 1, "location": "NL", "url": "https://alpha.example/order/small", "eur_per_tb": 5 },
+        { "name": "Big", "type": "shared", "price": 20, "currency": "EUR", "billing": "monthly", "monthly_eur": 20, "storage_gb": 8000, "storage_type": "hdd", "traffic_tb": -1, "port_gbps": 10, "location": "NL", "url": null, "eur_per_tb": 2.5 }
+      ],
+      "page": "https://ch4nnels.com/seedboxes/alpha-seed"
+    },
+    {
+      "slug": "bravo",
+      "name": "Bravo Boxes",
+      "url": "https://bravo.example",
+      "pricing_url": null,
+      "description": null,
+      "hq": null,
+      "locations": ["FR"],
+      "founded": null,
+      "apps": [],
+      "features": ["dedicated", "root"],
+      "payments": ["paypal"],
+      "refund": null,
+      "trial": null,
+      "status": "unverified-pricing",
+      "checked_at": "2026-10-19",
+      "monthly_eur": null,
+      "max_storage_gb": null,
+      "max_port_gbps": null,
+      "plans": [
+        { "name": "Dedi", "type": "dedicated", "price": null, "currency": "USD", "billing": null, "monthly_eur": null, "storage_gb": null, "storage_type": null, "traffic_tb": null, "port_gbps": null, "location": null, "url": null, "eur_per_tb": null },
+        { "name": null, "type": "shared", "price": 3, "currency": "USD" }
+      ],
+      "page": "https://ch4nnels.com/seedboxes/bravo"
+    },
+    { "slug": "", "name": "Nameless" }
+  ]
+}

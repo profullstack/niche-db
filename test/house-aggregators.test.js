@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises';
 import * as agenticjobs from '../packages/adapters/src/agenticjobs.js';
 import * as aiornot from '../packages/adapters/src/aiornot.js';
 import * as c0upons from '../packages/adapters/src/c0upons.js';
+import * as ch4nnels from '../packages/adapters/src/ch4nnels.js';
 import { ADAPTERS, adapterByName } from '../packages/adapters/src/index.js';
 import * as marketplace from '../packages/adapters/src/marketplacefeeds.js';
 import * as p0dcasters from '../packages/adapters/src/p0dcasters.js';
@@ -61,6 +62,7 @@ const HOUSE = {
   agenticjobs: { collection: 'jobs', kinds: ['job'], source: 'agenticjobs-postings' },
   tsbb: { collection: 'forums', kinds: ['post'], source: 'tsbb-topics' },
   c0upons: { collection: 'coupons', kinds: ['coupon'], source: 'c0upons-coupons' },
+  ch4nnels: { collection: 'seedboxes', kinds: ['provider', 'plan'], source: 'ch4nnels-seedboxes' },
 };
 
 describe('registration', () => {
@@ -81,7 +83,7 @@ describe('registration', () => {
   }
 
   test('the five house collections exist and every seeded feed names one that does', () => {
-    for (const slug of ['saas', 'marketplace', 'ai-media', 'forums', 'coupons']) {
+    for (const slug of ['saas', 'marketplace', 'ai-media', 'forums', 'coupons', 'seedboxes']) {
       expect(COLLECTIONS.some((c) => c.slug === slug)).toBe(true);
     }
     const collections = new Set(COLLECTIONS.map((c) => c.slug));
@@ -511,5 +513,77 @@ describe('c0upons', () => {
     const out = await adapterByName('c0upons').pull(c);
     expect(seen.length).toBe(2);
     expect(out.items.length).toBe(201);
+  });
+});
+
+describe('ch4nnels', () => {
+  test('a provider carries countries, apps, features and payment as tags, unknowns as null', async () => {
+    const { providers } = JSON.parse(await fixture('ch4nnels-seedboxes.json'));
+    const it = ch4nnels.toProvider(providers[0]);
+    expect(it.kind).toBe('provider');
+    expect(it.externalId).toBe('provider:alpha-seed');
+    expect(it.url).toBe('https://ch4nnels.com/seedboxes/alpha-seed');
+    expect(it.data.website).toBe('https://alpha.example');
+    expect(it.tags).toEqual([
+      'seedbox',
+      'country:nl',
+      'app:plex',
+      'app:qbittorrent',
+      'feature:shared',
+      'feature:10gbps',
+      'pay:crypto',
+      'pay:card',
+      'unmetered',
+      '10gbps',
+    ]);
+    expect(it.publishedAt.toISOString()).toBe('2026-10-19T00:00:00.000Z');
+    const bare = ch4nnels.toProvider(providers[1]);
+    expect(bare.data.trial).toBeNull();
+    expect(bare.data.fromEurMonthly).toBeNull();
+    expect(bare.tags).toContain('unverified-pricing');
+    expect(ch4nnels.toProvider(providers[2])).toBeNull();
+    expect(normaliseItem(it)).toBeTruthy();
+  });
+
+  test('a plan says what it costs and what it gets, and an unpublished price stays unpublished', async () => {
+    const { providers } = JSON.parse(await fixture('ch4nnels-seedboxes.json'));
+    const big = ch4nnels.toPlan(providers[0], providers[0].plans[1], 1);
+    expect(big.externalId).toBe('plan:alpha-seed:big:1');
+    expect(big.title).toBe('Alpha Seed Big');
+    expect(big.summary).toBe('€20/mo, 8 TB HDD, 10 Gbps, unmetered, shared, NL');
+    // No order link of its own: the register's provider page.
+    expect(big.url).toBe('https://ch4nnels.com/seedboxes/alpha-seed');
+    expect(big.tags).toEqual([
+      'seedbox',
+      'provider:alpha-seed',
+      'type:shared',
+      'disk:hdd',
+      'country:nl',
+      'unmetered',
+      '10gbps',
+    ]);
+    expect(big.data.eurPerTb).toBe(2.5);
+    const dedi = ch4nnels.toPlan(providers[1], providers[1].plans[0], 0);
+    expect(dedi.data.price).toBeNull();
+    expect(dedi.summary).toBe('price not published, dedicated');
+    expect(dedi.tags).toContain('unpriced');
+    expect(ch4nnels.toPlan(providers[1], providers[1].plans[1], 1)).toBeNull();
+  });
+
+  test('one read of the register gives every provider and plan', async () => {
+    const { ctx: c, seen } = ctx('ch4nnels', {
+      'https://ch4nnels.com/api/v1/seedboxes': await fixture('ch4nnels-seedboxes.json'),
+    });
+    const out = await adapterByName('ch4nnels').pull(c);
+    expect(seen).toEqual(['https://ch4nnels.com/api/v1/seedboxes']);
+    expect(out.items.map((i) => i.externalId)).toEqual([
+      'provider:alpha-seed',
+      'plan:alpha-seed:small:0',
+      'plan:alpha-seed:big:1',
+      'provider:bravo',
+      'plan:bravo:dedi:0',
+    ]);
+    expect(out.note).toBe('2 providers, 3 plans');
+    for (const it of out.items) expect(normaliseItem(it)).toBeTruthy();
   });
 });
