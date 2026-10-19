@@ -18,6 +18,8 @@
     "./traffic": "./src/traffic/index.js",
     "./traffic/review": "./src/traffic/review.js",
     "./traffic/shared": "./src/traffic/shared.js",
+    "./traffic/owners": "./src/traffic/owners.js",
+    "./traffic/rdap": "./src/traffic/rdap.js",
     "./lyrics": "./src/lyrics.js"
   },
   "dependencies": {

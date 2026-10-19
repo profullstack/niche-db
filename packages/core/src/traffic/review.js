@@ -1,5 +1,5 @@
 import { isIP } from 'node:net';
-import { isSharedIp } from './shared.js';
+import { ownerOf } from './owners.js';
 
 /**
  * riotcoder's review of the /traffic queue: the rules a careful person would
@@ -11,8 +11,9 @@ import { isSharedIp } from './shared.js';
  * page whose query says "docker", `web-scanner-detection` on any burst of
  * 404s and 402s).
  *
- *   reject   a shared CDN or resolver address, or anyone who logged in over
- *            SSH (an operator)
+ *   reject   an address in the owner registry (owners.js: CDNs, resolvers,
+ *            search crawlers, Apple's 17.0.0.0/8), or anyone who logged in
+ *            over SSH (an operator)
  *   approve  everything else ThreatCrush banned (Anthony, 2026-10-19), with
  *            the strongest reason we have: an exploit probe in a request
  *            path, SSH brute force, or the ban itself
@@ -168,10 +169,11 @@ export function probesIn(paths = []) {
  */
 export function reviewAddress(row, ev = {}) {
   const ip = row.ip;
-  if (isIP(ip) && isSharedIp(ip))
+  const owner = isIP(ip) ? ownerOf(ip) : null;
+  if (owner)
     return {
       decision: 'reject',
-      note: 'riotcoder review: a shared CDN or resolver address (Cloudflare and the like), never one actor.',
+      note: `riotcoder review: owned by ${owner.name} (${owner.range}), a known network we never list. See /traffic/owners.`,
     };
   const sshOk = Number(ev.ssh_accepted) || 0;
   const sshBad = Number(ev.ssh_failed) || 0;

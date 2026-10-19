@@ -250,16 +250,43 @@ export async function rejectedForReview({ limit = 100_000 } = {}, { db = sql } =
 }
 
 /**
+ * riotcoder's own approvals, for a re-review when the owner registry grows:
+ * an address that turns out to be Applebot or a CDN comes off the list. A
+ * person's approval is never in here.
+ */
+export async function approvedForReview({ limit = 100_000 } = {}, { db = sql } = {}) {
+  const rows = await db`
+    select host(t.ip) as ip, t.rules, t.blocks, t.servers, coalesce(t.evidence->'paths', '[]'::jsonb) as paths
+    from traffic_ips t join users u on u.id = t.reviewed_by
+    where t.status = 'approved' and u.email = ${RIOTCODER_EMAIL}
+    order by t.score desc, t.last_seen desc limit ${limit}
+  `;
+  return rows.map((r) => ({
+    ...r,
+    rules: typeof r.rules === 'string' ? JSON.parse(r.rules) : r.rules,
+    paths: typeof r.paths === 'string' ? JSON.parse(r.paths) : r.paths,
+  }));
+}
+
+/** Every address we hold with its status, for the owner counts on /traffic/owners. */
+export async function allStatuses({ db = sql } = {}) {
+  return db`select host(ip) as ip, status from traffic_ips`;
+}
+
+/**
  * Write riotcoder's decisions. `from: 'pending'` (the default) decides the
  * queue; `from: 'rejected'` re-reviews riotcoder's own rejections and only
- * ever turns one into an approval.
+ * ever turns one into an approval; `from: 'approved'` re-reviews its own
+ * approvals and only ever turns one into a rejection.
  */
 export async function applyReview(decisions, { db = sql, from = 'pending' } = {}) {
   const rows = (decisions ?? [])
     .filter((d) =>
       from === 'rejected'
         ? d.decision === 'approve'
-        : d.decision === 'approve' || d.decision === 'reject',
+        : from === 'approved'
+          ? d.decision === 'reject'
+          : d.decision === 'approve' || d.decision === 'reject',
     )
     .map((d) => ({
       ip: d.ip,
