@@ -371,9 +371,53 @@ export const COLLECTIONS = [
     description:
       'Seedbox providers and every plan they sell, from the ch4nnels.com seedbox register: each host read from its own pricing page, with datacenter countries, the apps a box ships (Plex, qBittorrent, rTorrent, the *arrs), features, payment, refund and trial, and per plan the price as quoted, the monthly price in EUR, EUR per TB, storage and disk kind, traffic (unmetered where the host says so), port speed and location. Unknowns stay unknown; a plan with no published price is tagged unpriced, never zero. Follow a country, an app, unmetered plans or 10 Gbps ports.',
   },
+  {
+    slug: 'peptides',
+    name: 'Peptides',
+    description:
+      'Research-peptide vendors and every listing they sell, from the search.peptides register. Each vendor with its independent lab score and pass/fail counts (Finnrick), payment methods, where it ships from, how you order, coupons, and a contact card read from its own site: emails, phones, websites, WhatsApp, Telegram and socials. Each listing with the peptide, size, price as quoted, USD, USD per mg and stock, flagged where the vendor passed a lab test for that peptide. Not affiliated with Finnrick or any vendor; for research use, not medical advice.',
+  },
 ];
 
 export const DEFAULT_FEEDS = [
+  {
+    collection: 'peptides',
+    slug: 'peptide-vendors',
+    name: 'Peptide vendors',
+    description: 'Every vendor in the register with its lab results and contact card.',
+    query: { kinds: ['vendor'] },
+  },
+  {
+    collection: 'peptides',
+    slug: 'peptide-listings',
+    name: 'Peptide listings',
+    description: 'Every listing with price, USD per mg and stock.',
+    query: { kinds: ['listing'] },
+  },
+  {
+    collection: 'peptides',
+    slug: 'peptide-vendors-lab-tested',
+    name: 'Lab-tested peptide vendors',
+    query: { kinds: ['vendor'], tags: ['lab-tested'] },
+  },
+  {
+    collection: 'peptides',
+    slug: 'peptide-vendors-email',
+    name: 'Peptide vendors with an email',
+    query: { kinds: ['vendor'], tags: ['contact:email'] },
+  },
+  {
+    collection: 'peptides',
+    slug: 'peptide-vendors-us',
+    name: 'Peptide vendors shipping from the US',
+    query: { kinds: ['vendor'], tags: ['ships-from:us'] },
+  },
+  {
+    collection: 'peptides',
+    slug: 'peptide-listings-passed',
+    name: 'Listings from vendors that passed a test for that peptide',
+    query: { kinds: ['listing'], tags: ['passed-test'] },
+  },
   {
     collection: 'seedboxes',
     slug: 'seedbox-providers',

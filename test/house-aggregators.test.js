@@ -8,6 +8,7 @@ import { ADAPTERS, adapterByName } from '../packages/adapters/src/index.js';
 import * as marketplace from '../packages/adapters/src/marketplacefeeds.js';
 import * as p0dcasters from '../packages/adapters/src/p0dcasters.js';
 import * as saasrow from '../packages/adapters/src/saasrow.js';
+import * as searchpeptides from '../packages/adapters/src/searchpeptides.js';
 import * as tsbb from '../packages/adapters/src/tsbb.js';
 import { normaliseItem } from '../packages/core/src/adapter.js';
 
@@ -63,6 +64,11 @@ const HOUSE = {
   tsbb: { collection: 'forums', kinds: ['post'], source: 'tsbb-topics' },
   c0upons: { collection: 'coupons', kinds: ['coupon'], source: 'c0upons-coupons' },
   ch4nnels: { collection: 'seedboxes', kinds: ['provider', 'plan'], source: 'ch4nnels-seedboxes' },
+  searchpeptides: {
+    collection: 'peptides',
+    kinds: ['vendor', 'listing'],
+    source: 'searchpeptides-register',
+  },
 };
 
 describe('registration', () => {
@@ -83,7 +89,15 @@ describe('registration', () => {
   }
 
   test('the five house collections exist and every seeded feed names one that does', () => {
-    for (const slug of ['saas', 'marketplace', 'ai-media', 'forums', 'coupons', 'seedboxes']) {
+    for (const slug of [
+      'saas',
+      'marketplace',
+      'ai-media',
+      'forums',
+      'coupons',
+      'seedboxes',
+      'peptides',
+    ]) {
       expect(COLLECTIONS.some((c) => c.slug === slug)).toBe(true);
     }
     const collections = new Set(COLLECTIONS.map((c) => c.slug));
@@ -584,6 +598,85 @@ describe('ch4nnels', () => {
       'plan:bravo:dedi:0',
     ]);
     expect(out.note).toBe('2 providers, 3 plans');
+    for (const it of out.items) expect(normaliseItem(it)).toBeTruthy();
+  });
+});
+
+describe('searchpeptides', () => {
+  test('a vendor carries lab results, payment, shipping and its contact card', async () => {
+    const { vendors } = JSON.parse(await fixture('searchpeptides-export.json'));
+    const it = searchpeptides.toVendor(vendors[0]);
+    expect(it.kind).toBe('vendor');
+    expect(it.externalId).toBe('vendor:acme-peptides');
+    expect(it.url).toBe('https://search.peptides.pit.world/v/acme-peptides');
+    expect(it.summary).toBe('score 84/100, 6 of 6 lab tests passed, 2 listings, ships from US');
+    expect(it.tags).toEqual([
+      'peptide-vendor',
+      'ships-from:us',
+      'pay:crypto',
+      'pay:zelle',
+      'lab-tested',
+      'all-tests-passed',
+      'score:80-plus',
+      'priced',
+      'coupon',
+      'ordering:checkout',
+      'contact:email',
+      'contact:phone',
+      'contact:telegram',
+      'contact:instagram',
+    ]);
+    expect(it.data.contact.emails).toEqual(['sales@acme.example']);
+    expect(it.data.contact.socials.telegram).toEqual(['https://t.me/acmepeps']);
+    expect(it.publishedAt.toISOString()).toBe('2026-10-19T00:00:00.000Z');
+    const bare = searchpeptides.toVendor(vendors[1]);
+    expect(bare.data.score).toBeNull();
+    expect(bare.data.contact.emails).toEqual([]);
+    expect(bare.url).toBe('https://search.peptides.pit.world/v/zen-bio');
+    expect(searchpeptides.toVendor(vendors[2])).toBeNull();
+    expect(normaliseItem(it)).toBeTruthy();
+  });
+
+  test('a listing says what it costs per mg, and an unpublished price stays unpublished', async () => {
+    const { vendors, listings } = JSON.parse(await fixture('searchpeptides-export.json'));
+    const by = new Map(vendors.map((v) => [v.slug, v]));
+    const bpc = searchpeptides.toListing(listings[0], by);
+    expect(bpc.externalId).toBe('listing:1');
+    expect(bpc.title).toBe('BPC-157 10mg (Acme Peptides)');
+    expect(bpc.summary).toBe('$40, $4/mg, 10 mg, Acme Peptides');
+    expect(bpc.tags).toEqual([
+      'peptide-listing',
+      'peptide:bpc-157',
+      'vendor:acme-peptides',
+      'form:vial',
+      'in-stock',
+      'passed-test',
+      'lab-tested-vendor',
+    ]);
+    const blend = searchpeptides.toListing(listings[1], by);
+    expect(blend.data.priceUsd).toBeNull();
+    expect(blend.tags).toContain('unpriced');
+    expect(blend.tags).toContain('blend');
+    expect(blend.url).toBe('https://search.peptides.pit.world/v/acme-peptides');
+    expect(searchpeptides.toListing(listings[3], by)).toBeNull();
+  });
+
+  test('one read of the export gives every vendor and listing', async () => {
+    const { ctx: c, seen } = ctx('searchpeptides', {
+      'https://search.peptides.pit.world/api/v1/export': await fixture(
+        'searchpeptides-export.json',
+      ),
+    });
+    const out = await adapterByName('searchpeptides').pull(c);
+    expect(seen).toEqual(['https://search.peptides.pit.world/api/v1/export']);
+    expect(out.items.map((i) => i.externalId)).toEqual([
+      'vendor:acme-peptides',
+      'vendor:zen-bio',
+      'listing:1',
+      'listing:2',
+      'listing:3',
+    ]);
+    expect(out.note).toBe('2 vendors, 3 listings');
     for (const it of out.items) expect(normaliseItem(it)).toBeTruthy();
   });
 });
