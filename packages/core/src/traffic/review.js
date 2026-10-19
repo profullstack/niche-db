@@ -91,42 +91,71 @@ const PROBE = new RegExp(
     String.raw`/backup\.(zip|sql|tar)`,
     String.raw`/(dump|database|db)\.sql`,
     String.raw`/__vite_rsc_findsourcemapurl\?filename=file`,
+    // Secrets and config files nobody links to (2026-10-19 re-review).
+    String.raw`/[\w.-]*\.env(\.[\w-]+)?($|\?)`,
+    String.raw`/\.(npmrc|pypirc|yarnrc|netrc|pgpass|bashrc|bash_history|zshrc|profile|s3cfg|boto|dockercfg|git-credentials|gitignore|gitlab-ci\.yml|travis\.yml|circleci/|terraform|kube/|idea/|ds_store|htaccess|my\.cnf)`,
+    String.raw`/web-inf/`,
+    String.raw`/(database|parameters|secrets|credentials)\.(yml|yaml|json|ini)`,
+    'aws_credentials',
+    String.raw`/credentials($|\?|\.)`,
+    String.raw`id_(rsa|dsa|ecdsa|ed25519)\b`,
+    String.raw`wp-config`,
+    String.raw`/reportserver`,
+    // SQL injection.
+    String.raw`union(\s+all)?\s+select`,
+    'information_schema',
+    String.raw`\b(and|or)\s+\d+\s*=\s*\d+`,
+    String.raw`waitfor\s+delay`,
+    String.raw`pg_sleep\(`,
+    String.raw`169\.254\.169\.254`,
   ].join('|'),
   'i',
 );
 
-/**
- * Traversal counts only in the path itself: "../" inside a query parameter is
- * usually a real article URL handed to a reader endpoint
- * (/x/read?p=https://site/a/../b).
- */
+/** Path traversal, in the path or in one of our own query values. */
 const TRAVERSAL = /(\.\.\/|\.\.\\|\.\.;\/|\.\.%c1%9c)/i;
+
+/**
+ * Query values that are web addresses (a reader's ?p=https://site/a/../b,
+ * an archive link to Editing_wp-config.php) are someone else's URL, not a
+ * request to us: they are dropped before the probe and traversal tests.
+ * Every other value counts, so ?range=../../proc/version is traversal.
+ */
+const isWebUrl = (v) => /^https?:\/\//i.test(decode(v).trim());
+const ownQuery = (query) =>
+  query
+    .split('&')
+    .filter((kv) => !isWebUrl(kv.slice(kv.indexOf('=') + 1)))
+    .join('&');
+
+/** Scripts we never serve: the fleet runs no PHP, ASP or JSP. */
+const SCRIPT = /\.(php\d?|phtml|asp|aspx|jsp|cgi)$/i;
 
 const BRUTE_RULES = new Set(['ssh-brute-force', 'ssh-root-login', 'ssh-user-enumeration']);
 
-const decode = (s) => {
-  try {
-    return decodeURIComponent(decodeURIComponent(s));
-  } catch {
-    try {
-      return decodeURIComponent(s);
-    } catch {
-      return s;
-    }
-  }
-};
+/**
+ * Percent-decoding that survives malformed input: the stored paths are cut
+ * at a length, often mid-escape ("...WHERE%"), and decodeURIComponent then
+ * throws, which used to leave a UNION SELECT undecoded and unmatched.
+ */
+const decodeOnce = (s) =>
+  s.replace(/\+/g, ' ').replace(/%([0-9a-f]{2})/gi, (_, h) => String.fromCharCode(parseInt(h, 16)));
+const decode = (s) => decodeOnce(decodeOnce(s));
 
 /** The request paths that are exploit probes. */
 export function probesIn(paths = []) {
   const hits = [];
   for (const p of paths) {
     const raw = String(p ?? '');
-    const path = raw.split('?', 1)[0];
+    const q = raw.indexOf('?');
+    const path = q < 0 ? raw : raw.slice(0, q);
+    const own = q < 0 ? path : `${path}?${ownQuery(raw.slice(q + 1))}`;
     if (
-      PROBE.test(decode(raw)) ||
-      PROBE.test(raw) ||
-      TRAVERSAL.test(decode(path)) ||
-      TRAVERSAL.test(path)
+      PROBE.test(decode(own)) ||
+      PROBE.test(own) ||
+      TRAVERSAL.test(decode(own)) ||
+      TRAVERSAL.test(own) ||
+      SCRIPT.test(decode(path))
     )
       hits.push(raw);
   }

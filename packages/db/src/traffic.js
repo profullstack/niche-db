@@ -231,9 +231,36 @@ export async function pendingForReview({ limit = 100_000 } = {}, { db = sql } = 
  * Write the review job's decisions as riotcoder. Only still-pending rows move,
  * so a person's decision made meanwhile always wins. Returns rows changed.
  */
-export async function applyReview(decisions, { db = sql } = {}) {
+/**
+ * riotcoder's own rejections, for a re-review when the rules improve. A
+ * person's rejection is never in here.
+ */
+export async function rejectedForReview({ limit = 100_000 } = {}, { db = sql } = {}) {
+  const rows = await db`
+    select host(t.ip) as ip, t.rules, t.blocks, t.servers, coalesce(t.evidence->'paths', '[]'::jsonb) as paths
+    from traffic_ips t join users u on u.id = t.reviewed_by
+    where t.status = 'rejected' and u.email = ${RIOTCODER_EMAIL}
+    order by t.score desc, t.last_seen desc limit ${limit}
+  `;
+  return rows.map((r) => ({
+    ...r,
+    rules: typeof r.rules === 'string' ? JSON.parse(r.rules) : r.rules,
+    paths: typeof r.paths === 'string' ? JSON.parse(r.paths) : r.paths,
+  }));
+}
+
+/**
+ * Write riotcoder's decisions. `from: 'pending'` (the default) decides the
+ * queue; `from: 'rejected'` re-reviews riotcoder's own rejections and only
+ * ever turns one into an approval.
+ */
+export async function applyReview(decisions, { db = sql, from = 'pending' } = {}) {
   const rows = (decisions ?? [])
-    .filter((d) => d.decision === 'approve' || d.decision === 'reject')
+    .filter((d) =>
+      from === 'rejected'
+        ? d.decision === 'approve'
+        : d.decision === 'approve' || d.decision === 'reject',
+    )
     .map((d) => ({
       ip: d.ip,
       status: d.decision === 'approve' ? 'approved' : 'rejected',
@@ -250,7 +277,8 @@ export async function applyReview(decisions, { db = sql } = {}) {
       update traffic_ips t set status = d.status, review_note = d.note, reviewed_by = ${reviewer},
         reviewed_at = now(), updated_at = now()
       from jsonb_to_recordset(${doc(rows.slice(i, i + 1000))}::text::jsonb) as d(ip text, status text, note text)
-      where t.ip = d.ip::inet and t.status = 'pending'
+      where t.ip = d.ip::inet and t.status = ${from}
+        and (${from} = 'pending' or t.reviewed_by = ${reviewer})
       returning t.ip
     `;
     changed += out.length;
