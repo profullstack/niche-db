@@ -6,6 +6,8 @@
  * dev2, because the nginx and sshd evidence is root-only.
  *
  *   bun apps/worker/src/traffic-review.js --pending          print the queue's addresses
+ *   ... --rejected [--pending]                               the same over riotcoder's own
+ *                                                    rejections: only approvals are written
  *   bun apps/worker/src/traffic-review.js [--dry-run] < ev   decide with the evidence on stdin
  *                                                    ({ ip: { n, status, paths, ssh_* } })
  *                                                    and write the decisions as riotcoder
@@ -14,7 +16,9 @@ import { reviewAddress } from '@nichedb/core/traffic/review';
 import * as store from '@nichedb/db/traffic';
 
 const args = new Set(process.argv.slice(2));
-const queue = await store.pendingForReview();
+const from = args.has('--rejected') ? 'rejected' : 'pending';
+const queue =
+  from === 'rejected' ? await store.rejectedForReview() : await store.pendingForReview();
 
 if (args.has('--pending')) {
   // Awaited: process.stdout.write into a pipe is asynchronous, and exiting
@@ -36,9 +40,9 @@ const summary = {
 };
 
 if (args.has('--dry-run')) {
-  console.log(JSON.stringify({ ...summary, dryRun: true }));
+  console.log(JSON.stringify({ ...summary, from, dryRun: true }));
   process.exit(0);
 }
-const changed = await store.applyReview(decisions);
-console.log(JSON.stringify({ ...summary, changed }));
+const changed = await store.applyReview(decisions, { from });
+console.log(JSON.stringify({ ...summary, from, changed }));
 process.exit(0);

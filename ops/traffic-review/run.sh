@@ -10,8 +10,12 @@ DIR="$(cd "$(dirname "$0")" && pwd)"
 LOG="${TRAFFIC_REVIEW_LOG:-/var/log/nichedb-traffic-review.log}"
 tmp=$(mktemp -d)
 trap 'rm -rf "$tmp"' EXIT
-docker exec "$APP" bun apps/worker/src/traffic-review.js --pending > "$tmp/pending.txt"
-python3 -I "$DIR/evidence.py" < "$tmp/pending.txt" > "$tmp/evidence.json" 2>> "$LOG"
-out=$(docker exec -i "$APP" bun apps/worker/src/traffic-review.js "$@" < "$tmp/evidence.json")
-echo "$(date -u +%FT%TZ) $out" >> "$LOG"
-echo "$out"
+# Two passes: the pending queue, then riotcoder's own rejections, which only
+# ever become approvals when the rules (or newer evidence) now show a probe.
+for pass in "" --rejected; do
+  docker exec "$APP" bun apps/worker/src/traffic-review.js $pass --pending > "$tmp/queue.txt"
+  python3 -I "$DIR/evidence.py" < "$tmp/queue.txt" > "$tmp/evidence.json" 2>> "$LOG"
+  out=$(docker exec -i "$APP" bun apps/worker/src/traffic-review.js $pass "$@" < "$tmp/evidence.json")
+  echo "$(date -u +%FT%TZ) $out" >> "$LOG"
+  echo "$out"
+done

