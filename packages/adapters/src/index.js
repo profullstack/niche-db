@@ -140,6 +140,7 @@ import { saasrow } from './saasrow.js';
 import { scalewayInstances } from './scaleway.js';
 import { scannerDirectory } from './scanners.js';
 import { scryfallCards, scryfallSets } from './scryfall.js';
+import { searchpeptides } from './searchpeptides.js';
 import { slickdeals } from './slickdeals.js';
 import { smithery } from './smithery.js';
 import { socrataCrime } from './socratacrime.js';
@@ -421,6 +422,7 @@ export const ADAPTERS = [
   wikidataFestivals,
   radiobrowser,
   ch4nnels,
+  searchpeptides,
 ];
 
 /**
