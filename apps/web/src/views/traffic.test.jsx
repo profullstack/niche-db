@@ -4,7 +4,7 @@ process.env.DATABASE_URL ??= 'postgres://test:test@localhost:5432/test';
 process.env.SITE_URL ??= 'https://nichedb.test';
 
 const { render } = await import('../lib/http.js');
-const { TrafficIpPage, TrafficOwnersPage, TrafficPage, TrafficReviewPage } = await import(
+const { IpOwnerPage, IpOwnersPage, TrafficIpPage, TrafficPage, TrafficReviewPage } = await import(
   './traffic.jsx'
 );
 const { ownerOf, ownersList } = await import('@nichedb/core/traffic/owners');
@@ -32,16 +32,73 @@ const stats = (over = {}) => ({
 });
 
 describe('traffic views', () => {
-  test('the owners page lists every known network with its count and source', async () => {
-    const owners = ownersList().map((o) => ({ ...o, banned: o.slug === 'applebot' ? 112 : 0 }));
+  const host = {
+    slug: 'example-net',
+    name: 'Example Hosting',
+    kind: 'hosting',
+    kind_name: 'Hosting provider',
+    about: 'Runs its own network: AS64500 (EXAMPLE-AS).',
+    source: 'https://bgp.he.net/AS64500',
+    website: 'https://example.net',
+    asns: [{ asn: 64500, holder: 'EXAMPLE-AS' }],
+    directories: [{ site: 'r4ck.dev', url: 'https://r4ck.dev/providers/example' }],
+    shared: false,
+    ranges: ['192.0.2.0/24'],
+    banned: 7,
+  };
+
+  test('the owners page lists shared networks and hosting providers with counts and sources', async () => {
+    const owners = [
+      ...ownersList()
+        .filter((o) => o.shared)
+        .map((o) => ({ ...o, banned: o.slug === 'applebot' ? 112 : 0 })),
+      host,
+    ];
     const html = String(
-      await render(<TrafficOwnersPage owners={owners} fetchedAt="2026-10-19T00:00:00Z" />),
+      await render(
+        <IpOwnersPage
+          owners={owners}
+          fetchedAt="2026-10-19T00:00:00Z"
+          providersFetchedAt="2026-10-19T00:00:00Z"
+          providersChecked={256}
+        />,
+      ),
     );
     expect(html).toContain('Who owns an IP');
     expect(html).toContain('Applebot (Apple)');
     expect(html).toContain('17.0.0.0/8');
     expect(html).toContain('112');
     expect(html).toContain('search.developer.apple.com');
+    expect(html).toContain('Example Hosting');
+    expect(html).toContain('AS64500');
+    expect(html).toContain('/ips/owners/example-net');
+    expect(html).toContain('r4ck.dev/providers/example');
+  });
+
+  test('one owner page prints every range', async () => {
+    const html = String(await render(<IpOwnerPage owner={host} />));
+    expect(html).toContain('Example Hosting IP ranges');
+    expect(html).toContain('192.0.2.0/24');
+    expect(html).toContain('bans here are listed');
+  });
+
+  test('an address in a hosting provider names it and keeps the RDAP abuse contact', async () => {
+    const html = String(
+      await render(
+        <TrafficIpPage
+          query="192.0.2.9"
+          result={{ ip: '192.0.2.9', listed: true }}
+          owner={{
+            known: { ...host, range: '192.0.2.0/24' },
+            rdap: { owner: 'Example Hosting Ltd', network: 'EX', abuse_email: 'abuse@example.net' },
+          }}
+        />,
+      ),
+    );
+    expect(html).toContain('Example Hosting');
+    expect(html).toContain('AS64500');
+    expect(html).toContain('abuse@example.net');
+    expect(html).not.toContain('never listed here');
   });
 
   test('an address page names its owner: a known network, or RDAP with the abuse contact', async () => {

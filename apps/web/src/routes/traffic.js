@@ -7,7 +7,14 @@ import {
   rpzForDomains,
   rpzForIps,
 } from '@nichedb/core/traffic';
-import { OWNERS_FETCHED_AT, ownerOf, ownersList } from '@nichedb/core/traffic/owners';
+import {
+  OWNERS_FETCHED_AT,
+  ownerBySlug,
+  ownerOf,
+  ownersList,
+  PROVIDERS_CHECKED,
+  PROVIDERS_FETCHED_AT,
+} from '@nichedb/core/traffic/owners';
 import { rdapLookup } from '@nichedb/core/traffic/rdap';
 import * as q from '@nichedb/db/queries';
 import * as reputation from '@nichedb/db/reputation';
@@ -16,8 +23,9 @@ import { callerAddress } from '../lib/auth-throttle.js';
 import { render, wantsJson } from '../lib/http.js';
 import { canReview, Denied } from '../lib/service.js';
 import {
+  IpOwnerPage,
+  IpOwnersPage,
   TrafficIpPage,
-  TrafficOwnersPage,
   TrafficPage,
   TrafficReviewPage,
 } from '../views/traffic.jsx';
@@ -101,8 +109,9 @@ async function requireReviewer(c) {
 /** Who owns an address: a known owner from the registry, else RDAP. */
 export async function ownerFor(ip, { rdap = rdapLookup } = {}) {
   const known = ownerOf(ip);
-  if (known) return { known, rdap: null };
-  return { known: null, rdap: await rdap(ip) };
+  if (known?.shared) return { known, rdap: null };
+  // A hosting provider still gets its registry record: the abuse contact.
+  return { known, rdap: await rdap(ip) };
 }
 
 /**
@@ -124,24 +133,55 @@ async function ownersWithCounts() {
 }
 
 export function registerTraffic(app) {
-  /** Networks we know by name and never list, and why. */
-  app.get('/traffic/owners', async (c) => {
+  /** Who owns an IP: shared networks we never list, and hosting providers. */
+  const ownersPage = async (c) => {
     const owners = await ownersWithCounts();
     return c.html(
       await render(
-        <TrafficOwnersPage user={c.get('user')} owners={owners} fetchedAt={OWNERS_FETCHED_AT} />,
+        <IpOwnersPage
+          user={c.get('user')}
+          owners={owners}
+          fetchedAt={OWNERS_FETCHED_AT}
+          providersFetchedAt={PROVIDERS_FETCHED_AT}
+          providersChecked={PROVIDERS_CHECKED}
+        />,
       ),
     );
-  });
+  };
+  app.get('/ips/owners', ownersPage);
+  app.get('/traffic/owners', (c) => c.redirect('/ips/owners', 301));
 
-  app.get('/api/v1/traffic/owners', async (c) => {
+  const ownersJson = async (c) => {
     c.header('cache-control', 'public, max-age=600');
     return c.json({
       about:
-        'Networks we know by name (search crawlers, CDNs, public resolvers, company blocks). None is ever listed on /traffic. `banned` counts addresses in each that ThreatCrush banned on our servers.',
+        'Who owns an IP. `shared: true` owners (search crawlers, CDNs, public resolvers, company blocks) are never listed on /traffic. `shared: false` owners are hosting and seedbox providers from r4ck.dev and ch4nnels.com that run their own network; bans there are listed. `banned` counts addresses in each that ThreatCrush banned on our servers. Hosting providers omit `ranges` here; get them from /api/v1/ips/owners/<slug>.',
       ranges_fetched_at: OWNERS_FETCHED_AT,
-      owners: await ownersWithCounts(),
+      providers_fetched_at: PROVIDERS_FETCHED_AT,
+      owners: (await ownersWithCounts()).map((o) =>
+        o.shared ? o : { ...o, ranges: undefined, range_count: o.ranges.length },
+      ),
     });
+  };
+  app.get('/api/v1/ips/owners', ownersJson);
+  app.get('/api/v1/traffic/owners', ownersJson);
+
+  const ownerWithCount = async (slug) => {
+    const owner = ownerBySlug(slug);
+    if (!owner) return null;
+    const counts = (await ownersWithCounts()).find((o) => o.slug === slug);
+    return { ...owner, banned: counts?.banned ?? 0 };
+  };
+  app.get('/ips/owners/:slug', async (c) => {
+    const owner = await ownerWithCount(c.req.param('slug'));
+    if (!owner) return c.notFound();
+    return c.html(await render(<IpOwnerPage user={c.get('user')} owner={owner} />));
+  });
+  app.get('/api/v1/ips/owners/:slug', async (c) => {
+    const owner = await ownerWithCount(c.req.param('slug'));
+    if (!owner) return c.json({ error: 'not found' }, 404);
+    c.header('cache-control', 'public, max-age=600');
+    return c.json(owner);
   });
 
   app.get('/traffic', async (c) => {

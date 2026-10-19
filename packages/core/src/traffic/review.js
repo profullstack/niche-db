@@ -1,5 +1,5 @@
 import { isIP } from 'node:net';
-import { ownerOf } from './owners.js';
+import { sharedOwnerOf } from './owners.js';
 
 /**
  * riotcoder's review of the /traffic queue: the rules a careful person would
@@ -169,11 +169,11 @@ export function probesIn(paths = []) {
  */
 export function reviewAddress(row, ev = {}) {
   const ip = row.ip;
-  const owner = isIP(ip) ? ownerOf(ip) : null;
+  const owner = isIP(ip) ? sharedOwnerOf(ip) : null;
   if (owner)
     return {
       decision: 'reject',
-      note: `riotcoder review: owned by ${owner.name} (${owner.range}), a known network we never list. See /traffic/owners.`,
+      note: `riotcoder review: owned by ${owner.name} (${owner.range}), a known network we never list. See /ips/owners.`,
     };
   const sshOk = Number(ev.ssh_accepted) || 0;
   const sshBad = Number(ev.ssh_failed) || 0;

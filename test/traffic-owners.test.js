@@ -1,5 +1,12 @@
 import { describe, expect, test } from 'bun:test';
-import { ipToBigInt, ownerOf, ownersList } from '../packages/core/src/traffic/owners.js';
+import {
+  ipToBigInt,
+  ownerBySlug,
+  ownerOf,
+  ownersList,
+  PROVIDERS,
+  sharedOwnerOf,
+} from '../packages/core/src/traffic/owners.js';
 import { parseRdap, rdapLookup } from '../packages/core/src/traffic/rdap.js';
 import { isSharedIp } from '../packages/core/src/traffic/shared.js';
 
@@ -20,10 +27,16 @@ describe('ownerOf', () => {
 
   test('anyone else has no named owner and is not shared', () => {
     expect(ownerOf('45.148.10.7')).toBeNull();
-    expect(ownerOf('2a01:4f8::1')).toBeNull();
+    expect(ownerOf('2001:db8::1')).toBeNull();
     expect(ownerOf('not an ip')).toBeNull();
     expect(isSharedIp('45.148.10.7')).toBe(false);
     expect(isSharedIp('17.166.22.207')).toBe(true);
+  });
+
+  test('a Hetzner address is named as a hosting provider, and still listable', () => {
+    expect(ownerOf('2a01:4f8::1')).toMatchObject({ name: 'Hetzner', shared: false });
+    expect(sharedOwnerOf('2a01:4f8::1')).toBeNull();
+    expect(isSharedIp('2a01:4f8::1')).toBe(false);
   });
 
   test('IPv6 parsing handles :: and embedded IPv4', () => {
@@ -35,6 +48,18 @@ describe('ownerOf', () => {
     const list = ownersList();
     expect(list.map((o) => o.slug)).toContain('applebot');
     expect(list.every((o) => o.ranges.length && o.source && o.kind_name)).toBe(true);
+    expect(ownerBySlug('applebot')?.ranges.length).toBeGreaterThan(0);
+    expect(ownerBySlug('nope')).toBeNull();
+  });
+
+  test('a hosting provider is named but never shared, so its bans are listed', () => {
+    for (const p of PROVIDERS) {
+      const first = p.ranges.find((r) => !r.includes(':'))?.split('/')[0];
+      if (!first || sharedOwnerOf(first)) continue;
+      expect(ownerOf(first)).toMatchObject({ slug: p.slug, shared: false });
+      expect(isSharedIp(first)).toBe(false);
+    }
+    expect(PROVIDERS.every((p) => p.asns.length && p.directories.length)).toBe(true);
   });
 });
 

@@ -56,8 +56,8 @@ const Vetting = () => (
         asked for. riotcoder, our review agent, records the strongest reason it can find (an exploit
         probe in a request path, SSH brute force, or the ban itself). Kept off: networks we know by
         name (search crawlers like Applebot and Googlebot, CDNs like Cloudflare, public resolvers,
-        Apple's 17.0.0.0/8; see <a href="/traffic/owners">who owns what</a>), and anyone who logged
-        in over SSH. A person can reject any address, and a person's decision is never overturned.
+        Apple's 17.0.0.0/8; see <a href="/ips/owners">who owns what</a>), and anyone who logged in
+        over SSH. A person can reject any address, and a person's decision is never overturned.
       </li>
       <li>
         Private ranges, our own servers, verified search crawlers and visitors whose only offence
@@ -69,85 +69,121 @@ const Vetting = () => (
 
 /** Who holds an address: a known owner from our registry, else what RDAP says. */
 const OwnerBox = ({ owner }) => {
-  if (owner?.known)
+  const k = owner?.known;
+  if (k?.shared)
     return (
       <p>
-        <strong>Owner:</strong> {owner.known.name} ({owner.known.range}),{' '}
-        {OWNER_KINDS[owner.known.kind]?.toLowerCase() ?? owner.known.kind}. {owner.known.about} A{' '}
-        <a href="/traffic/owners">known network</a>, so it is never listed here.{' '}
-        <a href={owner.known.source} rel="noopener">
+        <strong>Owner:</strong> {k.name} ({k.range}), {OWNER_KINDS[k.kind]?.toLowerCase() ?? k.kind}
+        . {k.about} A <a href={`/ips/owners/${k.slug}`}>known network</a>, so it is never listed
+        here.{' '}
+        <a href={k.source} rel="noopener">
           Source
         </a>
       </p>
     );
+  const hosting = k ? (
+    <p>
+      <strong>Provider:</strong> <a href={`/ips/owners/${k.slug}`}>{k.name}</a> ({k.range}), a
+      hosting provider on its own network ({k.asns.map((a) => `AS${a.asn}`).join(', ')}), listed on{' '}
+      {k.directories.map((d, i) => (
+        <>
+          {i ? ' and ' : ''}
+          <a href={d.url}>{d.site}</a>
+        </>
+      ))}
+      . A rented server is one actor, so bans here are listed.
+    </p>
+  ) : null;
   const r = owner?.rdap;
-  if (!r?.owner) return null;
+  if (!r?.owner) return hosting;
   return (
-    <table>
-      <tbody>
-        <tr>
-          <th>Owner</th>
-          <td>
-            {r.owner}
-            {r.country ? ` (${r.country})` : ''}
-          </td>
-        </tr>
-        <tr>
-          <th>Network</th>
-          <td>
-            {r.network} {r.range ? <code>{r.range}</code> : null}
-          </td>
-        </tr>
-        {r.abuse_email ? (
+    <>
+      {hosting}
+      <table>
+        <tbody>
           <tr>
-            <th>Abuse contact</th>
+            <th>Owner</th>
             <td>
-              <a href={`mailto:${r.abuse_email}`}>{r.abuse_email}</a>
+              {r.owner}
+              {r.country ? ` (${r.country})` : ''}
             </td>
           </tr>
-        ) : null}
-        <tr>
-          <th>Registry</th>
-          <td>
-            {r.source ? (
-              <a href={r.source} rel="noopener">
-                {r.registry ?? 'RDAP'}
-              </a>
-            ) : (
-              (r.registry ?? 'RDAP')
-            )}
-          </td>
-        </tr>
-      </tbody>
-    </table>
+          <tr>
+            <th>Network</th>
+            <td>
+              {r.network} {r.range ? <code>{r.range}</code> : null}
+            </td>
+          </tr>
+          {r.abuse_email ? (
+            <tr>
+              <th>Abuse contact</th>
+              <td>
+                <a href={`mailto:${r.abuse_email}`}>{r.abuse_email}</a>
+              </td>
+            </tr>
+          ) : null}
+          <tr>
+            <th>Registry</th>
+            <td>
+              {r.source ? (
+                <a href={r.source} rel="noopener">
+                  {r.registry ?? 'RDAP'}
+                </a>
+              ) : (
+                (r.registry ?? 'RDAP')
+              )}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </>
   );
 };
 
-/** /traffic/owners: the networks we know by name and never list. */
-export function TrafficOwnersPage({ user, owners, fetchedAt }) {
+const OwnerRanges = ({ ranges }) => (
+  <details>
+    <summary>
+      <Num n={ranges.length} />
+    </summary>
+    <code>{ranges.join(' ')}</code>
+  </details>
+);
+
+/**
+ * /ips/owners: who owns an IP. The shared networks we never list, then the
+ * hosting and seedbox providers from r4ck.dev and ch4nnels.com that run their
+ * own network, whose bans are listed like anyone else's.
+ */
+export function IpOwnersPage({ user, owners, fetchedAt, providersFetchedAt, providersChecked }) {
+  const shared = owners.filter((o) => o.shared);
+  const hosting = owners.filter((o) => !o.shared);
   return (
     <Layout
       user={user}
       wide
-      canonical="/traffic/owners"
-      title="Who owns an IP: networks we never list"
-      description="Search crawlers, CDNs, public resolvers and company networks we know by name, with their address ranges and sources. None is ever put on the nichedb.dev blocklist."
+      canonical="/ips/owners"
+      title="Who owns an IP: crawlers, CDNs, resolvers and hosting providers"
+      description="IP ranges by owner: search crawlers, CDNs, public resolvers and company networks we never list, plus the hosting and seedbox providers from r4ck.dev and ch4nnels.com that run their own networks."
     >
       <section class="hero">
         <h1>Who owns an IP</h1>
         <p class="lede">
-          Networks we know by name. A ban on one of these would block a search engine, a whole CDN
-          or a public DNS resolver, never one attacker, so none is ever listed on{' '}
-          <a href="/traffic">/traffic</a>. Look up any address to see who holds it: the ones not
-          below are answered from the regional registries (RDAP).
+          Address ranges by owner. Look up any address to see who holds it; one we do not know by
+          name is answered from the regional registries (RDAP).
         </p>
         <Lookup />
         <p>
-          Crawler and CDN ranges come from each owner's published list, last fetched{' '}
-          {day(fetchedAt)}. JSON: <a href="/api/v1/traffic/owners">/api/v1/traffic/owners</a>
+          JSON: <a href="/api/v1/ips/owners">/api/v1/ips/owners</a>, one owner with every range at{' '}
+          <code>/api/v1/ips/owners/&lt;slug&gt;</code>.
         </p>
       </section>
       <section>
+        <h2>Shared networks, never listed</h2>
+        <p>
+          A ban on one of these would block a search engine, a whole CDN or a public DNS resolver,
+          never one attacker, so none is ever listed on <a href="/traffic">/traffic</a>. Crawler and
+          CDN ranges come from each owner's published list, last fetched {day(fetchedAt)}.
+        </p>
         <table>
           <thead>
             <tr>
@@ -159,21 +195,18 @@ export function TrafficOwnersPage({ user, owners, fetchedAt }) {
             </tr>
           </thead>
           <tbody>
-            {owners.map((o) => (
+            {shared.map((o) => (
               <tr id={o.slug}>
                 <td>
-                  <strong>{o.name}</strong>
+                  <a href={`/ips/owners/${o.slug}`}>
+                    <strong>{o.name}</strong>
+                  </a>
                   <br />
                   <small>{o.about}</small>
                 </td>
                 <td>{o.kind_name}</td>
                 <td class="num">
-                  <details>
-                    <summary>
-                      <Num n={o.ranges.length} />
-                    </summary>
-                    <code>{o.ranges.join(' ')}</code>
-                  </details>
+                  <OwnerRanges ranges={o.ranges} />
                 </td>
                 <td class="num">
                   <Num n={o.banned} />
@@ -187,6 +220,109 @@ export function TrafficOwnersPage({ user, owners, fetchedAt }) {
             ))}
           </tbody>
         </table>
+      </section>
+      <section>
+        <h2>Hosting and seedbox providers</h2>
+        <p>
+          The providers listed on <a href="https://r4ck.dev">r4ck.dev</a> and{' '}
+          <a href="https://ch4nnels.com/seedboxes">ch4nnels.com</a> that run their own network:{' '}
+          <Num n={hosting.length} /> of the <Num n={providersChecked} /> checked. A provider owns a
+          range when it holds the autonomous system announcing it (PeeringDB, RIPEstat), last
+          checked {day(providersFetchedAt)}. The rest rent space on someone else's network. A rented
+          server is one actor, so bans here are listed.
+        </p>
+        <table>
+          <thead>
+            <tr>
+              <th>Provider</th>
+              <th>Networks</th>
+              <th class="num">Ranges</th>
+              <th class="num">Banned by ThreatCrush</th>
+              <th>Listed on</th>
+            </tr>
+          </thead>
+          <tbody>
+            {hosting.map((o) => (
+              <tr id={o.slug}>
+                <td>
+                  <a href={`/ips/owners/${o.slug}`}>
+                    <strong>{o.name}</strong>
+                  </a>
+                  <br />
+                  <small>
+                    <a href={o.website} rel="noopener">
+                      {new URL(o.website).hostname}
+                    </a>
+                  </small>
+                </td>
+                <td>
+                  {o.asns.map((a) => (
+                    <>
+                      <a href={`https://bgp.he.net/AS${a.asn}`} rel="noopener">
+                        AS{a.asn}
+                      </a>{' '}
+                      <small>{a.holder}</small>
+                      <br />
+                    </>
+                  ))}
+                </td>
+                <td class="num">
+                  <Num n={o.ranges.length} />
+                </td>
+                <td class="num">
+                  <Num n={o.banned} />
+                </td>
+                <td>
+                  {o.directories.map((d, i) => (
+                    <>
+                      {i ? ', ' : ''}
+                      <a href={d.url}>{d.site}</a>
+                    </>
+                  ))}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+    </Layout>
+  );
+}
+
+/** /ips/owners/:slug: one owner and every range it holds. */
+export function IpOwnerPage({ user, owner }) {
+  return (
+    <Layout
+      user={user}
+      canonical={`/ips/owners/${owner.slug}`}
+      title={`${owner.name} IP ranges`}
+      description={`Every IP range ${owner.name} holds (${owner.ranges.length}), from nichedb.dev's IP owner registry.`}
+    >
+      <section class="hero">
+        <p>
+          <a href="/ips/owners">Who owns an IP</a>
+        </p>
+        <h1>{owner.name} IP ranges</h1>
+        <p class="lede">
+          {owner.kind_name}. {owner.about}{' '}
+          {owner.shared
+            ? 'A shared network, so no address in it is ever listed on /traffic.'
+            : 'A rented server is one actor, so bans here are listed on /traffic.'}
+        </p>
+        <p>
+          <Num n={owner.banned} /> addresses here banned by ThreatCrush.{' '}
+          <a href={owner.source} rel="noopener">
+            Source
+          </a>
+          {' · '}
+          <a href={`/api/v1/ips/owners/${owner.slug}`}>JSON</a>
+        </p>
+      </section>
+      <section>
+        <h2>
+          <Num n={owner.ranges.length} /> ranges
+        </h2>
+        <pre>{owner.ranges.join('\n')}</pre>
       </section>
     </Layout>
   );
@@ -454,7 +590,7 @@ export function TrafficIpPage({ user, query, result, owner, error, notice }) {
         <Lookup value={query} />
         <p>
           <a href="/traffic">About this list and how it is reviewed</a> ·{' '}
-          <a href="/traffic/owners">Who owns what</a>
+          <a href="/ips/owners">Who owns what</a>
         </p>
       </section>
     </Layout>

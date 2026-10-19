@@ -268,7 +268,7 @@ export async function approvedForReview({ limit = 100_000 } = {}, { db = sql } =
   }));
 }
 
-/** Every address we hold with its status, for the owner counts on /traffic/owners. */
+/** Every address we hold with its status, for the owner counts on /ips/owners. */
 export async function allStatuses({ db = sql } = {}) {
   return db`select host(ip) as ip, status from traffic_ips`;
 }

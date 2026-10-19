@@ -4,7 +4,6 @@ import { bundledTemplate, latestTemplate, renderFooter } from '@profullstack/foo
 import { raw } from 'hono/html';
 import { assetUrl } from '../lib/asset-version.js';
 import { currentModules } from '../lib/modules.js';
-import { pitFooterHtml } from '../lib/pit-footer.js';
 
 const faviconFor = (user) => {
   const icon = appIconFor({ plan: currentModules().plan, icon: user?.premium_icon });
@@ -228,8 +227,6 @@ export const Layout = (props) => (
       {config.ads.enabled && currentModules().ads ? (
         <script src="https://crawlproof.com/ad.js" async />
       ) : null}
-      {/* The pit.world global footer, last in <body>. */}
-      {raw(pitFooterHtml())}
     </body>
   </html>
 );

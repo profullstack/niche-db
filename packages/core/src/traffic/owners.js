@@ -1,5 +1,6 @@
 import { isIP } from 'node:net';
 import data from './owners-data.json' with { type: 'json' };
+import providers from './providers-data.json' with { type: 'json' };
 
 /**
  * Who owns an address, for the networks we know by name: crawlers, CDNs,
@@ -12,6 +13,11 @@ import data from './owners-data.json' with { type: 'json' };
  * owners-data.json, refreshed by `bun scripts/refresh-ip-owners.js`. The rest
  * are written here with where they come from. Any other address is looked up
  * in RDAP (rdap.js), which names the network's registrant.
+ *
+ * PROVIDERS are the hosting and seedbox companies listed on r4ck.dev and
+ * ch4nnels.com that run their own network (providers-data.json, refreshed by
+ * `bun scripts/refresh-provider-ranges.js`). They are looked up but never kept
+ * off: a rented server is one actor, so a ban there is listed like any other.
  */
 export const OWNERS = [
   {
@@ -86,13 +92,33 @@ export const OWNERS = [
     source: 'https://www.opendns.com/',
     ranges: ['208.67.222.222/32', '208.67.220.220/32'],
   },
-];
+].map((o) => ({ ...o, shared: true }));
+
+const slugify = (s) =>
+  String(s)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
+
+export const PROVIDERS = providers.providers.map((p) => ({
+  slug: slugify(p.domain),
+  name: p.name,
+  kind: 'hosting',
+  about: `Runs its own network: ${p.asns.map((a) => `AS${a.asn} (${a.holder})`).join(', ')}. Listed on ${p.directories.map((d) => d.site).join(' and ')}.`,
+  source: `https://bgp.he.net/AS${p.asns[0].asn}`,
+  website: `https://${p.domain}`,
+  asns: p.asns.map(({ asn, holder }) => ({ asn, holder })),
+  directories: p.directories,
+  shared: false,
+  ranges: p.ranges,
+}));
 
 export const OWNER_KINDS = {
   crawler: 'Search crawler',
   company: 'Company network',
   cdn: 'CDN edge',
   resolver: 'Public DNS resolver',
+  hosting: 'Hosting provider',
 };
 
 /** An address as a BigInt and its width in bits, or null. */
@@ -129,31 +155,61 @@ function parseCidr(cidr) {
   return { cidr, width, len, net: (n >> shift) << shift, shift };
 }
 
-/** Every range, most specific first, so Applebot wins over Apple's /8. */
-const RANGES = OWNERS.flatMap((owner) =>
-  owner.ranges.map((r) => ({ ...parseCidr(r), owner })),
-).sort((a, b) => b.len - a.len);
-
 /**
- * The named owner of an address: { slug, name, kind, about, source, range },
- * or null when it is not one we know by name.
+ * Ranges indexed by width and prefix length, so a lookup is one map hit per
+ * distinct length rather than a scan of every range (the providers alone
+ * announce thousands).
  */
-export function ownerOf(ip) {
+function index(owners) {
+  const byLen = new Map();
+  for (const owner of owners)
+    for (const cidr of owner.ranges) {
+      const r = parseCidr(cidr);
+      const key = `${r.width}/${r.len}`;
+      if (!byLen.has(key)) byLen.set(key, { ...r, nets: new Map() });
+      const nets = byLen.get(key).nets;
+      if (!nets.has(r.net)) nets.set(r.net, { cidr, owner });
+    }
+  // Most specific first, so Applebot wins over Apple's /8.
+  return [...byLen.values()].sort((a, b) => b.len - a.len);
+}
+const SHARED = index(OWNERS);
+const HOSTING = index(PROVIDERS);
+
+function find(idx, ip) {
   const parsed = ipToBigInt(ip);
   if (!parsed) return null;
   const [n, width] = parsed;
-  for (const r of RANGES) {
-    if (r.width === width && (n >> r.shift) << r.shift === r.net) {
-      const { ranges: _ranges, ...owner } = r.owner;
-      return { ...owner, range: r.cidr };
+  for (const level of idx) {
+    if (level.width !== width) continue;
+    const hit = level.nets.get((n >> level.shift) << level.shift);
+    if (hit) {
+      const { ranges: _ranges, ...owner } = hit.owner;
+      return { ...owner, range: hit.cidr };
     }
   }
   return null;
 }
 
-/** The registry as published on /traffic/owners and its JSON. */
+/**
+ * A shared network we never list (crawler, CDN, resolver, company block):
+ * { slug, name, kind, about, source, shared: true, range }, or null.
+ */
+export function sharedOwnerOf(ip) {
+  return find(SHARED, ip);
+}
+
+/**
+ * The named owner of an address: a shared network first, else a hosting
+ * provider (shared: false), else null when it is not one we know by name.
+ */
+export function ownerOf(ip) {
+  return find(SHARED, ip) ?? find(HOSTING, ip);
+}
+
+/** The registry as published on /ips/owners and its JSON. */
 export function ownersList() {
-  return OWNERS.map(({ ranges, ...o }) => ({
+  return [...OWNERS, ...PROVIDERS].map(({ ranges, ...o }) => ({
     ...o,
     kind_name: OWNER_KINDS[o.kind] ?? o.kind,
     ranges,
@@ -161,3 +217,11 @@ export function ownersList() {
 }
 
 export const OWNERS_FETCHED_AT = data.fetched_at;
+export const PROVIDERS_FETCHED_AT = providers.fetched_at;
+export const PROVIDERS_CHECKED = providers.checked;
+
+/** One owner by slug, with its ranges, or null. */
+export function ownerBySlug(slug) {
+  const o = [...OWNERS, ...PROVIDERS].find((x) => x.slug === slug);
+  return o ? { ...o, kind_name: OWNER_KINDS[o.kind] ?? o.kind } : null;
+}
