@@ -372,6 +372,12 @@ export const COLLECTIONS = [
       'Seedbox providers and every plan they sell, from the ch4nnels.com seedbox register: each host read from its own pricing page, with datacenter countries, the apps a box ships (Plex, qBittorrent, rTorrent, the *arrs), features, payment, refund and trial, and per plan the price as quoted, the monthly price in EUR, EUR per TB, storage and disk kind, traffic (unmetered where the host says so), port speed and location. Unknowns stay unknown; a plan with no published price is tagged unpriced, never zero. Follow a country, an app, unmetered plans or 10 Gbps ports.',
   },
   {
+    slug: 'iptv',
+    name: 'IPTV services',
+    description:
+      'IPTV and live-TV services and every plan they sell, from the ch4nnels.com register: each service read from its own pricing page, with countries, channel and VOD counts, devices, max resolution, trial, EPG, catch-up, payment and apps, and per plan the price as quoted, length, monthly EUR and devices; plus the daily check of the service’s own pricing page (ok, drift, unverifiable, down). ArgonTV is the one ch4nnels resells, marked as such. Follow a country, a resolution, or the services whose page no longer shows the listed price.',
+  },
+  {
     slug: 'peptides',
     name: 'Peptides',
     description:
@@ -386,6 +392,32 @@ export const COLLECTIONS = [
 ];
 
 export const DEFAULT_FEEDS = [
+  {
+    collection: 'iptv',
+    slug: 'iptv-providers',
+    name: 'IPTV services',
+    description: 'Every IPTV and live-TV service in the register, one row each.',
+    query: { kinds: ['provider'] },
+  },
+  {
+    collection: 'iptv',
+    slug: 'iptv-plans',
+    name: 'IPTV plans',
+    description: 'Every plan with price, length, monthly EUR and devices.',
+    query: { kinds: ['plan'] },
+  },
+  {
+    collection: 'iptv',
+    slug: 'iptv-price-drift',
+    name: 'IPTV services whose page no longer shows the listed price',
+    query: { kinds: ['provider'], tags: ['price:drift'] },
+  },
+  {
+    collection: 'seedboxes',
+    slug: 'seedbox-price-drift',
+    name: 'Seedbox hosts whose page no longer shows the listed price',
+    query: { kinds: ['provider'], tags: ['price:drift'] },
+  },
   {
     collection: 'peptides',
     slug: 'peptide-vendors',

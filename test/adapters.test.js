@@ -107,6 +107,7 @@ describe('registry', () => {
         'radio',
         'seedboxes',
         'peptides',
+        'iptv',
         'weed',
       ]).toContain(a.collection);
     }
