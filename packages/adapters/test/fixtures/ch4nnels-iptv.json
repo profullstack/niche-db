@@ -1,0 +1,42 @@
+{
+  "providers": [
+    {
+      "slug": "argontv",
+      "name": "ArgonTV",
+      "kind": "independent",
+      "url": "https://argontv.nl",
+      "pricing_url": "https://argontv.nl/pricing",
+      "page": "https://ch4nnels.com/p/argontv",
+      "countries": ["GB", "NL"],
+      "channels": 35000,
+      "vod": 90000,
+      "max_connections": 3,
+      "max_resolution": "4K",
+      "trial": "1 day free",
+      "epg": true,
+      "catchup": true,
+      "payment": ["card", "crypto"],
+      "apps": ["android", "ios"],
+      "sports": "Premier League",
+      "notes": "Reseller-backed independent service.",
+      "checked_at": "2026-10-17",
+      "monthly_eur": 2.92,
+      "from_eur": 5,
+      "featured": true,
+      "plans": [
+        { "name": "1 Month", "months": 1, "price": 5, "currency": "EUR", "connections": 3, "price_eur": 5, "monthly_eur": 5 },
+        { "name": "6 Months", "months": 6, "price": 20, "currency": "EUR", "connections": 3, "price_eur": 20, "monthly_eur": 3.3333 }
+      ]
+    },
+    {
+      "slug": "directv-stream",
+      "name": "DirecTV Stream",
+      "kind": "licensed",
+      "url": "https://www.directv.com/stream/",
+      "countries": ["US"],
+      "payment": [],
+      "plans": [{ "name": null, "months": 1, "price": null, "currency": "USD" }]
+    },
+    { "slug": "", "name": "Nameless" }
+  ]
+}

@@ -13,6 +13,7 @@ import {
   descriptorUrl,
   liftMemory,
   openserver,
+  originsFromList,
   parseAliases,
   parseDescriptor,
   servedByProvider,
@@ -263,6 +264,50 @@ describe('LowEndBox posts', () => {
 
 describe('OpenServer descriptors', () => {
   const URL_ = 'https://www.example-host.com/.well-known/openserver.json';
+
+  test("r4ck.dev's origin list feeds the descriptors: domains only, deduplicated, an unreadable list skipped", async () => {
+    expect(openserver.defaults.originLists).toEqual(['https://r4ck.dev/api/v1/openserver-origins']);
+    expect(
+      originsFromList({
+        origins: [
+          {
+            domain: 'Exos.Tech',
+            provider: 'exos',
+            url: 'https://exos.tech/.well-known/openserver.json',
+          },
+          { domain: 'not a domain' },
+          'host.example',
+        ],
+      }),
+    ).toEqual(['https://exos.tech', 'https://host.example']);
+    expect(originsFromList({})).toEqual([]);
+    const seen = [];
+    const http = {
+      json: async (url) => {
+        seen.push(url);
+        if (url === 'https://r4ck.dev/api/v1/openserver-origins')
+          return { origins: [{ domain: 'exos.tech' }, { domain: 'new-host.example' }] };
+        throw new Error(`404 from ${url}`);
+      },
+    };
+    const out = await openserver.pull({
+      config: {
+        ...openserver.defaults,
+        urls: ['https://exos.tech'],
+        originLists: [...openserver.defaults.originLists, 'https://broken.example/list'],
+      },
+      http,
+      log: () => {},
+      deadline: Date.now() + 10_000,
+    });
+    expect(seen).toEqual([
+      'https://r4ck.dev/api/v1/openserver-origins',
+      'https://broken.example/list',
+      'https://exos.tech/.well-known/openserver.json',
+      'https://new-host.example/.well-known/openserver.json',
+    ]);
+    expect(out.items).toEqual([]);
+  });
 
   test('a bare origin is read at the well-known path; a full URL as given', () => {
     expect(descriptorUrl('example-host.com')).toBe(
