@@ -156,6 +156,9 @@ describe('the upsell appears where the thing it sells is missing', () => {
     expect(html).toContain('data-cp-ad');
     expect(html).toContain('/premium');
     expect(html).toContain('Premium turns both off');
+    // Top of the content, never pressed against the footer.
+    expect(html.indexOf('data-cp-ad')).toBeGreaterThan(html.indexOf('<main'));
+    expect(html.indexOf('data-cp-ad')).toBeLessThan(html.indexOf('hello'));
   });
 
   test("a member's page carries neither the ad nor the pitch for it", async () => {
