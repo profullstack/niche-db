@@ -384,6 +384,12 @@ export const COLLECTIONS = [
       'Research-peptide vendors and every listing they sell, from the search.peptides register. Each vendor with its independent lab score and pass/fail counts (Finnrick), payment methods, where it ships from, how you order, coupons, and a contact card read from its own site: emails, phones, websites, WhatsApp, Telegram and socials. Each listing with the peptide, size, price as quoted, USD, USD per mg and stock, flagged where the vendor passed a lab test for that peptide. Not affiliated with Finnrick or any vendor; for research use, not medical advice.',
   },
   {
+    slug: 'weed',
+    name: 'Weed',
+    description:
+      'Licensed cannabis dispensaries from the weedforcrypto.com directory, built from official regulator licence lists: US state cannabis boards, Canadian provincial registries, Uruguay\u2019s IRCCA pharmacies, Amsterdam coffeeshop permits and Thailand\u2019s DTAM shop licences. Each store with its licence number, type and status, address and coordinates (so near= and sort=distance work), medical or adult-use, licensed delivery, and whether it takes crypto through CoinPay. Re-synced from the regulators daily; a licence that drops off its list drops out. Follow a country, a state or province, delivery, or the stores that take crypto.',
+  },
+  {
     slug: 'launches',
     name: 'Launches',
     description:
@@ -487,6 +493,68 @@ export const DEFAULT_FEEDS = [
     slug: 'peptide-listings-passed',
     name: 'Listings from vendors that passed a test for that peptide',
     query: { kinds: ['listing'], tags: ['passed-test'] },
+  },
+  {
+    collection: 'weed',
+    slug: 'weed-dispensaries',
+    name: 'Licensed dispensaries',
+    description: 'Every licensed store in the directory, most recently changed first.',
+    query: { kinds: ['dispensary'] },
+  },
+  {
+    collection: 'weed',
+    slug: 'weed-crypto',
+    name: 'Dispensaries that take crypto',
+    description: 'Stores that accept Bitcoin, Lightning or stablecoins, most through CoinPay.',
+    query: { kinds: ['dispensary'], tags: ['crypto'] },
+  },
+  {
+    collection: 'weed',
+    slug: 'weed-delivery',
+    name: 'Licensed cannabis delivery',
+    query: { kinds: ['dispensary'], tags: ['delivery'] },
+  },
+  {
+    collection: 'weed',
+    slug: 'weed-medical',
+    name: 'Medical dispensaries',
+    query: { kinds: ['dispensary'], tags: ['medical'] },
+  },
+  {
+    collection: 'weed',
+    slug: 'weed-adult-use',
+    name: 'Adult-use dispensaries',
+    query: { kinds: ['dispensary'], tags: ['adult-use'] },
+  },
+  {
+    collection: 'weed',
+    slug: 'weed-us',
+    name: 'Dispensaries in the United States',
+    query: { kinds: ['dispensary'], tags: ['country:us'] },
+  },
+  {
+    collection: 'weed',
+    slug: 'weed-canada',
+    name: 'Cannabis stores in Canada',
+    query: { kinds: ['dispensary'], tags: ['country:ca'] },
+  },
+  {
+    collection: 'weed',
+    slug: 'weed-uruguay',
+    name: 'Cannabis pharmacies in Uruguay',
+    query: { kinds: ['dispensary'], tags: ['country:uy'] },
+  },
+  {
+    collection: 'weed',
+    slug: 'weed-thailand',
+    name: 'Licensed cannabis shops in Thailand',
+    query: { kinds: ['dispensary'], tags: ['country:th'] },
+  },
+  {
+    collection: 'weed',
+    slug: 'weed-netherlands',
+    name: 'Amsterdam coffeeshops',
+    query: { kinds: ['dispensary'], tags: ['country:nl'] },
   },
   {
     collection: 'seedboxes',
