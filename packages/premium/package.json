@@ -1,6 +1,6 @@
 {
   "name": "@nichedb/premium",
-  "version": "0.44.2",
+  "version": "0.45.1",
   "private": true,
   "type": "module",
   "exports": {
