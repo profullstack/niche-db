@@ -1,4 +1,5 @@
 import { CATEGORIES } from '@nichedb/core/traffic';
+import { OWNER_KINDS } from '@nichedb/core/traffic/owners';
 import { Num, Relative } from './components.jsx';
 import { Layout } from './Layout.jsx';
 
@@ -53,9 +54,10 @@ const Vetting = () => (
         <strong>Every ThreatCrush ban is published</strong>, marked <em>ThreatCrush verified</em>,
         with its evidence: which rules fired, on how many of our servers, how often, and what it
         asked for. riotcoder, our review agent, records the strongest reason it can find (an exploit
-        probe in a request path, SSH brute force, or the ban itself). Kept off: shared CDN and
-        resolver addresses (Cloudflare and the like), and anyone who logged in over SSH. A person
-        can reject any address, and a person's decision is never overturned.
+        probe in a request path, SSH brute force, or the ban itself). Kept off: networks we know by
+        name (search crawlers like Applebot and Googlebot, CDNs like Cloudflare, public resolvers,
+        Apple's 17.0.0.0/8; see <a href="/traffic/owners">who owns what</a>), and anyone who logged
+        in over SSH. A person can reject any address, and a person's decision is never overturned.
       </li>
       <li>
         Private ranges, our own servers, verified search crawlers and visitors whose only offence
@@ -64,6 +66,131 @@ const Vetting = () => (
     </ol>
   </section>
 );
+
+/** Who holds an address: a known owner from our registry, else what RDAP says. */
+const OwnerBox = ({ owner }) => {
+  if (owner?.known)
+    return (
+      <p>
+        <strong>Owner:</strong> {owner.known.name} ({owner.known.range}),{' '}
+        {OWNER_KINDS[owner.known.kind]?.toLowerCase() ?? owner.known.kind}. {owner.known.about} A{' '}
+        <a href="/traffic/owners">known network</a>, so it is never listed here.{' '}
+        <a href={owner.known.source} rel="noopener">
+          Source
+        </a>
+      </p>
+    );
+  const r = owner?.rdap;
+  if (!r?.owner) return null;
+  return (
+    <table>
+      <tbody>
+        <tr>
+          <th>Owner</th>
+          <td>
+            {r.owner}
+            {r.country ? ` (${r.country})` : ''}
+          </td>
+        </tr>
+        <tr>
+          <th>Network</th>
+          <td>
+            {r.network} {r.range ? <code>{r.range}</code> : null}
+          </td>
+        </tr>
+        {r.abuse_email ? (
+          <tr>
+            <th>Abuse contact</th>
+            <td>
+              <a href={`mailto:${r.abuse_email}`}>{r.abuse_email}</a>
+            </td>
+          </tr>
+        ) : null}
+        <tr>
+          <th>Registry</th>
+          <td>
+            {r.source ? (
+              <a href={r.source} rel="noopener">
+                {r.registry ?? 'RDAP'}
+              </a>
+            ) : (
+              (r.registry ?? 'RDAP')
+            )}
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  );
+};
+
+/** /traffic/owners: the networks we know by name and never list. */
+export function TrafficOwnersPage({ user, owners, fetchedAt }) {
+  return (
+    <Layout
+      user={user}
+      wide
+      canonical="/traffic/owners"
+      title="Who owns an IP: networks we never list"
+      description="Search crawlers, CDNs, public resolvers and company networks we know by name, with their address ranges and sources. None is ever put on the nichedb.dev blocklist."
+    >
+      <section class="hero">
+        <h1>Who owns an IP</h1>
+        <p class="lede">
+          Networks we know by name. A ban on one of these would block a search engine, a whole CDN
+          or a public DNS resolver, never one attacker, so none is ever listed on{' '}
+          <a href="/traffic">/traffic</a>. Look up any address to see who holds it: the ones not
+          below are answered from the regional registries (RDAP).
+        </p>
+        <Lookup />
+        <p>
+          Crawler and CDN ranges come from each owner's published list, last fetched{' '}
+          {day(fetchedAt)}. JSON: <a href="/api/v1/traffic/owners">/api/v1/traffic/owners</a>
+        </p>
+      </section>
+      <section>
+        <table>
+          <thead>
+            <tr>
+              <th>Owner</th>
+              <th>Kind</th>
+              <th class="num">Ranges</th>
+              <th class="num">Banned by ThreatCrush, kept off</th>
+              <th>Source</th>
+            </tr>
+          </thead>
+          <tbody>
+            {owners.map((o) => (
+              <tr id={o.slug}>
+                <td>
+                  <strong>{o.name}</strong>
+                  <br />
+                  <small>{o.about}</small>
+                </td>
+                <td>{o.kind_name}</td>
+                <td class="num">
+                  <details>
+                    <summary>
+                      <Num n={o.ranges.length} />
+                    </summary>
+                    <code>{o.ranges.join(' ')}</code>
+                  </details>
+                </td>
+                <td class="num">
+                  <Num n={o.banned} />
+                </td>
+                <td>
+                  <a href={o.source} rel="noopener">
+                    {new URL(o.source).hostname}
+                  </a>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+    </Layout>
+  );
+}
 
 const Row = ({ r }) => (
   <tr>
@@ -260,7 +387,7 @@ const DelistForm = ({ ip }) => (
   </details>
 );
 
-export function TrafficIpPage({ user, query, result, error, notice }) {
+export function TrafficIpPage({ user, query, result, owner, error, notice }) {
   return (
     <Layout
       user={user}
@@ -323,9 +450,11 @@ export function TrafficIpPage({ user, query, result, error, notice }) {
             <DelistForm ip={query} />
           </>
         ) : null}
+        <OwnerBox owner={owner} />
         <Lookup value={query} />
         <p>
-          <a href="/traffic">About this list and how it is reviewed</a>
+          <a href="/traffic">About this list and how it is reviewed</a> ·{' '}
+          <a href="/traffic/owners">Who owns what</a>
         </p>
       </section>
     </Layout>

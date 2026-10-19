@@ -4,7 +4,10 @@ process.env.DATABASE_URL ??= 'postgres://test:test@localhost:5432/test';
 process.env.SITE_URL ??= 'https://nichedb.test';
 
 const { render } = await import('../lib/http.js');
-const { TrafficIpPage, TrafficPage, TrafficReviewPage } = await import('./traffic.jsx');
+const { TrafficIpPage, TrafficOwnersPage, TrafficPage, TrafficReviewPage } = await import(
+  './traffic.jsx'
+);
+const { ownerOf, ownersList } = await import('@nichedb/core/traffic/owners');
 
 const row = {
   ip: '45.148.10.7',
@@ -29,6 +32,53 @@ const stats = (over = {}) => ({
 });
 
 describe('traffic views', () => {
+  test('the owners page lists every known network with its count and source', async () => {
+    const owners = ownersList().map((o) => ({ ...o, banned: o.slug === 'applebot' ? 112 : 0 }));
+    const html = String(
+      await render(<TrafficOwnersPage owners={owners} fetchedAt="2026-10-19T00:00:00Z" />),
+    );
+    expect(html).toContain('Who owns an IP');
+    expect(html).toContain('Applebot (Apple)');
+    expect(html).toContain('17.0.0.0/8');
+    expect(html).toContain('112');
+    expect(html).toContain('search.developer.apple.com');
+  });
+
+  test('an address page names its owner: a known network, or RDAP with the abuse contact', async () => {
+    const known = String(
+      await render(
+        <TrafficIpPage
+          query="17.166.22.207"
+          result={{ ip: '17.166.22.207', listed: false }}
+          owner={{ known: ownerOf('17.166.22.207'), rdap: null }}
+        />,
+      ),
+    );
+    expect(known).toContain('Applebot (Apple)');
+    expect(known).toContain('never listed');
+    const rdap = String(
+      await render(
+        <TrafficIpPage
+          query="45.33.32.156"
+          result={{ ip: '45.33.32.156', listed: false }}
+          owner={{
+            known: null,
+            rdap: {
+              owner: 'Linode',
+              network: 'LINODE',
+              range: '45.33.0.0/17',
+              abuse_email: 'abuse@linode.com',
+              registry: 'whois.arin.net',
+              source: 'https://rdap.arin.net/registry/ip/45.33.0.0',
+            },
+          }}
+        />,
+      ),
+    );
+    expect(rdap).toContain('Linode');
+    expect(rdap).toContain('mailto:abuse@linode.com');
+  });
+
   test('the public page says how it is reviewed and shows approved rows', async () => {
     const html = String(
       await render(

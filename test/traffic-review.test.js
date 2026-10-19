@@ -92,6 +92,14 @@ describe('reviewAddress', () => {
     expect(reviewAddress(row('172.71.183.86', { paths: ['/.env'] })).decision).toBe('reject');
   });
 
+  test("Applebot and the rest of Apple's 17.0.0.0/8 stay off, naming the owner", () => {
+    const bot = reviewAddress(row('17.166.22.207', { paths: ['/.env'] }));
+    expect(bot.decision).toBe('reject');
+    expect(bot.note).toContain('Applebot (Apple)');
+    expect(bot.note).toContain('17.166.22.0/24');
+    expect(reviewAddress(row('17.1.2.3')).note).toContain('Apple Inc. (17.0.0.0/8)');
+  });
+
   test('anyone who logged in over SSH is an operator', () => {
     const r = reviewAddress(row('172.12.140.170', { paths: ['/.env'] }), { ssh_accepted: 2 });
     expect(r.decision).toBe('reject');
@@ -105,7 +113,7 @@ describe('reviewAddress', () => {
   });
 
   test('every other ThreatCrush ban approves (Anthony, 2026-10-19: "just approve all")', () => {
-    const busy = reviewAddress(row('17.166.22.207', { blocks: 4, servers: 2 }), {
+    const busy = reviewAddress(row('45.148.10.20', { blocks: 4, servers: 2 }), {
       n: 182,
       status: { 200: 141, 301: 22, 402: 16 },
       paths: ['/candidates?tags=REST%2CPerl', '/i/151620020'],
@@ -192,5 +200,43 @@ describe('store against PGlite', () => {
         from: 'rejected',
       }),
     ).toBe(0);
+  });
+
+  test("riotcoder's own approvals come off for a known owner; a person's never do", async () => {
+    await store.upsertCandidates(
+      [
+        {
+          ip: '17.166.22.207',
+          score: 1,
+          category: 'other',
+          last_seen: '2026-10-17T00:00:00Z',
+          blocks: 1,
+          servers: 1,
+          rules: [],
+          evidence: {},
+        },
+      ],
+      { db: sql },
+    );
+    await store.applyReview(
+      ['45.148.10.7', '17.166.22.207'].map((ip) => ({ ip, decision: 'approve', note: 'old' })),
+      { db: sql },
+    );
+    const [{ id: userId }] =
+      await sql`insert into users (email) values ('mod3@nichedb.test') returning id`;
+    await store.reviewIps(
+      { ips: ['45.148.10.8'], status: 'approved', userId, note: 'ours' },
+      { db: sql },
+    );
+    const queue = await store.approvedForReview({}, { db: sql });
+    expect(queue.map((r) => r.ip).sort()).toEqual(['17.166.22.207', '45.148.10.7']);
+    const decisions = [...queue, { ip: '45.148.10.8' }].map((r) => ({
+      ip: r.ip,
+      ...reviewAddress({ ...r, ip: r.ip === '45.148.10.8' ? '17.1.1.1' : r.ip }),
+    }));
+    expect(await store.applyReview(decisions, { db: sql, from: 'approved' })).toBe(1);
+    expect((await store.lookupIp('17.166.22.207', { db: sql })).listed).toBe(false);
+    expect((await store.lookupIp('45.148.10.7', { db: sql })).listed).toBe(true);
+    expect((await store.lookupIp('45.148.10.8', { db: sql })).listed).toBe(true);
   });
 });
