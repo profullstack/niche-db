@@ -45,6 +45,8 @@ describe('traffic views', () => {
     expect(html).toContain('riotcoder');
     expect(html).toContain('45.148.10.7');
     expect(html).toContain('/traffic/blocklist.txt');
+    expect(html).toContain('ThreatCrush verified');
+    expect(html).toContain('href="https://threatcrush.com"');
   });
 
   test('an empty list explains that nothing is published until reviewed', async () => {
