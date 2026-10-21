@@ -145,6 +145,38 @@ describe('IANA parsers', () => {
     expect(rows.find((r) => r.tld === 'ai').manager).toBe('Government of Anguilla & Co');
   });
 
+  test('the root zone database, redesigned: status column, col-manager, title-case types', () => {
+    const page = `
+<table><tbody>
+<tr>
+  <td><a href="/domains/root/db/aaa"> .aaa <span class="rz-icon-sm tld-type-inline"><img src="/g.svg" alt=""></span></a></td>
+  <td><span class="index-label"><span class="rz-icon-sm"><img src="/c.svg" alt=""></span> Active </span></td>
+  <td><span class="index-label"><span class="rz-icon-sm"><img src="/g.svg" alt=""></span> Generic </span></td>
+  <td class="col-manager"> American Automobile Association, Inc. </td>
+  <td> Latn </td><td> Latin </td><td> en||aaa </td>
+</tr>
+<tr>
+  <td><a href="/domains/root/db/ai"> .ai </a></td>
+  <td><span class="index-label"> Active </span></td>
+  <td><span class="index-label"> Country Code </span></td>
+  <td class="col-manager"> Government of Anguilla &amp; Co </td>
+  <td> Latn </td>
+</tr>
+<tr>
+  <td><a href="/domains/root/db/xn--0zwm56d"> .测试 </a></td>
+  <td><span class="index-label"> Retired </span></td>
+  <td><span class="index-label"> Test </span></td>
+  <td class="col-manager"> </td>
+  <td> Hani </td>
+</tr>
+</tbody></table>`;
+    expect(src.parseRootDb(page)).toEqual([
+      { tld: 'aaa', type: 'generic', manager: 'American Automobile Association, Inc.' },
+      { tld: 'ai', type: 'country-code', manager: 'Government of Anguilla & Co' },
+      { tld: 'xn--0zwm56d', type: 'test', manager: 'Not assigned' },
+    ]);
+  });
+
   test('RDAP bootstrap: https wins, trailing slash added', () => {
     const rows = src.parseRdapBootstrap(RDAP_BOOT);
     expect(rows).toContainEqual({ tld: 'com', rdap: 'https://rdap.verisign.com/com/v1/' });

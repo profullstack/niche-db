@@ -56,17 +56,47 @@ export const decodeEntities = (s) =>
 /**
  * The root zone database page: one table row per label with its type and
  * manager. The link, not the text, carries the ASCII label: an IDN row shows
- * `.рф` and links to `xn--p1ai.html`. "Not assigned" is IANA's word for a
- * retired label, kept as the manager so a reader sees it.
+ * `.рф` and links to `xn--p1ai` (`xn--p1ai.html` before IANA's 2026 redesign).
+ * "Not assigned" is IANA's word for a retired label, kept as the manager so a
+ * reader sees it.
+ *
+ * Two layouts are read. The old one is `label | type | manager`. The redesign
+ * (live by 2026-10-21) is `label | status | type | manager | script | ...`, with
+ * the manager cell marked `col-manager`, types in title case ("Country Code"),
+ * and a retired label shown as status "Retired" with an empty manager. Types are
+ * normalised to the old lower-case, dashed vocabulary (`country-code`).
  */
 export function parseRootDb(html) {
   const out = [];
-  const re =
-    /href="\/domains\/root\/db\/([^"/]+)\.html"[^>]*>[\s\S]*?<\/td>\s*<td>([\s\S]*?)<\/td>\s*<td>([\s\S]*?)<\/td>/g;
-  for (const m of String(html ?? '').matchAll(re)) {
-    const tld = decodeURIComponent(m[1]).toLowerCase();
-    if (!/^[a-z0-9-]+$/.test(tld)) continue;
-    out.push({ tld, type: decodeEntities(m[2]) || null, manager: decodeEntities(m[3]) || null });
+  const seen = new Set();
+  const text = (cell) => decodeEntities(cell.replace(/<[^>]*>/g, ' '));
+  for (const row of String(html ?? '')
+    .split(/<tr\b/i)
+    .slice(1)) {
+    const link = row.match(/href="\/domains\/root\/db\/([^"/]+?)(?:\.html)?"/);
+    if (!link) continue;
+    const tld = decodeURIComponent(link[1]).toLowerCase();
+    if (!/^[a-z0-9-]+$/.test(tld) || seen.has(tld)) continue;
+    const cells = [...row.matchAll(/<td\b([^>]*)>([\s\S]*?)<\/td>/gi)];
+    const at = cells.findIndex((c) => /col-manager/.test(c[1]));
+    let type;
+    let manager;
+    if (at > 0) {
+      type = text(cells[at - 1][2]);
+      manager = text(cells[at][2]);
+      const status = at > 1 ? text(cells[1][2]) : '';
+      if (!manager && /^retired$/i.test(status)) manager = 'Not assigned';
+    } else {
+      if (cells.length < 3) continue;
+      type = text(cells[1][2]);
+      manager = text(cells[2][2]);
+    }
+    seen.add(tld);
+    out.push({
+      tld,
+      type: type ? type.toLowerCase().replace(/\s+/g, '-') : null,
+      manager: manager || null,
+    });
   }
   return out;
 }
