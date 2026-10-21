@@ -40,10 +40,19 @@ export async function apiMeter(c, next) {
       ? config.api.premiumPerHour
       : config.api.anonPerHour;
   const used = await q.bumpApiUsage(bucket);
-  c.header('x-ratelimit-limit', String(limit));
-  c.header('x-ratelimit-remaining', String(Math.max(0, limit - used)));
-  c.header('x-plan', paid ? 'crawl-pass' : plan);
-  if (used <= limit) return next();
+  const headers = {
+    'x-ratelimit-limit': String(limit),
+    'x-ratelimit-remaining': String(Math.max(0, limit - used)),
+    'x-plan': paid ? 'crawl-pass' : plan,
+  };
+  for (const [k, v] of Object.entries(headers)) c.header(k, v);
+  if (used <= limit) {
+    await next();
+    // The MCP handler answers with its own Response, which drops c.header().
+    for (const [k, v] of Object.entries(headers))
+      if (!c.res.headers.has(k)) c.res.headers.set(k, v);
+    return;
+  }
 
   if (viaKey || paid) {
     c.header('retry-after', String(HOUR));
