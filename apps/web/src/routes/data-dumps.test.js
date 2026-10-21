@@ -24,7 +24,11 @@ const manifest = {
     },
   ],
 };
-const USER = { id: '11111111-1111-4111-8111-111111111111', role: 'user' };
+const USER = {
+  id: '11111111-1111-4111-8111-111111111111',
+  email: 'buyer@example.com',
+  role: 'user',
+};
 function build(plan = 'free', user = USER, current = manifest) {
   const downloads = [];
   const app = new Hono();
@@ -119,6 +123,10 @@ describe('Data checkout and offer', () => {
     expect(out.checkoutUrl).toBe('https://pay.test/data');
     expect(calls[0].amountCents).toBe(199900);
     expect(calls[0].metadata).toMatchObject({ plan: 'data', term_days: '30', kind: 'membership' });
+    // A hosted checkout session: who paid, no chain, a way back to the dumps page.
+    expect(calls[0]).toMatchObject({ email: 'buyer@example.com', accountId: USER.id });
+    expect(calls[0].blockchain).toBeUndefined();
+    expect(calls[0].successUrl).toEndWith('/dumps?paid=1');
   });
   test('a configured payment provider cannot sell dumps before the first export is ready', async () => {
     let called = false;

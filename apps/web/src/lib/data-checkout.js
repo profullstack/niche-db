@@ -19,6 +19,9 @@ export async function startDataCheckout(
     throw new Denied('The first hourly data dump is being prepared. Check back shortly.', 503);
   return createCheckout({
     user,
+    // CoinPay files the session under who paid; the hosted page offers every coin + PayPal.
+    email: user?.email,
+    accountId: user?.id != null ? String(user.id) : undefined,
     amountCents: config.dataDumps.priceCents,
     currency: 'USD',
     description: `${config.siteName} Data: hourly data dumps, 30 days`,
@@ -28,6 +31,7 @@ export async function startDataCheckout(
       term_days: '30',
       list_price_cents: String(config.dataDumps.priceCents),
     },
-    blockchain: config.payments.blockchain,
+    successUrl: `${config.siteUrl}/dumps?paid=1`,
+    cancelUrl: `${config.siteUrl}/dumps`,
   });
 }

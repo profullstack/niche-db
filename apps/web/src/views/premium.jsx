@@ -296,7 +296,7 @@ export const PremiumPage = ({
           <h2>Start with a day. Stay as long as you like.</h2>
           <p class="muted">
             The same Premium benefits in every term. Prices in {config.premium.currency}; paid
-            upfront through CoinPay in crypto.
+            upfront through CoinPay in any major coin or PayPal.
           </p>
           <form method="get" action="/premium#plans" class="row premium-promo">
             <input type="hidden" name="term" value={selectedTerm} />
