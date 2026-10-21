@@ -1245,7 +1245,7 @@ td.evidence {
 
 /* The ad and the offer to be rid of it, as one block. */
 .ad-slot {
-  margin: 0 0 1.5rem;
+  margin: 0 0 0.75rem;
 }
 .ad-slot .upsell {
   margin-top: 0.35rem;

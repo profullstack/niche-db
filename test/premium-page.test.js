@@ -161,6 +161,14 @@ describe('the upsell appears where the thing it sells is missing', () => {
     expect(html.indexOf('data-cp-ad')).toBeLessThan(html.indexOf('hello'));
   });
 
+  test('the homepage carries no ad', async () => {
+    process.env.CRAWLPROOF_AD_SLOT = 'slot-for-the-test';
+    const html = await withModules(decideModules({ plan: 'free', paid: false }), () =>
+      Layout({ user: null, canonical: '/', children: 'hello' }).toString(),
+    );
+    expect(html).not.toContain('data-cp-ad');
+  });
+
   test("a member's page carries neither the ad nor the pitch for it", async () => {
     const html = await page('premium');
     expect(html).not.toContain('data-cp-ad');

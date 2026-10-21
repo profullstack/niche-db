@@ -194,8 +194,8 @@ export const Layout = (props) => (
 
       <main id="main" class={props.wide ? 'wide' : ''}>
         {/* Top of the content, never down by the footer. Put the ad-free offer
-            beside the ad it removes. */}
-        {config.ads.enabled && currentModules().ads ? (
+            beside the ad it removes. The homepage carries no ad. */}
+        {config.ads.enabled && currentModules().ads && props.canonical !== '/' ? (
           <aside class="ad-slot">
             <div data-cp-ad data-slot={config.ads.slot} data-format="text_link" />
             <p class="small muted upsell">
