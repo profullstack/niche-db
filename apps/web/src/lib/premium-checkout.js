@@ -65,6 +65,9 @@ export async function startPremiumCheckout(
   const price = await quotePremium(user, term, promo, { referralPrice });
   return createCheckout({
     user,
+    // CoinPay files the session under who paid; the hosted page offers every coin + PayPal.
+    email: user?.email,
+    accountId: user?.id != null ? String(user.id) : undefined,
     amountCents: price.amountCents,
     currency: config.premium.currency,
     description: `${config.siteName} Premium, ${term.days} days${
@@ -78,6 +81,7 @@ export async function startPremiumCheckout(
       promo_code: price.promoCode ?? '',
       list_price_cents: String(term.cents),
     },
-    blockchain: config.payments.blockchain,
+    successUrl: `${config.siteUrl}/premium?paid=1`,
+    cancelUrl: `${config.siteUrl}/premium`,
   });
 }

@@ -11,7 +11,11 @@ const { Denied } = await import('../lib/service.js');
 const { registerPremium } = await import('./premium.js');
 const { registerOpenSaaS } = await import('./opensaas.js');
 
-const USER = { id: '11111111-1111-4111-8111-111111111111', role: 'user' };
+const USER = {
+  id: '11111111-1111-4111-8111-111111111111',
+  email: 'buyer@example.com',
+  role: 'user',
+};
 const CHECKOUT = 'https://coinpayportal.com/pay/test-payment';
 const KEYS = ['COINPAY_API_KEY', 'COINPAY_BUSINESS_ID', 'COINPAY_WEBHOOK_SECRET'];
 let saved;
@@ -106,6 +110,9 @@ describe('Premium checkout', () => {
     });
     expect(calls[0].amountCents).toBe(prices().monthCents / 2);
     expect(calls[0].metadata.referral_code).toBe('');
+    expect(calls[0]).toMatchObject({ email: 'buyer@example.com', accountId: USER.id });
+    expect(calls[0].blockchain).toBeUndefined();
+    expect(calls[0].successUrl).toEndWith('/premium?paid=1');
     await startPremiumCheckout(buyer, 'month', { referralPrice, createCheckout });
     expect(calls[1].amountCents).toBe(prices().monthCents * 0.8);
     expect(calls[1].metadata).toMatchObject({ referral_code: 'FRIEND', promo_code: '' });

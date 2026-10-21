@@ -175,7 +175,7 @@ export async function llmsTxt() {
     '  Prepaid; no automatic renewal. A crawl pass is separate and does not include account perks.',
     `- **Pro, $${(config.membership.priceCents / 100).toFixed(0)} a month** (${base}/pro): everything Premium has, plus`,
     `  ${config.api.proPerHour.toLocaleString('en-US')} API requests an hour and a crawl pass for the whole term so your own`,
-    '  agents walk through the paywall on your key. Paid in crypto through CoinPay.',
+    '  agents walk through the paywall on your key. Paid through CoinPay in any major coin or PayPal.',
     `- **Data, $${(config.dataDumps.priceCents / 100).toLocaleString('en-US')} per 30 days** (${base}/dumps): everything in Pro plus`,
     `  full public-data snapshots every hour, as gzip-compressed NDJSON. Authenticated manifest: ${base}/api/v1/dumps/latest.`,
     `  Completed dumps are retained ${config.dataDumps.retentionHours} hours. No automatic renewal.`,

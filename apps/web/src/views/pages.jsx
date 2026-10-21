@@ -959,7 +959,7 @@ export const ProPage = ({ user, pro, enabled, price, notice, error }) => (
       user ? (
         <form method="post" action="/api/membership/buy">
           <button type="submit" class="cta">
-            Pay with crypto via CoinPay
+            Pay with any major coin or PayPal
           </button>
         </form>
       ) : (

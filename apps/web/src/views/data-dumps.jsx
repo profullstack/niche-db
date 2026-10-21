@@ -76,7 +76,7 @@ export const DataDumpsPage = ({ user, access, snapshot, ready, notice, error }) 
           ) : (
             <p class="muted">The first hourly snapshot is being prepared. Check back shortly.</p>
           )}
-          <p class="small muted">Paid in crypto through CoinPay.</p>
+          <p class="small muted">Paid through CoinPay in any major coin or PayPal.</p>
         </div>
       </section>
       <Notice notice={notice} error={error} />

@@ -460,6 +460,8 @@ export function registerManage(app) {
     });
     const { checkoutUrl } = await pay.createCheckout({
       user,
+      email: user.email,
+      accountId: String(user.id),
       amountCents: price.amountCents,
       currency: config.membership.currency,
       description: `${config.siteName} Pro, ${config.membership.termDays} days`,
@@ -470,7 +472,8 @@ export function registerManage(app) {
         referral_code: price.code ?? '',
         list_price_cents: String(config.membership.priceCents),
       },
-      blockchain: config.payments.blockchain,
+      successUrl: `${config.siteUrl}/pro?paid=1`,
+      cancelUrl: `${config.siteUrl}/pro`,
     });
     return respond(c, { json: { checkoutUrl }, redirectTo: checkoutUrl });
   });
@@ -497,7 +500,9 @@ export function registerManage(app) {
           termDays: days,
           plan,
         });
-        if (meta.referral_code) {
+        // A replay (confirmed, then forwarded) finds the term already granted:
+        // grantMembership returns null and the referral must not be counted twice.
+        if (term && meta.referral_code) {
           await recordReferral(tx, {
             code: meta.referral_code,
             newUserId: meta.user_id,

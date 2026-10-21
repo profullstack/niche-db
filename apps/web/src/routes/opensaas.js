@@ -65,6 +65,8 @@ export function registerOpenSaaS(app, deps = {}) {
       });
       const { checkoutUrl } = await pay.createCheckout({
         user,
+        email: user.email,
+        accountId: String(user.id),
         amountCents: price.amountCents,
         currency: config.membership.currency,
         description: `${config.siteName} Pro, ${config.membership.termDays} days`,
@@ -75,7 +77,8 @@ export function registerOpenSaaS(app, deps = {}) {
           referral_code: price.code ?? '',
           list_price_cents: String(config.membership.priceCents),
         },
-        blockchain: config.payments.blockchain,
+        successUrl: `${config.siteUrl}/pro?paid=1`,
+        cancelUrl: `${config.siteUrl}/pro`,
       });
       return pending(c, checkoutUrl, { plan: 'pro' });
     }
