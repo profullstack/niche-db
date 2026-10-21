@@ -90,6 +90,41 @@ export function CrawlPage(ctx) {
             </article>
           </div>
         </section>
+        {ctx.checkout ? (
+          <section class="premium-section" id="buy-pass">
+            <p class="premium-eyebrow">Pay with any coin or PayPal</p>
+            <h2>Buy a day pass</h2>
+            <p>
+              {price} a {term}, paid through CoinPay's hosted checkout. The pass appears on the next
+              page and works with any HTTP client.
+            </p>
+            <form method="post" action={ctx.checkout.action} class="crawl-checkout">
+              <input type="hidden" name="from" value={ctx.checkout.from ?? ''} />
+              <label for="pass-email">Email for the receipt</label>
+              <input
+                id="pass-email"
+                type="email"
+                name="email"
+                required
+                autocomplete="email"
+                placeholder="you@example.com"
+              />
+              <label for="pass-days">Days</label>
+              <input
+                id="pass-days"
+                type="number"
+                name="days"
+                min="1"
+                max={String(maxDays)}
+                value={String(ctx.checkout.days ?? days ?? 1)}
+              />
+              <button type="submit" class="cta button">
+                Buy a day pass
+              </button>
+            </form>
+            <p class="small muted">Checkout is hosted by CoinPay. Up to {maxDays} days at once.</p>
+          </section>
+        ) : null}
         <section class="premium-section" id="get-pass">
           <p class="premium-eyebrow">Get started</p>
           <h2>Buy once. Send the pass with your requests.</h2>
