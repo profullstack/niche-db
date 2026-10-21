@@ -1,4 +1,5 @@
 import { config } from '@nichedb/config';
+import { apiMeter } from '../lib/api-meter.js';
 import { render } from '../lib/http.js';
 import { ERRORS, fail } from '../lib/mcp/protocol.js';
 import { handle } from '../lib/mcp/server.js';
@@ -33,7 +34,9 @@ const KEY_TOOLS = new Set([
 
 export function registerMcp(app) {
   for (const path of ['/mcp', '/api/mcp']) {
-    app.post(path, async (c) => {
+    // The same hourly meter as /api/v1: a pass is honoured, a stranger who
+    // runs out is offered x402. MCP had no meter of its own before 2026-10-21.
+    app.post(path, apiMeter, async (c) => {
       const header = (name) => c.req.header(name) ?? null;
       const ctx = { header, user: c.get('user') };
       let payload;

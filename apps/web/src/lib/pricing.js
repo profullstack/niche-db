@@ -146,7 +146,15 @@ export function gatewayOptions(priceCents) {
      * the plain pages stay a normal page for every reader and link preview.
      * Item pages are challenged whole (Anthony 2026-10-19: "do it").
      */
+    /*
+     * 2026-10-21: the slice of the swarm driving real headless Chrome ran the
+     * one-line script and walked in (402, same address same second, 200, never
+     * seen again). `work` makes the script solve a proof of work first:
+     * ~0.5 s on a desktop once a day for a person, the same on EVERY page for
+     * a swarm that changes address each page.
+     */
     challenge: {
+      work: 17,
       paths: ['/i/', '/feeds/', '/tlds', '/tlds/'],
       when: (_request, url) => url.pathname.startsWith('/i/') || url.search.length > 1,
     },
