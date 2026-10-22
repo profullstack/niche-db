@@ -41,7 +41,7 @@
         "@profullstack/openprofile": "^0.2.0",
         "@profullstack/partners": "0.2.0",
         "@profullstack/throttle": "^0.3.3",
-        "@profullstack/x402-gateway": "0.13.0",
+        "@profullstack/x402-gateway": "0.13.1",
         "@simplewebauthn/browser": "^13.2.0",
         "hono": "^4.10.3",
       },
@@ -351,7 +351,7 @@
 
     "@profullstack/throttle": ["@profullstack/throttle@0.3.3", "", { "dependencies": { "@profullstack/x402-gateway": "^0.6.0 || ^0.7.0 || ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0" } }, "sha512-GigeMGXS/1T2UseW0gYvFbxgMuo89/bhW92xMPv/IKAR860mhCdo2G8U4Schciw27seDXVGNErWpTSUC2zGoiA=="],
 
-    "@profullstack/x402-gateway": ["@profullstack/x402-gateway@0.13.0", "", { "dependencies": { "@profullstack/keys": "^0.1.0" } }, "sha512-6HLUbOQdVUSXkeNXvaaniG+5yF+npwhYGA4U7l91Ds05BsBZKOdGWMy7CeSyU4hgDMnXxsVOrAESfNmfvvEj1A=="],
+    "@profullstack/x402-gateway": ["@profullstack/x402-gateway@0.13.1", "", { "dependencies": { "@profullstack/keys": "^0.1.0" } }, "sha512-V7liSO0tShZRlp8dancuDuUSF/rqrr5YF3bzLoZy9wn6ixf1RIRPYTepe72s36JOdSVzi3wfuhaZFm9y0RpV4w=="],
 
     "@redis/bloom": ["@redis/bloom@1.2.0", "", { "peerDependencies": { "@redis/client": "^1.0.0" } }, "sha512-HG2DFjYKbpNmVXsa0keLHp/3leGJz1mjh09f2RLGGLQZzSHpkmZWuwJbAvo3QcRY8p80m5+ZdXZdYOSBLlp7Cg=="],
 
