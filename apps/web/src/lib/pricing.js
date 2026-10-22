@@ -153,8 +153,14 @@ export function gatewayOptions(priceCents) {
      * ~0.5 s on a desktop once a day for a person, the same on EVERY page for
      * a swarm that changes address each page.
      */
+    /*
+     * The PoW did not slow it (its Chrome solves 17 bits), but it never loads
+     * a stylesheet: 11 of 5,394 swarm addresses fetched any CSS or JS. `css`
+     * makes a per-address stylesheet fetch set the second cookie.
+     */
     challenge: {
       work: 17,
+      css: true,
       paths: ['/i/', '/feeds/', '/tlds', '/tlds/'],
       when: (_request, url) => url.pathname.startsWith('/i/') || url.search.length > 1,
     },
