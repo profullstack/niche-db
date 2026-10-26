@@ -9,7 +9,7 @@
     "./referrals": "./src/referrals.js"
   },
   "dependencies": {
-    "@profullstack/coinpay": "^0.25.0",
+    "@profullstack/coinpay": "^0.8.0",
     "@profullstack/referrals": "^0.1.0"
   }
 }

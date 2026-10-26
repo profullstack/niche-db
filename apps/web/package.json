@@ -9,7 +9,7 @@
     "build:client": "bun build-client.js"
   },
   "dependencies": {
-    "@logicsrc/openaccess": "^0.3.1",
+    "@logicsrc/openaccess": "^0.3.0",
     "@nichedb/adapters": "workspace:*",
     "@nichedb/auth": "workspace:*",
     "@nichedb/config": "workspace:*",
@@ -22,15 +22,15 @@
     "@nichedb/premium": "workspace:*",
     "@nichedb/queue": "workspace:*",
     "@profullstack/footer": "latest",
-    "@profullstack/leaderboard": "^0.3.1",
+    "@profullstack/leaderboard": "^0.3.0",
     "@profullstack/nichedb": "workspace:*",
-    "@profullstack/notifications": "^0.1.4",
+    "@profullstack/notifications": "^0.1.0",
     "@profullstack/openprofile": "^0.2.0",
     "@profullstack/partners": "0.2.0",
-    "@profullstack/profile": "0.1.6",
-    "@profullstack/throttle": "^0.3.4",
+    "@profullstack/profile": "0.1.2",
+    "@profullstack/throttle": "^0.3.3",
     "@profullstack/x402-gateway": "0.13.1",
-    "@simplewebauthn/browser": "^14.0.0",
-    "hono": "^4.13.14"
+    "@simplewebauthn/browser": "^13.2.0",
+    "hono": "^4.10.3"
   }
 }
