@@ -30,6 +30,9 @@ const KEY_TOOLS = new Set([
   'run_source',
   'claim_profile',
   'update_profile',
+  'redeem_code',
+  'list_invites',
+  'create_invite',
 ]);
 
 export function registerMcp(app) {

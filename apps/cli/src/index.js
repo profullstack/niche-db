@@ -15,7 +15,7 @@ import { homedir, tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createInterface } from 'node:readline';
 
-export const VERSION = '0.50.0';
+export const VERSION = '0.51.0';
 const GEO_FLAGS = ['lat', 'long', 'radius', 'unit', 'bbox', 'sort', 'offset'];
 const DEFAULT_API = process.env.NICHEDB_API ?? 'https://nichedb.dev';
 const CONFIG_DIR = join(process.env.XDG_CONFIG_HOME ?? join(homedir(), '.config'), 'nichedb');
@@ -320,6 +320,26 @@ export const COMMANDS = [
     usage: 'profile handle <ref> <handle>',
     summary: 'Take a handle: your URL becomes /c/profiles/<handle> (key required).',
     options: [],
+  },
+  {
+    name: 'redeem',
+    usage: 'redeem <code>',
+    summary: 'Redeem a credit code for days of Premium (key required).',
+    options: ['--json'],
+  },
+  {
+    name: 'invites',
+    usage: 'invites [create [--note …] | revoke <id>]',
+    summary:
+      'Your invites: how many are left, and each one. create makes one (its link is shown once); revoke withdraws an unused one (key required).',
+    options: ['--note <who it is for>', '--json'],
+  },
+  {
+    name: 'credits mint',
+    usage: 'credits mint --days <n> [--label …] [--max <n>] [--expires <days>]',
+    summary:
+      'Admin: mint a code worth n days of Premium. The code is shown once. Also credits list|revoke <id>.',
+    options: ['--days <n>', '--label <text>', '--max <redemptions>', '--expires <days>', '--json'],
   },
   {
     name: 'login',
@@ -1279,6 +1299,71 @@ export async function run(
         return 0;
       }
       out(await client.text(`/api/v1/profiles/${encodeURIComponent(sub)}/openprofile.md`));
+      return 0;
+    }
+    case 'redeem': {
+      const code = rest.join(' ').trim();
+      if (!code) throw new Error('redeem <code>');
+      const r = await client.post('/api/v1/credits/redeem', { code });
+      out(json ? JSON.stringify(r, null, 2) : `Redeemed: ${r.days} days of Premium added.`);
+      return 0;
+    }
+    case 'invites': {
+      const [sub, arg] = rest;
+      if (sub === 'create') {
+        const r = await client.post('/api/v1/invites', { note: flags.note ?? '' });
+        out(json ? JSON.stringify(r.invite, null, 2) : `${r.invite.url}\n(shown once)`);
+        return 0;
+      }
+      if (sub === 'revoke') {
+        if (!arg) throw new Error('invites revoke <id>');
+        await client.post(`/api/v1/invites/${encodeURIComponent(arg)}/revoke`, {});
+        out(`Withdrew ${arg}.`);
+        return 0;
+      }
+      const r = await client.get('/api/v1/invites');
+      if (json) {
+        out(JSON.stringify(r, null, 2));
+        return 0;
+      }
+      out(
+        `${r.quota.left} of ${r.quota.total} invites left · ${r.bonus_days} days of Premium each when one is used`,
+      );
+      for (const i of r.invites) out(`${pad(i.id, 18)} ${pad(i.status, 8)} ${i.note}`);
+      return 0;
+    }
+    case 'credits': {
+      const [sub, arg] = rest;
+      if (sub === 'mint') {
+        const r = await client.post('/api/v1/admin/credits', {
+          days: Number(flags.days),
+          label: flags.label ?? '',
+          max: flags.max ? Number(flags.max) : 1,
+          expires_days: flags.expires ? Number(flags.expires) : null,
+        });
+        out(
+          json
+            ? JSON.stringify(r, null, 2)
+            : `${r.code}\n${r.days} days of Premium · ${r.max_redemptions} use(s) · id ${r.id}`,
+        );
+        return 0;
+      }
+      if (sub === 'revoke') {
+        if (!arg) throw new Error('credits revoke <id>');
+        await client.post(`/api/v1/admin/credits/${encodeURIComponent(arg)}/revoke`, {});
+        out(`Revoked ${arg}.`);
+        return 0;
+      }
+      if (sub && sub !== 'list') throw new Error('credits mint|list|revoke <id>');
+      const { codes } = await client.get('/api/v1/admin/credits');
+      if (json) {
+        out(JSON.stringify(codes, null, 2));
+        return 0;
+      }
+      for (const c of codes)
+        out(
+          `${pad(c.id, 18)} ${pad(`${c.days}d`, 6)} ${pad(`${c.redemptions}/${c.max_redemptions}`, 8)} ${c.revoked_at ? 'revoked ' : ''}${c.label}`,
+        );
       return 0;
     }
     case 'mcp':

@@ -13,14 +13,14 @@
     },
     "apps/cli": {
       "name": "@profullstack/nichedb",
-      "version": "0.50.0",
+      "version": "0.51.0",
       "bin": {
         "nichedb": "./bin/nichedb.js",
       },
     },
     "apps/web": {
       "name": "@nichedb/web",
-      "version": "0.50.0",
+      "version": "0.51.0",
       "dependencies": {
         "@logicsrc/openaccess": "^0.3.1",
         "@nichedb/adapters": "workspace:*",
@@ -34,6 +34,7 @@
         "@nichedb/payments": "workspace:*",
         "@nichedb/premium": "workspace:*",
         "@nichedb/queue": "workspace:*",
+        "@profullstack/affiliates": "^0.2.0",
         "@profullstack/footer": "latest",
         "@profullstack/leaderboard": "^0.3.1",
         "@profullstack/nichedb": "workspace:*",
@@ -41,6 +42,7 @@
         "@profullstack/openprofile": "^0.2.0",
         "@profullstack/partners": "0.2.0",
         "@profullstack/profile": "0.1.6",
+        "@profullstack/redeem-credits": "^0.2.0",
         "@profullstack/throttle": "^0.3.4",
         "@profullstack/x402-gateway": "0.13.1",
         "@simplewebauthn/browser": "^14.0.0",
@@ -49,7 +51,7 @@
     },
     "apps/worker": {
       "name": "@nichedb/worker",
-      "version": "0.50.0",
+      "version": "0.51.0",
       "dependencies": {
         "@nichedb/config": "workspace:*",
         "@nichedb/core": "workspace:*",
@@ -60,7 +62,7 @@
     },
     "packages/adapters": {
       "name": "@nichedb/adapters",
-      "version": "0.50.0",
+      "version": "0.51.0",
       "dependencies": {
         "@nichedb/core": "workspace:*",
         "@profullstack/openprofile": "^0.2.0",
@@ -68,7 +70,7 @@
     },
     "packages/auth": {
       "name": "@nichedb/auth",
-      "version": "0.50.0",
+      "version": "0.51.0",
       "dependencies": {
         "@nichedb/config": "workspace:*",
         "@nichedb/db": "workspace:*",
@@ -78,11 +80,11 @@
     },
     "packages/config": {
       "name": "@nichedb/config",
-      "version": "0.50.0",
+      "version": "0.51.0",
     },
     "packages/core": {
       "name": "@nichedb/core",
-      "version": "0.50.0",
+      "version": "0.51.0",
       "dependencies": {
         "@nichedb/adapters": "workspace:*",
         "@nichedb/config": "workspace:*",
@@ -94,7 +96,7 @@
     },
     "packages/db": {
       "name": "@nichedb/db",
-      "version": "0.50.0",
+      "version": "0.51.0",
       "dependencies": {
         "@nichedb/config": "workspace:*",
         "@nichedb/core": "workspace:*",
@@ -104,7 +106,7 @@
     },
     "packages/enrichers": {
       "name": "@nichedb/enrichers",
-      "version": "0.50.0",
+      "version": "0.51.0",
       "dependencies": {
         "@nichedb/config": "workspace:*",
         "@nichedb/core": "workspace:*",
@@ -113,11 +115,11 @@
     },
     "packages/knowledge": {
       "name": "@nichedb/knowledge",
-      "version": "0.50.0",
+      "version": "0.51.0",
     },
     "packages/notify": {
       "name": "@nichedb/notify",
-      "version": "0.50.0",
+      "version": "0.51.0",
       "dependencies": {
         "@nichedb/config": "workspace:*",
         "@nichedb/db": "workspace:*",
@@ -127,7 +129,7 @@
     },
     "packages/payments": {
       "name": "@nichedb/payments",
-      "version": "0.50.0",
+      "version": "0.51.0",
       "dependencies": {
         "@profullstack/coinpay": "^0.25.0",
         "@profullstack/referrals": "^0.1.0",
@@ -135,11 +137,11 @@
     },
     "packages/premium": {
       "name": "@nichedb/premium",
-      "version": "0.50.0",
+      "version": "0.51.0",
     },
     "packages/queue": {
       "name": "@nichedb/queue",
-      "version": "0.50.0",
+      "version": "0.51.0",
       "dependencies": {
         "@nichedb/config": "workspace:*",
         "@nichedb/core": "workspace:*",
@@ -350,6 +352,8 @@
 
     "@peculiar/x509": ["@peculiar/x509@2.2.0", "", { "dependencies": { "@peculiar/asn1-cms": "^2.11.0", "@peculiar/asn1-csr": "^2.11.0", "@peculiar/asn1-ecc": "^2.11.0", "@peculiar/asn1-pkcs9": "^2.11.0", "@peculiar/asn1-rsa": "^2.11.0", "@peculiar/asn1-schema": "^2.11.0", "@peculiar/asn1-x509": "^2.11.0", "@peculiar/asn1-x509-post-quantum": "^2.11.0", "pvtsutils": "^1.3.6", "tslib": "^2.8.1", "tsyringe": "^4.10.0" } }, "sha512-adpW58ySPQMOUPv8pTKT3RIyCFqfUFt8X05ukPdtkQToXDVr8dMtxuenik1yx8tNFTbpApWsM/Hi5SzlIx48+Q=="],
 
+    "@profullstack/affiliates": ["@profullstack/affiliates@0.2.0", "", { "dependencies": { "@profullstack/referrals": "^0.1.0" }, "bin": { "affiliates": "dist/cli.js" } }, "sha512-fbP5uiS8Pa5g8mk5WFD79U4Cj7BUPH6Qy0tQP7ZXE9gfxHOHirHASmZ/rAk8MqnmzGOZTuwq9WwOHbmoFV2TSA=="],
+
     "@profullstack/api-key-manager": ["@profullstack/api-key-manager@0.3.0", "", { "dependencies": { "crypto": "^1.0.1", "uuid": "^11.1.0" }, "optionalDependencies": { "redis": "^4.6.13" } }, "sha512-/YpoRmhOaZm/2TbzhKgyE9xANQE3A8FGYqxduW2UkE22fGJdtTHRLU5eB9NjpDGgKBsQs33Tb52wAJN7mWvEIQ=="],
 
     "@profullstack/autoblog": ["@profullstack/autoblog@0.4.0", "", {}, "sha512-Lrc6pqfAO0A11bmkaVCHi/YPUdJSLXy3E6fy7NEMjUM2LE/mC+zEW1PRmzKfaYF7HWh6Lmaq7VaHpZiCW05Rvw=="],
@@ -377,6 +381,8 @@
     "@profullstack/partners": ["@profullstack/partners@0.2.0", "", { "dependencies": { "@profullstack/leaderboard": "^0.3.1" } }, "sha512-h8Fal+ZMqpR2xixo8OC/Xb/OXfLXmt2BdBIgohC3tK6U3AkAsDrkUyrlf+DEF8Ut8mptDEjCWDz5EV/dIXBRHw=="],
 
     "@profullstack/profile": ["@profullstack/profile@0.1.6", "", { "peerDependencies": { "@libsql/client": ">=0.6.0", "postgres": "^3.4.0", "react": ">=18" }, "optionalPeers": ["@libsql/client", "postgres", "react"], "bin": { "profile": "src/cli.js" } }, "sha512-xkn0P3ANz151QJdlBwcBXkHk813qW9qAmuTZKcuvpEZYkyHDC9J9KfvpVSRepfjECzz4ONGHWO5Zwc4BHpfK8g=="],
+
+    "@profullstack/redeem-credits": ["@profullstack/redeem-credits@0.2.0", "", { "bin": { "redeem-credits": "dist/cli.js" } }, "sha512-JLowb7mWYfouIK7O522tuPPhvLjQjhdEfm6g3xEYrlNLGzLhrIADDhrYldBlGHfiVBWUFX7wefLuCSLF9fnyog=="],
 
     "@profullstack/referrals": ["@profullstack/referrals@0.1.0", "", { "peerDependencies": { "react": ">=18" }, "optionalPeers": ["react"] }, "sha512-u66SdBVpsv3kc0N+NWISPoYD5vjCERyv5wfD07iSkZwQeC2IA+ihX5jNA4e7Xr+Y4AUvxLycG+3b4VaROqzgRg=="],
 

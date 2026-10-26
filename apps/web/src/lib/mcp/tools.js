@@ -22,6 +22,7 @@ import * as trafficStore from '@nichedb/db/traffic';
 import { enqueueRun } from '@nichedb/queue';
 import { whereToBuy } from '../books.js';
 import { businessReport, hasInput, normaliseInput, rdapLookup } from '../business.js';
+import * as credits from '../credits.js';
 import { liveReputationDeps } from '../dnsbl.js';
 import { areaOut } from '../population.js';
 import {
@@ -813,6 +814,43 @@ export const TOOLS = [
         trafficStore.listPublished(params),
       ]);
       return { approved: stats.approved, full, ...params, addresses: rows };
+    },
+  },
+  {
+    name: 'redeem_code',
+    description:
+      'Redeem a credit code (CR-XXXX-XXXX-XXXX-XXXX) for the key owner. A code is worth days of Premium, added after any term already held. Needs a key.',
+    inputSchema: {
+      type: 'object',
+      properties: { code: str('The credit code, any case, dashes optional') },
+      required: ['code'],
+    },
+    run: async ({ code }, ctx) => {
+      const user = needUser(ctx);
+      const r = await credits.redeemCode(user.id, code);
+      if (!r.ok) throw toolError(r.error);
+      return { ok: true, unit: credits.UNIT, days: r.days };
+    },
+  },
+  {
+    name: 'list_invites',
+    description:
+      "The key owner's invites: how many are left of the quota, and each invite with its status (open, used, expired, revoked). Needs a key.",
+    inputSchema: { type: 'object', properties: {} },
+    run: async (_args, ctx) => credits.myInvites(needUser(ctx).id),
+  },
+  {
+    name: 'create_invite',
+    description:
+      'Make one invite link as the key owner. Invites are scarce (a few per account); when the invited person signs up, both get days of Premium. The link is returned once. Needs a key.',
+    inputSchema: {
+      type: 'object',
+      properties: { note: str('Who it is for (only the owner sees this)') },
+    },
+    run: async ({ note }, ctx) => {
+      const r = await credits.createInvite(needUser(ctx).id, note ?? '');
+      if (!r.ok) throw toolError(r.error);
+      return r.invite;
     },
   },
 ];
