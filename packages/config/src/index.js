@@ -288,6 +288,20 @@ export const config = {
     },
   },
 
+  /**
+   * Invites (@profullstack/affiliates) and credit codes (@profullstack/redeem-credits).
+   *
+   * Invites are scarce on purpose: a few per account, each single-use. When the
+   * person invited signs up through the emailed link (which proves the
+   * mailbox, so it is a real account), both of them get `bonusDays` of Premium,
+   * through the same memberships row a paid term writes.
+   */
+  invites: {
+    quota: num('INVITE_QUOTA', 3),
+    bonusDays: num('INVITE_BONUS_PREMIUM_DAYS', 7),
+    ttlDays: num('INVITE_TTL_DAYS', 30),
+  },
+
   dataDumps: {
     priceCents: num('DATA_DUMPS_MONTH_CENTS', 199900),
     termDays: 30,

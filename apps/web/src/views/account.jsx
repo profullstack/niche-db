@@ -5,6 +5,7 @@
  */
 import { config } from '@nichedb/config';
 import { Notice } from './components.jsx';
+import { RedeemPanel } from './credits.jsx';
 import { Layout } from './Layout.jsx';
 
 const when = (d) => new Date(d).toLocaleDateString('en-US');
@@ -48,6 +49,7 @@ export const BillingPage = ({ user, plans = [], notice, error }) => (
         ))}
       </section>
     ) : null}
+    <RedeemPanel back="/account/billing" />
     <p class="small muted">
       What this page does is also written down for machines at{' '}
       <a href="/.well-known/opensaas.json">/.well-known/opensaas.json</a> (

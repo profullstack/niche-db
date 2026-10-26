@@ -23,6 +23,7 @@ import {
   Tags,
   When,
 } from './components.jsx';
+import { RedeemPanel } from './credits.jsx';
 import { EnrichmentBlocks } from './enrichment.jsx';
 import { Layout } from './Layout.jsx';
 import { PremiumUpsell } from './PremiumUpsell.jsx';
@@ -649,7 +650,7 @@ export const Following = ({ user, follows, items }) => (
  */
 const PROFILE_FIELDS = PROFILE_COLUMNS.filter((f) => f !== 'email');
 
-export const SignIn = ({ mode, sent, next, error, referral, values, errors }) => (
+export const SignIn = ({ mode, sent, next, error, referral, invite, values, errors }) => (
   <Layout title={mode === 'signup' ? 'Create your account' : 'Sign in'}>
     <section class="auth">
       <h1>{mode === 'signup' ? 'Create your account' : 'Sign in'}</h1>
@@ -668,9 +669,16 @@ export const SignIn = ({ mode, sent, next, error, referral, values, errors }) =>
               Referred with code {referral}: 20% off Pro on your first purchase.
             </p>
           ) : null}
+          {invite ? (
+            <p class="feedback ok">
+              You were invited ({invite}). Create your account with the emailed link and you and the
+              person who invited you each get {config.invites.bonusDays} days of Premium.
+            </p>
+          ) : null}
           {error ? <p class="feedback error">{error}</p> : null}
           <form method="post" action="/api/auth/magic" class="stack">
             <input type="hidden" name="next" value={next ?? '/following'} />
+            {invite ? <input type="hidden" name="invite" value={invite} /> : null}
             {mode === 'signup' ? <input type="hidden" name="mode" value="signup" /> : null}
             <label>
               Email
@@ -914,6 +922,16 @@ export const Settings = ({
           ) : null}
         </p>
       ) : null}
+    </section>
+
+    <RedeemPanel back="/settings" />
+
+    <section class="panel">
+      <h2>Invites</h2>
+      <p class="small">
+        A few invites per account. When someone you invite signs up, you each get{' '}
+        {config.invites.bonusDays} days of Premium. <a href="/invites">Make an invite</a>
+      </p>
     </section>
 
     <form method="post" action="/api/auth/logout">

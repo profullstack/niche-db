@@ -184,6 +184,10 @@ export async function llmsTxt() {
     `  you have paid here the less a day costs: ${loyaltyLine()}.`,
     '  A pass may switch ads or tracking off for its own requests with `?disable=ads,tracking`.',
     '',
+    `Credit codes (CR-…) are worth days of Premium: redeem with POST ${base}/api/v1/credits/redeem {"code"},`,
+    `\`nichedb redeem <code>\` or the redeem_code MCP tool. Invites are scarce (${config.invites.quota} per account):`,
+    `GET/POST ${base}/api/v1/invites; when an invited person signs up, both get ${config.invites.bonusDays} days of Premium.`,
+    '',
     `Source code: https://github.com/profullstack/niche-db (MIT).`,
   ];
   return lines.join('\n');

@@ -7,11 +7,18 @@ import { vapidKeysFromEnv, vapidPublicKeyResponse } from '@profullstack/notifica
 import { saveSignupProfile, validateProfile } from '@profullstack/profile';
 import { getCookie, setCookie } from 'hono/cookie';
 import { AUTH, attempt, callerAddress, forgive, VIEW } from '../lib/auth-throttle.js';
+import { acceptInvite, attributeReferral, looksLikeInvite } from '../lib/credits.js';
 import { render, requireUser, respond } from '../lib/http.js';
 import { profiles } from '../lib/profile.js';
 import { SignIn } from '../views/pages.jsx';
 
 const REF_COOKIE = 'ndb_ref';
+/** Set by /i/<code>; also carried on the emailed link (login_tokens.invite_code). */
+export const INVITE_COOKIE = 'ndb_invite';
+const inviteFrom = (c) => {
+  const v = getCookie(c, INVITE_COOKIE);
+  return v && looksLikeInvite(v) ? v : null;
+};
 const waitFor = (s) =>
   s >= 3600
     ? `${Math.ceil(s / 3600)} hour(s)`
@@ -60,6 +67,7 @@ export function registerAuth(app) {
           mode="login"
           next={c.req.query('next')}
           referral={referral}
+          invite={inviteFrom(c)}
           error={c.req.query('error')}
         />,
       ),
@@ -70,7 +78,14 @@ export function registerAuth(app) {
     if (c.get('user')) return c.redirect('/following', 303);
     const referral = rememberReferral(c);
     return c.html(
-      await render(<SignIn mode="signup" next={c.req.query('next')} referral={referral} />),
+      await render(
+        <SignIn
+          mode="signup"
+          next={c.req.query('next')}
+          referral={referral}
+          invite={inviteFrom(c)}
+        />,
+      ),
     );
   });
   /** A referral link: remember the code, land on sign-up. */
@@ -117,15 +132,16 @@ export function registerAuth(app) {
       .trim()
       .toLowerCase();
     const next = String(body.next ?? '/following');
+    const invite = looksLikeInvite(body.invite) ? String(body.invite) : inviteFrom(c);
     if (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
       try {
-        const url = await auth.createLoginLink(email, { next, profile });
+        const url = await auth.createLoginLink(email, { next, profile, invite });
         await sendLoginLink({ email, url });
       } catch (err) {
         console.error('[auth] link send failed:', err.message);
         if (!config.mail.enabled)
           console.log(
-            `[auth] mail is not configured; the link would have been ${await auth.createLoginLink(email, { next, profile })}`,
+            `[auth] mail is not configured; the link would have been ${await auth.createLoginLink(email, { next, profile, invite })}`,
           );
       }
     }
@@ -157,12 +173,31 @@ export function registerAuth(app) {
       }).catch((err) => console.error('[auth] signup profile save failed:', err.message));
     }
     const ref = getCookie(c, REF_COOKIE);
-    if (ref && result.user?.created)
-      await q.setReferredBy({ userId: result.user.id, code: ref }).catch(() => {});
+    if (ref && result.user?.created) {
+      // One attribution per sign-up: a referrals code (the programme that pays)
+      // goes to users.referred_by as before; an affiliates code is recorded there.
+      await attributeReferral({
+        userId: result.user.id,
+        code: ref,
+        onExternal: ({ userId, code }) => q.setReferredBy({ userId, code }),
+      }).catch(async (err) => {
+        console.error('[auth] attribution failed:', err.message);
+        await q.setReferredBy({ userId: result.user.id, code: ref }).catch(() => {});
+      });
+    }
+    // An invite counts only for an account this link just created: spending the
+    // link proved the mailbox, so this is a real, confirmed sign-up. The code
+    // comes from the link itself first, so another browser still counts.
+    const invite = result.invite ?? inviteFrom(c);
+    if (invite && result.user?.created)
+      await acceptInvite({ userId: result.user.id, code: invite }).catch((err) =>
+        console.error('[auth] invite accept failed:', err.message),
+      );
     const caller = callerAddress(c);
     if (caller) forgive(`token:${caller}`);
     c.header('set-cookie', auth.sessionCookie(result.sessionId));
     if (ref) setCookie(c, REF_COOKIE, '', { path: '/', maxAge: 0 });
+    if (getCookie(c, INVITE_COOKIE)) setCookie(c, INVITE_COOKIE, '', { path: '/', maxAge: 0 });
     const next = c.req.query('next');
     return c.redirect(next?.startsWith('/') ? next : '/following', 303);
   });

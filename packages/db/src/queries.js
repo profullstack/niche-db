@@ -127,11 +127,30 @@ export async function countUsers() {
  * Bound as text and cast via ::text: Bun SQL binds a bare `::jsonb` string as a
  * JSON string scalar.
  */
-export async function insertLoginToken({ tokenHash, email, expiresAt, profile = null }) {
+export async function insertLoginToken({
+  tokenHash,
+  email,
+  expiresAt,
+  profile = null,
+  inviteCode = null,
+}) {
   await sql`
-    insert into login_tokens (token_hash, email, expires_at, profile)
-    values (${tokenHash}, ${email}, ${expiresAt}, ${profile ? JSON.stringify(profile) : null}::text::jsonb)
+    insert into login_tokens (token_hash, email, expires_at, profile, invite_code)
+    values (${tokenHash}, ${email}, ${expiresAt}, ${profile ? JSON.stringify(profile) : null}::text::jsonb,
+            ${inviteCode ? String(inviteCode).slice(0, 40) : null})
   `;
+}
+
+/**
+ * The invite code a just-spent link carried, if any. Read-only: the invite is
+ * single-use in its own table, so reading it twice can never grant twice.
+ */
+export async function loginTokenInvite(tokenHash) {
+  const [row] = await sql`
+    select invite_code from login_tokens
+    where token_hash = ${tokenHash} and consumed_at is not null
+  `;
+  return row?.invite_code ?? null;
 }
 
 /**

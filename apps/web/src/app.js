@@ -16,6 +16,7 @@ import { registerAutomotive } from './routes/automotive.js';
 import { registerBooks } from './routes/books.js';
 import { registerBusiness } from './routes/business.js';
 import { registerCrawlStatus } from './routes/crawlstatus.js';
+import { registerCredits } from './routes/credits.js';
 import { registerDataDumps } from './routes/data-dumps.js';
 import { registerKnowledge } from './routes/knowledge.js';
 import { registerLyrics } from './routes/lyrics.js';
@@ -141,6 +142,8 @@ app.get('/healthz', (c) => c.text('ok'));
 
 registerStatic(app, gateway);
 registerAuth(app);
+// Before pages: /i/INV-… is an invite, /i/<number> (pages) is an item.
+registerCredits(app);
 registerPages(app);
 registerManage(app);
 registerSubmit(app);
