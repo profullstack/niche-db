@@ -103,7 +103,7 @@ describe('liveItem', () => {
     expect(hockey.summary).toContain('2-4');
     expect(hockey.tags).toContain('state:in');
     expect(hockey.tags).toContain('hockey');
-    expect(hockey.tags).toContain('league:slovak-extraliga');
+    expect(hockey.tags).toContain('league:hockey-slovak-extraliga');
     expect(hockey.tags).toContain('team:kosice');
   });
 

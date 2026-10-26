@@ -150,6 +150,7 @@ import { sportsdbTv } from './sportsdb.js';
 import { sportsdbLeagues } from './sportsdb-leagues.js';
 import { sportsdbLive } from './sportsdb-live.js';
 import { sportsdbPlayers } from './sportsdb-players.js';
+import { sportsdbSchedule } from './sportsdb-schedule.js';
 import { sportsdbTeams } from './sportsdb-teams.js';
 import { statuspage } from './statuspage.js';
 import { steam, steamNews } from './steam.js';
@@ -335,6 +336,7 @@ export const ADAPTERS = [
   sportsdbTv,
   sportsdbLeagues,
   sportsdbLive,
+  sportsdbSchedule,
   sportarrPersons,
   installmapYcPeople,
   // Screen: films, TV and anime, and the IMDb ratings behind 400k titles.

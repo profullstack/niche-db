@@ -48,6 +48,20 @@ the near window, every 3 h; the whole horizon daily by config), `espn-live`
 (leagues with a game on, every minute), `livetennis` (tennis fixtures and live
 scores within its 100/day budget), `espn-plays` (below).
 
+### TheSportsDB fixtures
+
+`sportsdb-schedule` (hourly, today to 14 days ahead plus yesterday's results;
+one `eventsday.php` request a day, re-asked per sport when a day hits the
+1,500-row cap) and `sportsdb-live` (every 2 minutes, games in play) emit kind
+`fixture` as `thesportsdb:fixture:<idEvent>`, in the same `data` shape as
+ESPN's: `key` is the event id, `league` carries `{key: idLeague, slug:
+'<sport>-<league name>', name, logoUrl}`, and each side `{key:
+'thesportsdb/team/<id>', name, logoUrl, score}`. A race, fight card or golf
+round has no sides (`home.key` null) and is titled by the event name.
+`sportsdb-leagues` items carry the same `key`, `slug`, `logoUrl`, `region`
+and `priority` (200, below ESPN's). A slug can coincide with an ESPN one
+(`basketball-nba`): it is the same competition, and a mirror keeps ESPN's.
+
 ### Play-by-play and recaps
 
 Kind `plays`, one item per fixture that is in play or ended in the last six
