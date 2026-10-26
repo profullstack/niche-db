@@ -14,6 +14,7 @@ import {
   statsFor,
 } from '@nichedb/payments/referrals';
 import { enqueueRun } from '@nichedb/queue';
+import { validateProfile } from '@profullstack/profile';
 import {
   configFromForm,
   isProUser,
@@ -25,6 +26,7 @@ import {
   takeFlash,
 } from '../lib/http.js';
 import { premiumSnapshot } from '../lib/premium.js';
+import { profiles } from '../lib/profile.js';
 import {
   addSource,
   canAddSources,
@@ -374,13 +376,14 @@ export function registerManage(app) {
 
   app.get('/settings', async (c) => {
     const user = requireUser(c);
-    const [passkeys, apiKeys, pro, terms, newKey, snapshot] = await Promise.all([
+    const [passkeys, apiKeys, pro, terms, newKey, snapshot, contact] = await Promise.all([
       q.listPasskeys(user.id),
       auth.listApiKeys(user.id),
       isProUser(user),
       q.membershipTerms(user.id, { limit: 3 }),
       takeFlash(c),
       premiumSnapshot(c),
+      profiles.get(user.id),
     ]);
     let referral = null;
     try {
@@ -397,6 +400,7 @@ export function registerManage(app) {
       await render(
         <Settings
           user={user}
+          contact={contact ?? { email: user.email }}
           passkeys={passkeys}
           apiKeys={apiKeys}
           newKey={newKey}
@@ -429,6 +433,27 @@ export function registerManage(app) {
     await auth.revokeApiKey({ userId: user.id, id: c.req.param('id') });
     return respond(c, { redirectTo: '/settings', notice: 'Key revoked.' });
   });
+  // The shared profile (names, company, title, LinkedIn), for a page without
+  // script; /api/v1/me/profile is the same thing for API callers.
+  app.post('/api/settings/contact', async (c) => {
+    const user = requireUser(c);
+    const body = await c.req.parseBody();
+    const check = validateProfile({ ...body, email: user.email });
+    if (!check.ok)
+      return respond(c, {
+        json: { error: 'Some fields need fixing.', errors: check.errors },
+        status: 400,
+        redirectTo: '/settings',
+        error: Object.values(check.errors)[0],
+      });
+    const profile = await profiles.save(user.id, check.profile);
+    return respond(c, {
+      json: { profile },
+      redirectTo: '/settings',
+      notice: 'Contact details saved.',
+    });
+  });
+
   app.post('/api/profile', async (c) => {
     const user = requireUser(c);
     const body = await c.req.parseBody();

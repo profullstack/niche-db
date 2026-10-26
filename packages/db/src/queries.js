@@ -121,10 +121,38 @@ export async function countUsers() {
   return n;
 }
 
-export async function insertLoginToken({ tokenHash, email, expiresAt }) {
+/**
+ * `profile` is the validated signup form (@profullstack/profile fields), held on
+ * the token because the account row does not exist until the link is spent.
+ * Bound as text and cast via ::text: Bun SQL binds a bare `::jsonb` string as a
+ * JSON string scalar.
+ */
+export async function insertLoginToken({ tokenHash, email, expiresAt, profile = null }) {
   await sql`
-    insert into login_tokens ${sql({ token_hash: tokenHash, email, expires_at: expiresAt })}
+    insert into login_tokens (token_hash, email, expires_at, profile)
+    values (${tokenHash}, ${email}, ${expiresAt}, ${profile ? JSON.stringify(profile) : null}::text::jsonb)
   `;
+}
+
+/**
+ * The signup fields a just-spent link carried, handed out once and then cleared.
+ * Only a consumed token answers, so this can never run ahead of the sign-in.
+ */
+export async function takeSignupProfile(tokenHash) {
+  // RETURNING sees the row after the update, so the old value comes from a
+  // subquery: `returning profile` here would always hand back the null.
+  const [row] = await sql`
+    update login_tokens t set profile = null
+    from (
+      select token_hash, profile from login_tokens
+      where token_hash = ${tokenHash} and consumed_at is not null and profile is not null
+      for update
+    ) old
+    where t.token_hash = old.token_hash
+    returning old.profile
+  `;
+  if (!row) return null;
+  return typeof row.profile === 'string' ? JSON.parse(row.profile) : row.profile;
 }
 
 /** Single-use by construction: the update is the consumption. Returns the ADDRESS. */

@@ -5,10 +5,12 @@ import { cleanChannelName, parseName } from '@nichedb/core/names';
 import * as q from '@nichedb/db/queries';
 import { enqueueRun } from '@nichedb/queue';
 import { COMMANDS } from '@profullstack/nichedb';
+import { mountProfileRoutes } from '@profullstack/profile';
 import { mintPass } from '@profullstack/x402-gateway';
 import { apiMeter } from '../lib/api-meter.js';
 import { isProUser, render, requireUser } from '../lib/http.js';
 import { planOf } from '../lib/premium.js';
+import { profiles, profileUser } from '../lib/profile.js';
 import { SCANNER_CONTEXT_NOTE, scannerContextOptions } from '../lib/scanner-context.js';
 import { allowedEnrichers, collectionOut, feedOut, itemOut, sourceOut } from '../lib/serialize.js';
 import {
@@ -43,7 +45,7 @@ export function registerApi(app) {
   app.use('/api/v1/*', async (c, next) => {
     c.header('access-control-allow-origin', '*');
     c.header('access-control-allow-headers', 'content-type, authorization');
-    c.header('access-control-allow-methods', 'GET, POST, PATCH, DELETE, OPTIONS');
+    c.header('access-control-allow-methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
     if (c.req.method === 'OPTIONS') return c.body(null, 204);
     await next();
   });
@@ -75,6 +77,9 @@ export function registerApi(app) {
       note: 'Every item carries time_known and precision. A false time_known means the date is real and the clock is not.',
     });
   });
+
+  // The shared @profullstack/profile row: GET/PUT/PATCH, the package's own handlers.
+  mountProfileRoutes(app, { store: profiles, getUser: (_req, c) => profileUser(c) });
 
   app.get('/api/v1/me', async (c) => {
     const user = requireUser(c);

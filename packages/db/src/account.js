@@ -140,5 +140,7 @@ export async function consumeActionToken(token, action) {
 export async function deleteAccount(userId) {
   const [row] =
     await sql`delete from users where id = ${userId}::uuid returning email::text as email`;
+  // The private @profullstack/profile row has no foreign key to cascade from.
+  await sql`delete from user_profiles where user_id = ${userId}::uuid`;
   return row ?? null;
 }
