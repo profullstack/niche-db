@@ -190,6 +190,13 @@ export const COMMANDS = [
     options: ['--level country|state|city|zip', '--limit', '--offset', '--json'],
   },
   {
+    name: 'isbn',
+    usage: 'isbn <isbn> [--zip <zip>] | isbn --title <t> [--author <a>] [--zip <zip>]',
+    summary:
+      'Where to buy a book: the edition, sellers new/used/ebook/library, and shops near a ZIP.',
+    options: ['--title', '--author', '--zip', '--json'],
+  },
+  {
     name: 'tlds',
     usage: 'tlds [<query>] [--registrar <slug>] [--type <t>] [--max-renew <n>] [--trap] [--sort …]',
     summary:
@@ -848,6 +855,50 @@ export async function run(
       }
       const res = await fetchImpl(url);
       out(await res.text());
+      return 0;
+    }
+    case 'isbn': {
+      const qs = new URLSearchParams();
+      if (rest[0]) qs.set('isbn', rest[0]);
+      if (flags.title) qs.set('title', flags.title);
+      if (flags.author) qs.set('author', flags.author);
+      if (flags.zip) qs.set('zip', flags.zip);
+      if (!qs.has('isbn') && !qs.has('title')) throw new Error('isbn <isbn> | isbn --title <t>');
+      const b = await client.get(`/api/v1/books/buy?${qs}`);
+      if (json) {
+        out(JSON.stringify(b, null, 2));
+        return 0;
+      }
+      const e = b.edition;
+      out(`${b.title ?? '(unknown title)'}${b.author ? ` — ${b.author}` : ''}`);
+      if (b.isbn)
+        out(`  ISBN-13 ${b.isbn.isbn13}${b.isbn.isbn10 ? `  ISBN-10 ${b.isbn.isbn10}` : ''}`);
+      if (e)
+        out(
+          `  ${[e.publishers?.[0], e.publishDate, e.pages ? `${e.pages} pages` : null].filter(Boolean).join(' · ')}`,
+        );
+      for (const kind of ['new', 'used', 'ebook', 'borrow']) {
+        const links = b.online.filter((l) => l.kind === kind);
+        if (!links.length) continue;
+        out(`\n${kind}`);
+        for (const l of links) out(`  ${pad(l.vendor, 22)} ${l.url}`);
+      }
+      if (b.inStore) {
+        out(`\nin store near ${b.inStore.near ?? b.inStore.zip}`);
+        for (const s of b.inStore.storeFinders) out(`  ${pad(s.vendor, 22)} ${s.url}`);
+        for (const [label, list] of [
+          ['bookshops', b.inStore.bookshops],
+          ['libraries', b.inStore.libraries],
+        ]) {
+          out(`\n${label}`);
+          for (const p of list)
+            out(
+              `  ${pad(`${p.miles ?? '?'} mi`, 8)} ${p.name}${p.address ? `, ${p.address}` : ''}${p.phone ? `  ${p.phone}` : ''}`,
+            );
+          if (!list.length) out('  (none mapped within 10 miles)');
+        }
+        if (b.inStore.error) out(`\n${b.inStore.error}`);
+      }
       return 0;
     }
     case 'population': {

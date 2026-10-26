@@ -13,6 +13,7 @@ import { registerAgents } from './routes/agents.js';
 import { registerApi } from './routes/api.js';
 import { registerAuth } from './routes/auth.js';
 import { registerAutomotive } from './routes/automotive.js';
+import { registerBooks } from './routes/books.js';
 import { registerBusiness } from './routes/business.js';
 import { registerCrawlStatus } from './routes/crawlstatus.js';
 import { registerDataDumps } from './routes/data-dumps.js';
@@ -153,6 +154,8 @@ registerPremium(app);
 registerDataDumps(app);
 registerOpenSaaS(app);
 registerAutomotive(app);
+/** Books: /isbn and /books/buy, where to buy one online or near a ZIP, and /api/v1/books/buy. */
+registerBooks(app);
 /** Business standing: /business and /api/v1/business, metered like the VIN lookups. */
 registerBusiness(app);
 /** Population: /population, the tree from the world to the ZIP code, and /api/v1/population. */

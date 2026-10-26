@@ -1080,6 +1080,27 @@ export async function getItem(id) {
 }
 
 /**
+ * One item of a collection by its upstream id (an Open Library work key, say).
+ * Asked per source because the unique index is (source_id, external_id): by
+ * external_id alone it is a scan of every item in the collection.
+ */
+export async function itemByExternalId(collectionSlug, externalId) {
+  const sources = await sql`
+    select s.id from sources s join collections c on c.id = s.collection_id
+    where c.slug = ${collectionSlug}
+  `;
+  if (sources.length === 0 || !externalId) return null;
+  const [row] = await sql`
+    select ${itemColumns}
+    from items i join sources s on s.id = i.source_id join collections c on c.id = i.collection_id
+    where i.source_id = any(${pgArray(sources.map((s) => String(s.id)))}::bigint[])
+      and i.external_id = ${String(externalId)}
+    limit 1
+  `;
+  return row ?? null;
+}
+
+/**
  * A page of a collection, the way a site mirroring it asks.
  *
  * Newest first, keyset on id, as it always was -- and now also by tags (all of

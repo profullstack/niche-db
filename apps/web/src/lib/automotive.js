@@ -732,6 +732,9 @@ const OSM_KINDS = {
   car_repair: 'shop=car_repair',
   car_parts: 'shop=car_parts',
   tyres: 'shop=tyres',
+  // The books collection's "in a shop near you" asks the same mirrors.
+  books: 'shop=books',
+  library: 'amenity=library',
 };
 
 function osmPlace(el) {
@@ -741,7 +744,7 @@ function osmPlace(el) {
   return {
     id: `${el.type}/${el.id}`,
     name: t.name ?? null,
-    kind: t.shop ?? null,
+    kind: t.shop ?? t.amenity ?? null,
     brand: t.brand ?? null,
     phone: t.phone ?? t['contact:phone'] ?? null,
     website: t.website ?? t['contact:website'] ?? null,
