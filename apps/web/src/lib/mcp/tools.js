@@ -20,6 +20,7 @@ import * as reputationStore from '@nichedb/db/reputation';
 import * as tldStore from '@nichedb/db/tlds';
 import * as trafficStore from '@nichedb/db/traffic';
 import { enqueueRun } from '@nichedb/queue';
+import { whereToBuy } from '../books.js';
 import { businessReport, hasInput, normaliseInput, rdapLookup } from '../business.js';
 import { liveReputationDeps } from '../dnsbl.js';
 import { areaOut } from '../population.js';
@@ -323,6 +324,26 @@ export const TOOLS = [
           ? { level: child, total: list.total, areas: list.areas.map(areaOut) }
           : null,
       };
+    },
+  },
+  {
+    name: 'where_to_buy_book',
+    description:
+      "Where to buy a book. Give an `isbn` (10 or 13 digits, hyphens fine), or a `title` and `author`, or `item` (a books-collection item id). Answers with the edition from Open Library (title, authors, publisher, pages, cover), `online`: links at Amazon, Bookshop.org, Barnes & Noble, Books-A-Million, Target, Walmart, Powell's, ThriftBooks, Better World Books, AbeBooks, eBay, BookFinder, Google Play Books, Kobo, Libby and WorldCat, each with `kind` (new, used, ebook, borrow) and `sponsored`. Give a US `zip` for `inStore`: the chains' store finders for that ZIP and the bookshops and libraries within 10 miles from OpenStreetMap, with address, phone, hours and distance. Sellers publish no stock or prices, so call a shop with the ISBN.",
+    inputSchema: {
+      type: 'object',
+      properties: {
+        isbn: str('ISBN-10 or ISBN-13 (optional)'),
+        title: str('Title, when there is no ISBN (optional)'),
+        author: str('Author, with a title (optional)'),
+        item: str('A books-collection item id (optional)'),
+        zip: str('A US ZIP code for shops near you (optional)'),
+      },
+    },
+    run: async (args) => {
+      const out = await whereToBuy(args);
+      if (out.error) throw toolError(out.error);
+      return out;
     },
   },
   {

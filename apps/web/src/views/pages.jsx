@@ -7,6 +7,7 @@ const locationLink = (base, geo, extra = {}) =>
 
 import { config } from '@nichedb/config';
 import { currentModules } from '../lib/modules.js';
+import { WhereToBuy } from './books.jsx';
 import {
   Credit,
   FeedCard,
@@ -411,6 +412,7 @@ export const ItemPage = ({
           Object.entries(item.enrichment ?? {}).filter(([k]) => !enrichers || enrichers.has(k)),
         )}
       />
+      {item.kind === 'book' && item.collection_slug === 'books' ? <WhereToBuy item={item} /> : null}
       {item.data?.exit ? <WayInOut data={item.data} /> : null}
       {item.kind === 'scanner-stream' ? (
         <section>
