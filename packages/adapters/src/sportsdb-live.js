@@ -109,16 +109,65 @@ export function parseLive(body) {
   return rows.filter((r) => text(r?.idEvent) && text(r?.strHomeTeam) && text(r?.strAwayTeam));
 }
 
-/** One live row -> one fixture item. */
-export function liveItem(row) {
+/** The league slug the fixture and league items share: `<sport>-<name>`, as ESPN's are. */
+export const leagueSlug = (sport, name) => {
+  const s = name ? slugify(name) : null;
+  return sport && s ? `${sport}-${s}` : null;
+};
+
+/** A team's key in the consolidation contract: provider-scoped, so no other provider collides. */
+export const teamKey = (id) => (text(id) ? `thesportsdb/team/${text(id)}` : null);
+
+const HOUR_MS = 3_600_000;
+
+/**
+ * pre, in or post for a scheduled row. A day listing leaves strStatus blank on
+ * plenty of rows nobody has scored -- 32 of 1,887 over three days -- and blank
+ * means "in play" to liveState, which is right for the livescore feed (a row is
+ * only there because the game is on) and wrong here. So a blank status reads
+ * the clock: not started yet is pre, six hours past kickoff is post, and the
+ * hours between stay pre rather than inventing a live game.
+ */
+export function scheduleState(status, startsAt, now = Date.now()) {
+  if (text(status)) return liveState(status);
+  const t = startsAt ? Date.parse(startsAt) : Number.NaN;
+  if (Number.isFinite(t) && now - t > 6 * HOUR_MS) return 'post';
+  return 'pre';
+}
+
+/** One side of a row, in the contract's shape. */
+function side(row, which, scoreValue) {
+  const name = text(row[`str${which}Team`]);
+  return {
+    id: text(row[`id${which}Team`]),
+    key: teamKey(row[`id${which}Team`]),
+    name,
+    displayName: name,
+    badge: text(row[`str${which}TeamBadge`]),
+    logoUrl: text(row[`str${which}TeamBadge`]),
+    score: scoreValue,
+  };
+}
+
+/**
+ * One row -> one fixture item. The livescore feed and the day listings share a
+ * row shape, so sportsdb-schedule builds its fixtures here too; `live` says
+ * which one it came from, since a blank status means different things in each.
+ *
+ * `data` carries the consolidation contract's keys (`key`, `league.key`,
+ * `league.slug`, `home.key`) so a mirror built for ESPN's fixtures takes these
+ * unchanged.
+ */
+export function fixtureItem(row, { live = false, now = Date.now() } = {}) {
   const id = String(row.idEvent);
   const home = text(row.strHomeTeam);
   const away = text(row.strAwayTeam);
   const sportName = text(row.strSport);
   const sport = sportName ? sportSlug(sportName) : null;
   const league = text(row.strLeague);
-  const leagueSlug = league ? slugify(league) : null;
-  const state = liveState(row.strStatus);
+  const slug = leagueSlug(sport, league);
+  const publishedAt = liveTime(row);
+  const state = live ? liveState(row.strStatus) : scheduleState(row.strStatus, publishedAt, now);
   const statusCode = text(row.strStatus);
   const homeScore = score(row.intHomeScore);
   const awayScore = score(row.intAwayScore);
@@ -127,21 +176,21 @@ export function liveItem(row) {
   return {
     externalId: `${PROVIDER}:fixture:${id}`,
     kind: 'fixture',
-    title: `${home} vs ${away}`,
+    title: home && away ? `${home} vs ${away}` : (text(row.strEvent) ?? `${home} vs ${away}`),
     summary:
       [scored ? `${homeScore ?? 0}-${awayScore ?? 0}` : null, statusCode, league]
         .filter(Boolean)
         .join(' · ') || null,
     url: `https://www.thesportsdb.com/event/${id}`,
     imageUrl: text(row.strHomeTeamBadge) ?? text(row.strAwayTeamBadge),
-    publishedAt: liveTime(row),
+    publishedAt,
     timeKnown: true,
     precision: 'minute',
     tags: [
       'fixture',
-      'live',
+      live ? 'live' : null,
       sport,
-      leagueSlug ? `league:${leagueSlug}` : null,
+      slug ? `league:${slug}` : null,
       `state:${state}`,
       home ? `team:${slugify(home)}` : null,
       away ? `team:${slugify(away)}` : null,
@@ -150,17 +199,22 @@ export function liveItem(row) {
       provider: PROVIDER,
       attribution: 'TheSportsDB (thesportsdb.com)',
       id,
+      key: id,
       liveId: text(row.idLiveScore),
       sport,
       sportName,
+      name: text(row.strEvent) ?? (home && away ? `${home} vs ${away}` : null),
+      shortName: text(row.strEventAlternate),
       league: {
         id: text(row.idLeague),
-        slug: leagueSlug,
+        key: text(row.idLeague),
+        slug,
         name: league,
+        logoUrl: text(row.strLeagueBadge),
         division: text(row.intDivision),
       },
-      home: { id: text(row.idHomeTeam), name: home, badge: text(row.strHomeTeamBadge) },
-      away: { id: text(row.idAwayTeam), name: away, badge: text(row.strAwayTeamBadge) },
+      home: side(row, 'Home', homeScore),
+      away: side(row, 'Away', awayScore),
       homeScore,
       awayScore,
       state,
@@ -168,13 +222,24 @@ export function liveItem(row) {
       statusDetail: statusCode,
       unplayed: UNPLAYED.has((statusCode ?? '').toUpperCase()),
       progress,
+      round: text(row.intRound),
+      season: text(row.strSeason),
+      venue: text(row.strVenue),
+      venueCity: text(row.strCity),
+      venueRegion: text(row.strCountry),
+      broadcastSource: 'thesportsdb',
+      plays_supported: false,
+      boxscoreSupported: false,
       day: text(row.dateEvent),
-      eventTime: text(row.strEventTime),
+      eventTime: text(row.strEventTime) ?? text(row.strTime),
       updatedAt: text(row.updated),
       eventPageUrl: `https://www.thesportsdb.com/event/${id}`,
     },
   };
 }
+
+/** One live row -> one fixture item. */
+export const liveItem = (row) => fixtureItem(row, { live: true });
 
 /** The feed a config asks for: one sport, or every one of them. */
 export function livePath(config) {

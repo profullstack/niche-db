@@ -1,5 +1,4 @@
 import { defineAdapter, slugify, stripHtml } from '@nichedb/core/adapter';
-
 import {
   BASE,
   DEFAULT_KEY,
@@ -12,6 +11,7 @@ import {
   sportSlug,
   usingFreeKey,
 } from './sportsdb.js';
+import { leagueSlug } from './sportsdb-live.js';
 
 /**
  * TheSportsDB: the league catalogue for the `sports` collection.
@@ -146,6 +146,13 @@ export function leagueItem(r) {
     data: {
       provider: PROVIDER,
       leagueId: id,
+      // The consolidation contract's league keys, as ESPN's league items carry
+      // them, so a mirror built for those takes these unchanged.
+      key: id,
+      slug: leagueSlug(sport, name),
+      logoUrl: text(r.strBadge) ?? text(r.strLogo),
+      region: country,
+      priority: 200,
       name,
       alternateNames: alternate
         ? alternate
