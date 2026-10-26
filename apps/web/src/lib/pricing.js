@@ -162,7 +162,12 @@ export function gatewayOptions(priceCents) {
       work: 17,
       css: true,
       paths: ['/i/', '/feeds/', '/tlds', '/tlds/'],
-      when: (_request, url) => url.pathname.startsWith('/i/') || url.search.length > 1,
+      // An invite link (/i/INV-…) is a person's first visit, often opened from a
+      // chat whose link preview cannot run the script; it is not an item page
+      // and nothing links to it, so the swarm never walks it.
+      when: (_request, url) =>
+        (url.pathname.startsWith('/i/') && !/^\/i\/inv-/i.test(url.pathname)) ||
+        url.search.length > 1,
     },
     onSale: async (sale) => {
       console.log('[x402] sold a pass', {
