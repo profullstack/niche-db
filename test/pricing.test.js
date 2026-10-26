@@ -178,4 +178,10 @@ describe('the script challenge (faceted listings, item pages)', async () => {
     expect(on('/feeds/new')).toBe(false);
     expect(on('/feeds/new?')).toBe(false);
   });
+
+  test('an invite link is a first visit, not an item page', () => {
+    expect(on('/i/INV-7K3M-QX9D-2F8H')).toBe(false);
+    expect(on('/i/inv-7k3m-qx9d-2f8h')).toBe(false);
+    expect(on('/i/INV-7K3M-QX9D-2F8H?x=1')).toBe(true);
+  });
 });
