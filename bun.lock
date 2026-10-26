@@ -364,7 +364,7 @@
 
     "@profullstack/favicon-generator": ["@profullstack/favicon-generator@1.2.1", "", { "dependencies": { "inquirer": "^10.2.2", "sharp": "^0.33.5" }, "bin": { "fav": "bin/cli.js" } }, "sha512-1w+EcoEmi60TXXQd97Brs7kN/BmlaoOcNvE39ZombUWSCBFBNe6fFm2mA7HORXb7TM39mHklNTIoG20glLsgVA=="],
 
-    "@profullstack/footer": ["@profullstack/footer@0.2.6", "", { "peerDependencies": { "react": ">=18" }, "optionalPeers": ["react"], "bin": { "profullstack-footer": "bin/profullstack-footer.js" } }, "sha512-BKwbDszAc7e0mYIBiPjgr/5WS8WyDt8IW718s/zW/8pCWOIB1BGwSNs6fmImRSo5kqIjQKUVbXp22jZQ5GEipA=="],
+    "@profullstack/footer": ["@profullstack/footer@0.4.0", "", { "peerDependencies": { "react": ">=18" }, "optionalPeers": ["react"], "bin": { "profullstack-footer": "bin/profullstack-footer.js" } }, "sha512-EJZnMUQmWDi9Gzx6BAjogloeaPFFSSCHtHJuC9dsXiOz8M87hfn6Z+Zx9AMYWk8s6xemPrPlkXKGB3PZugkcEA=="],
 
     "@profullstack/hqtui": ["@profullstack/hqtui@0.6.3", "", { "bin": { "hqtui": "bin/hqtui.mjs" } }, "sha512-RQmULiyNt6Qcz+M0x7Hn3sGN+2C766STHA8AZv4olcYpoMeQFzUW0NnOSXtbqgaUTZCeJLZPU4NHx6NQffVvkw=="],
 
