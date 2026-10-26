@@ -227,7 +227,6 @@ export function fixtureItem(row, { live = false, now = Date.now() } = {}) {
       venue: text(row.strVenue),
       venueCity: text(row.strCity),
       venueRegion: text(row.strCountry),
-      broadcastSource: 'thesportsdb',
       plays_supported: false,
       boxscoreSupported: false,
       day: text(row.dateEvent),
