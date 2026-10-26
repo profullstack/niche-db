@@ -1,6 +1,7 @@
 import { config } from '@nichedb/config';
 import * as q from '@nichedb/db/queries';
 import { APP_ICONS, appIconFor } from '@nichedb/premium';
+import { PROFILE_ENHANCE_SCRIPT } from '@profullstack/profile';
 import { assetUrl, isCurrentVersion, loadAssetVersions } from '../lib/asset-version.js';
 import { llmsTxt } from '../lib/llms.js';
 
@@ -51,6 +52,13 @@ export function registerStatic(app, gateway) {
       return c.body(await Bun.file(path).arrayBuffer());
     });
   }
+
+  // The signup form's company-from-work-email helper, from @profullstack/profile.
+  app.get('/vendor-profile.js', (c) => {
+    c.header('content-type', 'text/javascript');
+    c.header('cache-control', 'public, max-age=60');
+    return c.body(PROFILE_ENHANCE_SCRIPT);
+  });
 
   for (const [route, file, type] of STATIC_FILES) {
     app.get(route, async (c) => {

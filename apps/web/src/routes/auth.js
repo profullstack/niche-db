@@ -4,9 +4,11 @@ import * as q from '@nichedb/db/queries';
 import { sendLoginLink } from '@nichedb/notify';
 import { connection } from '@nichedb/queue';
 import { vapidKeysFromEnv, vapidPublicKeyResponse } from '@profullstack/notifications/server';
+import { saveSignupProfile, validateProfile } from '@profullstack/profile';
 import { getCookie, setCookie } from 'hono/cookie';
 import { AUTH, attempt, callerAddress, forgive, VIEW } from '../lib/auth-throttle.js';
 import { render, requireUser, respond } from '../lib/http.js';
+import { profiles } from '../lib/profile.js';
 import { SignIn } from '../views/pages.jsx';
 
 const REF_COOKIE = 'ndb_ref';
@@ -88,23 +90,46 @@ export function registerAuth(app) {
   app.post('/api/auth/magic', backoff('magic'));
   app.post('/api/auth/magic', async (c) => {
     const body = await c.req.parseBody();
+    const json = (c.req.header('accept') ?? '').includes('application/json');
+
+    /*
+     * The signup form carries the shared profile fields; plain sign-in does not and
+     * is never asked for them. They are checked here, before any link exists, and
+     * a refusal goes back to the form with what was typed. The same answer for a
+     * known or unknown address, so it says nothing about who has an account.
+     */
+    let profile = null;
+    if (body.mode === 'signup') {
+      const check = validateProfile(body);
+      if (!check.ok) {
+        if (json) return c.json({ error: 'Some fields need fixing.', errors: check.errors }, 400);
+        return c.html(
+          await render(
+            <SignIn mode="signup" next={body.next} values={body} errors={check.errors} />,
+          ),
+          400,
+        );
+      }
+      profile = check.profile;
+    }
+
     const email = String(body.email ?? '')
       .trim()
       .toLowerCase();
     const next = String(body.next ?? '/following');
     if (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
       try {
-        const url = await auth.createLoginLink(email, { next });
+        const url = await auth.createLoginLink(email, { next, profile });
         await sendLoginLink({ email, url });
       } catch (err) {
         console.error('[auth] link send failed:', err.message);
         if (!config.mail.enabled)
           console.log(
-            `[auth] mail is not configured; the link would have been ${await auth.createLoginLink(email, { next })}`,
+            `[auth] mail is not configured; the link would have been ${await auth.createLoginLink(email, { next, profile })}`,
           );
       }
     }
-    if ((c.req.header('accept') ?? '').includes('application/json')) return c.json({ ok: true });
+    if (json) return c.json({ ok: true });
     return c.html(await render(<SignIn mode="login" sent />));
   });
 
@@ -123,6 +148,14 @@ export function registerAuth(app) {
         ),
         400,
       );
+    // The fields typed on the signup form, saved now that the account exists and
+    // the link has proved the mailbox. A failure here never costs anybody their
+    // sign-in: settings asks again.
+    if (result.profile) {
+      await saveSignupProfile(profiles, result.user.id, result.profile, {
+        email: result.user.email,
+      }).catch((err) => console.error('[auth] signup profile save failed:', err.message));
+    }
     const ref = getCookie(c, REF_COOKIE);
     if (ref && result.user?.created)
       await q.setReferredBy({ userId: result.user.id, code: ref }).catch(() => {});

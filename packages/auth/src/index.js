@@ -51,12 +51,14 @@ const hashToken = (t) => createHash('sha256').update(t).digest();
  * The caller must answer identically whether or not the address is known: a
  * different response for a registered address enumerates who has an account.
  */
-export async function createLoginLink(email, { next } = {}) {
+export async function createLoginLink(email, { next, profile = null } = {}) {
   const token = randomBytes(32).toString('base64url');
   await q.insertLoginToken({
     tokenHash: hashToken(token),
     email: email.trim().toLowerCase(),
     expiresAt: new Date(Date.now() + TOKEN_TTL_MINUTES * 60_000),
+    // Signup form fields, already validated by the caller; saved on verify.
+    profile,
   });
   const url = new URL('/auth/magic', config.siteUrl);
   url.searchParams.set('t', token);
@@ -69,8 +71,10 @@ export async function createLoginLink(email, { next } = {}) {
  * address nobody has used before gets an account here.
  */
 export async function consumeLoginLink(token, { userAgent } = {}) {
-  const email = await q.consumeLoginToken(hashToken(token));
+  const tokenHash = hashToken(token);
+  const email = await q.consumeLoginToken(tokenHash);
   if (!email) return null;
+  const profile = await q.takeSignupProfile(tokenHash);
   const user = await q.findOrCreateUser(email, {
     admin: config.adminEmails.includes(String(email).toLowerCase()),
   });
@@ -79,7 +83,7 @@ export async function consumeLoginLink(token, { userAgent } = {}) {
     ttlDays: config.session.ttlDays,
     userAgent,
   });
-  return { user, sessionId };
+  return { user, sessionId, profile };
 }
 
 /* ---------------------------------------------------------------- passkey -- */

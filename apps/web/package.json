@@ -27,6 +27,7 @@
     "@profullstack/notifications": "^0.1.0",
     "@profullstack/openprofile": "^0.2.0",
     "@profullstack/partners": "0.2.0",
+    "@profullstack/profile": "0.1.2",
     "@profullstack/throttle": "^0.3.3",
     "@profullstack/x402-gateway": "0.13.1",
     "@simplewebauthn/browser": "^13.2.0",

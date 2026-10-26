@@ -6,6 +6,8 @@ const locationLink = (base, geo, extra = {}) =>
   `${base}?${new URLSearchParams({ ...geoParams(geo), ...extra })}`;
 
 import { config } from '@nichedb/config';
+import { COLUMNS as PROFILE_COLUMNS, renderProfileFields } from '@profullstack/profile';
+import { raw } from 'hono/html';
 import { currentModules } from '../lib/modules.js';
 import { WhereToBuy } from './books.jsx';
 import {
@@ -640,7 +642,14 @@ export const Following = ({ user, follows, items }) => (
   </Layout>
 );
 
-export const SignIn = ({ mode, sent, next, error, referral }) => (
+/*
+ * The rest of the shared profile (@profullstack/profile), asked for on the signup
+ * page only. Email is the form's own box, so the package renders the other five.
+ * A plain sign-in never sees or needs them.
+ */
+const PROFILE_FIELDS = PROFILE_COLUMNS.filter((f) => f !== 'email');
+
+export const SignIn = ({ mode, sent, next, error, referral, values, errors }) => (
   <Layout title={mode === 'signup' ? 'Create your account' : 'Sign in'}>
     <section class="auth">
       <h1>{mode === 'signup' ? 'Create your account' : 'Sign in'}</h1>
@@ -662,6 +671,7 @@ export const SignIn = ({ mode, sent, next, error, referral }) => (
           {error ? <p class="feedback error">{error}</p> : null}
           <form method="post" action="/api/auth/magic" class="stack">
             <input type="hidden" name="next" value={next ?? '/following'} />
+            {mode === 'signup' ? <input type="hidden" name="mode" value="signup" /> : null}
             <label>
               Email
               <input
@@ -670,12 +680,24 @@ export const SignIn = ({ mode, sent, next, error, referral }) => (
                 required
                 autocomplete="email"
                 placeholder="you@example.com"
+                value={values?.email ?? undefined}
               />
             </label>
+            {errors?.email ? <p class="pfs-profile__error">{errors.email}</p> : null}
+            {mode === 'signup'
+              ? raw(
+                  renderProfileFields({
+                    fields: PROFILE_FIELDS,
+                    values: values ?? {},
+                    errors: errors ?? {},
+                  }),
+                )
+              : null}
             <button class="cta" type="submit">
               Email me a link
             </button>
           </form>
+          {mode === 'signup' ? <script src="/vendor-profile.js" defer /> : null}
           <div class="or">or</div>
           <button type="button" id="passkey-signin" class="ghost">
             Use a passkey
@@ -700,6 +722,7 @@ export const SignIn = ({ mode, sent, next, error, referral }) => (
 
 export const Settings = ({
   user,
+  contact = null,
   passkeys,
   apiKeys,
   newKey,
@@ -765,6 +788,20 @@ export const Settings = ({
       <p class="small muted">
         Then: <code>nichedb login --api {config.siteUrl}</code>
       </p>
+    </section>
+
+    <section class="panel" id="contact">
+      <h2>Contact details</h2>
+      <p class="muted small">
+        Private to your account and never shown in the people directory. Sent with{' '}
+        <code>{user.email}</code>. Also at <code>/api/v1/me/profile</code>.
+      </p>
+      <form method="post" action="/api/settings/contact" class="stack">
+        {raw(renderProfileFields({ fields: PROFILE_FIELDS, values: contact ?? {} }))}
+        <button type="submit" class="ghost">
+          Save contact details
+        </button>
+      </form>
     </section>
 
     <section class="panel">
