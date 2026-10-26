@@ -30,11 +30,15 @@
   "engines": {
     "bun": ">=1.3.0"
   },
-  "packageManager": "bun@1.4.0",
+  "packageManager": "bun@1.4.4",
   "devDependencies": {
-    "@biomejs/biome": "^2.3.0",
-    "@electric-sql/pglite": "^0.5.5",
+    "@biomejs/biome": "^2.6.3",
+    "@electric-sql/pglite": "^0.5.11",
     "@profullstack/favicon-generator": "^1.2.1",
     "@profullstack/svgcrusher": "file:vendor/profullstack-svgcrusher-0.1.0.tgz"
+  },
+  "overrides": {
+    "sharp": "^0.35.5",
+    "tmp": "^0.2.6"
   }
 }

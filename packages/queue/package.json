@@ -13,7 +13,7 @@
     "@nichedb/db": "workspace:*",
     "@nichedb/notify": "workspace:*",
     "@profullstack/autoblog": "^0.4.0",
-    "bullmq": "^5.63.0",
-    "ioredis": "^5.9.0"
+    "bullmq": "^6.4.2",
+    "ioredis": "^6.0.0"
   }
 }

@@ -86,8 +86,16 @@ export async function pruneQueues(
   return report;
 }
 
+/**
+ * The raw Redis client behind a queue. BullMQ 6 moved it from `queue.client` to
+ * the queue's backend (`queue.getBackend().client`); the fallback keeps 5 working.
+ */
+function redisClient(queue) {
+  return queue.getBackend ? queue.getBackend().client : queue.client;
+}
+
 async function pruneQueue(queue, { maxLen, maxBytes, step, pauseMs }) {
-  const client = await queue.client;
+  const client = await redisClient(queue);
   const key = queue.keys.events;
   // Clean first: each clean call itself appends a `cleaned` event to the stream.
   const completed = await cleanInSteps(queue, KEEP_COMPLETED.age * 1000, 'completed', {
@@ -122,7 +130,7 @@ async function cleanInSteps(queue, graceMs, type, { step, pauseMs }) {
   // Ask first: a clean call appends a `cleaned` event even when it removes
   // nothing, so calling it unconditionally would grow the stream on every boot.
   // Finished sets are scored by finishedOn, the same clock clean() goes by.
-  const client = await queue.client;
+  const client = await redisClient(queue);
   const due = Number(await client.zcount(queue.keys[type], '-inf', Date.now() - graceMs));
   if (!due) return 0;
   let total = 0;
