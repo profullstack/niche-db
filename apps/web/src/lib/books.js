@@ -329,11 +329,12 @@ export async function zipPoint(raw, { areaByKey = pop.areaByKey } = {}) {
 }
 
 /**
- * Patient, like /mechanics rather than a VIN profile's short wait: the shops
- * are what this page was asked for, and a cold Overpass answer for a 10-mile
- * radius took 30s when measured (2026-10-26). The tile is then cached a week.
+ * Patient, because no page waits on it past STORE_WAIT_MS: it finishes in the
+ * background and fills the week-long tile cache. A cold Overpass answer for a
+ * 10-mile radius took 29-30s on every mirror when measured (2026-10-26), so a
+ * 25s timeout meant the cache never filled and every reload said "slow".
  */
-const STORE_BUDGET = { timeoutMs: 25_000, maxMirrors: 2 };
+const STORE_BUDGET = { timeoutMs: 60_000, maxMirrors: 2 };
 /** How long a page waits for that before rendering without the shops. */
 const STORE_WAIT_MS = 15_000;
 
