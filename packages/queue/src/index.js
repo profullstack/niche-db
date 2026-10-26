@@ -62,12 +62,48 @@ export const queues = Object.fromEntries(
 export const minuteStamp = () => new Date().toISOString().slice(0, 16).replace(/[:T]/g, '-');
 
 /**
- * Repeatables are declared, not accumulated: clear and re-add on every boot so
- * the code is the single source of truth. A repeatable first fires one interval
- * from NOW, so both tickers are also enqueued once immediately -- the data
- * (next_run_at, last_scanned_item_id) decides whether they do anything.
+ * The recurring jobs, as BullMQ job schedulers: `[queue, id, repeat, name]`.
+ *
+ * BullMQ 6 dropped repeatable jobs. `add(name, data, { repeat })` no longer
+ * schedules anything -- it adds one plain job and returns -- and
+ * getRepeatableJobs/removeRepeatableByKey are gone, so the 5.x version of
+ * installSchedules crashed every boot after the upgrade (2026-10-26, #241).
+ */
+export function scheduleSpecs() {
+  const specs = [
+    [queues.stats, 'stats', { every: config.stats.tickSeconds * 1000 }, 'stats'],
+    [queues.tick, 'tick', { every: config.ingest.tickSeconds * 1000 }, 'tick'],
+    [queues.scan, 'scan', { every: config.feeds.scanSeconds * 1000 }, 'scan'],
+    [queues.enrich, 'enrich', { every: config.enrich.tickSeconds * 1000 }, 'enrich'],
+    [queues.maintain, 'gin', { every: config.maintenance.ginTickSeconds * 1000 }, 'gin'],
+  ];
+  if (config.dataDumps.enabled) {
+    specs.push([queues.dumps, 'hourly-dump', { pattern: '0 * * * *', tz: 'UTC' }, 'snapshot']);
+  }
+  if (config.tlds.enabled) {
+    specs.push([queues.tlds, 'tld-sync', { pattern: config.tlds.cron, tz: 'UTC' }, 'sync']);
+  }
+  if (config.traffic.feedToken) {
+    specs.push([
+      queues.traffic,
+      'traffic-sync',
+      { pattern: config.traffic.cron, tz: 'UTC' },
+      'sync',
+    ]);
+  }
+  return specs;
+}
+
+/**
+ * Schedules are declared, not accumulated: every scheduler the code does not
+ * name is removed on boot (which also clears 5.x repeatables left in Redis),
+ * and the rest are upserted, so the code is the single source of truth. A
+ * scheduler first fires one interval from NOW, so the tickers are also
+ * enqueued once shortly after boot -- the data (next_run_at,
+ * last_scanned_item_id) decides whether they do anything.
  */
 export async function installSchedules({ log = console.log } = {}) {
+  const specs = scheduleSpecs();
   for (const queue of [
     queues.tick,
     queues.scan,
@@ -78,66 +114,34 @@ export async function installSchedules({ log = console.log } = {}) {
     queues.tlds,
     queues.traffic,
   ]) {
-    for (const r of await queue.getRepeatableJobs()) await queue.removeRepeatableByKey(r.key);
+    const wanted = new Set(specs.filter(([q]) => q === queue).map(([, id]) => id));
+    for (const s of await queue.getJobSchedulers()) {
+      const id = s.id ?? s.key;
+      if (id && !wanted.has(id)) await queue.removeJobScheduler(id);
+    }
   }
-  await queues.stats.add(
-    'stats',
-    {},
-    { repeat: { every: config.stats.tickSeconds * 1000 }, jobId: 'stats' },
-  );
+  for (const [queue, id, repeat, name] of specs) {
+    await queue.upsertJobScheduler(id, repeat, { name, data: {} });
+  }
+
   await queues.stats.add('stats', {}, { jobId: `stats-boot-${minuteStamp()}`, delay: 10_000 });
-  await queues.tick.add(
-    'tick',
-    {},
-    { repeat: { every: config.ingest.tickSeconds * 1000 }, jobId: 'tick' },
-  );
-  await queues.scan.add(
-    'scan',
-    {},
-    { repeat: { every: config.feeds.scanSeconds * 1000 }, jobId: 'scan' },
-  );
   await queues.tick.add(
     'tick',
     { force: config.ingest.onBoot },
     { jobId: `tick-boot-${minuteStamp()}`, delay: 5_000 },
   );
   await queues.scan.add('scan', {}, { jobId: `scan-boot-${minuteStamp()}`, delay: 20_000 });
-  await queues.enrich.add(
-    'enrich',
-    {},
-    { repeat: { every: config.enrich.tickSeconds * 1000 }, jobId: 'enrich' },
-  );
   await queues.enrich.add('enrich', {}, { jobId: `enrich-boot-${minuteStamp()}`, delay: 45_000 });
   if (config.dataDumps.enabled) {
-    await queues.dumps.add(
-      'snapshot',
-      {},
-      { repeat: { pattern: '0 * * * *', tz: 'UTC' }, jobId: 'hourly-dump' },
-    );
     await queues.dumps.add('snapshot', {}, { jobId: `dumps-boot-${minuteStamp()}`, delay: 15_000 });
   }
-  await queues.maintain.add(
-    'gin',
-    {},
-    { repeat: { every: config.maintenance.ginTickSeconds * 1000 }, jobId: 'gin' },
-  );
   await queues.maintain.add('gin', {}, { jobId: `gin-boot-${minuteStamp()}`, delay: 30_000 });
   if (config.tlds.enabled) {
-    await queues.tlds.add(
-      'sync',
-      {},
-      { repeat: { pattern: config.tlds.cron, tz: 'UTC' }, jobId: 'tld-sync' },
-    );
     // Once at boot as well: an unchanged list costs one fetch, and a fresh
     // deployment (or a new registrar) should not wait a day for its first rows.
     await queues.tlds.add('sync', {}, { jobId: `tlds-boot-${minuteStamp()}`, delay: 60_000 });
   }
   if (config.traffic.feedToken) {
-    await queues.traffic.add(
-      'sync',
-      {},
-      { repeat: { pattern: config.traffic.cron, tz: 'UTC' }, jobId: 'traffic-sync' },
-    );
     await queues.traffic.add('sync', {}, { jobId: `traffic-boot-${minuteStamp()}`, delay: 90_000 });
   }
   log('[queue] schedules installed');
