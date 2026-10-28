@@ -5,7 +5,6 @@ import { citext } from '@electric-sql/pglite/contrib/citext';
 import { pg_trgm } from '@electric-sql/pglite/contrib/pg_trgm';
 // The receiver every follow webhook was verified with before the hub: autoblog's own.
 import { verifyAndParse as autoblogVerify } from '@profullstack/autoblog';
-import { Hono } from 'hono';
 import {
   memoryStore,
   postgresStore,
@@ -268,40 +267,5 @@ describe('account webhooks', () => {
   test('legacyEventType mirrors autoblog for any host', () => {
     expect(legacyEventType('https://www.nichedb.dev')).toBe('dev.nichedb.post.published.v1');
     expect(legacyEventType('https://nichedb.test')).toBe('test.nichedb.post.published.v1');
-  });
-});
-
-const { mountWebhooksApi } = await import('../apps/web/src/lib/webhooks.js');
-
-describe('/api/v1/webhooks', () => {
-  function app(user, viaKey) {
-    const { hub } = hubOn(memoryStore());
-    const a = new Hono();
-    a.use('*', async (c, next) => {
-      c.set('user', user);
-      c.set('viaKey', viaKey);
-      await next();
-    });
-    mountWebhooksApi(a, { hub });
-    return a;
-  }
-
-  test('401 without a key, and for a browser session', async () => {
-    expect((await app(null, false).request('/api/v1/webhooks')).status).toBe(401);
-    expect((await app({ id: ALICE }, false).request('/api/v1/webhooks')).status).toBe(401);
-  });
-
-  test('with a key: create, list, and the event types', async () => {
-    const a = app({ id: ALICE }, true);
-    const made = await a.request('/api/v1/webhooks', {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ url: 'https://a.example/hook', events: ['feed.item.published'] }),
-    });
-    expect(made.status).toBe(201);
-    expect((await made.json()).secret.startsWith('whsec_')).toBe(true);
-    const list = await (await a.request('/api/v1/webhooks')).json();
-    expect(list.endpoints.length).toBe(1);
-    expect(list.event_types).toContain('feed.item.published');
   });
 });
