@@ -5,6 +5,7 @@ import { sendSubmissionDecision, sendSubmissionNotice } from '@nichedb/notify';
 import { enqueueRun } from '@nichedb/queue';
 import { cleanEmail, looksLikeFeed, normaliseFeedUrl, titleOf } from './feed-url.js';
 import { addSource, canReview, Denied, isAdmin } from './service.js';
+import { submissionDecided } from './webhooks.js';
 
 /**
  * Suggesting a feed, and deciding one. Shared by the form, the API, and the
@@ -203,6 +204,7 @@ export async function approveSubmission(
   });
   if (!decided) throw new Denied('That suggestion was decided by someone else just now.', 409);
 
+  await submissionDecided(sub, { approved: true, resultUrl, note });
   sendSubmissionDecision({
     email: sub.user_email ?? sub.email,
     feedUrl: sub.feed_url,
@@ -226,6 +228,7 @@ export async function rejectSubmission(admin, id, { note = null } = {}) {
     note,
   });
   if (!decided) throw new Denied('That suggestion was already decided.', 409);
+  await submissionDecided(sub, { approved: false, note });
   sendSubmissionDecision({
     email: sub.user_email ?? sub.email,
     feedUrl: sub.feed_url,

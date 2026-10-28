@@ -33,6 +33,13 @@ const KEY_TOOLS = new Set([
   'redeem_code',
   'list_invites',
   'create_invite',
+  'list_webhooks',
+  'create_webhook',
+  'update_webhook',
+  'delete_webhook',
+  'test_webhook',
+  'rotate_webhook_secret',
+  'webhook_deliveries',
 ]);
 
 export function registerMcp(app) {

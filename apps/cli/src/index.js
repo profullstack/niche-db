@@ -15,7 +15,7 @@ import { homedir, tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createInterface } from 'node:readline';
 
-export const VERSION = '0.51.0';
+export const VERSION = '0.52.0';
 const GEO_FLAGS = ['lat', 'long', 'radius', 'unit', 'bbox', 'sort', 'offset'];
 const DEFAULT_API = process.env.NICHEDB_API ?? 'https://nichedb.dev';
 const CONFIG_DIR = join(process.env.XDG_CONFIG_HOME ?? join(homedir(), '.config'), 'nichedb');
@@ -175,6 +175,14 @@ export const COMMANDS = [
     usage: 'following',
     summary: 'The feeds your key follows.',
     options: ['--json'],
+  },
+  {
+    name: 'webhooks',
+    usage:
+      'webhooks [list] | add <url> [--events a,b] [--description …] | rm|test|secret|rotate|enable|disable <id> | deliveries [<id>]',
+    summary:
+      'Account webhooks (key required): signed Standard Webhooks POSTs for feed.item.published, feed.followed and more.',
+    options: ['--events', '--description', '--limit', '--json'],
   },
   {
     name: 'rss',
@@ -866,6 +874,85 @@ export async function run(
       }
       for (const f of feeds) out(`${pad(f.slug, 30)} ${f.name}`);
       return 0;
+    }
+    case 'webhooks':
+    case 'webhook': {
+      const [sub = 'list', arg] = rest;
+      const base = '/api/v1/webhooks';
+      const id = () => {
+        if (!arg) throw new Error(`webhooks ${sub} <id>`);
+        return `${base}/${encodeURIComponent(arg)}`;
+      };
+      const show = (r, text) => out(json ? JSON.stringify(r, null, 2) : text);
+      if (sub === 'list' || sub === 'ls') {
+        const r = await client.get(base);
+        if (json) {
+          show(r);
+          return 0;
+        }
+        for (const e of r.endpoints)
+          out(
+            `${pad(e.id, 28)} ${pad(e.enabled ? 'on' : 'off', 4)} ${pad(e.events.join(','), 24)} ${e.url}`,
+          );
+        if (r.endpoints.length === 0) out('(no webhooks)');
+        out(`\nevents: ${r.event_types.join(', ')}`);
+        return 0;
+      }
+      if (sub === 'add' || sub === 'create') {
+        if (!arg) throw new Error('webhooks add <url> [--events a,b]');
+        const r = await client.post(base, {
+          url: arg,
+          events: csv(flags.events),
+          description: typeof flags.description === 'string' ? flags.description : '',
+        });
+        show(
+          r,
+          `${r.endpoint.id}  ${r.endpoint.url}\nsecret: ${r.secret}\n(also: nichedb webhooks secret ${r.endpoint.id})`,
+        );
+        return 0;
+      }
+      if (sub === 'rm' || sub === 'delete') {
+        show(await client.del(id()), `Removed ${arg}.`);
+        return 0;
+      }
+      if (sub === 'test') {
+        const r = await client.post(`${id()}/test`, {});
+        show(
+          r,
+          r.ok ? `Delivered (HTTP ${r.status}).` : `Failed: ${r.error ?? `HTTP ${r.status}`}`,
+        );
+        return r.ok ? 0 : 1;
+      }
+      if (sub === 'secret') {
+        const r = await client.get(`${id()}/secret`);
+        show(r, r.secret);
+        return 0;
+      }
+      if (sub === 'rotate') {
+        const r = await client.post(`${id()}/rotate`, {});
+        show(r, `${r.secret}\n(the old secret has stopped working)`);
+        return 0;
+      }
+      if (sub === 'enable' || sub === 'disable') {
+        const r = await client.patch(id(), { enabled: sub === 'enable' });
+        show(r, `${r.id} ${r.enabled ? 'on' : 'off'}`);
+        return 0;
+      }
+      if (sub === 'deliveries') {
+        const limit = flags.limit ? `?limit=${Number(flags.limit)}` : '';
+        const r = await client.get(`${arg ? `${id()}/deliveries` : `${base}/deliveries`}${limit}`);
+        if (json) {
+          show(r);
+          return 0;
+        }
+        for (const d of r.deliveries)
+          out(
+            `${pad(d.id, 28)} ${pad(d.status, 9)} ${pad(d.last_status ?? '-', 4)} ${pad(d.event_type, 22)} ${when(d.created_at)} ${d.last_error ?? ''}`,
+          );
+        if (r.deliveries.length === 0) out('(no deliveries)');
+        return 0;
+      }
+      throw new Error('webhooks list|add|rm|test|secret|rotate|enable|disable|deliveries');
     }
     case 'rss': {
       const url = `${client.base}/f/${rest[0]}.rss`;

@@ -226,6 +226,9 @@ export async function createFeed(user, { collection, name, description, query, i
   });
   // A new feed delivers from now, not from history.
   await q.setFeedScanCursor(feed.id, await q.maxItemId());
+  // Imported here, not at the top: lib/webhooks.js imports Denied from this module.
+  const { feedCreated } = await import('./webhooks.js');
+  await feedCreated({ ...feed, collection_slug: col.slug });
   return feed;
 }
 
