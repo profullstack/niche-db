@@ -58,6 +58,28 @@ function needUser(ctx) {
   return ctx.user;
 }
 
+/**
+ * MCP tool annotations, so clients can auto-approve safe reads and ask before
+ * side effects. READ touches only this database; LOOKUP is read-only but asks
+ * outside services (RDAP, DNS blocklists, Open Library). write() changes state
+ * here; pass destructiveHint when it overwrites or removes something, and
+ * openWorldHint when it reaches out to a URL or a source.
+ */
+const READ = {
+  readOnlyHint: true,
+  destructiveHint: false,
+  idempotentHint: true,
+  openWorldHint: false,
+};
+const LOOKUP = { ...READ, openWorldHint: true };
+const write = (hints = {}) => ({
+  readOnlyHint: false,
+  destructiveHint: false,
+  idempotentHint: false,
+  openWorldHint: false,
+  ...hints,
+});
+
 const str = (d) => ({ type: 'string', description: d });
 const int = (d) => ({ type: 'integer', description: d });
 const list = (d) => ({ type: 'array', items: { type: 'string' }, description: d });
@@ -65,6 +87,7 @@ const list = (d) => ({ type: 'array', items: { type: 'string' }, description: d 
 export const TOOLS = [
   {
     name: 'stats',
+    annotations: READ,
     description:
       'What this deployment holds: collections, sources, items, items added today, feeds.',
     inputSchema: { type: 'object', properties: {} },
@@ -72,12 +95,14 @@ export const TOOLS = [
   },
   {
     name: 'list_collections',
+    annotations: READ,
     description: 'The collections (niches) with their source, feed and item counts.',
     inputSchema: { type: 'object', properties: {} },
     run: async () => (await q.listCollections()).map((c) => collectionOut(c, site())),
   },
   {
     name: 'list_adapters',
+    annotations: READ,
     description:
       'Every adapter this deployment can run, with the config fields each takes. Use before add_source.',
     inputSchema: { type: 'object', properties: {} },
@@ -85,6 +110,7 @@ export const TOOLS = [
   },
   {
     name: 'list_enrichers',
+    annotations: READ,
     description:
       'Every enricher (YouTube videos, Wikipedia, repo stats, downloads, company profiles, TL;DRs) and which collections turn it on by default. Items carry their results under `enrichment`.',
     inputSchema: { type: 'object', properties: {} },
@@ -92,8 +118,14 @@ export const TOOLS = [
   },
   {
     name: 'list_sources',
+    annotations: READ,
     description: 'Sources with status, last run and item counts. Optionally one collection.',
-    inputSchema: { type: 'object', properties: { collection: str('Collection slug, e.g. games') } },
+    inputSchema: {
+      type: 'object',
+      properties: {
+        collection: str('Collection slug, e.g. games (optional; see list_collections)'),
+      },
+    },
     run: async ({ collection }) => {
       const col = collection ? await q.getCollection(collection) : null;
       if (collection && !col) throw toolError(`No collection named ${collection}`);
@@ -102,8 +134,12 @@ export const TOOLS = [
   },
   {
     name: 'list_feeds',
+    annotations: READ,
     description: 'Public feeds, most followed first. Optionally one collection.',
-    inputSchema: { type: 'object', properties: { collection: str('Collection slug') } },
+    inputSchema: {
+      type: 'object',
+      properties: { collection: str('Collection slug, e.g. games (see list_collections)') },
+    },
     run: async ({ collection }) => {
       const col = collection ? await q.getCollection(collection) : null;
       if (collection && !col) throw toolError(`No collection named ${collection}`);
@@ -112,15 +148,18 @@ export const TOOLS = [
   },
   {
     name: 'feed_items',
+    annotations: READ,
     description: 'What a feed selects, newest first. Page with before_id.',
     inputSchema: {
       type: 'object',
       properties: {
         ...geoSchema,
-        feed: str('Feed slug'),
-        limit: int('Default 30, max 200'),
-        before_id: int('Keyset cursor; cannot combine with distance sorting'),
-        offset: int('Distance pagination offset'),
+        feed: str('Feed slug, e.g. new-on-steam (see list_feeds)'),
+        limit: int('Rows to return, integer 1-200, default 30, e.g. 50'),
+        before_id: int(
+          'Keyset cursor: the smallest item id from the previous page, e.g. 81234567; not with sort=distance',
+        ),
+        offset: int('Rows to skip when sort=distance, integer, e.g. 30'),
       },
       required: ['feed'],
     },
@@ -142,17 +181,20 @@ export const TOOLS = [
   },
   {
     name: 'recent_items',
+    annotations: READ,
     description: 'Newest items, optionally narrowed to a collection, source or kind.',
     inputSchema: {
       type: 'object',
       properties: {
         ...geoSchema,
-        collection: str('Collection slug'),
-        source: str('Source slug'),
-        kind: str('Item kind'),
-        limit: int('Default 30, max 200'),
-        before_id: int('Keyset cursor; cannot combine with distance sorting'),
-        offset: int('Distance pagination offset'),
+        collection: str('Collection slug, e.g. games (see list_collections)'),
+        source: str('Source slug, e.g. steam-new-releases (see list_sources)'),
+        kind: str('Item kind, e.g. release, title, filing (optional)'),
+        limit: int('Rows to return, integer 1-200, default 30, e.g. 50'),
+        before_id: int(
+          'Keyset cursor: the smallest item id from the previous page, e.g. 81234567; not with sort=distance',
+        ),
+        offset: int('Rows to skip when sort=distance, integer, e.g. 30'),
       },
     },
     run: async ({ collection, source, kind, limit, before_id, offset, ...location }) => {
@@ -175,14 +217,15 @@ export const TOOLS = [
   },
   {
     name: 'upcoming',
+    annotations: READ,
     description: 'Items dated in the future (releases, launches, deadlines), soonest first.',
     inputSchema: {
       type: 'object',
       properties: {
         ...geoSchema,
-        collection: str('Collection slug'),
-        days: int('Horizon, default 30'),
-        limit: int('Default 50'),
+        collection: str('Collection slug, e.g. games (see list_collections)'),
+        days: int('How many days ahead to look, integer, default 30, e.g. 90'),
+        limit: int('Rows to return, integer 1-200, default 50, e.g. 20'),
       },
     },
     run: async ({ collection, days, limit, ...location }) => {
@@ -199,16 +242,17 @@ export const TOOLS = [
   },
   {
     name: 'search_items',
+    annotations: READ,
     description:
       'Full-text search over titles, summaries and tags. Use this first when you know a name.',
     inputSchema: {
       type: 'object',
       properties: {
         ...geoSchema,
-        q: str('Query'),
-        collection: str('Collection slug'),
-        kind: str('Item kind'),
-        limit: int('Default 20, max 100'),
+        q: str('Search words, e.g. elden ring'),
+        collection: str('Collection slug, e.g. games (see list_collections)'),
+        kind: str('Item kind, e.g. release, title, filing (optional)'),
+        limit: int('Rows to return, integer 1-100, default 20, e.g. 10'),
       },
       required: ['q'],
     },
@@ -226,18 +270,21 @@ export const TOOLS = [
   },
   {
     name: 'match_items',
+    annotations: READ,
     description:
       'Which title, channel or fixture is this name? Give a file name, a release name or a playlist entry ("Top.Gun.Maverick.2022.1080p.mkv", "US: ESPN2 HD"); it is cleaned (year, season and episode, quality tags, playlist decorations) and matched by similarity. A matchup ("NFL: Chiefs vs Bills", "Lakers @ Celtics", "Rangers at Celtic 19:45") is answered by the fixture whose two teams those are, kicking off between 36 hours ago and 7 days ahead unless date narrows it. Each result carries a score in 0..1. Use screen for films and TV, channels for television channels, sports for fixtures.',
     inputSchema: {
       type: 'object',
       properties: {
         ...geoSchema,
-        q: str('The name as written'),
-        collection: str('Collection slug: screen, channels or sports'),
-        kind: str('Item kind: title, channel, fixture'),
-        year: int('A year to prefer, when known'),
-        date: str('A day (YYYY-MM-DD) to look for a fixture on, plus a day either side'),
-        limit: int('Default 5, max 50'),
+        q: str('The name as written, e.g. Top.Gun.Maverick.2022.1080p.mkv or US: ESPN2 HD'),
+        collection: str('Collection slug: screen, channels or sports (optional), e.g. screen'),
+        kind: str('Item kind: title, channel or fixture (optional), e.g. title'),
+        year: int('A four-digit year to prefer, when known, e.g. 2022'),
+        date: str(
+          'A day (YYYY-MM-DD) to look for a fixture on, plus a day either side, e.g. 2026-11-02',
+        ),
+        limit: int('Rows to return, integer 1-50, default 5, e.g. 3'),
       },
       required: ['q'],
     },
@@ -265,8 +312,13 @@ export const TOOLS = [
   },
   {
     name: 'get_item',
+    annotations: READ,
     description: 'One item with its full adapter payload.',
-    inputSchema: { type: 'object', properties: { id: int('Item id') }, required: ['id'] },
+    inputSchema: {
+      type: 'object',
+      properties: { id: int('Numeric item id from any listing, e.g. 81234567') },
+      required: ['id'],
+    },
     run: async ({ id }) => {
       const item = await q.getItem(Number(id));
       if (!item) throw toolError(`No item ${id}`);
@@ -275,13 +327,14 @@ export const TOOLS = [
   },
   {
     name: 'population',
+    annotations: READ,
     description:
       'Population and demography, drilled down from the world to the ZIP code. Give a `key` (us, us-ca, us-ca-los-angeles, gb, gb-england-london), a US `zip`, or a place name in `q`; no argument is the world. Answers with the area (population, year, measures: age, income, home value, rent, poverty, education, unemployment, race and Hispanic origin for the US; growth, age structure, births, deaths, fertility, life expectancy, migration, GDP per head and Gini for countries), how many areas of each level it contains, and the largest of its children at `level` (country, state, city or zip). Sources: World Bank, US Census ACS 5-year, GeoNames.',
     inputSchema: {
       type: 'object',
       properties: {
         key: str('Area key, e.g. us, us-ca, us-ca-los-angeles, us-90210, de (optional)'),
-        zip: str('A US ZIP code (optional)'),
+        zip: str('A US ZIP code (optional), 5 digits, e.g. 90210'),
         q: str('A place name to look up, e.g. Springfield (optional)'),
         level: str('Which children to list: country, state, city or zip (optional)'),
         limit: int('Children to list, default 20, max 500'),
@@ -330,16 +383,17 @@ export const TOOLS = [
   },
   {
     name: 'where_to_buy_book',
+    annotations: LOOKUP,
     description:
       "Where to buy a book. Give an `isbn` (10 or 13 digits, hyphens fine), or a `title` and `author`, or `item` (a books-collection item id). Answers with the edition from Open Library (title, authors, publisher, pages, cover), `online`: links at Amazon, Bookshop.org, Barnes & Noble, Books-A-Million, Target, Walmart, Powell's, ThriftBooks, Better World Books, AbeBooks, eBay, BookFinder, Google Play Books, Kobo, Libby and WorldCat, each with `kind` (new, used, ebook, borrow) and `sponsored`. Give a US `zip` for `inStore`: the chains' store finders for that ZIP and the bookshops and libraries within 10 miles from OpenStreetMap, with address, phone, hours and distance. Sellers publish no stock or prices, so call a shop with the ISBN.",
     inputSchema: {
       type: 'object',
       properties: {
-        isbn: str('ISBN-10 or ISBN-13 (optional)'),
-        title: str('Title, when there is no ISBN (optional)'),
-        author: str('Author, with a title (optional)'),
-        item: str('A books-collection item id (optional)'),
-        zip: str('A US ZIP code for shops near you (optional)'),
+        isbn: str('ISBN-10 or ISBN-13, hyphens fine (optional), e.g. 978-0-14-143951-8'),
+        title: str('Title, when there is no ISBN (optional), e.g. Pride and Prejudice'),
+        author: str('Author, with a title (optional), e.g. Jane Austen'),
+        item: str('A books-collection item id (optional), e.g. 81234567'),
+        zip: str('A US ZIP code for shops near you (optional), 5 digits, e.g. 97209'),
       },
     },
     run: async (args) => {
@@ -350,22 +404,28 @@ export const TOOLS = [
   },
   {
     name: 'create_feed',
+    annotations: write(),
     description:
       'Save a query as a feed (needs a key). Sources, kinds and tags narrow; q is a text match; upcoming keeps only future-dated items.',
     inputSchema: {
       type: 'object',
       properties: {
         ...geoSchema,
-        collection: str('Collection slug'),
-        name: str('Feed name'),
-        description: str('Optional'),
-        sources: list('Source slugs'),
-        kinds: list('Item kinds'),
-        tags: list('Tags, any match'),
-        q: str('Text match'),
-        upcoming: { type: 'boolean' },
-        enrichers: list('Enrichers to show; omit for the collection defaults'),
-        public: { type: 'boolean', description: 'Default true' },
+        collection: str('Collection slug, e.g. games (see list_collections)'),
+        name: str('Display name for the feed, e.g. Rust releases'),
+        description: str('One line about the feed (optional), e.g. Every Rust crate release'),
+        sources: list('Source slugs to include (optional), e.g. ["crates"]'),
+        kinds: list('Item kinds to include (optional), e.g. ["release"]'),
+        tags: list('Tags, any one matches (optional), e.g. ["rust", "cli"]'),
+        q: str('Text the items must match (optional), e.g. tokio'),
+        upcoming: {
+          type: 'boolean',
+          description: 'true keeps only items dated in the future, e.g. true; default false',
+        },
+        enrichers: list(
+          'Enricher names to show (see list_enrichers), e.g. ["youtube"]; omit for the collection defaults',
+        ),
+        public: { type: 'boolean', description: 'Listed publicly, true or false, default true' },
       },
       required: ['collection', 'name'],
     },
@@ -391,14 +451,19 @@ export const TOOLS = [
   },
   {
     name: 'follow_feed',
+    annotations: write({ idempotentHint: true }),
     description: 'Follow a feed as the key owner (needs a key). Channels: webpush, email, webhook.',
     inputSchema: {
       type: 'object',
       properties: {
-        feed: str('Feed slug'),
-        channels: list('Default webpush,email'),
-        webhook_url: str('For the webhook channel'),
-        webhook_secret: str('Shared secret the receiver verifies with'),
+        feed: str('Feed slug, e.g. new-on-steam (see list_feeds)'),
+        channels: list('Delivery channels: webpush, email, webhook; default ["webpush", "email"]'),
+        webhook_url: str(
+          'https URL for the webhook channel, e.g. https://example.com/hooks/nichedb',
+        ),
+        webhook_secret: str(
+          'Shared secret the receiver verifies signatures with, any string, e.g. s3cret-value',
+        ),
       },
       required: ['feed'],
     },
@@ -416,6 +481,7 @@ export const TOOLS = [
   },
   {
     name: 'list_webhooks',
+    annotations: READ,
     description:
       "The key owner's account webhook endpoints (never their secrets) and the event types this site emits. Needs a key.",
     inputSchema: { type: 'object', properties: {} },
@@ -429,14 +495,19 @@ export const TOOLS = [
   },
   {
     name: 'create_webhook',
+    annotations: write(),
     description:
       'Add an account webhook: signed POSTs (Standard Webhooks + CloudEvents) to an https URL for events such as feed.item.published (new items in feeds you follow), feed.followed, feed.created, submission.approved. Patterns like feed.* work; omit events for all. Returns the signing secret. Needs a key.',
     inputSchema: {
       type: 'object',
       properties: {
-        url: str('Public https URL that receives the POSTs'),
-        events: list('Event types or patterns (default all)'),
-        description: str('A note for yourself (optional)'),
+        url: str(
+          'Public https URL that receives the POSTs, e.g. https://example.com/hooks/nichedb',
+        ),
+        events: list(
+          'Event types or patterns, default all, e.g. ["feed.*", "submission.approved"]',
+        ),
+        description: str('A note for yourself (optional), e.g. staging receiver'),
       },
       required: ['url'],
     },
@@ -449,16 +520,20 @@ export const TOOLS = [
   },
   {
     name: 'update_webhook',
+    annotations: write({ destructiveHint: true, idempotentHint: true }),
     description:
       'Change an account webhook: url, events, description, or enabled (true turns it back on and clears its failure count). Needs a key.',
     inputSchema: {
       type: 'object',
       properties: {
-        id: str('Webhook id (wh_…)'),
-        url: str('New URL'),
-        events: list('New event types or patterns'),
-        description: str('New description'),
-        enabled: { type: 'boolean', description: 'On or off' },
+        id: str('Webhook id from list_webhooks, e.g. wh_01JB2X3Y4Z'),
+        url: str('New https URL (optional), e.g. https://example.com/hooks/v2'),
+        events: list('New event types or patterns (optional), e.g. ["feed.item.published"]'),
+        description: str('New note (optional), e.g. production receiver'),
+        enabled: {
+          type: 'boolean',
+          description: 'true turns it on and clears failures, false pauses it',
+        },
       },
       required: ['id'],
     },
@@ -469,8 +544,13 @@ export const TOOLS = [
   },
   {
     name: 'delete_webhook',
+    annotations: write({ destructiveHint: true, idempotentHint: true }),
     description: 'Remove an account webhook and its delivery log. Needs a key.',
-    inputSchema: { type: 'object', properties: { id: str('Webhook id (wh_…)') }, required: ['id'] },
+    inputSchema: {
+      type: 'object',
+      properties: { id: str('Webhook id from list_webhooks, e.g. wh_01JB2X3Y4Z') },
+      required: ['id'],
+    },
     run: async ({ id }, ctx) => {
       const user = needUser(ctx);
       return hookCall(() => hooks.deleteEndpoint(String(user.id), String(id)));
@@ -478,9 +558,14 @@ export const TOOLS = [
   },
   {
     name: 'test_webhook',
+    annotations: write({ openWorldHint: true }),
     description:
       'Send a webhook.test event to one of your endpoints now and report the HTTP status. Needs a key.',
-    inputSchema: { type: 'object', properties: { id: str('Webhook id (wh_…)') }, required: ['id'] },
+    inputSchema: {
+      type: 'object',
+      properties: { id: str('Webhook id from list_webhooks, e.g. wh_01JB2X3Y4Z') },
+      required: ['id'],
+    },
     run: async ({ id }, ctx) => {
       const user = needUser(ctx);
       return hookCall(() => hooks.test(String(user.id), String(id)));
@@ -488,9 +573,14 @@ export const TOOLS = [
   },
   {
     name: 'rotate_webhook_secret',
+    annotations: write({ destructiveHint: true }),
     description:
       'Replace a webhook signing secret; the old one stops working at once. Returns the new secret. Needs a key.',
-    inputSchema: { type: 'object', properties: { id: str('Webhook id (wh_…)') }, required: ['id'] },
+    inputSchema: {
+      type: 'object',
+      properties: { id: str('Webhook id from list_webhooks, e.g. wh_01JB2X3Y4Z') },
+      required: ['id'],
+    },
     run: async ({ id }, ctx) => {
       const user = needUser(ctx);
       return hookCall(() => hooks.rotateSecret(String(user.id), String(id)));
@@ -498,11 +588,15 @@ export const TOOLS = [
   },
   {
     name: 'webhook_deliveries',
+    annotations: READ,
     description:
       'Recent webhook deliveries with status, attempts, last error and payload: for one endpoint, or all of yours. Needs a key.',
     inputSchema: {
       type: 'object',
-      properties: { id: str('Webhook id (optional)'), limit: int('Default 20, max 200') },
+      properties: {
+        id: str('Webhook id (optional; omit for all of yours), e.g. wh_01JB2X3Y4Z'),
+        limit: int('Rows to return, integer 1-200, default 20, e.g. 50'),
+      },
     },
     run: async ({ id, limit }, ctx) => {
       const user = needUser(ctx);
@@ -515,13 +609,16 @@ export const TOOLS = [
   },
   {
     name: 'submit_feed',
+    annotations: write({ idempotentHint: true }),
     description:
       'Suggest an RSS or Atom feed for the index. No key needed. An admin reviews every suggestion before anything is fetched; approved podcast feeds are handed to rssamplifier, everything else becomes a source here.',
     inputSchema: {
       type: 'object',
       properties: {
         url: str('The feed URL, starting with https://'),
-        collection: str('Collection slug it belongs in (optional; an admin decides otherwise)'),
+        collection: str(
+          'Collection slug it belongs in, e.g. podcasts (optional; an admin decides otherwise)',
+        ),
         note: str('Why it belongs here: who publishes it, what it covers (optional)'),
         email: str('Where to hear back, if you are not sending a key (optional)'),
       },
@@ -547,22 +644,25 @@ export const TOOLS = [
   },
   {
     name: 'search_profiles',
+    annotations: READ,
     description:
       'People: one entry per person assembled from every app that serves their OpenProfile.md (podcasters from p0dcasters, public profiles from OutreachGraph). Search by name, headline or anything in the document; newest change first. Each answer carries the page, the openprofile.md URL, accounts, topics, Broadcast shows, the Guest section, and the job title, company and seniority the person published (filter on them with title, company, seniority or tags).',
     inputSchema: {
       type: 'object',
       properties: {
         q: str('Text to match against the name, headline and document (optional)'),
-        since: str('ISO time: only profiles changed after it (optional)'),
+        since: str(
+          'ISO 8601 time: only profiles changed after it (optional), e.g. 2026-10-01T00:00:00Z',
+        ),
         title: str('Job title, matched as its tag (`CTO` is title:cto) (optional)'),
-        company: str('Company domain, URL or name (optional)'),
+        company: str('Company domain, URL or name (optional), e.g. example.com'),
         seniority: {
           type: 'string',
           enum: SENIORITY_LEVELS,
           description: 'Seniority derived from the title (optional)',
         },
         tags: list('Facet tags every result must carry: title:…, company:…, seniority:…'),
-        limit: int('Default 30, max 200'),
+        limit: int('Rows to return, integer 1-200, default 30, e.g. 50'),
       },
     },
     run: async ({ q: term, since, limit, title, company, seniority, tags }) => {
@@ -584,6 +684,7 @@ export const TOOLS = [
   },
   {
     name: 'find_profile_by_linkedin',
+    annotations: READ,
     description:
       'The public profile a LinkedIn profile or company URL belongs to (linkedin.com/in/… or /company/…), or null. LinkedIn only: profiles are never looked up by email.',
     inputSchema: {
@@ -599,11 +700,14 @@ export const TOOLS = [
   },
   {
     name: 'get_profile',
+    annotations: READ,
     description:
       'One person by id, `<slug>-<id>` or handle: the parsed view and the OpenProfile.md as served.',
     inputSchema: {
       type: 'object',
-      properties: { ref: str('Profile id, slug-id or handle') },
+      properties: {
+        ref: str('Profile id, slug-id or handle, e.g. 4821, ada-lovelace-4821 or ada'),
+      },
       required: ['ref'],
     },
     run: async ({ ref }) => {
@@ -614,13 +718,14 @@ export const TOOLS = [
   },
   {
     name: 'claim_profile',
+    annotations: write({ idempotentHint: true }),
     description:
       'Claim a profile as the key owner (needs a key). Proven when the key owner’s email is one the profile lists, or when the person’s site or show page links back to the profile’s nichedb page. An admin may claim on behalf of an email.',
     inputSchema: {
       type: 'object',
       properties: {
-        ref: str('Profile id, slug-id or handle'),
-        email: str('Admins only: claim it for this email'),
+        ref: str('Profile id, slug-id or handle, e.g. 4821, ada-lovelace-4821 or ada'),
+        email: str('Admins only: claim it for this email address, e.g. ada@example.com'),
       },
       required: ['ref'],
     },
@@ -634,15 +739,16 @@ export const TOOLS = [
   },
   {
     name: 'update_profile',
+    annotations: write({ destructiveHint: true, idempotentHint: true }),
     description:
       'Edit a profile you own (needs a key). Send `markdown`, a whole OpenProfile.md that replaces what you wrote before, or any of `name`, `headline`, `emoji`, `pronouns`, `web`, `identity` (key: value, null removes), `sections` (name: body, `none` removes), `handle`, `public`. What you write wins over every source and survives every re-read.',
     inputSchema: {
       type: 'object',
       properties: {
-        ref: str('Profile id, slug-id or handle'),
-        markdown: str('A complete OpenProfile.md'),
-        name: str('The name'),
-        headline: str('One line'),
+        ref: str('Profile id, slug-id or handle, e.g. 4821, ada-lovelace-4821 or ada'),
+        markdown: str('A complete OpenProfile.md document as Markdown, starting "# Name"'),
+        name: str('Display name, e.g. Ada Lovelace'),
+        headline: str('One-line headline, e.g. Founder at Example Labs'),
         emoji: str(
           'Your mark next to your name: one emoji or an OpenEmoji :shortcode:; empty removes',
         ),
@@ -658,7 +764,9 @@ export const TOOLS = [
           description:
             'Section bodies by name (accounts, topics, broadcast, guest, ...); the word none removes one',
         },
-        handle: str('Your URL: /c/profiles/<handle>'),
+        handle: str(
+          'Your URL handle, lowercase letters, digits and dashes, e.g. ada for /c/profiles/ada',
+        ),
         public: { type: 'boolean', description: 'Listed and pulled by other directories' },
       },
       required: ['ref'],
@@ -686,16 +794,20 @@ export const TOOLS = [
   },
   {
     name: 'add_source',
+    annotations: write({ openWorldHint: true }),
     description:
       'Add a source: an adapter with a config, fetched on a schedule (needs a key; admins and Pro). Call list_adapters first for the fields.',
     inputSchema: {
       type: 'object',
       properties: {
-        adapter: str('Adapter name, e.g. github-releases'),
-        collection: str("Collection slug; defaults to the adapter's"),
-        name: str('Display name'),
-        config: { type: 'object', description: 'Adapter config fields' },
-        cadence_minutes: int('5 to 1440'),
+        adapter: str('Adapter name from list_adapters, e.g. github-releases'),
+        collection: str("Collection slug, e.g. packages; defaults to the adapter's"),
+        name: str('Display name, e.g. Bun releases'),
+        config: {
+          type: 'object',
+          description: 'Adapter config fields from list_adapters, e.g. {"repo": "oven-sh/bun"}',
+        },
+        cadence_minutes: int('Minutes between fetches, integer 5-1440, e.g. 60'),
       },
       required: ['adapter'],
     },
@@ -714,11 +826,12 @@ export const TOOLS = [
   },
   {
     name: 'run_source',
+    annotations: write({ openWorldHint: true }),
     description:
       'Fetch a source now instead of waiting for its schedule (needs a key; owner or admin).',
     inputSchema: {
       type: 'object',
-      properties: { source: str('Source slug') },
+      properties: { source: str('Source slug, e.g. steam-new-releases (see list_sources)') },
       required: ['source'],
     },
     run: async ({ source }, ctx) => {
@@ -733,6 +846,7 @@ export const TOOLS = [
   },
   {
     name: 'search_tlds',
+    annotations: READ,
     description:
       "Top-level domains: every label in IANA's root, with type, registry, RDAP server and each registrar's one-year register/renew/transfer price (Porkbun, Dynadot, Cloudflare, OVHcloud). Sorted by renewal by default, because the first year is a promotion. `best` is the cheapest USD price across registrars; with `registrar` it is that registrar's own price in its currency. Answers carry facet counts. `trap: true` keeps only labels that renew at 2x the first year or more.",
     inputSchema: {
@@ -753,13 +867,13 @@ export const TOOLS = [
           type: 'boolean',
           description: 'true: internationalised labels only; false: ASCII only',
         },
-        status: str('delegated (default), removed, or all'),
+        status: str('delegated (default), removed, or all, e.g. removed'),
         sort: str(
           'renew (default), register, transfer, restore, ratio, tld, registrars, type, manager, first_seen',
         ),
-        order: str('asc or desc'),
-        limit: int('Default 50, max 500'),
-        offset: int('Default 0'),
+        order: str('Sort direction: asc or desc, e.g. desc'),
+        limit: int('Rows to return, integer 1-500, default 50, e.g. 100'),
+        offset: int('Rows to skip for paging, integer, default 0, e.g. 50'),
       },
     },
     run: async (args = {}) => {
@@ -776,6 +890,7 @@ export const TOOLS = [
   },
   {
     name: 'get_tld',
+    annotations: READ,
     description:
       'One top-level domain: type, registry, RDAP server, when it entered or left the root, every registrar price (register, renew, transfer, restore, promotions, privacy, restrictions) and its change history.',
     inputSchema: {
@@ -800,14 +915,15 @@ export const TOOLS = [
   },
   {
     name: 'tld_changes',
+    annotations: READ,
     description:
       "Top-level domains added to or removed from IANA's root, newest first, with the IANA list version each happened in. Nobody else publishes this diff.",
     inputSchema: {
       type: 'object',
       properties: {
-        since: str('ISO time: only changes after it (optional)'),
-        change: str('added, removed or returned (optional)'),
-        limit: int('Default 100, max 1000'),
+        since: str('ISO 8601 time: only changes after it (optional), e.g. 2026-01-01T00:00:00Z'),
+        change: str('added, removed or returned (optional), e.g. added'),
+        limit: int('Rows to return, integer 1-1000, default 100, e.g. 25'),
       },
     },
     run: async ({ since, change, limit }) =>
@@ -819,12 +935,15 @@ export const TOOLS = [
   },
   {
     name: 'check_domain',
+    annotations: LOOKUP,
     description:
       'Is a domain name registered? Asks each registry over RDAP. Give `name` as a full name (foo.watches), or a bare word with `tlds` (foo + com,dev,io), or several names comma separated. Each answer is registered (with registrar and expiry), not_registered, or unknown. not_registered means the registry holds no registration; the name may still be reserved or premium, so it is not a promise that it is for sale. unknown (no RDAP server, a timeout, a 429) is never a yes. Each answer carries the cheapest known USD price for its ending.',
     inputSchema: {
       type: 'object',
       properties: {
-        name: str('foo.watches, or foo, or a.com,b.dev'),
+        name: str(
+          'A full name, a bare word with tlds, or names comma separated, e.g. foo.watches or a.com,b.dev',
+        ),
         tlds: str('Endings to try a bare word under, comma separated (optional)'),
       },
       required: ['name'],
@@ -846,6 +965,7 @@ export const TOOLS = [
   },
   {
     name: 'business_standing',
+    annotations: LOOKUP,
     description:
       "Is a business on anybody's list? Give its `name`, and any of `domain`, `state` (two letters), `number` (state entity number) and `ein`. Answers with `standing` (flagged, incomplete or clear; clear only when every list was checked and found nothing), the `findings` behind it, and each section: US Treasury OFAC sanctions (SDN and consolidated, aliases included), GLEIF LEI records, SEC EDGAR filers, state registry status (OpenCorporates) and SAM.gov exclusions when keyed, and the domain over RDAP plus Spamhaus/URIBL/SURBL/Safe Browsing when the operator enabled them. A name match is not an identity: confirm against address and identifiers.",
     inputSchema: {
@@ -853,7 +973,7 @@ export const TOOLS = [
       properties: {
         name: str('Company name, e.g. Profullstack, Inc.'),
         domain: str('Its website or mail domain (optional)'),
-        state: str('Two-letter US state it is registered in (optional)'),
+        state: str('Two-letter US state it is registered in (optional), e.g. CA'),
         number: str('State entity number, e.g. 4218574 (optional)'),
         ein: str('US EIN, kept to identify it, never checked (optional)'),
       },
@@ -866,6 +986,7 @@ export const TOOLS = [
   },
   {
     name: 'reputation_lookup',
+    annotations: LOOKUP,
     description:
       'Is an IP address or a domain on a blocklist? Give `indicator` (an IPv4/IPv6 address or a domain; a URL is reduced to its host). Answers `listed`, a rough 0-100 `score` with the `reasons` behind it, the nichedb /traffic record (addresses our own servers banned and a person approved), the abuse.ch indicators (ThreatFox, URLhaus, Feodo Tracker; a domain is checked with its parent domains), the SURBL standing of a watched domain, and live DNS blocklists in `dnsbl` (an address: Spamhaus ZEN with SBL/CSS/XBL/PBL decoded, SpamCop, PSBL, Mailspike; a domain and its parents: Spamhaus DBL, URIBL, SURBL). A domain is also resolved and each A/AAAA address is checked the same way, in `addresses` (each with `ip`, `listed`, `traffic`, `indicators`, `dnsbl`). A list whose own test entry failed is named in `unknown`, not treated as a miss. Not listed is not the same as clean.',
     inputSchema: {
@@ -885,6 +1006,7 @@ export const TOOLS = [
   },
   {
     name: 'traffic_list',
+    annotations: READ,
     description:
       'The nichedb /traffic blocklist: IP addresses our own servers banned for exploit attempts, scanning, brute force or spam, each published only after a reviewer (a person, or riotcoder applying published rules) read the evidence and approved it. Newest approvals first. Optional `days` keeps addresses seen in the last N days, `category` one of exploit, brute-force, scanner, spam, other. Without an API key the newest 100 are returned; with one, `limit` (up to 1000) and `offset` page the whole list.',
     inputSchema: {
@@ -916,11 +1038,14 @@ export const TOOLS = [
   },
   {
     name: 'redeem_code',
+    annotations: write(),
     description:
       'Redeem a credit code (CR-XXXX-XXXX-XXXX-XXXX) for the key owner. A code is worth days of Premium, added after any term already held. Needs a key.',
     inputSchema: {
       type: 'object',
-      properties: { code: str('The credit code, any case, dashes optional') },
+      properties: {
+        code: str('The credit code, any case, dashes optional, e.g. CR-AB12-CD34-EF56-GH78'),
+      },
       required: ['code'],
     },
     run: async ({ code }, ctx) => {
@@ -932,6 +1057,7 @@ export const TOOLS = [
   },
   {
     name: 'list_invites',
+    annotations: READ,
     description:
       "The key owner's invites: how many are left of the quota, and each invite with its status (open, used, expired, revoked). Needs a key.",
     inputSchema: { type: 'object', properties: {} },
@@ -939,11 +1065,14 @@ export const TOOLS = [
   },
   {
     name: 'create_invite',
+    annotations: write(),
     description:
       'Make one invite link as the key owner. Invites are scarce (a few per account); when the invited person signs up, both get days of Premium. The link is returned once. Needs a key.',
     inputSchema: {
       type: 'object',
-      properties: { note: str('Who it is for (only the owner sees this)') },
+      properties: {
+        note: str('Who it is for, only the owner sees it (optional), e.g. Grace at Example Labs'),
+      },
     },
     run: async ({ note }, ctx) => {
       const r = await credits.createInvite(needUser(ctx).id, note ?? '');
@@ -959,6 +1088,7 @@ export const describe = (t) => ({
   name: t.name,
   description: t.description,
   inputSchema: t.inputSchema,
+  annotations: t.annotations,
 });
 
 /** Turn a Denied into a tool error so the model sees why. */

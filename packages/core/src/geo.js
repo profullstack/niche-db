@@ -65,5 +65,10 @@ export const geoSchema = {
     type: 'string',
     description: 'west,south,east,north; west > east crosses the antimeridian',
   },
-  sort: { type: 'string', enum: ['id', 'published', 'updated', 'distance'] },
+  sort: {
+    type: 'string',
+    enum: ['id', 'published', 'updated', 'distance'],
+    description:
+      'Result order. distance (needs lat and long) puts the nearest first, e.g. "distance"; anything else keeps newest first',
+  },
 };
