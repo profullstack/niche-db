@@ -1,15 +1,18 @@
 {
   "name": "@nichedb/notify",
-  "version": "0.51.0",
+  "version": "0.52.0",
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.js"
+    ".": "./src/index.js",
+    "./hub": "./src/hub.js",
+    "./webhooks": "./src/webhooks.js"
   },
   "dependencies": {
     "@nichedb/config": "workspace:*",
     "@nichedb/db": "workspace:*",
     "@profullstack/emailer": "^1.0.3",
-    "@profullstack/notifications": "^0.1.4"
+    "@profullstack/notifications": "^0.1.4",
+    "@profullstack/webhooks": "0.2.1"
   }
 }

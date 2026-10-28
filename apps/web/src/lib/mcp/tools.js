@@ -37,6 +37,7 @@ import { allowedEnrichers, collectionOut, feedOut, itemOut, sourceOut } from '..
 import { addSource, createFeed, Denied, editSource } from '../service.js';
 import { submissionOut, submitFeed } from '../submissions.js';
 import { catalogueRows, namesFrom } from '../tlds.js';
+import { follow, hookCall, hooks } from '../webhooks.js';
 
 /**
  * Every MCP tool, in the order they are worth learning. This array is the
@@ -405,14 +406,111 @@ export const TOOLS = [
       const user = needUser(ctx);
       const f = await q.getFeed(String(feed));
       if (!f) throw toolError(`No feed named ${feed}`);
-      await q.followFeed({
-        userId: user.id,
-        feedId: f.id,
+      await follow(user, f, {
         channels,
         webhookUrl: webhook_url ?? null,
         webhookSecret: webhook_secret ?? null,
       });
       return { ok: true, feed: feedOut(await q.getFeed(f.slug), site()) };
+    },
+  },
+  {
+    name: 'list_webhooks',
+    description:
+      "The key owner's account webhook endpoints (never their secrets) and the event types this site emits. Needs a key.",
+    inputSchema: { type: 'object', properties: {} },
+    run: async (_args, ctx) => {
+      const user = needUser(ctx);
+      return {
+        endpoints: await hooks.listEndpoints(String(user.id)),
+        event_types: hooks.eventTypes,
+      };
+    },
+  },
+  {
+    name: 'create_webhook',
+    description:
+      'Add an account webhook: signed POSTs (Standard Webhooks + CloudEvents) to an https URL for events such as feed.item.published (new items in feeds you follow), feed.followed, feed.created, submission.approved. Patterns like feed.* work; omit events for all. Returns the signing secret. Needs a key.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        url: str('Public https URL that receives the POSTs'),
+        events: list('Event types or patterns (default all)'),
+        description: str('A note for yourself (optional)'),
+      },
+      required: ['url'],
+    },
+    run: async ({ url, events, description }, ctx) => {
+      const user = needUser(ctx);
+      return hookCall(() =>
+        hooks.createEndpoint(String(user.id), { url, events, description: description ?? '' }),
+      );
+    },
+  },
+  {
+    name: 'update_webhook',
+    description:
+      'Change an account webhook: url, events, description, or enabled (true turns it back on and clears its failure count). Needs a key.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        id: str('Webhook id (wh_…)'),
+        url: str('New URL'),
+        events: list('New event types or patterns'),
+        description: str('New description'),
+        enabled: { type: 'boolean', description: 'On or off' },
+      },
+      required: ['id'],
+    },
+    run: async ({ id, ...patch }, ctx) => {
+      const user = needUser(ctx);
+      return hookCall(() => hooks.updateEndpoint(String(user.id), String(id), patch));
+    },
+  },
+  {
+    name: 'delete_webhook',
+    description: 'Remove an account webhook and its delivery log. Needs a key.',
+    inputSchema: { type: 'object', properties: { id: str('Webhook id (wh_…)') }, required: ['id'] },
+    run: async ({ id }, ctx) => {
+      const user = needUser(ctx);
+      return hookCall(() => hooks.deleteEndpoint(String(user.id), String(id)));
+    },
+  },
+  {
+    name: 'test_webhook',
+    description:
+      'Send a webhook.test event to one of your endpoints now and report the HTTP status. Needs a key.',
+    inputSchema: { type: 'object', properties: { id: str('Webhook id (wh_…)') }, required: ['id'] },
+    run: async ({ id }, ctx) => {
+      const user = needUser(ctx);
+      return hookCall(() => hooks.test(String(user.id), String(id)));
+    },
+  },
+  {
+    name: 'rotate_webhook_secret',
+    description:
+      'Replace a webhook signing secret; the old one stops working at once. Returns the new secret. Needs a key.',
+    inputSchema: { type: 'object', properties: { id: str('Webhook id (wh_…)') }, required: ['id'] },
+    run: async ({ id }, ctx) => {
+      const user = needUser(ctx);
+      return hookCall(() => hooks.rotateSecret(String(user.id), String(id)));
+    },
+  },
+  {
+    name: 'webhook_deliveries',
+    description:
+      'Recent webhook deliveries with status, attempts, last error and payload: for one endpoint, or all of yours. Needs a key.',
+    inputSchema: {
+      type: 'object',
+      properties: { id: str('Webhook id (optional)'), limit: int('Default 20, max 200') },
+    },
+    run: async ({ id, limit }, ctx) => {
+      const user = needUser(ctx);
+      return {
+        deliveries: await hookCall(() =>
+          hooks.deliveries(String(user.id), { endpointId: id ?? undefined, limit: limit ?? 20 }),
+        ),
+      };
     },
   },
   {

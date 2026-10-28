@@ -39,6 +39,7 @@ import {
   normaliseQuery,
 } from '../lib/service.js';
 import { parseJson } from '../lib/source-config.js';
+import { feedDeleted, follow, hookCall, hooks, unfollow } from '../lib/webhooks.js';
 import { FeedForm, FeedsPage, SourceForm, SourcePage, SourcesPage } from '../views/admin.jsx';
 import { Settings } from '../views/pages.jsx';
 
@@ -341,6 +342,7 @@ export function registerManage(app) {
     withFeed(async (c, user, feed) => {
       if (!canEditFeed(user, feed)) throw new Denied('Not your feed.');
       await q.deleteFeed(feed.id);
+      await feedDeleted(feed);
       return respond(c, { redirectTo: '/feeds', notice: `Deleted ${feed.name}.` });
     }),
   );
@@ -352,12 +354,8 @@ export function registerManage(app) {
         ['webpush', 'email', 'webhook'].includes(x),
       );
       const webhookUrl = body.webhook_url ? String(body.webhook_url).trim() : null;
-      if (webhookUrl && !/^https:\/\//.test(webhookUrl))
-        throw new Denied('Webhook URLs must be https.', 400);
-      await q.followFeed({
-        userId: user.id,
-        feedId: feed.id,
-        channels: channels.length ? channels : undefined,
+      await follow(user, feed, {
+        channels,
         webhookUrl,
         webhookSecret: body.webhook_secret ? String(body.webhook_secret) : null,
       });
@@ -367,7 +365,7 @@ export function registerManage(app) {
   app.post(
     '/f/:slug/unfollow',
     withFeed(async (c, user, feed) => {
-      await q.unfollowFeed({ userId: user.id, feedId: feed.id });
+      await unfollow(user, feed);
       return respond(c, { redirectTo: `/f/${feed.slug}`, notice: 'Unfollowed.' });
     }),
   );
@@ -376,7 +374,7 @@ export function registerManage(app) {
 
   app.get('/settings', async (c) => {
     const user = requireUser(c);
-    const [passkeys, apiKeys, pro, terms, newKey, snapshot, contact] = await Promise.all([
+    const [passkeys, apiKeys, pro, terms, flash, snapshot, contact, webhooks] = await Promise.all([
       q.listPasskeys(user.id),
       auth.listApiKeys(user.id),
       isProUser(user),
@@ -384,7 +382,11 @@ export function registerManage(app) {
       takeFlash(c),
       premiumSnapshot(c),
       profiles.get(user.id),
+      hooks.listEndpoints(String(user.id)).catch(() => []),
     ]);
+    // One flash slot: an API key (ndb_…) or a webhook signing secret (whsec_…).
+    const webhookSecret = flash?.startsWith('whsec_') ? flash : null;
+    const newKey = webhookSecret ? null : flash;
     let referral = null;
     try {
       const code = await codeFor(sql, user.id);
@@ -409,6 +411,9 @@ export function registerManage(app) {
           balance={snapshot.balance}
           terms={terms}
           referral={referral}
+          webhooks={webhooks}
+          webhookSecret={webhookSecret}
+          eventTypes={hooks.eventTypes}
           notice={c.req.query('notice')}
           error={c.req.query('error')}
         />,
@@ -428,6 +433,65 @@ export function registerManage(app) {
     await setFlash(c, made.key);
     return respond(c, { json: { ok: true, key: made.key, id: made.id }, redirectTo: '/settings' });
   });
+  // Account webhooks from the settings page; /api/v1/webhooks does the same with a key.
+  app.post('/settings/webhooks', async (c) => {
+    const user = requireUser(c);
+    const body = await c.req.parseBody();
+    const made = await hookCall(() =>
+      hooks.createEndpoint(String(user.id), {
+        url: String(body.url ?? '').trim(),
+        events: String(body.events ?? '').trim() || undefined,
+        description: String(body.description ?? '').trim(),
+      }),
+    );
+    await setFlash(c, made.secret);
+    return respond(c, {
+      json: made,
+      redirectTo: '/settings#webhooks',
+      notice: 'Webhook added. Its signing secret is below.',
+    });
+  });
+  app.post(
+    '/settings/webhooks/:id/:action{(test|secret|rotate|enable|disable|delete)}',
+    async (c) => {
+      const user = requireUser(c);
+      const owner = String(user.id);
+      const id = c.req.param('id');
+      const action = c.req.param('action');
+      const to = '/settings#webhooks';
+      if (action === 'test') {
+        const r = await hookCall(() => hooks.test(owner, id));
+        return respond(c, {
+          json: r,
+          redirectTo: to,
+          ...(r.ok
+            ? { notice: `Test delivered (HTTP ${r.status}).` }
+            : { error: `Test failed: ${r.error ?? `HTTP ${r.status}`}` }),
+        });
+      }
+      if (action === 'secret' || action === 'rotate') {
+        const r = await hookCall(() =>
+          action === 'rotate' ? hooks.rotateSecret(owner, id) : hooks.secret(owner, id),
+        );
+        await setFlash(c, r.secret);
+        return respond(c, {
+          json: r,
+          redirectTo: to,
+          notice: action === 'rotate' ? 'New secret below; the old one has stopped working.' : null,
+        });
+      }
+      if (action === 'delete') {
+        await hookCall(() => hooks.deleteEndpoint(owner, id));
+        return respond(c, { redirectTo: to, notice: 'Webhook removed.' });
+      }
+      await hookCall(() => hooks.updateEndpoint(owner, id, { enabled: action === 'enable' }));
+      return respond(c, {
+        redirectTo: to,
+        notice: action === 'enable' ? 'Webhook on.' : 'Webhook off.',
+      });
+    },
+  );
+
   app.post('/api/keys/:id/revoke', async (c) => {
     const user = requireUser(c);
     await auth.revokeApiKey({ userId: user.id, id: c.req.param('id') });

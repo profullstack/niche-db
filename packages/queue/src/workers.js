@@ -13,7 +13,7 @@ import { buildBigIndexesOnce } from '@nichedb/db/build-indexes';
 import { cleanGinPendingLists } from '@nichedb/db/gin-maintenance';
 import * as q from '@nichedb/db/queries';
 import { sendEmail, sendPush } from '@nichedb/notify';
-import { buildEvent, sendWebhook } from '@profullstack/autoblog';
+import { emitFeedItems, emitFollowItems, hooks, wants } from '@nichedb/notify/webhooks';
 import { Worker } from 'bullmq';
 import { connection, QUEUES, queues, streams } from './index.js';
 import { scheduleDueRuns, staleMinutesByAdapter } from './ingest-scheduling.js';
@@ -76,9 +76,16 @@ async function runDeliver(job) {
   if (items.length === 0) return { skipped: 'items gone' };
 
   const targets = await q.followerTargets(feedId);
+  // Followers with an account webhook endpoint that wants feed items get them
+  // too, as the 'hub' channel (claimed like any other, so a retry never doubles one).
+  const hubUsers = new Set();
+  for (const t of targets)
+    if (await wants(hooks, t.user_id, 'feed.item.published').catch(() => false))
+      hubUsers.add(t.user_id);
   const claims = [];
   for (const t of targets) {
-    for (const channel of t.channels ?? []) {
+    const channels = [...(t.channels ?? []), ...(hubUsers.has(t.user_id) ? ['hub'] : [])];
+    for (const channel of channels) {
       if (channel === 'webpush' && (t.push_subscriptions?.length ?? 0) === 0) continue;
       if (channel === 'email' && !t.email) continue;
       if (channel === 'webhook' && !(t.webhook_url && t.webhook_secret)) continue;
@@ -108,7 +115,8 @@ async function runDeliver(job) {
     try {
       if (channel === 'webpush') await sendPush(target, { feed, items: batch });
       else if (channel === 'email') await sendEmail(target, { feed, items: batch });
-      else if (channel === 'webhook') await sendItemWebhooks(target, { feed, items: batch });
+      else if (channel === 'webhook') await emitFollowItems(hooks, { target, feed, items: batch });
+      else if (channel === 'hub') await emitFeedItems(hooks, { userId, feed, items: batch });
       sent++;
     } catch (err) {
       failed++;
@@ -120,39 +128,13 @@ async function runDeliver(job) {
   return { sent, failed };
 }
 
-/**
- * One signed POST per item, as a CloudEvents post-published event with
- * Standard Webhooks headers (@profullstack/autoblog). The receiver verifies
- * with the secret it gave us when it followed. Any non-2xx fails the batch so
- * it is marked for retry.
+/*
+ * Webhooks are not sent from here any more: emitFollowItems/emitFeedItems put
+ * them in @profullstack/webhooks' outbox (webhook_deliveries), and its drainer
+ * (hooks.start() below) sends and retries them with backoff over days. A
+ * 'webhook' or 'hub' delivery row means "queued", and BullMQ never retries a
+ * receiver's outage.
  */
-async function sendItemWebhooks(target, { feed, items }) {
-  for (const it of items) {
-    const event = buildEvent(
-      {
-        id: `item_${it.id}`,
-        url: it.url ?? `${config.siteUrl}/i/${it.id}`,
-        title: it.title,
-        slug: `${feed.slug}/${it.id}`,
-        html: it.summary ? `<p>${String(it.summary).replace(/</g, '&lt;')}</p>` : '',
-        status: 'published',
-        published_at: new Date(it.published_at ?? it.first_seen_at).toISOString(),
-        updated_at: new Date(it.updated_at ?? it.first_seen_at).toISOString(),
-        tags: it.tags ?? [],
-        categories: [feed.collection_slug, it.kind].filter(Boolean),
-        _nichedb: { feed: feed.slug, source: it.source_slug, kind: it.kind, data: it.data },
-      },
-      { source: config.siteUrl },
-    );
-    const r = await sendWebhook(target.webhook_url, event, {
-      secret: target.webhook_secret,
-      userAgent: `niche-db/0.1 (+${config.siteUrl})`,
-    });
-    if (!r.ok)
-      throw new Error(`webhook ${r.status ?? 'failed'} from ${new URL(target.webhook_url).host}`);
-  }
-  return items.length;
-}
 
 /* -------------------------------------------------------------------- boot -- */
 
@@ -251,5 +233,12 @@ export function startWorkers() {
     w.on('error', (err) => console.error(`[worker] ${w.name} error:`, err?.message ?? err));
   }
   log(`started ${workers.length} workers`);
-  return workers;
+  /*
+   * Webhook deliveries (webhook_deliveries): whatever waited through the
+   * restart goes out now, then every 5 s. Once per worker process, never per
+   * request; several processes can drain together (claims SKIP LOCKED).
+   * Returned with the workers so shutdown stops it with them.
+   */
+  hooks.start();
+  return [...workers, { name: 'webhooks', close: async () => hooks.stop() }];
 }

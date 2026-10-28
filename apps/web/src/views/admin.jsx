@@ -703,6 +703,14 @@ export const ApiDocs = ({ user, stats }) => (
             '{ channels?: ["webpush","email","webhook"], webhook_url?, webhook_secret? }',
           ],
           [
+            'GET · POST /api/v1/webhooks',
+            'Account webhooks (key only): list, or { url, events?, description? } → { endpoint, secret }. Events: feed.item.published, feed.followed, feed.unfollowed, feed.created, feed.deleted, submission.approved, submission.rejected (patterns like feed.* work). Standard Webhooks + CloudEvents, retried for ~3 days.',
+          ],
+          [
+            'GET · PATCH · DELETE /api/v1/webhooks/:id',
+            'One endpoint; PATCH { url?, events?, description?, enabled? }. Also GET …/:id/secret, POST …/:id/rotate, POST …/:id/test, GET …/:id/deliveries, GET /api/v1/webhooks/deliveries, POST …/deliveries/:id/retry.',
+          ],
+          [
             'POST /api/v1/submissions (suggest a feed; no key needed, an admin reviews it)',
             'POST /api/v1/sources',
             '{ adapter, collection?, name?, config: {…}, cadence_minutes? } — admins and Pro.',

@@ -21,6 +21,7 @@ import {
   editFeed,
   editSource,
 } from '../lib/service.js';
+import { feedDeleted, follow, mountWebhooksApi, unfollow } from '../lib/webhooks.js';
 import { ApiDocs, CliDocs } from '../views/admin.jsx';
 
 const lim = (v, d, max) => Math.min(Math.max(1, Number(v) || d), max);
@@ -254,6 +255,7 @@ export function registerApi(app) {
     if (!f) return c.json({ error: 'not found' }, 404);
     if (!(user.role === 'admin' || f.owner_id === user.id)) throw new Denied('Not your feed.');
     await q.deleteFeed(f.id);
+    await feedDeleted(f);
     return c.json({ ok: true });
   });
   app.post('/api/v1/feeds/:slug/follow', async (c) => {
@@ -264,12 +266,8 @@ export function registerApi(app) {
     const channels = (body.channels ?? []).filter((x) =>
       ['webpush', 'email', 'webhook'].includes(x),
     );
-    if (body.webhook_url && !/^https:\/\//.test(body.webhook_url))
-      throw new Denied('Webhook URLs must be https.', 400);
-    await q.followFeed({
-      userId: user.id,
-      feedId: f.id,
-      channels: channels.length ? channels : undefined,
+    await follow(user, f, {
+      channels,
       webhookUrl: body.webhook_url ?? null,
       webhookSecret: body.webhook_secret ?? null,
     });
@@ -279,9 +277,12 @@ export function registerApi(app) {
     const user = requireUser(c);
     const f = await q.getFeed(c.req.param('slug'));
     if (!f) return c.json({ error: 'not found' }, 404);
-    await q.unfollowFeed({ userId: user.id, feedId: f.id });
+    await unfollow(user, f);
     return c.json({ ok: true });
   });
+  // Account webhooks: @profullstack/webhooks' own routes, behind an API key.
+  mountWebhooksApi(app);
+
   app.get('/api/v1/following', async (c) => {
     const user = requireUser(c);
     return c.json({ feeds: (await q.listFollows(user.id)).map((f) => feedOut(f, site())) });

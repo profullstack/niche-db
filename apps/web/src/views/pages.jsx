@@ -306,7 +306,8 @@ export const FeedPage = ({
               value="webhook"
               checked={follow.channels?.includes('webhook')}
             />{' '}
-            Signed webhook (CloudEvents + Standard Webhooks, one POST per item)
+            Signed webhook for this feed (CloudEvents + Standard Webhooks, one POST per item,
+            retried for about three days; your secret is also sent as the bearer token)
           </label>
           <label>
             Webhook URL
@@ -323,7 +324,7 @@ export const FeedPage = ({
               type="text"
               name="webhook_secret"
               value={follow.webhook_secret ?? ''}
-              placeholder="whsec_…"
+              placeholder="A shared secret you choose"
             />
           </label>
           <button type="submit" class="ghost">
@@ -741,6 +742,9 @@ export const Settings = ({
   pro,
   terms,
   referral,
+  webhooks = [],
+  webhookSecret = null,
+  eventTypes = [],
 }) => (
   <Layout user={user} title="Settings">
     <h1>Settings</h1>
@@ -867,6 +871,83 @@ export const Settings = ({
         </select>
         <button type="submit" class="ghost">
           Save
+        </button>
+      </form>
+    </section>
+
+    <section class="panel" id="webhooks">
+      <h2>Webhooks</h2>
+      <p class="muted small">
+        Signed POSTs (Standard Webhooks + CloudEvents) to your own URL when something happens on
+        your account: <code>{eventTypes.join(', ')}</code>. Leave events empty for all of them, or
+        use a pattern like <code>feed.*</code>. Verify with any Standard Webhooks library, or{' '}
+        <code>verifySignature</code> from <code>@profullstack/webhooks</code>. Failed deliveries are
+        retried for about three days. Also at <code>/api/v1/webhooks</code> with a key, and{' '}
+        <code>nichedb webhooks</code>. A single feed's own webhook is set where you follow it.
+      </p>
+      {webhookSecret ? (
+        <p class="feedback ok">
+          Signing secret (copy it now; "Show secret" shows it again):{' '}
+          <code class="mono">{webhookSecret}</code>
+        </p>
+      ) : null}
+      {webhooks.length ? (
+        <table class="table">
+          <thead>
+            <tr>
+              <th>URL</th>
+              <th>Events</th>
+              <th>Status</th>
+              <th />
+            </tr>
+          </thead>
+          <tbody>
+            {webhooks.map((w) => (
+              <tr key={w.id}>
+                <td class="mono small">
+                  {w.url}
+                  {w.description ? <div class="muted">{w.description}</div> : null}
+                </td>
+                <td class="small">{w.events.join(', ')}</td>
+                <td class="small">
+                  {w.enabled ? 'on' : 'off'}
+                  {w.failures ? ` · ${w.failures} failed` : ''}
+                  {w.disabled_reason ? <div class="muted">{w.disabled_reason}</div> : null}
+                </td>
+                <td>
+                  {['test', 'secret', 'rotate', w.enabled ? 'disable' : 'enable', 'delete'].map(
+                    (action) => (
+                      <form
+                        key={action}
+                        method="post"
+                        action={`/settings/webhooks/${w.id}/${action}`}
+                        class="inline"
+                      >
+                        <button type="submit" class="ghost small">
+                          {action === 'secret'
+                            ? 'Show secret'
+                            : action[0].toUpperCase() + action.slice(1)}
+                        </button>
+                      </form>
+                    ),
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : null}
+      <form method="post" action="/settings/webhooks" class="stack">
+        <input type="url" name="url" placeholder="https://example.com/hooks/nichedb" required />
+        <input type="text" name="events" placeholder="Events (empty for all), e.g. feed.*" />
+        <input
+          type="text"
+          name="description"
+          placeholder="Description (optional)"
+          maxlength="200"
+        />
+        <button type="submit" class="cta">
+          Add webhook
         </button>
       </form>
     </section>
