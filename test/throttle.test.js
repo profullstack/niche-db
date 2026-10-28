@@ -54,8 +54,10 @@ async function countUntilLimited(gateway, path, ip, attempts, headers = {}) {
 describe('the site-wide allowance', () => {
   const gateway = paid(250);
 
+  // throttle 0.4 multiplies every configured limit by its headroom (5): the
+  // configured 100/min is 500 in effect, while the /auth/ guard stays at 10.
   test('meters a page route, which nothing here did before', async () => {
-    expect(await countUntilLimited(gateway, '/niches/housing', '10.5.0.1', 140)).toBe(100);
+    expect(await countUntilLimited(gateway, '/niches/housing', '10.5.0.1', 700)).toBe(500);
   });
 
   test('gives each caller its own allowance', async () => {
@@ -76,12 +78,12 @@ describe('the site-wide allowance', () => {
   });
 
   test('refuses with 402 and an offer, not 429', async () => {
-    for (let i = 0; i < 100; i++) await meter(gateway, request('/niches/crime', '10.5.0.6'));
+    for (let i = 0; i < 500; i++) await meter(gateway, request('/niches/crime', '10.5.0.6'));
     const answer = await meter(gateway, request('/niches/crime', '10.5.0.6'));
     expect(answer?.status).toBe(402);
     const body = await answer.json();
     expect(body.accepts.length).toBeGreaterThan(0);
-    expect(body.error).toMatch(/100 requests per 60s/);
+    expect(body.error).toMatch(/500 requests per 60s/);
   });
 });
 
@@ -90,7 +92,7 @@ describe('the price a refusal quotes', () => {
   // has spent. A refusal has to quote the price THAT buyer would pay.
   test('follows the gateway the request was priced with', async () => {
     const discounted = paid(37);
-    for (let i = 0; i < 100; i++) await meter(discounted, request('/niches/markets', '10.5.0.7'));
+    for (let i = 0; i < 500; i++) await meter(discounted, request('/niches/markets', '10.5.0.7'));
     const answer = await meter(discounted, request('/niches/markets', '10.5.0.7'));
     expect(answer?.status).toBe(402);
     expect((await answer.json()).pass.price).toBe('0.37 USD');
@@ -98,11 +100,11 @@ describe('the price a refusal quotes', () => {
 
   test('but the counting does not split along with it', async () => {
     // Or a caller crossing a discount threshold mid-window would be handed a
-    // fresh hundred requests for the privilege.
+    // fresh allowance for the privilege.
     const list = paid(250);
     const discounted = paid(37);
-    for (let i = 0; i < 60; i++) await meter(list, request('/niches/news', '10.5.0.8'));
-    for (let i = 0; i < 40; i++) await meter(discounted, request('/niches/news', '10.5.0.8'));
+    for (let i = 0; i < 300; i++) await meter(list, request('/niches/news', '10.5.0.8'));
+    for (let i = 0; i < 200; i++) await meter(discounted, request('/niches/news', '10.5.0.8'));
     const answer = await meter(discounted, request('/niches/news', '10.5.0.8'));
     expect(answer?.status).toBe(402);
   });
