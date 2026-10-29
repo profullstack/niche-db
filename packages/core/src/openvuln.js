@@ -277,7 +277,9 @@ export function buildRecord(
         retrieved: iso(r.updated_at),
       }),
     );
-  if (labelFrom && !house) sources.push(source(labelFrom, ['label']));
+  // The label's source is named once: the NVD row already lists `label`.
+  if (labelFrom && !house && !sources.some((s) => s.name === labelFrom))
+    sources.push(source(labelFrom, ['label']));
 
   const references = [];
   const seen = new Set();
