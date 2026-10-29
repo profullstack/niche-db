@@ -228,6 +228,12 @@ export const COLLECTIONS = [
       'What ThreatCrush and other OpenThreat reporters identified in the open: findings in public repositories, attacks observed against the reporter’s own hosts, indicators worth blocking, advisories. Each row is read from the reporter’s own /.well-known/openthreat.json, in the reporter’s words, with the reporter named and the subject linked, and re-read hourly so a threat goes fixed, blocked or withdrawn in place. Never from a private scan: a reporter publishes only what was already visible to anyone who looked, a secret is published unlocated, and a paying user’s scan never appears. Beside them, every CVE the NVD publishes and revises, read every fifteen minutes with CVSS, CWE, affected products and CISA KEV dates (this product uses the NVD API but is not endorsed or certified by the NVD), and SURBL’s public reputation lists as a catalogue with the house domains checked against them by DNS every half hour, each row moving only when its standing does.',
   },
   {
+    slug: 'blacklists',
+    name: 'Blacklists',
+    description:
+      'Numbers people flagged as spam or scams, published so anyone can block them too. The SMS list is every number smshub.dev users flagged after it texted them, one row per number with the spam and scam counts, how many people flagged it and when. A number nobody flags any more leaves the live list at nichedb.dev/blacklists/sms but keeps its row here as history. Who flagged a number, and which line it texted, are never published.',
+  },
+  {
     slug: 'vulns',
     name: 'Vulnerabilities',
     description:
@@ -2722,6 +2728,20 @@ export const DEFAULT_FEEDS = [
     slug: 'ai-media-videos',
     name: 'Videos to judge',
     query: { kinds: ['submission'], tags: ['video'] },
+  },
+  {
+    collection: 'blacklists',
+    slug: 'sms-blacklist',
+    name: 'SMS blacklist',
+    description: 'Every number smshub.dev users flagged as a spam or scam texter, newest first.',
+    query: { kinds: ['phone-number'], tags: ['sms'] },
+  },
+  {
+    collection: 'blacklists',
+    slug: 'sms-scam-numbers',
+    name: 'SMS scam numbers',
+    description: 'Only the numbers flagged as scams, not just spam.',
+    query: { kinds: ['phone-number'], tags: ['reason:scam'] },
   },
   {
     collection: 'coupons',

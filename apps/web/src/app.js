@@ -13,6 +13,7 @@ import { registerAgents } from './routes/agents.js';
 import { registerApi } from './routes/api.js';
 import { registerAuth } from './routes/auth.js';
 import { registerAutomotive } from './routes/automotive.js';
+import { registerBlacklists } from './routes/blacklists.js';
 import { registerBooks } from './routes/books.js';
 import { registerBusiness } from './routes/business.js';
 import { registerCrawlStatus } from './routes/crawlstatus.js';
@@ -170,6 +171,8 @@ registerTlds(app);
 registerTraffic(app);
 /** Reputation: one IP-or-domain answer from /traffic, abuse.ch, SURBL and live DNSBLs, and /api/v1/reputation. */
 registerReputation(app);
+/** Blacklists: /blacklists/sms, the numbers smshub.dev users flagged as spam or scam, and /api/v1/blacklists/sms. */
+registerBlacklists(app);
 /** Vulnerabilities: /vulns, the /c/vulns/<id> deep dive (OpenVuln, JSON too), /api/v1/vulns and /.well-known/openvuln.json. */
 registerVulns(app);
 /** Lyrics for our own bands: /lyrics and /api/v1/lyrics, read and written by the nixamp radio servers. */

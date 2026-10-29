@@ -22,6 +22,7 @@
     "./resilience": "./src/resilience.js",
     "./traffic": "./src/traffic.js",
     "./reputation": "./src/reputation.js",
+    "./blacklists": "./src/blacklists.js",
     "./lyrics": "./src/lyrics.js",
     "./vulns": "./src/vulns.js"
   },
