@@ -20,7 +20,8 @@
     "./traffic/shared": "./src/traffic/shared.js",
     "./traffic/owners": "./src/traffic/owners.js",
     "./traffic/rdap": "./src/traffic/rdap.js",
-    "./lyrics": "./src/lyrics.js"
+    "./lyrics": "./src/lyrics.js",
+    "./openvuln": "./src/openvuln.js"
   },
   "dependencies": {
     "@nichedb/adapters": "workspace:*",

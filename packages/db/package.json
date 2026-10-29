@@ -22,7 +22,8 @@
     "./resilience": "./src/resilience.js",
     "./traffic": "./src/traffic.js",
     "./reputation": "./src/reputation.js",
-    "./lyrics": "./src/lyrics.js"
+    "./lyrics": "./src/lyrics.js",
+    "./vulns": "./src/vulns.js"
   },
   "dependencies": {
     "@nichedb/config": "workspace:*",

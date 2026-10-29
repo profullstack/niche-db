@@ -228,6 +228,12 @@ export const COLLECTIONS = [
       'What ThreatCrush and other OpenThreat reporters identified in the open: findings in public repositories, attacks observed against the reporter’s own hosts, indicators worth blocking, advisories. Each row is read from the reporter’s own /.well-known/openthreat.json, in the reporter’s words, with the reporter named and the subject linked, and re-read hourly so a threat goes fixed, blocked or withdrawn in place. Never from a private scan: a reporter publishes only what was already visible to anyone who looked, a secret is published unlocated, and a paying user’s scan never appears. Beside them, every CVE the NVD publishes and revises, read every fifteen minutes with CVSS, CWE, affected products and CISA KEV dates (this product uses the NVD API but is not endorsed or certified by the NVD), and SURBL’s public reputation lists as a catalogue with the house domains checked against them by DNS every half hour, each row moving only when its standing does.',
   },
   {
+    slug: 'vulns',
+    name: 'Vulnerabilities',
+    description:
+      'One page per vulnerability with the five facts a defender needs, each with its source: what is affected and the first fixed version (OSV.dev: GitHub advisories, PyPA, Go, RustSec, OSS-Fuzz, the Linux kernel, Android), how bad it is (the NVD), whether it is exploited in the wild and by ransomware crews (CISA KEV), how likely exploitation is this month (FIRST EPSS, read live), and whether AI agents have been set to exploit it (the ExploitGym benchmark). Malicious packages from the OpenSSF, and the campaigns and agent flaws the package databases cannot hold, written up by nichedb.dev itself. Every record is served as OpenVuln, a valid OSV record. Never exploit code.',
+  },
+  {
     slug: 'webrings',
     name: 'Webrings',
     description:
@@ -2404,6 +2410,61 @@ export const DEFAULT_FEEDS = [
     description:
       'CVEs CISA has seen exploited in the wild and added to its Known Exploited Vulnerabilities catalogue, with the date federal agencies must act by.',
     query: { kinds: ['cve'], tags: ['kev'] },
+  },
+  // Vulns: the joined collection behind /c/vulns/<id>.
+  {
+    collection: 'vulns',
+    slug: 'open-source-advisories',
+    name: 'Open source advisories (OSV.dev)',
+    description:
+      'New and revised advisories for npm, PyPI, Go, Maven, NuGet, RubyGems, crates.io and the rest, OSS-Fuzz and the Linux kernel, with affected ranges and fixed versions.',
+    query: { kinds: ['vuln'] },
+  },
+  {
+    collection: 'vulns',
+    slug: 'critical-advisories',
+    name: 'Critical open source advisories',
+    description: 'OSV advisories GitHub rates critical.',
+    query: { kinds: ['vuln'], tags: ['severity:critical'] },
+  },
+  {
+    collection: 'vulns',
+    slug: 'malicious-packages',
+    name: 'Malicious packages',
+    description:
+      'Packages published to steal or destroy, as the OpenSSF Malicious Packages project reports them: npm, PyPI, RubyGems, crates.io and more.',
+    query: { kinds: ['malicious-package'] },
+  },
+  {
+    collection: 'vulns',
+    slug: 'kev',
+    name: 'Exploited in the wild (CISA KEV)',
+    description:
+      'Each CVE as CISA adds it to the Known Exploited Vulnerabilities catalog, with the due date and known ransomware use.',
+    query: { kinds: ['kev'] },
+  },
+  {
+    collection: 'vulns',
+    slug: 'kev-ransomware',
+    name: 'Exploited by ransomware crews (CISA KEV)',
+    description: 'KEV entries CISA marks as known to be used in ransomware campaigns.',
+    query: { kinds: ['kev'], tags: ['ransomware'] },
+  },
+  {
+    collection: 'vulns',
+    slug: 'ai-exploit-benchmark',
+    name: 'Vulnerabilities AI agents are set to exploit (ExploitGym)',
+    description:
+      'The tasks of the ExploitGym benchmark: real bugs in userspace programs, V8 and the Linux kernel that AI agents are asked to turn into working exploits.',
+    query: { kinds: ['ai-exploit'] },
+  },
+  {
+    collection: 'vulns',
+    slug: 'openvuln-records',
+    name: 'Deep dives: campaigns and agent vulnerabilities',
+    description:
+      'Records written in OpenVuln by nichedb.dev and other publishers: supply-chain campaigns, prompt injection in coding agents and CI, and other flaws the package databases cannot hold.',
+    query: { kinds: ['openvuln'] },
   },
   // SURBL: the lists as a catalogue, and the watched domains' standing.
   {

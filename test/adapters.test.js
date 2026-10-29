@@ -85,6 +85,7 @@ describe('registry', () => {
         'forums',
         'hosting',
         'threats',
+        'vulns',
         'webrings',
         'profiles',
         'directory',
