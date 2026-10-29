@@ -646,3 +646,68 @@ function splitN(s, sep, n) {
   out.push(s.slice(from));
   return out;
 }
+
+/**
+ * Members of a .tar.gz file as `{ name, size, body }`, streamed: one member's
+ * bytes are held at a time and the archive is never extracted to disk. For a
+ * GitHub repository tarball (codeload), where a few hundred thousand small
+ * files would be a gigabyte unpacked and an `untar` would be a gigabyte of
+ * inodes in the dump directory.
+ *
+ * Plain ustar plus the two pax records GitHub writes: a global header
+ * (`g`, the commit id, skipped) and per-file extended headers (`x`), whose
+ * `path=` replaces the next member's name. `filter(name)` is asked before a
+ * member's bytes are kept, so a skipped member costs only the read past it.
+ *
+ * @param {string} path
+ * @param {{ filter?: (name: string) => boolean }} [opts]
+ * @returns {AsyncGenerator<{ name: string, size: number, body: Buffer }>}
+ */
+export async function* tarGzEntries(path, { filter = () => true } = {}) {
+  const gz = createGunzip();
+  const file = createReadStream(path);
+  pipeline(file, gz, () => {});
+  let buf = Buffer.alloc(0);
+  let longName = null;
+  // A member being read: its header is parsed and `need` bytes (padded) remain.
+  let member = null;
+  try {
+    for await (const chunk of gz) {
+      buf = buf.length ? Buffer.concat([buf, chunk]) : chunk;
+      while (true) {
+        if (!member) {
+          if (buf.length < 512) break;
+          const h = buf.subarray(0, 512);
+          buf = buf.subarray(512);
+          if (h.every((b) => b === 0)) continue;
+          const field = (o, n) =>
+            h
+              .subarray(o, o + n)
+              .toString('utf8')
+              .replace(/\0.*$/s, '');
+          const size = Number.parseInt(field(124, 12).trim() || '0', 8) || 0;
+          const type = String.fromCharCode(h[156] || 48);
+          const prefix = field(345, 155);
+          const name = longName ?? (prefix ? `${prefix}/${field(0, 100)}` : field(0, 100));
+          if (type !== 'x' && type !== 'g') longName = null;
+          member = { name, size, type, padded: Math.ceil(size / 512) * 512 };
+        }
+        if (buf.length < member.padded) break;
+        const body = buf.subarray(0, member.size);
+        buf = buf.subarray(member.padded);
+        const m = member;
+        member = null;
+        if (m.type === 'x') {
+          const p = body.toString('utf8').match(/\d+ path=([^\n]*)\n/);
+          if (p) longName = p[1];
+          continue;
+        }
+        if (m.type === 'g' || (m.type !== '0' && m.type !== '\0')) continue;
+        if (filter(m.name)) yield { name: m.name, size: m.size, body: Buffer.from(body) };
+      }
+    }
+  } finally {
+    gz.destroy();
+    file.destroy();
+  }
+}

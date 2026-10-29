@@ -133,6 +133,73 @@ function Facts({ record, parts }) {
             )}
           </td>
         </tr>
+        {ex.ssvc ? (
+          <tr>
+            <th>CISA SSVC</th>
+            <td>
+              Exploitation <strong>{ex.ssvc.exploitation ?? 'unstated'}</strong>, automatable{' '}
+              {ex.ssvc.automatable ?? 'unstated'}, technical impact{' '}
+              {ex.ssvc.technical_impact ?? 'unstated'}
+              {ex.ssvc.date ? ` (${String(ex.ssvc.date).slice(0, 10)})` : ''}
+            </td>
+          </tr>
+        ) : null}
+        <tr>
+          <th>Public exploits</th>
+          <td>
+            {ex.public?.length ? (
+              <ul>
+                {ex.public.slice(0, 12).map((p) => (
+                  <li>
+                    <a href={p.url} rel="nofollow noopener">
+                      {p.source} {p.id}
+                    </a>
+                    : {p.title}
+                    {p.rank ? ` (rank ${p.rank})` : ''}
+                    {p.verified ? ' (verified)' : ''}
+                  </li>
+                ))}
+                {ex.public.length > 12 ? <li>and {ex.public.length - 12} more</li> : null}
+              </ul>
+            ) : (
+              'none in Exploit-DB or Metasploit'
+            )}
+          </td>
+        </tr>
+        {ex.claims?.length ? (
+          <tr>
+            <th>PoC claims</th>
+            <td>
+              {parts.pocCount || ex.claims.length} GitHub{' '}
+              {(parts.pocCount || ex.claims.length) === 1
+                ? 'repository claims'
+                : 'repositories claim'}{' '}
+              a proof of concept (the most starred shown). <strong>Unvetted:</strong> fake PoCs that
+              carry malware are a common lure; never run one outside an isolated machine.
+              <ul>
+                {ex.claims.slice(0, 5).map((c) => (
+                  <li>
+                    <a href={c.url} rel="nofollow noopener ugc">
+                      {c.url.replace('https://github.com/', '')}
+                    </a>{' '}
+                    ({c.stars} stars)
+                  </li>
+                ))}
+              </ul>
+            </td>
+          </tr>
+        ) : null}
+        {ex.scanners?.length ? (
+          <tr>
+            <th>Scanners</th>
+            <td>
+              {ex.scanners.map((x) => (
+                <a href={x.url}>{x.source} template</a>
+              ))}
+              : anyone can scan the internet for this with one command.
+            </td>
+          </tr>
+        ) : null}
         <tr>
           <th>AI agents</th>
           <td>
@@ -388,7 +455,7 @@ export function VulnPage({ user, query, report, error }) {
           </tbody>
         </table>
         <p class="muted">
-          This record is <a href="https://logicsrc.com/openvuln">OpenVuln 0.1</a>: a valid OSV
+          This record is <a href="https://logicsrc.com/openvuln">OpenVuln 0.1.1</a>: a valid OSV
           record with exploitation, fix and sources under <code>database_specific.openvuln</code>.
           Exploit code is never published here.
         </p>
@@ -445,6 +512,13 @@ export function VulnsLanding({ user, counts = [], house = [] }) {
           </li>
           <li>
             <a href="/f/ai-exploit-benchmark">Vulnerabilities AI agents are set to exploit</a>
+          </li>
+          <li>
+            <a href="/f/ssvc-active">CISA SSVC: exploitation active</a>,{' '}
+            <a href="/f/metasploit-modules">Metasploit modules</a>,{' '}
+            <a href="/f/exploitdb-exploits">Exploit-DB exploits</a>,{' '}
+            <a href="/f/nuclei-cve-templates">Nuclei scanner templates</a> and{' '}
+            <a href="/f/poc-claims">PoC claims on GitHub (unvetted)</a>
           </li>
           <li>
             <a href="/f/openvuln-records">Deep dives: campaigns and agent vulnerabilities</a>

@@ -231,7 +231,7 @@ export const COLLECTIONS = [
     slug: 'vulns',
     name: 'Vulnerabilities',
     description:
-      'One page per vulnerability with the five facts a defender needs, each with its source: what is affected and the first fixed version (OSV.dev: GitHub advisories, PyPA, Go, RustSec, OSS-Fuzz, the Linux kernel, Android), how bad it is (the NVD), whether it is exploited in the wild and by ransomware crews (CISA KEV), how likely exploitation is this month (FIRST EPSS, read live), and whether AI agents have been set to exploit it (the ExploitGym benchmark). Malicious packages from the OpenSSF, and the campaigns and agent flaws the package databases cannot hold, written up by nichedb.dev itself. Every record is served as OpenVuln, a valid OSV record. Never exploit code.',
+      'One page per vulnerability with the five facts a defender needs, each with its source: what is affected and the first fixed version (OSV.dev: GitHub advisories, PyPA, Go, RustSec, OSS-Fuzz, the Linux kernel, Android), how bad it is (the NVD), whether it is exploited in the wild and by ransomware crews (CISA KEV), how likely exploitation is this month (FIRST EPSS, read live), whether a working exploit is public (Exploit-DB, Metasploit modules) or merely claimed (PoC-in-GitHub, unvetted), whether a scanner can find it (Nuclei templates), CISA\u2019s own SSVC reading (exploitation none, proof of concept or active; automatable; impact), and whether AI agents have been set to exploit it (the ExploitGym benchmark). Malicious packages from the OpenSSF, and the campaigns and agent flaws the package databases cannot hold, written up by nichedb.dev itself. Every record is served as OpenVuln, a valid OSV record. Never exploit code.',
   },
   {
     slug: 'webrings',
@@ -2465,6 +2465,44 @@ export const DEFAULT_FEEDS = [
     description:
       'Records written in OpenVuln by nichedb.dev and other publishers: supply-chain campaigns, prompt injection in coding agents and CI, and other flaws the package databases cannot hold.',
     query: { kinds: ['openvuln'] },
+  },
+  {
+    collection: 'vulns',
+    slug: 'metasploit-modules',
+    name: 'Metasploit modules by CVE',
+    description:
+      'Metasploit Framework modules that reference a CVE: ready-to-run attacks, with rank and disclosure date.',
+    query: { kinds: ['exploit'], tags: ['metasploit'] },
+  },
+  {
+    collection: 'vulns',
+    slug: 'exploitdb-exploits',
+    name: 'Exploit-DB: published exploits by CVE',
+    description: 'Exploits the Exploit Database publishes for a CVE, linked to exploit-db.com.',
+    query: { kinds: ['exploit'], tags: ['exploitdb'] },
+  },
+  {
+    collection: 'vulns',
+    slug: 'nuclei-cve-templates',
+    name: 'CVEs with a Nuclei scanner template',
+    description: 'CVEs anyone can scan the internet for with one Nuclei command.',
+    query: { kinds: ['scanner-check'] },
+  },
+  {
+    collection: 'vulns',
+    slug: 'ssvc-active',
+    name: 'CISA SSVC: exploitation active',
+    description:
+      'CVEs CISA assesses as actively exploited (SSVC Exploitation: active), whether or not they are in KEV yet.',
+    query: { kinds: ['ssvc'], tags: ['ssvc-exploitation:active'] },
+  },
+  {
+    collection: 'vulns',
+    slug: 'poc-claims',
+    name: 'Proof-of-concept claims on GitHub (unvetted)',
+    description:
+      'CVEs with GitHub repositories claiming a proof of concept. Unvetted: fake PoCs carrying malware are common.',
+    query: { kinds: ['poc-claim'] },
   },
   // SURBL: the lists as a catalogue, and the watched domains' standing.
   {

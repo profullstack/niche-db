@@ -55,6 +55,7 @@ import { alpacaAssets, equityHistory, secFundamentals } from './equities.js';
 import { espnCatalogue, espnLive, espnSchedule } from './espn.js';
 import { espnPlays } from './espnplays.js';
 import { eurostat } from './eurostat.js';
+import { exploitdb, metasploit, nuclei } from './exploit-signals.js';
 import { exploitgym } from './exploitgym.js';
 import { faaAirportStatus } from './faanas.js';
 import { fbiCrimeEstimates } from './fbicrime.js';
@@ -137,6 +138,7 @@ import { radiobrowser } from './radiobrowser.js';
 import { redditDeals } from './redditdeals.js';
 import { redditWorkflows } from './redditworkflows.js';
 import { redfinMarket } from './redfin.js';
+import { pocInGithub, vulnrichment } from './repo-tarballs.js';
 import { rogueIncidents, rogueResearch } from './rogueaitracker.js';
 import { rosettaCode } from './rosetta-code.js';
 import { rssamplifier } from './rssamplifier.js';
@@ -389,6 +391,12 @@ export const ADAPTERS = [
   cisaKev,
   exploitgym,
   openvuln,
+  // Is it exploitable? Published exploits, Metasploit modules, scanner templates, CISA SSVC, PoC claims.
+  exploitdb,
+  metasploit,
+  nuclei,
+  vulnrichment,
+  pocInGithub,
   // abuse.ch: malware IPs and domains (ThreatFox, URLhaus, Feodo), one row per address.
   abusech,
   // Webrings: the rings a host runs and who is in them, read off the host's own descriptor.
