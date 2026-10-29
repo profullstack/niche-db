@@ -58,8 +58,8 @@ describe('signup page', () => {
     }
     expect(signup).toContain('name="mode" value="signup"');
     expect(signup).toContain('/vendor-profile.js');
-    // One email box, the form's own.
-    expect(signup.match(/name="email"/g)?.length).toBe(1);
+    // One email box, the form's own (the shared footer's newsletter box is below it).
+    expect(signup.split('<footer class="pfs-footer"')[0].match(/name="email"/g)?.length).toBe(1);
 
     const login = await html(SignIn({ mode: 'login' }));
     expect(login).not.toContain('name="first_name"');

@@ -42,7 +42,8 @@ describe('the submit page', () => {
       }),
     );
     expect(html).toMatch(/<option value="podcasts" selected/);
-    expect(html).not.toContain('name="email"');
+    // The shared site footer carries its own newsletter email field.
+    expect(html.split('<footer class="pfs-footer"')[0]).not.toContain('name="email"');
   });
 
   test('echoes a rejected value back as text, not markup', async () => {
