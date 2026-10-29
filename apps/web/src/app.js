@@ -34,6 +34,7 @@ import { registerStatic } from './routes/static.js';
 import { registerSubmit } from './routes/submit.js';
 import { registerTlds } from './routes/tlds.js';
 import { registerTraffic } from './routes/traffic.js';
+import { registerVulns } from './routes/vulns.js';
 import { NotFound } from './views/pages.jsx';
 
 export const app = new Hono();
@@ -169,6 +170,8 @@ registerTlds(app);
 registerTraffic(app);
 /** Reputation: one IP-or-domain answer from /traffic, abuse.ch, SURBL and live DNSBLs, and /api/v1/reputation. */
 registerReputation(app);
+/** Vulnerabilities: /vulns, the /c/vulns/<id> deep dive (OpenVuln, JSON too), /api/v1/vulns and /.well-known/openvuln.json. */
+registerVulns(app);
 /** Lyrics for our own bands: /lyrics and /api/v1/lyrics, read and written by the nixamp radio servers. */
 registerLyrics(app);
 registerMcp(app);

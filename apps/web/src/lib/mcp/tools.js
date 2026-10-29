@@ -37,6 +37,7 @@ import { allowedEnrichers, collectionOut, feedOut, itemOut, sourceOut } from '..
 import { addSource, createFeed, Denied, editSource } from '../service.js';
 import { submissionOut, submitFeed } from '../submissions.js';
 import { catalogueRows, namesFrom } from '../tlds.js';
+import { vulnReport } from '../vulns.js';
 import { follow, hookCall, hooks } from '../webhooks.js';
 
 /**
@@ -1002,6 +1003,24 @@ export const TOOLS = [
       });
       if (report.error) throw toolError(report.error);
       return report;
+    },
+  },
+  {
+    name: 'vuln_lookup',
+    annotations: LOOKUP,
+    description:
+      'Everything known about one vulnerability, as an OpenVuln record (a valid OSV record). Give `id`: a CVE (CVE-2026-12537), GHSA, OSV, PYSEC, GO, RUSTSEC, MAL (malicious package) or NDB (nichedb.dev write-up) id. Answers OSV fields (`aliases`, `summary`, `details`, `affected` with version ranges, `severity` vectors, `references`) and `database_specific.openvuln`: `label` (critical/high/medium/low), `fix` (`status` fixed/partial/mitigated/unfixed/unknown, first fixed `versions`, `workaround`), `exploitation` (`status` exploited-ransomware/exploited/poc-public/none-known; `kev` from CISA with added/due/ransomware, null when checked and absent; `epss` score and percentile read live from FIRST; `ai`, AI exploit benchmark tasks such as ExploitGym with `result`, where `unstated` means in the benchmark with no published result), `subject` (package, agent, campaign...), `class`, and `sources` naming where each field came from. Never contains exploit code.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        id: str('A vulnerability id, e.g. CVE-2026-12537, GHSA-wpqr-6v78-jr5g, MAL-2026-18177'),
+      },
+      required: ['id'],
+    },
+    run: async ({ id }) => {
+      const r = await vulnReport(id);
+      if (r.error) throw toolError(r.error);
+      return r.record;
     },
   },
   {

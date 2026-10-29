@@ -1,0 +1,244 @@
+{
+  "openvuln": "0.1",
+  "publisher": {
+    "name": "nichedb.dev",
+    "web": "https://nichedb.dev",
+    "prefix": "NDB",
+    "operator": "https://profullstack.com/.well-known/openprofile.md"
+  },
+  "updated": "2026-10-29T00:00:00Z",
+  "records": [
+    {
+      "schema_version": "1.6.0",
+      "id": "NDB-2026-0001",
+      "aliases": [],
+      "related": ["MAL-2026-18177", "MAL-2026-18185", "MAL-2026-18329", "CVE-2026-41940"],
+      "summary": "testmetest: 42 hijacked GitHub repositories plant start-up hooks for Claude Code, Gemini CLI, Cursor and VS Code",
+      "details": "## What it is\n\nAn attacker holding stolen GitHub and npm credentials rewrote 42 real repositories belonging to 11 legitimate owners (individual developers, students and one company) so that opening the project in an AI coding tool runs a hidden payload. JFrog Security Research found the repositories while tracing an npm worm it tracks as **testmetest**; SafeDep first described the npm side on 2026-10-22.\n\nThe trap is the tool's own project configuration, which every one of these tools reads from the repository it opens:\n\n- Claude Code: `.claude/settings.json` with a session-start hook\n- Gemini CLI: `.gemini/settings.json`\n- Cursor: `.cursor/mcp.json` and `.cursor/rules/setup.mdc`\n- VS Code: a folder-open task in `.vscode/tasks.json`\n\nThe hook starts `.github/init.js`, a 13 MB file large enough that GitHub code search and the contents API skip it. Commits were scripted to copy old messages and dates and carry `skip-checks:true`, so the change looks old and CI does not run.\n\n## Why it matters\n\nThe payload turns the victim's own GitHub and npm access into new malicious releases (the testmetest npm packages, reported to OSV as MAL-2026-18177, MAL-2026-18185 and MAL-2026-18329), which steal more access in turn. Scanner workflows in the hijacked accounts also hunt for cPanel and WHM servers open to CVE-2026-41940, an authentication bypass CISA lists as exploited and used by ransomware crews. JFrog found no proof a server was breached through this campaign.\n\nThe broader lesson: a repository's agent configuration is code that runs on open. Cloning a repository and starting an agent in it is the same trust decision as running its install script.\n\n## Who is affected\n\nAnyone who cloned or pulled one of the 42 repositories since late September 2026 and opened it in Claude Code, Gemini CLI, Cursor or VS Code with the workspace trusted, and anyone who installed the testmetest npm packages.\n\n## How to check\n\n- Look for `.github/init.js` larger than a few hundred kilobytes, and for `.claude/settings.json`, `.gemini/settings.json`, `.cursor/mcp.json` or `.vscode/tasks.json` in a repository you did not put them in.\n- Look for commits titled `chore: sync` with `skip-checks:true`, and branches named `chore/ci-<hex>` or `deps/upd-<digits>`.\n- On a machine that opened one: `~/.local/bin/net-health-checker.sh`, `/var/tmp/.fontconfig_state`, `/tmp/.svc`, a `.napi_cache` file.\n\n## What to do\n\nRemove the persistence first (`net-health-checker`, `pkg-runtime`), then revoke and reissue GitHub and npm tokens: JFrog reports a wiper that fires when a token is revoked while the implant still runs. Turn off automatic workspace trust in every agent and editor, and review a repository's agent configuration before opening it in an agent.",
+      "published": "2026-10-28T00:00:00Z",
+      "modified": "2026-10-29T00:00:00Z",
+      "references": [
+        {
+          "type": "REPORT",
+          "url": "https://research.jfrog.com/post/beyond-testmetest-42-hijacked-github-repos/"
+        },
+        {
+          "type": "ARTICLE",
+          "url": "https://cybersecuritynews.com/hackers-hijack-42-github-repositories/"
+        },
+        { "type": "ADVISORY", "url": "https://osv.dev/vulnerability/MAL-2026-18177" },
+        { "type": "ADVISORY", "url": "https://osv.dev/vulnerability/MAL-2026-18185" },
+        { "type": "ADVISORY", "url": "https://osv.dev/vulnerability/MAL-2026-18329" },
+        {
+          "type": "ADVISORY",
+          "url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog?search_api_fulltext=CVE-2026-41940"
+        }
+      ],
+      "credits": [
+        { "name": "JFrog Security Research", "type": "FINDER" },
+        { "name": "SafeDep", "type": "FINDER" }
+      ],
+      "database_specific": {
+        "iocs": [
+          { "type": "github-account", "value": "CementBeetleSteeple" },
+          { "type": "marker", "value": "msync-3f7a" },
+          { "type": "url", "value": "hxxps[:]//aiarmor[.]website/v1/api" },
+          { "type": "ip-port", "value": "43[.]228[.]157[.]68:80" },
+          { "type": "npm-package", "value": "data-pipeline-testmetest" },
+          { "type": "npm-package", "value": "log-rotate-testmetest" },
+          { "type": "npm-package", "value": "@iobandamwer/cache-helper" },
+          { "type": "file", "value": ".github/init.js" },
+          { "type": "file", "value": "~/.local/bin/net-health-checker.sh" },
+          { "type": "file", "value": "/var/tmp/.fontconfig_state" }
+        ],
+        "openvuln": {
+          "version": "0.1",
+          "subject": {
+            "kind": "campaign",
+            "name": "testmetest",
+            "members": [
+              {
+                "kind": "repository",
+                "name": "42 repositories of 11 GitHub owners (not named by the researchers)"
+              },
+              { "kind": "package", "name": "npm: data-pipeline-testmetest" },
+              { "kind": "package", "name": "npm: log-rotate-testmetest" },
+              { "kind": "package", "name": "npm: @iobandamwer/cache-helper" }
+            ]
+          },
+          "class": ["supply-chain", "malicious-package", "agent-config", "credential-theft"],
+          "label": "critical",
+          "fix": {
+            "status": "mitigated",
+            "workaround": "Remove persistence before revoking tokens; disable automatic workspace trust; review .claude/.gemini/.cursor/.vscode configuration before opening a repository in an agent."
+          },
+          "exploitation": {
+            "status": "exploited",
+            "kev": null,
+            "ai": []
+          },
+          "sources": [
+            {
+              "name": "JFrog Security Research",
+              "url": "https://research.jfrog.com/post/beyond-testmetest-42-hijacked-github-repos/",
+              "fields": ["details", "subject", "exploitation.status", "iocs"],
+              "retrieved": "2026-10-29T00:00:00Z"
+            },
+            {
+              "name": "OSV",
+              "url": "https://osv.dev/vulnerability/MAL-2026-18177",
+              "fields": ["related"],
+              "retrieved": "2026-10-29T00:00:00Z"
+            },
+            {
+              "name": "CISA KEV",
+              "url": "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+              "fields": ["related"],
+              "retrieved": "2026-10-29T00:00:00Z"
+            }
+          ],
+          "deep_dive": {
+            "url": "https://nichedb.dev/c/vulns/NDB-2026-0001",
+            "made_by": "ai",
+            "disclosure": "ai-generated",
+            "ai_model": "claude-opus-5-5",
+            "ai_provider": "Anthropic"
+          }
+        }
+      }
+    },
+    {
+      "schema_version": "1.6.0",
+      "id": "NDB-2026-0002",
+      "aliases": ["CVE-2026-12537", "GHSA-wpqr-6v78-jr5g"],
+      "summary": "Gemini CLI in CI runs commands from untrusted GitHub issue text (CVSS 10)",
+      "details": "## What it is\n\nGoogle's Gemini CLI, and the `run-gemini-cli` GitHub Action that runs it in CI to triage issues and pull requests, could be steered by text an outsider writes in an issue. In the workflows Google shipped, the agent ran with `--yolo`, which approves every shell command and tool call without asking, and the workspace trust and tool allowlist checks could be bypassed. Text in a public issue was therefore instructions to an agent holding the repository's GitHub token. Pillar Security (Dan Lisichkin) reported it to Google on 2026-04-16, first against `google/draco`, and demonstrated it against `gemini-cli` itself on 2026-04-20.\n\n## Why it matters\n\nThe flaw is in how the agent was wired into CI, not in the model: an agent that reads attacker-controlled text, can run commands, and can reach a credential is a remote code execution path by construction. The token in reach could write pull requests, so the end of the chain is a supply-chain compromise of a project with more than 100,000 stars.\n\n## Who is affected\n\nRepositories using `google-github-actions/run-gemini-cli` before 0.1.22, or `@google/gemini-cli` before 0.39.1 (or the 0.40.0-preview.2 prerelease) in a workflow that reads issue or pull request text from people outside the project.\n\n## How to check\n\n- `grep -r run-gemini-cli .github/workflows` and read the version pinned.\n- Look for `--yolo` or an auto-approve setting in any agent step that runs on `issues` or `pull_request_target` events.\n\n## What to do\n\nUpdate to `run-gemini-cli` 0.1.22 and Gemini CLI 0.39.1 or 0.40.0-preview.3, which restrict what the agent may run even in `--yolo` mode. Give an agent step the narrowest token it needs (read-only where it only labels), and never run an agent with auto-approval on text from outside the project.",
+      "published": "2026-04-24T19:30:01Z",
+      "modified": "2026-10-29T00:00:00Z",
+      "severity": [{ "type": "CVSS_V3", "score": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H" }],
+      "affected": [
+        {
+          "package": { "ecosystem": "npm", "name": "@google/gemini-cli" },
+          "ranges": [{ "type": "SEMVER", "events": [{ "introduced": "0" }, { "fixed": "0.39.1" }] }]
+        },
+        {
+          "package": {
+            "ecosystem": "GitHub Actions",
+            "name": "google-github-actions/run-gemini-cli"
+          },
+          "ranges": [
+            { "type": "ECOSYSTEM", "events": [{ "introduced": "0" }, { "fixed": "0.1.22" }] }
+          ]
+        }
+      ],
+      "references": [
+        {
+          "type": "ADVISORY",
+          "url": "https://github.com/google-github-actions/run-gemini-cli/security/advisories/GHSA-wpqr-6v78-jr5g"
+        },
+        {
+          "type": "REPORT",
+          "url": "https://www.pillar.security/blog/my-agentic-trust-issues-from-prompt-injection-to-supply-chain-compromise-on-gemini-cli"
+        },
+        {
+          "type": "ARTICLE",
+          "url": "https://hackread.com/google-cvss-10-gemini-cli-vulnerability-github-rce/"
+        },
+        { "type": "WEB", "url": "https://nvd.nist.gov/vuln/detail/CVE-2026-12537" }
+      ],
+      "credits": [{ "name": "Pillar Security (Dan Lisichkin)", "type": "FINDER" }],
+      "database_specific": {
+        "openvuln": {
+          "version": "0.1",
+          "subject": {
+            "kind": "agent",
+            "name": "Gemini CLI",
+            "vendor": "Google",
+            "url": "https://github.com/google-gemini/gemini-cli"
+          },
+          "class": ["prompt-injection", "ci-cd", "rce"],
+          "label": "critical",
+          "fix": {
+            "status": "fixed",
+            "versions": ["0.39.1", "0.40.0-preview.3", "run-gemini-cli 0.1.22"],
+            "workaround": "Never run an agent with --yolo or auto-approval on issue or pull request text from outside the project; give the step a read-only token."
+          },
+          "exploitation": { "status": "poc-public", "ai": [] },
+          "sources": [
+            {
+              "name": "OSV",
+              "id": "GHSA-wpqr-6v78-jr5g",
+              "url": "https://osv.dev/vulnerability/GHSA-wpqr-6v78-jr5g",
+              "fields": ["affected", "severity", "aliases", "published"],
+              "retrieved": "2026-10-29T00:00:00Z"
+            },
+            {
+              "name": "Pillar Security",
+              "url": "https://www.pillar.security/blog/my-agentic-trust-issues-from-prompt-injection-to-supply-chain-compromise-on-gemini-cli",
+              "fields": ["details", "exploitation.status", "credits"],
+              "retrieved": "2026-10-29T00:00:00Z"
+            }
+          ],
+          "deep_dive": {
+            "url": "https://nichedb.dev/c/vulns/NDB-2026-0002",
+            "made_by": "ai",
+            "disclosure": "ai-generated",
+            "ai_model": "claude-opus-5-5",
+            "ai_provider": "Anthropic"
+          }
+        }
+      }
+    },
+    {
+      "schema_version": "1.6.0",
+      "id": "NDB-2026-0003",
+      "aliases": [],
+      "summary": "ExploitGym: 869 real vulnerabilities AI agents are set to turn into working exploits",
+      "details": "## What it is\n\nExploitGym (Sunblaze lab at UC Berkeley and co-authors; arXiv 2605.11086, submitted 2026-05-11, Apache-2.0) is a benchmark, not a vulnerability. Each of its 869 tasks is a real, already fixed bug packaged in a container where it can be exploited, and an AI agent is asked to produce a working exploit: 502 userspace bugs (484 from OSS-Fuzz via ARVO, 18 by CVE or GHSA), 186 Linux kernel bugs (kernelCTF and syzbot) and 181 in Google's V8 engine.\n\n## Why it is here\n\nIt answers a defender's new question: is this vulnerability one an AI agent has been pointed at? Every task is a row in /c/vulns tagged `exploitgym`, joined to its CVE, GHSA or OSS-Fuzz record where the id allows, and every deep dive for one of those vulnerabilities lists it under AI exploitation.\n\n## What it does not say\n\nThe repository publishes tasks, not per-task results, so a vulnerability being in ExploitGym is not evidence that an agent exploited it. OpenVuln records it with `result: unstated` until a per-task result is published. Exploit code, proofs of concept and the paper's exploit write-ups are linked, never copied.",
+      "published": "2026-05-11T00:00:00Z",
+      "modified": "2026-10-29T00:00:00Z",
+      "references": [
+        { "type": "PACKAGE", "url": "https://github.com/sunblaze-ucb/exploitgym" },
+        { "type": "REPORT", "url": "https://arxiv.org/abs/2605.11086" },
+        { "type": "ARTICLE", "url": "https://rdi.berkeley.edu/blog/exploitgym/" }
+      ],
+      "database_specific": {
+        "openvuln": {
+          "version": "0.1",
+          "subject": {
+            "kind": "campaign",
+            "name": "ExploitGym v1.0 benchmark corpus",
+            "url": "https://github.com/sunblaze-ucb/exploitgym"
+          },
+          "class": ["ai-exploit-benchmark"],
+          "label": "none",
+          "exploitation": {
+            "ai": [
+              {
+                "benchmark": "ExploitGym",
+                "task": "v1.0 (869 tasks)",
+                "url": "https://github.com/sunblaze-ucb/exploitgym",
+                "result": "unstated"
+              }
+            ]
+          },
+          "sources": [
+            {
+              "name": "ExploitGym",
+              "url": "https://github.com/sunblaze-ucb/exploitgym",
+              "fields": ["details", "exploitation.ai"],
+              "retrieved": "2026-10-29T00:00:00Z"
+            }
+          ],
+          "deep_dive": {
+            "url": "https://nichedb.dev/c/vulns/NDB-2026-0003",
+            "made_by": "ai",
+            "disclosure": "ai-generated",
+            "ai_model": "claude-opus-5-5",
+            "ai_provider": "Anthropic"
+          }
+        }
+      }
+    }
+  ]
+}

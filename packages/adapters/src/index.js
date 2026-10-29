@@ -31,6 +31,7 @@ import { censusAcs } from './census-acs.js';
 import { cfpbComplaints } from './cfpb.js';
 import { ch4nnels, ch4nnelsIptv } from './ch4nnels.js';
 import { channels } from './channels.js';
+import { cisaKev } from './cisa-kev.js';
 import { clinicalTrials } from './clinicaltrials.js';
 import { coopsWaterLevels } from './coops.js';
 import { courtlistener, courtlistenerApi, courtlistenerOralArguments } from './courtlistener.js';
@@ -54,6 +55,7 @@ import { alpacaAssets, equityHistory, secFundamentals } from './equities.js';
 import { espnCatalogue, espnLive, espnSchedule } from './espn.js';
 import { espnPlays } from './espnplays.js';
 import { eurostat } from './eurostat.js';
+import { exploitgym } from './exploitgym.js';
 import { faaAirportStatus } from './faanas.js';
 import { fbiCrimeEstimates } from './fbicrime.js';
 import { fdicInstitutions, fdicStructureChanges } from './fdic.js';
@@ -117,7 +119,9 @@ import { opensaas } from './opensaas.js';
 import { openserver } from './openserver.js';
 import { opensite } from './opensite.js';
 import { openthreat } from './openthreat.js';
+import { openvuln } from './openvuln.js';
 import { openwebring } from './openwebring.js';
+import { osv } from './osv.js';
 import { outreachgraph } from './outreachgraph.js';
 import { ovhVps } from './ovh.js';
 import { p0dcasters } from './p0dcasters.js';
@@ -380,6 +384,11 @@ export const ADAPTERS = [
   // The NVD's CVE catalogue, and SURBL's lists with watched domains checked against them.
   nvd,
   surbl,
+  // Vulns: OSV.dev, CISA KEV, ExploitGym and OpenVuln publishers, joined per vulnerability at /c/vulns/<id>.
+  osv,
+  cisaKev,
+  exploitgym,
+  openvuln,
   // abuse.ch: malware IPs and domains (ThreatFox, URLhaus, Feodo), one row per address.
   abusech,
   // Webrings: the rings a host runs and who is in them, read off the host's own descriptor.
@@ -449,4 +458,5 @@ export function adapterByName(name) {
   return byName.get(String(name)) ?? null;
 }
 
+export { HOUSE as OPENVULN_HOUSE } from './openvuln.js';
 export { POLICE_CITIES, POLICE_SCOPE } from './police-updates.js';
