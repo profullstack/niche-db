@@ -197,7 +197,8 @@ export const outreachgraph = defineAdapter({
         const item = directoryItem(row, base);
         if (item) items.push(item);
         else skipped += 1;
-        if (typeof row?.updated === 'string' && (!newest || row.updated > newest)) newest = row.updated;
+        if (typeof row?.updated === 'string' && (!newest || row.updated > newest))
+          newest = row.updated;
       }
       const next = typeof doc?.next === 'string' && doc.next ? doc.next : null;
       if (!next || rows.length === 0) {
@@ -207,11 +208,15 @@ export const outreachgraph = defineAdapter({
       cursor = next;
     }
     const counts = KINDS.map((k) => `${items.filter((i) => i.kind === k).length} ${k}`).join(', ');
-    log(`${pages} pages: ${counts}${skipped ? `, ${skipped} skipped` : ''}${reachedEnd ? '' : ', resuming next run'}`);
+    log(
+      `${pages} pages: ${counts}${skipped ? `, ${skipped} skipped` : ''}${reachedEnd ? '' : ', resuming next run'}`,
+    );
     // Reached the end: from now on only what changed since the newest row seen
     // (>= on the far side, so a row sharing that instant is read again, not lost).
     // Cut short by the cap, the deadline or a failed page: carry on from here.
-    const next = reachedEnd ? { base, since: newest, resume: null } : { base, since, resume: cursor };
+    const next = reachedEnd
+      ? { base, since: newest, resume: null }
+      : { base, since, resume: cursor };
     return {
       items,
       cursor: next,

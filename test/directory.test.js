@@ -234,7 +234,10 @@ describe('OutreachGraph public directory: the adapter', () => {
       json: async (url) => {
         asked.push(url);
         const n = asked.length;
-        return { items: [{ ...company, id: `co_${n}`, updated: `2026-10-0${n}T00:00:00.000Z` }], next: `c${n}` };
+        return {
+          items: [{ ...company, id: `co_${n}`, updated: `2026-10-0${n}T00:00:00.000Z` }],
+          next: `c${n}`,
+        };
       },
     };
     const first = await outreachgraph.pull({
