@@ -150,6 +150,7 @@ import { scryfallCards, scryfallSets } from './scryfall.js';
 import { searchpeptides } from './searchpeptides.js';
 import { slickdeals } from './slickdeals.js';
 import { smithery } from './smithery.js';
+import { smshubBlacklist } from './smshub-blacklist.js';
 import { socrataCrime } from './socratacrime.js';
 import { sportarrPersons } from './sportarr-persons.js';
 import { sportsdbTv } from './sportsdb.js';
@@ -369,6 +370,7 @@ export const ADAPTERS = [
   agenticjobs,
   tsbb,
   c0upons,
+  smshubBlacklist,
   // Hosting: who sells servers, at what price, and the deals the small ones announce.
   findhost,
   vultrPlans,

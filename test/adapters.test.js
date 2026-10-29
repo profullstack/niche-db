@@ -111,6 +111,7 @@ describe('registry', () => {
         'iptv',
         'weed',
         'launches',
+        'blacklists',
       ]).toContain(a.collection);
     }
     expect(adapterByName('steam').title).toContain('Steam');
