@@ -23,6 +23,9 @@ const core = await import('../packages/core/src/openvuln.js');
 const { DEFAULT_FEEDS, COLLECTIONS } = await import('../packages/core/src/seed.js');
 const { itemsForKeys } = await import('../packages/db/src/vulns.js');
 const { vulnReport } = await import('../apps/web/src/lib/vulns.js');
+const sig = await import('../packages/adapters/src/exploit-signals.js');
+const tb = await import('../packages/adapters/src/repo-tarballs.js');
+const { tarGzEntries } = await import('../packages/core/src/dump.js');
 
 const GEMINI = {
   id: 'GHSA-wpqr-6v78-jr5g',
@@ -552,5 +555,202 @@ describe('itemsForKeys + vulnReport', () => {
     const none = await vulnReport('CVE-1999-0001', { ...deps, itemsForKeys: async () => [] });
     expect(none.status).toBe(404);
     expect((await vulnReport('', deps)).status).toBe(400);
+  });
+});
+
+describe('exploit signals', () => {
+  test('Exploit-DB CSV: quoted commas and newlines, CVEs from codes, rows without a CVE dropped', () => {
+    const csv =
+      'id,file,description,date_published,author,type,platform,port,date_added,date_updated,verified,codes,tags,aliases,screenshot_url,application_url,source_url\n' +
+      '16929,exploits/aix/dos/16929.rb,"AIX rpc.cmsd, Opcode 21 - ""Buffer"" Overflow",2010-11-11,Metasploit,dos,aix,,2010-11-11,2011-03-06,1,CVE-2009-3699;OSVDB-58726,,,,,\n' +
+      '1,exploits/x/1.txt,"no cve\nat all",2001-01-01,x,local,linux,,2001-01-01,2001-01-01,0,OSVDB-1,,,,,\n';
+    const items = sig.parseExploitDb(csv);
+    expect(items).toHaveLength(1);
+    expect(items[0].externalId).toBe('EDB-16929');
+    expect(items[0].title).toContain('"Buffer"');
+    expect(items[0].tags).toEqual(
+      expect.arrayContaining(['id:cve-2009-3699', 'verified', 'platform:aix']),
+    );
+    expect(items[0].url).toBe('https://www.exploit-db.com/exploits/16929');
+  });
+
+  test('Metasploit: only modules that reference a CVE, rank named', () => {
+    const m = sig.metasploitItem('x', {
+      name: 'Log4Shell',
+      fullname: 'exploit/multi/http/log4shell',
+      type: 'exploit',
+      rank: 600,
+      references: ['CVE-2021-44228', 'URL-https://x'],
+      path: '/modules/exploits/multi/http/log4shell.rb',
+      check: true,
+    });
+    expect(m.tags).toEqual(
+      expect.arrayContaining(['metasploit', 'id:cve-2021-44228', 'rank:excellent', 'has-check']),
+    );
+    expect(sig.metasploitItem('y', { references: ['OSVDB-1'] })).toBeNull();
+  });
+
+  test('Nuclei: one template line per CVE', () => {
+    const n = sig.nucleiItem(
+      '{"ID":"CVE-2000-0114","Info":{"Name":"FrontPage","Severity":"medium"},"file_path":"http/cves/2000/CVE-2000-0114.yaml"}',
+    );
+    expect(n.kind).toBe('scanner-check');
+    expect(n.tags).toEqual(['nuclei', 'id:cve-2000-0114', 'severity:medium']);
+    expect(sig.nucleiItem('not json')).toBeNull();
+  });
+
+  test('Vulnrichment: SSVC from the CISA ADP container, mapped to an exploitation status', () => {
+    const rec = {
+      cveMetadata: { cveId: 'CVE-2026-41940' },
+      containers: {
+        cna: { title: 'cPanel auth bypass' },
+        adp: [
+          { providerMetadata: { shortName: 'CVE' }, metrics: [] },
+          {
+            providerMetadata: { shortName: 'CISA-ADP' },
+            metrics: [
+              {
+                other: {
+                  type: 'ssvc',
+                  content: {
+                    options: [
+                      { Exploitation: 'active' },
+                      { Automatable: 'yes' },
+                      { 'Technical Impact': 'total' },
+                    ],
+                    timestamp: '2026-04-30T16:41:31Z',
+                  },
+                },
+              },
+              { other: { type: 'kev', content: { dateAdded: '2026-04-30' } } },
+            ],
+          },
+        ],
+      },
+    };
+    const item = tb.vulnrichmentItem(rec);
+    expect(item.data.status).toBe('exploited');
+    expect(item.tags).toEqual(
+      expect.arrayContaining([
+        'id:cve-2026-41940',
+        'ssvc-exploitation:active',
+        'ssvc-automatable:yes',
+        'kev',
+      ]),
+    );
+    expect(
+      tb.vulnrichmentItem({ cveMetadata: { cveId: 'CVE-2026-1' }, containers: { adp: [] } }),
+    ).toBeNull();
+  });
+
+  test('PoC-in-GitHub: forks dropped, best-starred first, always unvetted', () => {
+    const item = tb.pocItem(
+      [
+        { html_url: 'https://github.com/a/fork', fork: true, stargazers_count: 99 },
+        {
+          html_url: 'https://github.com/a/low',
+          stargazers_count: 1,
+          created_at: '2026-05-01T00:00:00Z',
+        },
+        {
+          html_url: 'https://github.com/a/high',
+          stargazers_count: 26,
+          created_at: '2026-04-29T00:00:00Z',
+        },
+      ],
+      'PoC-in-GitHub-master/2026/CVE-2026-41940.json',
+    );
+    expect(item.data.repos.map((r) => r.url)).toEqual([
+      'https://github.com/a/high',
+      'https://github.com/a/low',
+    ]);
+    expect(item.data.vetted).toBe(false);
+    expect(item.url).toBe(
+      'https://github.com/nomi-sec/PoC-in-GitHub/blob/master/2026/CVE-2026-41940.json',
+    );
+    expect(item.publishedAt).toBe('2026-04-29T00:00:00Z');
+  });
+
+  test('tarGzEntries streams members, honours pax long names, and skips filtered ones', async () => {
+    const dir = await import('node:fs/promises').then((f) =>
+      f.mkdtemp(`${process.env.TMPDIR ?? '/tmp'}/tgz-`),
+    );
+    const long = `${'d'.repeat(120)}/CVE-2026-1.json`;
+    const fs = await import('node:fs/promises');
+    await fs.mkdir(`${dir}/src/${'d'.repeat(120)}`, { recursive: true });
+    await fs.writeFile(`${dir}/src/${long}`, '{"a":1}');
+    await fs.writeFile(`${dir}/src/skip.txt`, 'x'.repeat(2000));
+    const p = Bun.spawnSync([
+      'tar',
+      '--format=pax',
+      '-czf',
+      `${dir}/a.tgz`,
+      '-C',
+      `${dir}/src`,
+      '.',
+    ]);
+    expect(p.exitCode).toBe(0);
+    const got = [];
+    for await (const e of tarGzEntries(`${dir}/a.tgz`, { filter: (n) => n.endsWith('.json') }))
+      got.push([e.name, e.body.toString()]);
+    expect(got).toEqual([[`./${long}`, '{"a":1}']]);
+    await fs.rm(dir, { recursive: true, force: true });
+  });
+
+  test('the merge: SSVC active and a Metasploit module raise the status; PoC claims alone do not', () => {
+    const msf = row(
+      sig.metasploitItem('k', {
+        name: 'cPanel bypass',
+        fullname: 'exploit/x/cpanel',
+        type: 'exploit',
+        rank: 600,
+        references: ['CVE-2026-41940'],
+        path: '/m.rb',
+      }),
+      { adapter: 'metasploit' },
+    );
+    const poc = row(
+      tb.pocItem(
+        [{ html_url: 'https://github.com/a/b', stargazers_count: 3 }],
+        'x/2026/CVE-2026-41940.json',
+      ),
+      { adapter: 'poc-in-github' },
+    );
+    const ssvcNone = row(
+      {
+        ...tb.vulnrichmentItem({
+          cveMetadata: { cveId: 'CVE-2026-41940' },
+          containers: {
+            adp: [
+              {
+                providerMetadata: { shortName: 'CISA-ADP' },
+                metrics: [
+                  { other: { type: 'ssvc', content: { options: [{ Exploitation: 'none' }] } } },
+                ],
+              },
+            ],
+          },
+        }),
+      },
+      { adapter: 'vulnrichment' },
+    );
+
+    const onlyPoc = core.buildRecord('CVE-2026-41940', { rows: [poc] }).record.database_specific
+      .openvuln.exploitation;
+    expect(onlyPoc.status).toBeUndefined();
+    expect(onlyPoc.claims[0]).toMatchObject({ vetted: false });
+
+    const ssvcAndMsf = core.buildRecord('CVE-2026-41940', { rows: [ssvcNone, msf, poc] }).record
+      .database_specific.openvuln;
+    expect(ssvcAndMsf.exploitation.status).toBe('poc-public');
+    expect(ssvcAndMsf.exploitation.ssvc.exploitation).toBe('none');
+    expect(ssvcAndMsf.exploitation.public[0]).toMatchObject({
+      source: 'Metasploit',
+      rank: 'excellent',
+    });
+    expect(ssvcAndMsf.version).toBe('0.1.1');
+    expect(ssvcAndMsf.sources.map((s) => s.name)).toEqual(
+      expect.arrayContaining(['CISA Vulnrichment (SSVC)', 'Metasploit', 'PoC-in-GitHub']),
+    );
   });
 });

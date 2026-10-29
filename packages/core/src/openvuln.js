@@ -13,7 +13,7 @@
  * consulted for a CVE (the catalog is held whole, so a CVE not in it is not in
  * it).
  */
-export const VERSION = '0.1';
+export const VERSION = '0.1.1';
 export const OSV_SCHEMA = '1.6.0';
 
 const RANK = { 'exploited-ransomware': 4, exploited: 3, 'poc-public': 2, 'none-known': 1 };
@@ -111,6 +111,11 @@ export function buildRecord(
 
   const kevRow = rows.find((r) => r.kind === 'kev') ?? null;
   const aiRows = rows.filter((r) => r.kind === 'ai-exploit');
+  const exploitRows = rows.filter((r) => r.kind === 'exploit');
+  const pocRows = rows.filter((r) => r.kind === 'poc-claim');
+  const scannerRows = rows.filter((r) => r.kind === 'scanner-check');
+  const ssvcRow = rows.find((r) => r.kind === 'ssvc') ?? null;
+  const signals = exploitRows.length + pocRows.length + scannerRows.length + (ssvcRow ? 1 : 0);
   const hr = house?.data?.record ?? null;
   const ov = hr?.database_specific?.openvuln ?? {};
   const base = hr ?? osv?.rec ?? null;
@@ -121,10 +126,12 @@ export function buildRecord(
     kevRow?.external_id,
     nvd?.external_id,
     ...aiRows.flatMap((r) => r.data?.ids ?? []),
+    ssvcRow?.external_id,
   ]);
   const recordId = base?.id ?? (isCve(id) ? id.toUpperCase() : id);
   const cves = uniq([recordId, ...allIds].filter(isCve).map((c) => c.toUpperCase()));
-  if (!base && !nvd && !kevRow && aiRows.length === 0 && campaigns.length === 0) return null;
+  if (!base && !nvd && !kevRow && aiRows.length === 0 && campaigns.length === 0 && signals === 0)
+    return null;
 
   const sources = [];
   const nvdData = nvd?.data ?? null;
@@ -145,6 +152,11 @@ export function buildRecord(
     const type = v.startsWith('4') ? 'CVSS_V4' : v.startsWith('3') ? 'CVSS_V3' : 'CVSS_V2';
     severity = [{ type, score: nvdData.cvss.vector }];
   }
+  const adpCvss = ssvcRow?.data?.cvss ?? null;
+  if (!severity?.length && adpCvss?.vector)
+    severity = [
+      { type: adpCvss.vector.startsWith('CVSS:4') ? 'CVSS_V4' : 'CVSS_V3', score: adpCvss.vector },
+    ];
 
   let label = ov.label ?? null;
   let labelFrom = label ? (house?.source_name ?? 'publisher') : null;
@@ -153,6 +165,8 @@ export function buildRecord(
   if (!label && nvdData?.cvss?.severity) [label, labelFrom] = [nvdData.cvss.severity, 'NVD'];
   if (!label && nvdData?.cvss?.score != null)
     [label, labelFrom] = [labelFromScore(nvdData.cvss.score), 'nichedb.dev from NVD CVSS'];
+  if (!label && adpCvss?.severity)
+    [label, labelFrom] = [adpCvss.severity, 'CISA Vulnrichment (SSVC)'];
 
   const fix = ov.fix ?? osv?.row?.data?.fix ?? null;
 
@@ -184,9 +198,45 @@ export function buildRecord(
     })),
   ];
 
+  // Published exploits: Exploit-DB and Metasploit, links only. PoC-in-GitHub
+  // repositories are claims, listed apart and never counted as a public exploit.
+  const publicExploits = exploitRows.map((r) => ({
+    source: r.data?.source ?? r.adapter,
+    id: r.data?.id ?? r.external_id,
+    title: r.data?.title ?? r.title,
+    url: r.url,
+    date: r.data?.published ?? r.data?.disclosed ?? null,
+    ...(r.data?.verified !== undefined ? { verified: r.data.verified } : {}),
+    ...(r.data?.rank ? { rank: r.data.rank } : {}),
+  }));
+  const claims = pocRows.flatMap((r) =>
+    (r.data?.repos ?? []).map((x) => ({
+      source: 'PoC-in-GitHub',
+      url: x.url,
+      stars: x.stars,
+      date: x.created,
+      vetted: false,
+    })),
+  );
+  const scanners = scannerRows.map((r) => ({
+    source: r.data?.source ?? 'Nuclei',
+    id: r.data?.id ?? r.external_id,
+    url: r.url,
+  }));
+  const ssvc = ssvcRow?.data?.ssvc
+    ? {
+        exploitation: ssvcRow.data.ssvc.exploitation,
+        automatable: ssvcRow.data.ssvc.automatable,
+        technical_impact: ssvcRow.data.ssvc.technicalImpact,
+        date: ssvcRow.data.ssvc.timestamp,
+      }
+    : null;
+
   const statuses = [ov.exploitation?.status];
   if (kev?.ransomware) statuses.push('exploited-ransomware');
   else if (kev) statuses.push('exploited');
+  if (ssvcRow?.data?.status) statuses.push(ssvcRow.data.status);
+  if (publicExploits.length) statuses.push('poc-public');
   for (const c of campaigns) {
     const s = c.data.record.database_specific?.openvuln?.exploitation?.status;
     if (s === 'exploited' && osv && String(osv.rec.id).startsWith('MAL-'))
@@ -269,6 +319,28 @@ export function buildRecord(
         retrieved: iso(now),
       }),
     );
+  if (ssvcRow)
+    sources.push(
+      source('CISA Vulnrichment (SSVC)', ['exploitation.ssvc', 'exploitation.status'], {
+        id: ssvcRow.external_id,
+        url: ssvcRow.url,
+        retrieved: iso(ssvcRow.updated_at),
+      }),
+    );
+  for (const r of [...exploitRows, ...pocRows, ...scannerRows])
+    sources.push(
+      source(
+        r.data?.source ?? r.adapter,
+        [
+          r.kind === 'exploit'
+            ? 'exploitation.public'
+            : r.kind === 'poc-claim'
+              ? 'exploitation.claims'
+              : 'exploitation.scanners',
+        ],
+        { id: r.data?.id ?? r.external_id, url: r.url, retrieved: iso(r.updated_at) },
+      ),
+    );
   for (const r of aiRows)
     sources.push(
       source('ExploitGym', ['exploitation.ai'], {
@@ -334,6 +406,10 @@ export function buildRecord(
       ...(epss
         ? { epss: { score: epss.score, percentile: epss.percentile, date: epss.date } }
         : {}),
+      ...(ssvc ? { ssvc } : {}),
+      ...(publicExploits.length ? { public: publicExploits } : {}),
+      ...(claims.length ? { claims } : {}),
+      ...(scanners.length ? { scanners } : {}),
       ai,
     },
     sources,
@@ -375,6 +451,8 @@ export function buildRecord(
       kev: kevRow,
       nvd,
       ai: aiRows,
+      exploits: exploitRows,
+      pocCount: pocRows.reduce((n, r) => n + (Number(r.data?.count) || 0), 0),
       cves,
     },
   };
