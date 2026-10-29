@@ -22,6 +22,7 @@
     "@nichedb/premium": "workspace:*",
     "@nichedb/queue": "workspace:*",
     "@profullstack/affiliates": "^0.2.0",
+    "@profullstack/coinpay-onboard": "0.3.1",
     "@profullstack/footer": "latest",
     "@profullstack/leaderboard": "^0.3.1",
     "@profullstack/nichedb": "workspace:*",

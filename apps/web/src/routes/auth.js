@@ -7,6 +7,7 @@ import { vapidKeysFromEnv, vapidPublicKeyResponse } from '@profullstack/notifica
 import { saveSignupProfile, validateProfile } from '@profullstack/profile';
 import { getCookie, setCookie } from 'hono/cookie';
 import { AUTH, attempt, callerAddress, forgive, VIEW } from '../lib/auth-throttle.js';
+import { isPlaceholderEmail } from '../lib/coinpay-signin.js';
 import { acceptInvite, attributeReferral, looksLikeInvite } from '../lib/credits.js';
 import { render, requireUser, respond } from '../lib/http.js';
 import { profiles } from '../lib/profile.js';
@@ -133,7 +134,8 @@ export function registerAuth(app) {
       .toLowerCase();
     const next = String(body.next ?? '/following');
     const invite = looksLikeInvite(body.invite) ? String(body.invite) : inviteFrom(c);
-    if (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+    // A CoinPay-only account's placeholder address never gets a link.
+    if (/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) && !isPlaceholderEmail(email)) {
       try {
         const url = await auth.createLoginLink(email, { next, profile, invite });
         await sendLoginLink({ email, url });

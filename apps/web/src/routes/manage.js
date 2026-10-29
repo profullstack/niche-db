@@ -15,6 +15,7 @@ import {
 } from '@nichedb/payments/referrals';
 import { enqueueRun } from '@nichedb/queue';
 import { validateProfile } from '@profullstack/profile';
+import { identityStore } from '../lib/coinpay-signin.js';
 import {
   configFromForm,
   isProUser,
@@ -374,16 +375,20 @@ export function registerManage(app) {
 
   app.get('/settings', async (c) => {
     const user = requireUser(c);
-    const [passkeys, apiKeys, pro, terms, flash, snapshot, contact, webhooks] = await Promise.all([
-      q.listPasskeys(user.id),
-      auth.listApiKeys(user.id),
-      isProUser(user),
-      q.membershipTerms(user.id, { limit: 3 }),
-      takeFlash(c),
-      premiumSnapshot(c),
-      profiles.get(user.id),
-      hooks.listEndpoints(String(user.id)).catch(() => []),
-    ]);
+    const [passkeys, apiKeys, pro, terms, flash, snapshot, contact, webhooks, coinpay] =
+      await Promise.all([
+        q.listPasskeys(user.id),
+        auth.listApiKeys(user.id),
+        isProUser(user),
+        q.membershipTerms(user.id, { limit: 3 }),
+        takeFlash(c),
+        premiumSnapshot(c),
+        profiles.get(user.id),
+        hooks.listEndpoints(String(user.id)).catch(() => []),
+        identityStore((text, params) => sql.unsafe(text, params))
+          .status(user.id, user.email)
+          .catch(() => null),
+      ]);
     // One flash slot: an API key (ndb_…) or a webhook signing secret (whsec_…).
     const webhookSecret = flash?.startsWith('whsec_') ? flash : null;
     const newKey = webhookSecret ? null : flash;
@@ -403,6 +408,7 @@ export function registerManage(app) {
         <Settings
           user={user}
           contact={contact ?? { email: user.email }}
+          coinpay={coinpay}
           passkeys={passkeys}
           apiKeys={apiKeys}
           newKey={newKey}

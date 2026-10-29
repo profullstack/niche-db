@@ -8,6 +8,7 @@ const locationLink = (base, geo, extra = {}) =>
 import { config } from '@nichedb/config';
 import { COLUMNS as PROFILE_COLUMNS, renderProfileFields } from '@profullstack/profile';
 import { raw } from 'hono/html';
+import { coinpayConfig } from '../lib/coinpay-signin.js';
 import { currentModules } from '../lib/modules.js';
 import { WhereToBuy } from './books.jsx';
 import {
@@ -28,6 +29,9 @@ import { EnrichmentBlocks } from './enrichment.jsx';
 import { Layout } from './Layout.jsx';
 import { PremiumUpsell } from './PremiumUpsell.jsx';
 import { AwardForm, AwardPills, PlanBadge } from './premium.jsx';
+
+/** The CoinPay buttons show only when the OAuth client is configured. */
+const coinpayEnabled = () => Boolean(coinpayConfig(config.siteUrl));
 
 export const Landing = ({ user, stats, collections, latest, feeds }) => (
   <Layout user={user} canonical="/">
@@ -677,6 +681,17 @@ export const SignIn = ({ mode, sent, next, error, referral, invite, values, erro
             </p>
           ) : null}
           {error ? <p class="feedback error">{error}</p> : null}
+          {coinpayEnabled() ? (
+            <>
+              <a
+                class="cta"
+                href={`/api/v1/coinpay/oauth/start?next=${encodeURIComponent(next ?? '/following')}`}
+              >
+                {mode === 'signup' ? 'Sign up with CoinPay' : 'Sign in with CoinPay'}
+              </a>
+              <div class="or">or</div>
+            </>
+          ) : null}
           <form method="post" action="/api/auth/magic" class="stack">
             <input type="hidden" name="next" value={next ?? '/following'} />
             {invite ? <input type="hidden" name="invite" value={invite} /> : null}
@@ -732,6 +747,7 @@ export const SignIn = ({ mode, sent, next, error, referral, invite, values, erro
 export const Settings = ({
   user,
   contact = null,
+  coinpay = null,
   passkeys,
   apiKeys,
   newKey,
@@ -815,6 +831,38 @@ export const Settings = ({
         </button>
       </form>
     </section>
+
+    {coinpayEnabled() ? (
+      <section class="panel" id="coinpay">
+        <h2>Sign in with CoinPay</h2>
+        {coinpay?.linked ? (
+          <>
+            <p class="muted small">Connected: you can sign in with your CoinPay account.</p>
+            {coinpay.canDisconnect ? (
+              <form method="post" action="/api/v1/coinpay/disconnect">
+                <button type="submit" class="ghost small">
+                  Disconnect CoinPay
+                </button>
+              </form>
+            ) : (
+              <p class="muted small">
+                CoinPay is this account's only way in, so it stays connected. Add a passkey to be
+                able to disconnect it.
+              </p>
+            )}
+          </>
+        ) : (
+          <>
+            <p class="muted small">
+              Connect your CoinPay account to sign in with it as well as by email.
+            </p>
+            <a class="ghost" href="/api/v1/coinpay/oauth/start?mode=connect">
+              Connect CoinPay
+            </a>
+          </>
+        )}
+      </section>
+    ) : null}
 
     <section class="panel">
       <h2>Passkeys</h2>
