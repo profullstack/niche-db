@@ -480,6 +480,19 @@ describe('buildRecord', () => {
     expect(record.database_specific.cwe_ids).toEqual(['CWE-20']);
   });
 
+  test('a label the NVD supplies names the NVD once in sources', () => {
+    const nvd = {
+      external_id: 'CVE-2020-0002',
+      title: 'CVE-2020-0002: A bug.',
+      url: 'https://nvd.nist.gov/vuln/detail/CVE-2020-0002',
+      data: { cvss: { version: '3.1', score: 9.8, severity: 'critical', vector: 'CVSS:3.1/AV:N' } },
+    };
+    const { record } = core.buildRecord('CVE-2020-0002', { nvd });
+    const ov = record.database_specific.openvuln;
+    expect(ov.label).toBe('critical');
+    expect(ov.sources.filter((s) => s.name === 'NVD')).toHaveLength(1);
+  });
+
   test('nothing known is null', () => {
     expect(core.buildRecord('CVE-1999-0001', {})).toBeNull();
     expect(core.normaliseId('cve-2026-12537.json')).toBe('CVE-2026-12537');
