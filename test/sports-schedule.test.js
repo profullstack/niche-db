@@ -1,4 +1,4 @@
-import { describe, expect, test } from 'bun:test';
+import { afterAll, beforeAll, describe, expect, setSystemTime, test } from 'bun:test';
 import { fixtureItem, scheduleState } from '../packages/adapters/src/sportsdb-live.js';
 import {
   DAY_CAP,
@@ -120,6 +120,10 @@ describe('fixtureItem', () => {
 });
 
 describe('sportsdbSchedule.pull', () => {
+  // pull() plans from the real clock; the fixtures are dated around NOW.
+  beforeAll(() => setSystemTime(new Date(NOW)));
+  afterAll(() => setSystemTime());
+
   test('does nothing on the shared test key', async () => {
     const p = provider();
     const out = await run(p, { key: '3' });

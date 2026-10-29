@@ -216,7 +216,8 @@ describe('the page', () => {
     expect(html).toContain('action="/c/profiles/bob/claim"');
     expect(html).toContain('This is me');
     expect(html).toContain('Bob &lt;script&gt;');
-    expect(html).not.toContain('<script>');
+    // The shared site footer ships its own subscribe <script>; the page above it has none.
+    expect(html.split('<footer class="pfs-footer"')[0]).not.toContain('<script>');
     expect(html).toContain('&lt;b&gt;not bold&lt;/b&gt;');
   });
 
