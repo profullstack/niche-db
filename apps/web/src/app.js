@@ -16,6 +16,7 @@ import { registerAutomotive } from './routes/automotive.js';
 import { registerBlacklists } from './routes/blacklists.js';
 import { registerBooks } from './routes/books.js';
 import { registerBusiness } from './routes/business.js';
+import { registerCoinpay } from './routes/coinpay.js';
 import { registerCrawlStatus } from './routes/crawlstatus.js';
 import { registerCredits } from './routes/credits.js';
 import { registerDataDumps } from './routes/data-dumps.js';
@@ -144,6 +145,8 @@ app.get('/healthz', (c) => c.text('ok'));
 
 registerStatic(app, gateway);
 registerAuth(app);
+/** Sign in with CoinPay: before registerApi so its /api/v1 meter never sees these redirects. */
+registerCoinpay(app);
 // Before pages: /i/INV-… is an invite, /i/<number> (pages) is an item.
 registerCredits(app);
 registerPages(app);
