@@ -56,6 +56,9 @@ describe('OutreachGraph public directory: where it is read', () => {
   test('the first page and a cursor page', () => {
     expect(pageUrl(DEFAULT_BASE)).toBe(FIRST);
     expect(pageUrl('https://outreachgraph.com/', 'abc')).toBe(`${FIRST}&cursor=abc`);
+    expect(pageUrl(DEFAULT_BASE, 'abc', '2026-10-29T05:00:00.000Z')).toBe(
+      `${FIRST}&since=2026-10-29T05%3A00%3A00.000Z&cursor=abc`,
+    );
     expect(pageUrl('https://staging.example')).toBe(
       'https://staging.example/api/v1/public/directory?limit=200',
     );
@@ -223,5 +226,82 @@ describe('OutreachGraph public directory: the adapter', () => {
     expect(out.items).toEqual([]);
     expect(out.note).toBe('0 pages, 0 rows');
     expect(logs[0]).toContain('page 1 failed (404');
+  });
+
+  test('a run cut short by the cap saves where it stopped, and the next run resumes there', async () => {
+    const asked = [];
+    const http = {
+      json: async (url) => {
+        asked.push(url);
+        const n = asked.length;
+        return { items: [{ ...company, id: `co_${n}`, updated: `2026-10-0${n}T00:00:00.000Z` }], next: `c${n}` };
+      },
+    };
+    const first = await outreachgraph.pull({
+      config: { base: DEFAULT_BASE, pages: 2 },
+      cursor: {},
+      http,
+      log: () => {},
+      deadline: Date.now() + 10_000,
+    });
+    expect(first.cursor).toEqual({ base: DEFAULT_BASE, since: null, resume: 'c2' });
+    expect(first.nextInMinutes).toBe(2);
+
+    const second = await outreachgraph.pull({
+      config: { base: DEFAULT_BASE, pages: 1 },
+      cursor: first.cursor,
+      http,
+      log: () => {},
+      deadline: Date.now() + 10_000,
+    });
+    expect(asked[2]).toBe(`${FIRST}&cursor=c2`);
+    expect(second.cursor.resume).toBe('c3');
+  });
+
+  test('a walk that reaches the end keeps the newest updated as since, and reads only changes after', async () => {
+    const asked = [];
+    const http = {
+      json: async (url) => {
+        asked.push(url);
+        return { items: [company, person, site], next: null };
+      },
+    };
+    const done = await outreachgraph.pull({
+      config: { base: DEFAULT_BASE },
+      cursor: { base: DEFAULT_BASE, since: null, resume: 'c9' },
+      http,
+      log: () => {},
+      deadline: Date.now() + 10_000,
+    });
+    expect(asked[0]).toBe(`${FIRST}&cursor=c9`);
+    expect(done.cursor).toEqual({ base: DEFAULT_BASE, since: person.updated, resume: null });
+    expect(done.nextInMinutes).toBeUndefined();
+
+    await outreachgraph.pull({
+      config: { base: DEFAULT_BASE },
+      cursor: done.cursor,
+      http,
+      log: () => {},
+      deadline: Date.now() + 10_000,
+    });
+    expect(asked[1]).toBe(`${FIRST}&since=${encodeURIComponent(person.updated)}`);
+  });
+
+  test('a cursor saved against another origin is ignored', async () => {
+    const asked = [];
+    const http = {
+      json: async (url) => {
+        asked.push(url);
+        return { items: [], next: null };
+      },
+    };
+    await outreachgraph.pull({
+      config: { base: DEFAULT_BASE },
+      cursor: { base: 'https://staging.example', since: '2026-10-01T00:00:00.000Z', resume: 'zz' },
+      http,
+      log: () => {},
+      deadline: Date.now() + 10_000,
+    });
+    expect(asked).toEqual([FIRST]);
   });
 });

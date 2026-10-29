@@ -20,8 +20,13 @@ import { defineAdapter, looseDate } from '@nichedb/core/adapter';
  *
  * Keyset by `(updated, id)` ascending behind an opaque `cursor`, so a walk
  * from the start meets every row once and a walk with `since` meets what
- * changed. Each run walks from the start, bounded by pages and the deadline;
- * an unchanged row is a content-hash no-op downstream, so the walk is cheap.
+ * changed. A run is bounded by pages and the deadline and resumes where the
+ * last one stopped (`cursor.resume`); a walk that reaches the end keeps the
+ * newest `updated` it saw as `cursor.since`, so later runs read only what
+ * changed. Every run used to start from the top: once the directory passed
+ * the ten thousand rows a run reads, nothing newer ever arrived. An unchanged
+ * row is a content-hash no-op downstream, so re-reading a boundary row is
+ * cheap.
  *
  * IDS
  *
@@ -37,8 +42,11 @@ export const KINDS = ['company', 'site', 'person'];
 /** The documented ceiling per page. */
 const PAGE = 200;
 
-/** Pages per run: 50 x 200 is ten thousand rows, more than the directory holds today. */
+/** Pages per run: 50 x 200 is ten thousand rows. */
 const DEFAULT_PAGES = 50;
+
+/** Minutes to the next run while a walk is still behind the end of the directory. */
+const CATCH_UP_MINUTES = 2;
 
 const clean = (s) => {
   const t = String(s ?? '')
@@ -60,13 +68,14 @@ function when(s) {
   return looseDate(String(s).slice(0, 10));
 }
 
-/** The page URL for a cursor, or the first page. */
-export function pageUrl(base, cursor) {
+/** The page URL for a cursor, or the first page; `since` keeps a walk to what changed. */
+export function pageUrl(base, cursor, since) {
   const origin = String(base ?? DEFAULT_BASE)
     .trim()
     .replace(/\/+$/, '');
   const u = new URL(`${origin}${PATH}`);
   u.searchParams.set('limit', String(PAGE));
+  if (since) u.searchParams.set('since', since);
   if (cursor) u.searchParams.set('cursor', cursor);
   return u.href;
 }
@@ -162,17 +171,22 @@ export const outreachgraph = defineAdapter({
       enabled: true,
     },
   ],
-  async pull({ config, http, log, deadline }) {
+  async pull({ config, cursor: saved, http, log, deadline }) {
     const base = String(config.base ?? DEFAULT_BASE);
     const maxPages = Math.max(1, Math.min(Number(config.pages) || DEFAULT_PAGES, 200));
+    // A cursor saved against another origin means nothing here: start over.
+    const state = saved?.base === base ? saved : {};
+    const since = typeof state.since === 'string' ? state.since : null;
+    let cursor = typeof state.resume === 'string' ? state.resume : null;
     const items = [];
-    let cursor = null;
+    let newest = since;
     let pages = 0;
     let skipped = 0;
+    let reachedEnd = false;
     while (pages < maxPages && Date.now() < deadline) {
       let doc;
       try {
-        doc = await http.json(pageUrl(base, cursor), { timeoutMs: 20_000 });
+        doc = await http.json(pageUrl(base, cursor, since), { timeoutMs: 20_000 });
       } catch (err) {
         log(`page ${pages + 1} failed (${err.message.slice(0, 60)})`);
         break;
@@ -183,13 +197,26 @@ export const outreachgraph = defineAdapter({
         const item = directoryItem(row, base);
         if (item) items.push(item);
         else skipped += 1;
+        if (typeof row?.updated === 'string' && (!newest || row.updated > newest)) newest = row.updated;
       }
       const next = typeof doc?.next === 'string' && doc.next ? doc.next : null;
-      if (!next || rows.length === 0) break;
+      if (!next || rows.length === 0) {
+        reachedEnd = true;
+        break;
+      }
       cursor = next;
     }
     const counts = KINDS.map((k) => `${items.filter((i) => i.kind === k).length} ${k}`).join(', ');
-    log(`${pages} pages: ${counts}${skipped ? `, ${skipped} skipped` : ''}`);
-    return { items, note: `${pages} pages, ${items.length} rows` };
+    log(`${pages} pages: ${counts}${skipped ? `, ${skipped} skipped` : ''}${reachedEnd ? '' : ', resuming next run'}`);
+    // Reached the end: from now on only what changed since the newest row seen
+    // (>= on the far side, so a row sharing that instant is read again, not lost).
+    // Cut short by the cap, the deadline or a failed page: carry on from here.
+    const next = reachedEnd ? { base, since: newest, resume: null } : { base, since, resume: cursor };
+    return {
+      items,
+      cursor: next,
+      note: `${pages} pages, ${items.length} rows`,
+      ...(reachedEnd ? {} : { nextInMinutes: CATCH_UP_MINUTES }),
+    };
   },
 });
