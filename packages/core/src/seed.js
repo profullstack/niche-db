@@ -114,6 +114,12 @@ export const COLLECTIONS = [
       'Every market venue in the world from the ISO 10383 register, across 149 countries, and the events that move the ones we have data for: US dividends, splits, mergers and spin-offs, trading halts as they are declared, the market news wire, and the ECB’s daily euro reference rates.',
   },
   {
+    slug: 'blockchain',
+    name: 'Blockchain',
+    description:
+      'Free public blockchain data sources for payment and wallet applications: Bitcoin UTXOs and fees, multi-chain RPC, Cardano queries, XRP Ledger services and exchange prices. Every provider carries its official documentation, supported chains, endpoints and access limits. Public access is shared and rate-limited; the directory is not a transaction relay.',
+  },
+  {
     slug: 'crypto',
     name: 'Crypto',
     description:
@@ -1481,6 +1487,24 @@ export const DEFAULT_FEEDS = [
     slug: 'fx-rates',
     name: 'Euro FX reference rates',
     query: { kinds: ['fx-rate'] },
+  },
+  {
+    collection: 'blockchain',
+    slug: 'blockchain',
+    name: 'Free blockchain data sources',
+    query: { kinds: ['api-provider'] },
+  },
+  {
+    collection: 'blockchain',
+    slug: 'blockchain-bitcoin',
+    name: 'Free Bitcoin data sources',
+    query: { kinds: ['api-provider'], tags: ['chain:btc'] },
+  },
+  {
+    collection: 'blockchain',
+    slug: 'blockchain-rpc',
+    name: 'Free blockchain RPC services',
+    query: { kinds: ['api-provider'], tags: ['feature:rpc'] },
   },
   {
     collection: 'crypto',

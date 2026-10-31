@@ -22,6 +22,7 @@ import { awesomeMcp } from './awesomemcp.js';
 import { bensbargains } from './bensbargains.js';
 import { bittorrentedDht } from './bittorrented.js';
 import { bl0ggers } from './bl0ggers.js';
+import { blockchainProviders } from './blockchain.js';
 import { blsSeries } from './bls.js';
 import { brisk } from './brisk.js';
 import { builtindie } from './builtindie.js';
@@ -222,6 +223,7 @@ export const ADAPTERS = [
   secFundamentals,
   coingeckoAssets,
   cryptoPairs,
+  blockchainProviders,
   nasdaqHalts,
   ecbFxRates,
   socrataCrime,
