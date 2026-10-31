@@ -25,7 +25,19 @@ const faviconFor = (user) => {
  * fetched (refreshed in the background, cached an hour by the package): Layout
  * is a sync component, and the x402 gateway's crawl page renders it without await.
  */
-const FOOTER = { site: 'https://nichedb.dev/', links: [] };
+const FOOTER = {
+  site: 'https://nichedb.dev/',
+  links: [
+    { label: 'About', href: '/about' },
+    { label: 'API', href: '/docs/api' },
+    { label: 'CLI', href: '/docs/cli' },
+    { label: 'MCP', href: '/docs/mcp' },
+    { label: 'Premium', href: '/premium' },
+    { label: 'Status', href: '/crawlstatus' },
+    { label: 'Code', href: 'https://github.com/profullstack/niche-db' },
+  ],
+  tagline: "Times are shown in your device's time zone.",
+};
 let footerTemplate = bundledTemplate;
 const refreshFooterTemplate = () =>
   latestTemplate().then(
@@ -211,16 +223,7 @@ export const Layout = (props) => (
         {props.children}
       </main>
 
-      <footer>
-        <p>
-          <a href="/about">About</a> · <a href="/docs/api">API</a> · <a href="/docs/cli">CLI</a> ·{' '}
-          <a href="/docs/mcp">MCP</a> · <a href="/premium">Premium</a> ·{' '}
-          <a href="/crawlstatus">Status</a> ·{' '}
-          <a href="https://github.com/profullstack/niche-db">Code</a>. Times are in{' '}
-          <span data-tz-label>your device's</span> time zone.
-        </p>
-      </footer>
-      {/* The bottom bar: @profullstack/footer (copyright, the webring). */}
+      {/* Links and site details are part of the shared Profullstack footer. */}
       <ProfullstackFooter />
 
       <script src={assetUrl('vendor-webauthn.js')} defer />
