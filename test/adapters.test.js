@@ -64,6 +64,7 @@ describe('registry', () => {
         'research',
         'markets',
         'crypto',
+        'blockchain',
         'crime',
         'public-money',
         'weather',

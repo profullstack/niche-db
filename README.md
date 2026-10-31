@@ -35,6 +35,7 @@ Adapters are one file each in `packages/adapters/src`. One hundred and sixty-one
 | automotive | `fueleconomy-catalog`, `nhtsa-recalls`, `nhtsa-complaints`, `nhtsa-safety-ratings` | no |
 | markets | `iso-mic-exchanges`, `alpaca-corporate-actions`, `alpaca-news`, `alpaca-assets`, `equity-history`, `nasdaq-halts`, `ecb-fx-rates`, `sec-fundamentals` | Alpaca (`APCA_API_KEY_ID`, `APCA_API_SECRET_KEY`, `APCA_FEED` iex or sip); SEC wants `CONTACT_EMAIL` in the user agent |
 | crypto | `coingecko-assets`, `crypto-pairs` | keyless (`COINGECKO_API_KEY` optional; `CRYPTO_PROXY_URL` for Binance.US from a datacenter) |
+| blockchain | `blockchain-providers`: a reviewed directory of free public APIs, with chains, capabilities, endpoints, documentation and access limits; `/blockchain` and `/c/blockchain` | no; upstream limits and production suitability are recorded per provider |
 | crime | `socrata-crime`, `uk-police-crime`, `fbi-crime-estimates`, `police-updates` (39 California police feeds; [source coverage](docs/police-sources.md)) | FBI only (free api.data.gov key) |
 | public-money | `usaspending-awards`, `ocds-tenders`, `ted-notices` | no |
 | housing | `uk-land-registry`, `freddie-mac-rates`, `building-permits`, `ruuster` (agent saved searches) | no |
