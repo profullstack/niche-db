@@ -29,7 +29,7 @@
     "@profullstack/notifications": "^0.1.4",
     "@profullstack/openprofile": "^0.2.0",
     "@profullstack/partners": "0.2.0",
-    "@profullstack/profile": "0.1.6",
+    "@profullstack/profile": "0.1.7",
     "@profullstack/redeem-credits": "^0.2.0",
     "@profullstack/throttle": "^0.4.0",
     "@profullstack/webhooks": "0.2.1",
