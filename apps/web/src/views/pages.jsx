@@ -107,6 +107,18 @@ export const CollectionPage = ({
   >
     <h1>{collection.name}</h1>
     <p class="lede">{collection.description}</p>
+    {collection.slug === 'water' ? (
+      <p>
+        NOAA resources: <a href="https://water.noaa.gov/fim">Flood Inundation Mapping services</a> ·{' '}
+        <a href="https://water.noaa.gov/about/FIMResourceInfo.html">
+          FIM guides and technical resources
+        </a>{' '}
+        · <a href="https://api.water.noaa.gov/nwps/v1/docs/">NWPS gauge API</a>. Check each gauge’s
+        vertical datum before comparing levels. Gauge readings and mapped inundation are separate
+        products; neither assesses flood risk for an individual property, determines a FEMA flood
+        zone or establishes insurance eligibility.
+      </p>
+    ) : null}
     {collection.slug === 'crime' ? (
       <p>
         <a href="/c/crime/coverage">California police source coverage</a> ·{' '}
