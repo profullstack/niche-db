@@ -60,6 +60,11 @@ const SEVERITY = {
   major: 'in major flood',
 };
 
+const FIM_SERVICES_URL = 'https://water.noaa.gov/fim';
+const FIM_RESOURCES_URL = 'https://water.noaa.gov/about/FIMResourceInfo.html';
+const GAUGE_DETAIL_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+const DATUM_CODE = /\b(MHHW|MHW|MLHW|MSL|MLLW|MLW|MTL|NAVD\s?-?\d+|NGVD\s?-?\d+|STND)\b/i;
+
 /**
  * A stage reading, or null.
  *
@@ -114,7 +119,59 @@ function place(gauge) {
  * wrong should stay in the record next to the observation that contradicted it,
  * not be overwritten by it.
  */
-export function toItem(gauge, which) {
+function isTideStation(gauge) {
+  return /\b(?:tide|tidal) station\b/i.test(String(gauge?.name ?? ''));
+}
+
+function verticalDatum(gauge, reading, details) {
+  const datumValues = details?.datums?.vertical?.value;
+  const datumText = Array.isArray(datumValues)
+    ? datumValues
+        .map((value) => (typeof value === 'string' ? value : Object.values(value ?? {}).join(' ')))
+        .join(' ')
+    : '';
+  const candidates = [
+    reading?.primaryName,
+    details?.primaryName,
+    details?.stageflow?.observed?.primaryName,
+    details?.stageflow?.forecast?.primaryName,
+    datumText,
+    gauge?.name,
+  ];
+  for (const candidate of candidates) {
+    const match = String(candidate ?? '').match(DATUM_CODE);
+    if (match) return match[1].replace(/\s+/g, '').toUpperCase();
+  }
+  return null;
+}
+
+function readableGaugeName(name, datum, tideStation) {
+  const value = String(name ?? '').trim();
+  if (!datum || !tideStation) return value;
+  const match = value.match(/\s*\(in\s+([A-Z0-9 -]+)\)\s*$/i);
+  const namedDatum = match?.[1]?.replace(/[\s-]/g, '').toUpperCase();
+  return namedDatum === datum ? value.slice(0, match.index).trim() : value;
+}
+
+function publicGaugeDetails(details) {
+  if (!details || typeof details !== 'object') return null;
+  const flood = details.flood ?? {};
+  return {
+    flood: {
+      stageUnits: flood.stageUnits ?? null,
+      categories: flood.categories ?? null,
+      impacts: Array.isArray(flood.impacts) ? flood.impacts : [],
+    },
+    dataAttribution: Array.isArray(details.dataAttribution) ? details.dataAttribution : [],
+    hydronotes: Array.isArray(details.hydronotes) ? details.hydronotes : [],
+    impactsLowWaters: Array.isArray(details.impactsLowWaters) ? details.impactsLowWaters : [],
+    inundation: details.inundation ?? null,
+    datums: details.datums ?? null,
+    forecastReliability: details.forecastReliability ?? null,
+  };
+}
+
+export function toItem(gauge, which, details = null) {
   const reading = gauge.status?.[which];
   const cat = category(reading?.floodCategory);
   const level = stage(reading?.primary);
@@ -125,22 +182,74 @@ export function toItem(gauge, which) {
   if (!lid) return null;
   const when = new Date(at).toISOString();
   const unit = String(reading.primaryUnit ?? 'ft').trim();
-  const name = String(gauge.name ?? lid).trim();
+  const tideStation = isTideStation(gauge);
+  const datum = verticalDatum(gauge, reading, details);
+  const name = readableGaugeName(gauge.name ?? lid, datum, tideStation) || lid;
   const where = place(gauge);
   const observed = which === 'observed';
+  const floodThreshold = stage(details?.flood?.categories?.[cat]?.stage);
+  const floodThresholdUnit = String(details?.flood?.stageUnits ?? unit).trim();
+  const floodText = tideStation
+    ? observed
+      ? `${cat} flood category`
+      : `forecast ${cat} flood category`
+    : observed
+      ? SEVERITY[cat]
+      : `forecast ${SEVERITY[cat]}`;
+  const kind = tideStation
+    ? observed
+      ? 'coastal-gauge'
+      : 'coastal-forecast'
+    : observed
+      ? 'river-gauge'
+      : 'river-forecast';
+  const hydronotes = (details?.hydronotes ?? [])
+    .map((note) => String(note?.statement ?? '').trim())
+    .filter(Boolean);
+  const impacts = [...(details?.flood?.impacts ?? []), ...(details?.impactsLowWaters ?? [])]
+    .map((impact) => ({
+      stage: impact?.stage ?? impact?.value ?? null,
+      description: impact?.impact ?? null,
+    }))
+    .filter((impact) => impact.stage || impact.description);
+  const inundation = details?.inundation;
+  const inundationSummary =
+    inundation?.enabled === false
+      ? 'NOAA lists no inundation layer for this gauge.'
+      : inundation?.enabled === true
+        ? 'NOAA lists an inundation layer for this gauge.'
+        : null;
+  const attribution = (details?.dataAttribution ?? []).find(
+    (source) => source?.text && source?.url,
+  );
+  const thresholdSummary =
+    floodThreshold === null
+      ? null
+      : `NOAA's ${cat} threshold for this gauge is ${floodThreshold} ${floodThresholdUnit}${
+          datum ? ` (${datum})` : ''
+        }.`;
 
   return {
     externalId: `nwps-${observed ? 'obs' : 'fcst'}-${lid}-${when}`,
-    kind: observed ? 'river-gauge' : 'river-forecast',
-    title: `${name}${where.state ? `, ${where.state}` : ''}: ${
-      observed ? SEVERITY[cat] : `forecast ${SEVERITY[cat]}`
-    } at ${level} ${unit}`,
+    kind,
+    title: `${name}${where.state ? `, ${where.state}` : ''}: ${floodText} at ${level} ${unit}${
+      datum ? ` (${datum})` : ''
+    }`,
     summary: [
-      `${name}${where.state ? ` in ${where.stateName ?? where.state}` : ''}`,
-      observed
-        ? `was ${SEVERITY[cat]} at ${level} ${unit} on ${stamp(when)}.`
-        : `is forecast to be ${SEVERITY[cat]} at ${level} ${unit} at ${stamp(when)}.`,
+      tideStation
+        ? null
+        : `River gauge ${name}${where.state ? ` in ${where.stateName ?? where.state}` : ''}`,
+      tideStation
+        ? `${observed ? 'Observed' : 'Forecast'} water height: ${level} ${unit}${
+            datum ? ` (${datum})` : ''
+          }; the NWS flood category is ${cat}.`
+        : observed
+          ? `was ${SEVERITY[cat]} at ${level} ${unit}${datum ? ` (${datum})` : ''} on ${stamp(when)}.`
+          : `is forecast to be ${SEVERITY[cat]} at ${level} ${unit}${datum ? ` (${datum})` : ''} at ${stamp(when)}.`,
       where.forecastOffice ? `Forecast office ${where.forecastOffice}.` : null,
+      thresholdSummary,
+      inundationSummary,
+      hydronotes[0] ?? null,
     ]
       .filter(Boolean)
       .join(' '),
@@ -152,6 +261,8 @@ export function toItem(gauge, which) {
       'water',
       'flood',
       'us',
+      tideStation ? 'coastal' : 'river',
+      tideStation ? 'tide-station' : null,
       observed ? 'observed' : 'forecast',
       `flood:${cat}`,
       where.state ? where.state.toLowerCase() : null,
@@ -161,13 +272,55 @@ export function toItem(gauge, which) {
     data: {
       gaugeId: lid,
       gaugeName: name,
+      rawGaugeName: String(gauge.name ?? lid).trim(),
+      gaugeType: tideStation ? 'tide-station' : 'river-gauge',
       reading: observed ? 'observed' : 'forecast',
       floodCategory: cat,
       stage: level,
       stageUnit: unit,
+      verticalDatum: datum,
       secondary: stage(reading.secondary),
       secondaryUnit: String(reading.secondaryUnit ?? '').trim() || null,
       validTime: when,
+      floodStages: details?.flood?.categories ?? null,
+      floodStageUnit: details?.flood?.stageUnits ?? null,
+      floodThreshold,
+      floodThresholdUnit: floodThreshold === null ? null : floodThresholdUnit,
+      floodThresholdDatum: floodThreshold === null ? null : datum,
+      dataAttribution: (details?.dataAttribution ?? []).map((source) => ({
+        provider: source?.abbrev ?? null,
+        label: source?.text ?? null,
+        url: source?.url ?? null,
+      })),
+      ...(attribution
+        ? {
+            credit: {
+              name: attribution.abbrev ?? 'upstream provider',
+              text: attribution.text,
+              url: attribution.url,
+            },
+          }
+        : {}),
+      hydronotes,
+      impacts,
+      forecastReliability: details?.forecastReliability ?? null,
+      inundationMapping: {
+        station: inundation
+          ? {
+              enabled: inundation.enabled ?? null,
+              url: inundation.url || null,
+              zeroDatum: inundation.zeroDatum ?? null,
+              siteSpecificInfo: inundation.siteSpecificInfo || null,
+              downloads: inundation.downloads ?? null,
+              dataAttribution: inundation.dataAttribution ?? [],
+            }
+          : null,
+        servicesUrl: FIM_SERVICES_URL,
+        resourcesUrl: FIM_RESOURCES_URL,
+        coverageNote:
+          'The NOAA NWPS gauge-page notice says its Flood Inundation Mapping services now cover nearly 100% of the U.S. (9/24 update); per-station map availability still varies.',
+        note: 'Gauge stage and mapped inundation are different products; map availability varies by station. Neither assesses flood risk for an individual property, determines a FEMA flood zone, or establishes insurance eligibility.',
+      },
       place: where,
       categoryBasis: 'NWS flood categories for this gauge',
       source: 'NOAA National Water Prediction Service',
@@ -178,12 +331,12 @@ export function toItem(gauge, which) {
 
 export const nwpsRiverGauges = defineAdapter({
   name: 'nwps-river-gauges',
-  title: 'River gauges in flood',
+  title: 'NOAA river and tide gauges in flood',
   collection: 'water',
   description:
-    'Every NOAA-forecast river gauge at or above its action stage, observed and forecast, with the height in feet and the flood category the National Weather Service assigns it. The number behind a flood warning. Keyless.',
+    'NOAA river and tide gauges at or above their action stages, with the measured level, vertical datum, NWS flood thresholds, station notes and source attribution when published. Includes whether each gauge has a Flood Inundation Mapping layer and links to NOAA’s national FIM services and technical resources. Keyless.',
   docs: 'https://api.water.noaa.gov/nwps/v1/docs/',
-  kinds: ['river-gauge', 'river-forecast'],
+  kinds: ['river-gauge', 'river-forecast', 'coastal-gauge', 'coastal-forecast'],
   cadenceMinutes: 60,
   configFields: [
     {
@@ -208,7 +361,7 @@ export const nwpsRiverGauges = defineAdapter({
     name: `River gauges in flood: ${REGIONS[key].name}`,
     config: { region: key },
   })),
-  async pull({ config, cursor, http, log }) {
+  async pull({ config, cursor, http, log, budget, deadline }) {
     const bbox = boxFor(config);
     if (!bbox) throw new Error('nwps-river-gauges needs a region or a bounding box');
     const [xmin, ymin, xmax, ymax] = bbox;
@@ -222,10 +375,59 @@ export const nwpsRiverGauges = defineAdapter({
 
     const floor = category(config.minimumCategory);
     const atLeast = floor ? FLOOD_CATEGORIES.indexOf(floor) : 0;
-    const items = gauges
-      .flatMap((g) => [toItem(g, 'observed'), toItem(g, 'forecast')])
-      .filter(Boolean)
-      .filter((i) => FLOOD_CATEGORIES.indexOf(i.data.floodCategory) >= atLeast);
+    const candidates = gauges
+      .flatMap((gauge) =>
+        ['observed', 'forecast'].map((reading) => ({
+          gauge,
+          reading,
+          item: toItem(gauge, reading),
+        })),
+      )
+      .filter(({ item }) => item && FLOOD_CATEGORIES.indexOf(item.data.floodCategory) >= atLeast);
+
+    // The regional list is deliberately compact and leaves out datum,
+    // station notes, flood-impact thresholds and per-gauge FIM availability.
+    // Hydrate only gauges that are producing a flood-stage row, then cache the
+    // stable station metadata for a week so the hourly poll stays lightweight.
+    const detailCache = { ...(cursor.gaugeDetails ?? {}) };
+    const now = Date.now();
+    for (const [id, saved] of Object.entries(detailCache)) {
+      if (!saved?.fetchedAt || now - saved.fetchedAt > 30 * GAUGE_DETAIL_TTL_MS) {
+        delete detailCache[id];
+      }
+    }
+    const activeGaugeIds = [
+      ...new Set(candidates.map(({ gauge }) => String(gauge.lid ?? '').toUpperCase())),
+    ].filter(Boolean);
+    const staleIds = activeGaugeIds.filter((id) => {
+      const fetchedAt = detailCache[id]?.fetchedAt;
+      return !fetchedAt || now - fetchedAt > GAUGE_DETAIL_TTL_MS;
+    });
+    const detailBudget = Math.max(0, Number(budget) || 0);
+    const lookupIds = staleIds.slice(0, detailBudget);
+    for (let i = 0; i < lookupIds.length && Date.now() + 8_000 < deadline; i += 6) {
+      const batch = lookupIds.slice(i, i + 6);
+      await Promise.all(
+        batch.map(async (id) => {
+          try {
+            const detail = await http.jsonOrNull(
+              `https://api.water.noaa.gov/nwps/v1/gauges/${encodeURIComponent(id)}`,
+              { timeoutMs: 8_000 },
+            );
+            detailCache[id] = {
+              fetchedAt: Date.now(),
+              data: publicGaugeDetails(detail),
+            };
+          } catch (error) {
+            log(`could not load extra metadata for ${id}: ${error.message}`);
+          }
+        }),
+      );
+    }
+
+    const items = candidates.map(({ gauge, reading }) =>
+      toItem(gauge, reading, detailCache[String(gauge.lid ?? '').toUpperCase()]?.data),
+    );
 
     const newest =
       items
@@ -233,10 +435,12 @@ export const nwpsRiverGauges = defineAdapter({
         .filter(Boolean)
         .sort()
         .at(-1) ?? cursor.since;
-    log(`${items.length} gauge reading(s) at or above action stage, of ${gauges.length} gauges`);
+    log(
+      `${items.length} gauge reading(s) at or above action stage, of ${gauges.length} gauges; ${lookupIds.length} detail lookup(s) attempted`,
+    );
     return {
       items,
-      cursor: { since: newest ?? null },
+      cursor: { since: newest ?? null, gaugeDetails: detailCache },
       note: `${items.length} of ${gauges.length} gauges`,
     };
   },
