@@ -837,11 +837,18 @@ export const Settings = ({
         <code>{user.email}</code>. Also at <code>/api/v1/me/profile</code>.
       </p>
       <form method="post" action="/api/settings/contact" class="stack">
-        {raw(renderProfileFields({ fields: PROFILE_FIELDS, values: contact ?? {} }))}
+        {raw(
+          renderProfileFields({
+            fields: PROFILE_FIELDS,
+            values: contact ?? {},
+            importOpenProfile: true,
+          }),
+        )}
         <button type="submit" class="ghost">
           Save contact details
         </button>
       </form>
+      <script src="/vendor-profile.js" defer />
     </section>
 
     {coinpayEnabled() ? (

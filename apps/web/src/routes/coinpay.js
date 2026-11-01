@@ -1,3 +1,4 @@
+import { saveOpenProfileContact } from '@profullstack/profile';
 import { getCookie, setCookie } from 'hono/cookie';
 import {
   beginSignIn,
@@ -119,7 +120,21 @@ export function registerCoinpay(app, overrides = null) {
       if (!user || c.get('viaKey') || String(user.id) !== String(pending.userId))
         return c.redirect(back('/login', 'Sign in first, then connect CoinPay.'), 303);
       const r = await store.link(user.id, { sub: who.sub, email: who.email });
-      if (r.ok) return c.redirect(back('/settings', 'CoinPay connected.', 'notice'), 303);
+      if (r.ok) {
+        const openprofileUrl = who.userinfo?.openprofile_url;
+        if (typeof openprofileUrl === 'string') {
+          try {
+            const { profiles } = await import('../lib/profile.js');
+            await saveOpenProfileContact(profiles, String(user.id), openprofileUrl);
+          } catch (err) {
+            console.warn(
+              '[coinpay] OpenProfile import skipped:',
+              err instanceof Error ? err.message : err,
+            );
+          }
+        }
+        return c.redirect(back('/settings', 'CoinPay connected.', 'notice'), 303);
+      }
       const why =
         r.reason === 'taken'
           ? 'That CoinPay account is already linked to another nichedb account.'
