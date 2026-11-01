@@ -1,5 +1,5 @@
-import { getCookie, setCookie } from 'hono/cookie';
 import { saveOpenProfileContact } from '@profullstack/profile';
+import { getCookie, setCookie } from 'hono/cookie';
 import {
   beginSignIn,
   coinpayConfig,
@@ -127,7 +127,10 @@ export function registerCoinpay(app, overrides = null) {
             const { profiles } = await import('../lib/profile.js');
             await saveOpenProfileContact(profiles, String(user.id), openprofileUrl);
           } catch (err) {
-            console.warn('[coinpay] OpenProfile import skipped:', err instanceof Error ? err.message : err);
+            console.warn(
+              '[coinpay] OpenProfile import skipped:',
+              err instanceof Error ? err.message : err,
+            );
           }
         }
         return c.redirect(back('/settings', 'CoinPay connected.', 'notice'), 303);
