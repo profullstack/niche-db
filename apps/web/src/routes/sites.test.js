@@ -25,7 +25,10 @@ const RECORD = {
   status: 'live',
   source: 'read',
   cards: {
-    og: { title: 'Inspiring <b>Founders</b>', image: 'https://cdn.example/a.jpg' },
+    og: {
+      title: 'Inspiring <b>Founders</b>',
+      image: 'https://cdn.example/a.jpg',
+    },
     twitter: { card: 'summary' },
   },
   jsonld: [],
@@ -56,6 +59,7 @@ const store = {
     return slug === 'sites' ? { id: 1, slug } : null;
   },
   async getSource(slug) {
+    if (slug === 'pit-crawler') return { id: 3, slug };
     return slug === 'sites-pasted' ? { id: 2, slug } : null;
   },
   async itemByUrls({ urls }) {
@@ -99,7 +103,14 @@ const { registerSites } = await import('./sites.js');
 const { Denied } = await import('../lib/service.js');
 const { withModules, decideModules } = await import('../lib/modules.js');
 
-function app(user = { id: 'u-reader', email: 'r@example.com', role: 'user', timezone: 'UTC' }) {
+function app(
+  user = {
+    id: 'u-reader',
+    email: 'r@example.com',
+    role: 'user',
+    timezone: 'UTC',
+  },
+) {
   const a = new Hono();
   a.use('*', async (c, next) => {
     // A signed-in reader, so pages render directly rather than through the page cache.
@@ -191,7 +202,12 @@ describe('the api', () => {
 });
 
 describe('a whole list', () => {
-  const admin = { id: 'u-admin', email: 'a@example.com', role: 'admin', timezone: 'UTC' };
+  const admin = {
+    id: 'u-admin',
+    email: 'a@example.com',
+    role: 'admin',
+    timezone: 'UTC',
+  };
 
   test('a pasted list becomes a source of the submitter, asked to run now, and the page says so', async () => {
     const before = store.sources.length;
@@ -221,9 +237,14 @@ describe('a whole list', () => {
     const form = new FormData();
     form.set(
       'file',
-      new File(['https://c.example/\nhttps://d.example/x\n'], 'list.txt', { type: 'text/plain' }),
+      new File(['https://c.example/\nhttps://d.example/x\n'], 'list.txt', {
+        type: 'text/plain',
+      }),
     );
-    const r = await app(admin).request('/c/sites/add', { method: 'POST', body: form });
+    const r = await app(admin).request('/c/sites/add', {
+      method: 'POST',
+      body: form,
+    });
     expect(r.status).toBe(303);
     expect(store.sources.at(-1).config.urls).toEqual(['https://c.example/', 'https://d.example/x']);
   });
@@ -265,5 +286,77 @@ describe('a whole list', () => {
     });
     expect(text.status).toBe(202);
     expect((await text.json()).queued).toBe(2);
+  });
+});
+
+describe('records a crawler pushes', () => {
+  const admin = {
+    id: 'u-admin',
+    email: 'a@example.com',
+    role: 'admin',
+    timezone: 'UTC',
+  };
+  const push = (user, body) =>
+    app(user).request('/api/v1/sites/records', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+  const entry = {
+    record: {
+      opensite: '0.1',
+      url: 'https://crawled.example/a',
+      canonical: 'https://crawled.example/a',
+      kind: 'article',
+      title: 'Wood-fired pizza at home',
+      status: 'live',
+      fetched_at: '2026-11-02T00:00:00.000Z',
+    },
+    enrichment: {
+      language: 'EN',
+      keywords: ['Pizza', 'oven'],
+      excerpt: 'How to build a small oven.',
+      words: 812,
+      rendered: true,
+      hash: 'abc123',
+      crawler: 'pitbot/0.1',
+    },
+  };
+
+  test('only an admin key may push', async () => {
+    expect((await push(null, { records: [entry] })).status).toBe(401);
+    const reader = {
+      id: 'u-r',
+      email: 'r@example.com',
+      role: 'user',
+      timezone: 'UTC',
+    };
+    expect((await push(reader, { records: [entry] })).status).toBe(403);
+  });
+
+  test('a batch is validated record by record and lands in the crawler source', async () => {
+    store.upserts.length = 0;
+    const r = await push(admin, {
+      records: [entry, { record: { canonical: 'http://localhost/x', title: 'x' } }],
+    });
+    expect(r.status).toBe(200);
+    const body = await r.json();
+    expect(body.accepted).toBe(1);
+    expect(body.rejected).toEqual([{ index: 1, error: 'canonical is not a public web address' }]);
+    const [row] = store.upserts;
+    expect(row.url).toBe('https://crawled.example/a');
+    expect(row.summary).toBe('How to build a small oven.');
+    expect(row.tags).toContain('topic:pizza');
+    expect(row.tags).toContain('lang:en');
+    expect(row.tags).toContain('site:crawled.example');
+    expect(row.tags).toContain('rendered');
+    expect(row.contentHash).toBe('crawl:abc123');
+    expect(row.data.enrichment.words).toBe(812);
+  });
+
+  test('an empty or oversized batch is refused whole', async () => {
+    expect((await push(admin, { records: [] })).status).toBe(400);
+    const many = Array.from({ length: 201 }, () => entry);
+    expect((await push(admin, { records: many })).status).toBe(413);
   });
 });

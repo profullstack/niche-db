@@ -3,6 +3,7 @@ import { cached, render, respond } from '../lib/http.js';
 import { Denied } from '../lib/service.js';
 import {
   findByPath,
+  keepCrawled,
   listForHost,
   pathOf,
   readAndKeep,
@@ -68,7 +69,11 @@ export function registerSites(app) {
     if (pasted !== '' || file) {
       const text = `${pasted}\n${file ? await file.text() : ''}`;
       try {
-        const out = await submitBulk({ user: c.get('user'), text, name: String(body.name ?? '') });
+        const out = await submitBulk({
+          user: c.get('user'),
+          text,
+          name: String(body.name ?? ''),
+        });
         const notice = `${out.queued} addresses queued${out.rejected.length ? `, ${out.rejected.length} could not be read` : ''}${out.dropped ? `, ${out.dropped} over the cap of ten thousand left out` : ''}. The worker reads them a few hundred a minute; this page shows how far it has got.`;
         return c.redirect(`${out.page}?notice=${encodeURIComponent(notice)}`, 303);
       } catch (err) {
@@ -150,6 +155,24 @@ export function registerSites(app) {
     }
   });
 
+  /**
+   * Records a crawler already read (pit.world's spider), in batches. Admin
+   * API key only; see keepCrawled for what is checked.
+   */
+  app.post('/api/v1/sites/records', async (c) => {
+    const body = await c.req.json().catch(() => null);
+    try {
+      const out = await keepCrawled({
+        user: c.get('user'),
+        records: body?.records,
+      });
+      return c.json(out, 200);
+    } catch (err) {
+      if (!(err instanceof Denied)) throw err;
+      return c.json({ error: err.message }, err.status);
+    }
+  });
+
   app.get('/api/v1/sites', async (c) => {
     const url = (c.req.query('url') ?? '').trim();
     if (url === '') return c.json({ error: 'say which address: ?url=' }, 400);
@@ -186,7 +209,11 @@ export function registerSites(app) {
       );
     } catch (err) {
       if (!(err instanceof Denied)) throw err;
-      return respond(c, { error: err.message, status: err.status, redirectTo: '/c/sites/add' });
+      return respond(c, {
+        error: err.message,
+        status: err.status,
+        redirectTo: '/c/sites/add',
+      });
     }
   });
 
