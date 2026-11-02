@@ -172,10 +172,16 @@ export function storableDeep(value) {
   return value;
 }
 
-function toDate(v) {
+/**
+ * A date Postgres can read back: years 1 to 9999. A page claiming year 10555
+ * serialises as "+010555-01-01T…", which Postgres rejects ("time zone
+ * displacement out of range") and which fails the whole upsert it rides in.
+ */
+export function toDate(v) {
   if (!v) return null;
   const d = v instanceof Date ? v : new Date(v);
-  return Number.isNaN(d.getTime()) ? null : d;
+  const y = d.getUTCFullYear();
+  return Number.isNaN(d.getTime()) || y < 1 || y > 9999 ? null : d;
 }
 
 /**

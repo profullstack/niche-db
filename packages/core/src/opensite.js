@@ -265,7 +265,8 @@ function ldAuthor(jsonld) {
 
 const iso = (s) => {
   const d = new Date(String(s ?? ''));
-  return Number.isNaN(d.getTime()) ? null : d.toISOString();
+  const y = d.getUTCFullYear();
+  return Number.isNaN(d.getTime()) || y < 1 || y > 9999 ? null : d.toISOString();
 };
 
 /** The largest icon a page links, for a card with nothing better. */
