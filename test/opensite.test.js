@@ -90,7 +90,11 @@ describe('parsing the head', () => {
 describe('a record from a page', () => {
   const url =
     'https://nixamp.com/?url=https%3A%2F%2Fserver1.example%3A4321%2Fview%2FK&play=channel%3Aurl-6f4152c1590e';
-  const record = readRecord({ url, html: PAGE, fetchedAt: new Date('2026-09-13T04:52:10Z') });
+  const record = readRecord({
+    url,
+    html: PAGE,
+    fetchedAt: new Date('2026-09-13T04:52:10Z'),
+  });
 
   test('every required key, first answer wins, pictures absolute, tags kept verbatim', () => {
     expect(record.opensite).toBe('0.1');
@@ -131,7 +135,10 @@ describe('a record from a page', () => {
       url: 'https://a.example/x',
       html: '<html><head><meta property="og:image" content="javascript:alert(1)"><link rel="icon" sizes="32x32" href="/i32.png"><link rel="apple-touch-icon" href="/touch.png"></head></html>',
     });
-    expect(bad.image).toEqual({ url: 'https://a.example/touch.png', icon: true });
+    expect(bad.image).toEqual({
+      url: 'https://a.example/touch.png',
+      icon: true,
+    });
     const none = readRecord({
       url: 'https://a.example/x',
       html: '<html><head><title>t</title></head></html>',
@@ -148,9 +155,16 @@ describe('a record from a page', () => {
     });
     expect(moved.status).toBe('moved');
     expect(moved.canonical).toBe('https://new.example/p');
-    const gone = readRecord({ url: 'https://a.example/p', status: 410, html: '' });
+    const gone = readRecord({
+      url: 'https://a.example/p',
+      status: 410,
+      html: '',
+    });
     expect(gone.status).toBe('gone');
-    const mp3 = readRecord({ url: 'https://a.example/ep.mp3', contentType: 'audio/mpeg' });
+    const mp3 = readRecord({
+      url: 'https://a.example/ep.mp3',
+      contentType: 'audio/mpeg',
+    });
     expect(mp3.kind).toBe('audio');
     expect(mp3.title).toBe('ep.mp3');
     const feed = readRecord({
@@ -167,7 +181,10 @@ describe('a record from a page', () => {
       url: 'https://a.example/post',
       html: '<html><head><meta property="article:author" content="Ada"><link rel="me" href="/~ada/OpenProfile.md"></head></html>',
     });
-    expect(r.author).toEqual({ name: 'Ada', profile: 'https://a.example/~ada/OpenProfile.md' });
+    expect(r.author).toEqual({
+      name: 'Ada',
+      profile: 'https://a.example/~ada/OpenProfile.md',
+    });
     const ld = readRecord({
       url: 'https://a.example/post',
       html: '<html><head><script type="application/ld+json">{"@type":"Article","headline":"H","author":{"@type":"Person","name":"Bob","url":"https://bob.example"}}</script></head></html>',
@@ -259,7 +276,11 @@ describe('refusing politely', () => {
         body: '<html><head><title>P</title><meta property="og:image" content="/p.jpg"></head></html>',
         type: 'text/html',
       },
-      'https://closed.example/robots.txt': { body: '', type: 'text/plain', status: 404 },
+      'https://closed.example/robots.txt': {
+        body: '',
+        type: 'text/plain',
+        status: 404,
+      },
       'https://closed.example/.well-known/opensite.json': {
         body: JSON.stringify({
           opensite: '0.1',
@@ -332,9 +353,13 @@ describe('the adapter', () => {
     expect(COLLECTIONS.some((c) => c.slug === 'sites')).toBe(true);
     const pasted = a.defaultSources.find((s) => s.slug === 'sites-pasted');
     expect(pasted.enabled).toBe(false);
+    // The crawler pushes into its own source; it has nothing to pull.
+    expect(a.defaultSources.find((s) => s.slug === 'pit-crawler').enabled).toBe(false);
     for (const s of a.defaultSources) {
       for (const k of Object.keys(s.config)) expect(a.configFields.map((f) => f.key)).toContain(k);
-      expect(s.slug.endsWith('-pages') || s.slug === 'sites-pasted').toBe(true);
+      expect(s.slug.endsWith('-pages') || ['sites-pasted', 'pit-crawler'].includes(s.slug)).toBe(
+        true,
+      );
     }
     const all = ADAPTERS.flatMap((x) => (x.defaultSources ?? []).map((s) => s.slug));
     expect(new Set(all).size).toBe(all.length);
@@ -431,7 +456,9 @@ describe('a list of addresses', () => {
         return new Response('');
       },
     };
-    const r = await readUrl('http://169.254.169.254/latest/meta-data', { http });
+    const r = await readUrl('http://169.254.169.254/latest/meta-data', {
+      http,
+    });
     expect(r.status).toBe('blocked');
     expect(asked).toEqual([]);
   });

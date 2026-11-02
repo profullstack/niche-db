@@ -95,11 +95,23 @@ export const opensite = defineAdapter({
       config: { urls: [], sitemaps: [], pages: 0 },
       enabled: false,
     },
+    {
+      slug: 'pit-crawler',
+      name: 'Crawled by pit.world',
+      description:
+        'Pages the pit.world crawler read (up to a thousand per site, JavaScript pages rendered through Obscura) and pushed here with POST /api/v1/sites/records. Nothing to pull: the crawler writes here.',
+      config: { urls: [], sitemaps: [], pages: 0 },
+      enabled: false,
+    },
     ...HOUSE.map(([slug, origin, description]) => ({
       slug: `${slug}-pages`,
       name: `${origin.replace('https://', '')}: its pages`,
       description,
-      config: { urls: [`${origin}/`], sitemaps: [`${origin}/sitemap.xml`], pages: DEFAULT_PAGES },
+      config: {
+        urls: [`${origin}/`],
+        sitemaps: [`${origin}/sitemap.xml`],
+        pages: DEFAULT_PAGES,
+      },
       enabled: true,
     })),
   ],
