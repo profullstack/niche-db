@@ -320,6 +320,19 @@ describe('records a crawler pushes', () => {
       rendered: true,
       hash: 'abc123',
       crawler: 'pitbot/0.1',
+      images: [
+        { url: 'https://crawled.example/dome.jpg', alt: 'Brick dome', width: 800, height: -1 },
+        { url: 'http://127.0.0.1/secret.png', alt: 'private' },
+        'not an object',
+      ],
+      videos: [
+        {
+          url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+          title: 'Firing it',
+          thumbnail: 'https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg',
+          provider: 'youtube',
+        },
+      ],
     },
   };
 
@@ -352,6 +365,17 @@ describe('records a crawler pushes', () => {
     expect(row.tags).toContain('rendered');
     expect(row.contentHash).toBe('crawl:abc123');
     expect(row.data.enrichment.words).toBe(812);
+    expect(row.data.enrichment.images).toEqual([
+      { url: 'https://crawled.example/dome.jpg', alt: 'Brick dome', width: 800, height: null },
+    ]);
+    expect(row.data.enrichment.videos).toEqual([
+      {
+        url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+        title: 'Firing it',
+        thumbnail: 'https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg',
+        provider: 'youtube',
+      },
+    ]);
   });
 
   test('an empty or oversized batch is refused whole', async () => {

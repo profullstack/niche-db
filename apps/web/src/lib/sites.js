@@ -179,6 +179,15 @@ const words = (list, max, len = 40) =>
     .filter(Boolean)
     .slice(0, max);
 
+const positive = (v) => (Number.isInteger(v) && v > 0 && v < 100_000 ? v : null);
+/** A list of media references, each with a public address, at most `max`. */
+const mediaRefs = (list, max, shape) =>
+  (Array.isArray(list) ? list : [])
+    .filter((m) => m && typeof m === 'object')
+    .map(shape)
+    .filter((m) => m.url)
+    .slice(0, max);
+
 /**
  * One pushed record as the row it becomes, or the reason it is refused.
  *
@@ -225,6 +234,19 @@ export function crawledItem(entry, { now = new Date() } = {}) {
     rendered: enrichment.rendered === true,
     depth: Number.isFinite(enrichment.depth) ? enrichment.depth : null,
     crawler: clip(enrichment.crawler, 80) || null,
+    // What the page shows, by reference (the crawler never stores the files).
+    images: mediaRefs(enrichment.images, 20, (m) => ({
+      url: publicWebUrl(m.url),
+      alt: clip(m.alt, 300),
+      width: positive(m.width),
+      height: positive(m.height),
+    })),
+    videos: mediaRefs(enrichment.videos, 10, (m) => ({
+      url: publicWebUrl(m.url),
+      title: clip(m.title, 300),
+      thumbnail: m.thumbnail ? publicWebUrl(m.thumbnail) : null,
+      provider: clip(m.provider, 40) || null,
+    })),
   };
   const row = normaliseItem({
     ...item,
