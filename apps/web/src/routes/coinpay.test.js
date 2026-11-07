@@ -42,7 +42,7 @@ const addUser = async (email) =>
 
 const b64 = (o) => Buffer.from(JSON.stringify(o)).toString('base64url');
 const fakeCoinpay =
-  ({ sub, email, nonce }) =>
+  ({ sub, email, nonce, pass }) =>
   async (url) => {
     const u = String(url);
     if (u.endsWith('/api/oauth/token'))
@@ -53,7 +53,7 @@ const fakeCoinpay =
         id_token: `${b64({ alg: 'HS256' })}.${b64({ iss: 'https://coinpayportal.com', aud: 'cp_test_client', sub, nonce, exp: Math.floor(Date.now() / 1000) + 600 })}.sig`,
       });
     if (u.endsWith('/api/oauth/userinfo'))
-      return Response.json({ sub, email, email_verified: false });
+      return Response.json({ sub, email, email_verified: false, ...(pass ? { pass } : {}) });
     return new Response('{}', { status: 404 });
   };
 
@@ -144,6 +144,56 @@ describe('Sign in with CoinPay', () => {
     // the same sub signs into the same account next time, whatever email it sends
     const again = await store.signIn({ sub: 'attacker-sub', email: 'other@example.com' });
     expect(again).toEqual({ userId: sessions[0], created: false });
+  });
+
+  test('an active Profullstack Pass makes the account Pro until it expires, once', async () => {
+    const expires = new Date(Date.now() + 20 * 86_400_000).toISOString();
+    const signIn = async (pass) => {
+      const coinpay = {};
+      const { app, sessions } = appWith({ coinpay });
+      const { loc, cookie } = await start(app);
+      coinpay.fetch = fakeCoinpay({
+        sub: 'pass-sub',
+        email: 'pass@example.com',
+        nonce: loc.searchParams.get('nonce'),
+        pass,
+      });
+      await app.request(
+        `/api/v1/coinpay/oauth/callback?code=c&state=${loc.searchParams.get('state')}`,
+        { headers: { cookie } },
+      );
+      return sessions[0];
+    };
+    const userId = await signIn({ active: true, expires_at: expires });
+    await signIn({ active: true, expires_at: expires });
+    const rows = await run(
+      'select plan, price_cents, expires_at, grant_ref from memberships where user_id = $1',
+      [userId],
+    );
+    expect(rows.length).toBe(1);
+    expect(rows[0].plan).toBe('pro');
+    expect(rows[0].price_cents).toBe(0);
+    expect(new Date(rows[0].expires_at).toISOString()).toBe(expires);
+    expect(rows[0].grant_ref).toBe(`coinpay-pass:pass-sub:${expires}`);
+  });
+
+  test('an inactive or expired pass grants nothing', async () => {
+    for (const [sub, pass] of [
+      ['nopass-a', { active: false }],
+      ['nopass-b', { active: true, expires_at: new Date(Date.now() - 1000).toISOString() }],
+      ['nopass-c', { active: true }],
+    ]) {
+      const coinpay = {};
+      const { app, sessions } = appWith({ coinpay });
+      const { loc, cookie } = await start(app);
+      coinpay.fetch = fakeCoinpay({ sub, email: null, nonce: loc.searchParams.get('nonce'), pass });
+      await app.request(
+        `/api/v1/coinpay/oauth/callback?code=c&state=${loc.searchParams.get('state')}`,
+        { headers: { cookie } },
+      );
+      const rows = await run('select 1 from memberships where user_id = $1', [sessions[0]]);
+      expect(rows.length).toBe(0);
+    }
   });
 
   test('a forged state is refused and nothing is created', async () => {

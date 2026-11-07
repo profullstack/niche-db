@@ -1,3 +1,4 @@
+import { grantCoinpayPass } from '@nichedb/payments/coinpay-pass';
 import { saveOpenProfileContact } from '@profullstack/profile';
 import { getCookie, setCookie } from 'hono/cookie';
 import {
@@ -114,6 +115,15 @@ export function registerCoinpay(app, overrides = null) {
       return c.text('CoinPay sign-in could not be verified.', 400);
     }
     const store = identityStore(d.run);
+    // Profullstack Pass: the claim is only seen here, so an active pass becomes
+    // a free Pro term until it expires (once per pass, bound to the CoinPay sub).
+    const grantPass = async (userId) => {
+      try {
+        await grantCoinpayPass(d.run, { userId: String(userId), sub: who.sub, pass: who.pass });
+      } catch (err) {
+        console.error('[coinpay] pass grant failed:', err instanceof Error ? err.message : err);
+      }
+    };
 
     if (pending.mode === 'connect') {
       const user = c.get('user');
@@ -121,6 +131,7 @@ export function registerCoinpay(app, overrides = null) {
         return c.redirect(back('/login', 'Sign in first, then connect CoinPay.'), 303);
       const r = await store.link(user.id, { sub: who.sub, email: who.email });
       if (r.ok) {
+        await grantPass(user.id);
         const openprofileUrl = who.userinfo?.openprofile_url;
         if (typeof openprofileUrl === 'string') {
           try {
@@ -143,6 +154,7 @@ export function registerCoinpay(app, overrides = null) {
     }
 
     const { userId } = await store.signIn({ sub: who.sub, email: who.email, name: who.name });
+    await grantPass(userId);
     const sid = await d.startSession(userId, c.req.header('user-agent'));
     c.header('set-cookie', d.sessionCookie(sid), { append: true });
     return c.redirect(pending.next || '/following', 303);

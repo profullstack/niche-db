@@ -298,6 +298,11 @@ export const PremiumPage = ({
             The same Premium benefits in every term. Prices in {config.premium.currency}; paid
             upfront through CoinPay in any major coin or PayPal.
           </p>
+          <p class="muted">
+            Deposit $99 in your CoinPay wallet and get a free month:{' '}
+            <a href="https://coinpayportal.com/pass">CoinPay Pass</a>. Sign in with CoinPay to use
+            it.
+          </p>
           <form method="get" action="/premium#plans" class="row premium-promo">
             <input type="hidden" name="term" value={selectedTerm} />
             <label class="small" for="promo">
