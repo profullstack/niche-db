@@ -79,6 +79,7 @@ import { igdb } from './igdb.js';
 import { igdbCatalog } from './igdb-catalog.js';
 import { imdbRatings } from './imdb.js';
 import { installmapYcMcp, installmapYcPeople } from './installmap.js';
+import { pitCrawlerMcp } from './pit-crawler-mcp.js';
 import { kitsuAnime } from './kitsu-anime.js';
 import { landRegistrySales } from './landregistry.js';
 import { launchLibrary } from './launchlibrary.js';
@@ -289,6 +290,8 @@ export const ADAPTERS = [
   // Last: a third party's crawl of which YC companies run one. Where the
   // registry already carries the same endpoint, the registry's row stands.
   installmapYcMcp,
+  // What the crawler proved itself: only what the catalogs above do not carry.
+  pitCrawlerMcp,
   // Glama's directory is built from most of the above, so it goes after all of
   // them and adds only what none of them carry. Keyed and licensed: every row
   // it does add credits Glama and links to the Glama listing.

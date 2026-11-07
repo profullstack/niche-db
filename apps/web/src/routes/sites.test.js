@@ -56,10 +56,12 @@ const store = {
   // The array literal helper other modules import from the same file.
   pgArray: (values) => `{${(values ?? []).map((v) => JSON.stringify(String(v))).join(',')}}`,
   async getCollection(slug) {
+    if (slug === 'mcp') return { id: 9, slug };
     return slug === 'sites' ? { id: 1, slug } : null;
   },
   async getSource(slug) {
     if (slug === 'pit-crawler') return { id: 3, slug };
+    if (slug === 'pit-crawler-mcp') return { id: 4, slug };
     return slug === 'sites-pasted' ? { id: 2, slug } : null;
   },
   async itemByUrls({ urls }) {
@@ -381,6 +383,60 @@ describe('records a crawler pushes', () => {
   test('an empty or oversized batch is refused whole', async () => {
     expect((await push(admin, { records: [] })).status).toBe(400);
     const many = Array.from({ length: 201 }, () => entry);
+    expect((await push(admin, { records: many })).status).toBe(413);
+  });
+});
+
+describe('MCP servers a crawler pushes', () => {
+  const admin = { id: 'u-admin', email: 'a@example.com', role: 'admin', timezone: 'UTC' };
+  const push = (user, body) =>
+    app(user).request('/api/v1/mcp/records', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+  const server = {
+    mcp: 'https://mcp.example.com/mcp',
+    name: 'Example\n  tools',
+    serverName: 'example',
+    version: '1.2.3',
+    protocolVersion: '2025-06-18',
+    tools: [{ name: 'search', description: 'Find things' }, { description: 'no name' }],
+    auth: 'none',
+    foundOn: 'https://example.com/docs',
+    hash: 'h1',
+    seenAt: '2026-11-07T00:00:00.000Z',
+  };
+
+  test('only an admin key may push', async () => {
+    expect((await push(null, { records: [server] })).status).toBe(401);
+    const reader = { id: 'u-r', email: 'r@example.com', role: 'user', timezone: 'UTC' };
+    expect((await push(reader, { records: [server] })).status).toBe(403);
+  });
+
+  test('a proved server lands as an OpenMCP row; a private or plain http address does not', async () => {
+    store.upserts.length = 0;
+    const r = await push(admin, {
+      records: [server, { mcp: 'http://example.com/mcp' }, { mcp: 'https://127.0.0.1/mcp' }],
+    });
+    expect(r.status).toBe(200);
+    const body = await r.json();
+    expect(body.accepted).toBe(1);
+    expect(body.rejected.map((x) => x.index)).toEqual([1, 2]);
+    const [row] = store.upserts;
+    expect(row.externalId).toBe('pit-crawler:mcp.example.com');
+    expect(row.kind).toBe('mcp-server');
+    expect(row.title).toBe('Example tools');
+    expect(row.url).toBe('https://mcp.example.com/mcp');
+    expect(row.contentHash).toBe('crawl:h1');
+    expect(row.data.openmcp.online).toBe(true);
+    expect(row.data.openmcp.verified).toBe(false);
+    expect(row.data.openmcp.tools).toEqual([{ name: 'search', description: 'Find things' }]);
+  });
+
+  test('an empty or oversized batch is refused whole', async () => {
+    expect((await push(admin, { records: [] })).status).toBe(400);
+    const many = Array.from({ length: 201 }, () => server);
     expect((await push(admin, { records: many })).status).toBe(413);
   });
 });

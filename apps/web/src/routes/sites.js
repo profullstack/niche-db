@@ -1,4 +1,5 @@
 import { config } from '@nichedb/config';
+import { keepCrawledMcp } from '../lib/crawled-mcp.js';
 import { cached, render, respond } from '../lib/http.js';
 import { Denied } from '../lib/service.js';
 import {
@@ -167,6 +168,17 @@ export function registerSites(app) {
         records: body?.records,
       });
       return c.json(out, 200);
+    } catch (err) {
+      if (!(err instanceof Denied)) throw err;
+      return c.json({ error: err.message }, err.status);
+    }
+  });
+
+  /** MCP servers a crawler proved with a live handshake. Admin API key only. */
+  app.post('/api/v1/mcp/records', async (c) => {
+    const body = await c.req.json().catch(() => null);
+    try {
+      return c.json(await keepCrawledMcp({ user: c.get('user'), records: body?.records }), 200);
     } catch (err) {
       if (!(err instanceof Denied)) throw err;
       return c.json({ error: err.message }, err.status);
