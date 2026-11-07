@@ -128,6 +128,7 @@ import { outreachgraph } from './outreachgraph.js';
 import { ovhVps } from './ovh.js';
 import { p0dcasters } from './p0dcasters.js';
 import { buildingPermits } from './permits.js';
+import { pitCrawlerMcp } from './pit-crawler-mcp.js';
 import { pluginMarketplaces } from './pluginmarketplaces.js';
 import { podcastindexCatalog } from './podcastindex-catalog.js';
 import { podcasts } from './podcasts.js';
@@ -289,6 +290,8 @@ export const ADAPTERS = [
   // Last: a third party's crawl of which YC companies run one. Where the
   // registry already carries the same endpoint, the registry's row stands.
   installmapYcMcp,
+  // What the crawler proved itself: only what the catalogs above do not carry.
+  pitCrawlerMcp,
   // Glama's directory is built from most of the above, so it goes after all of
   // them and adds only what none of them carry. Keyed and licensed: every row
   // it does add credits Glama and links to the Glama listing.
