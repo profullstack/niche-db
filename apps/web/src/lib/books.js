@@ -362,9 +362,65 @@ const editionCache = new Map();
 const EDITION_TTL_MS = 24 * 3600 * 1000;
 
 /**
- * One edition from Open Library, by ISBN: title, authors, publisher, pages,
- * cover and the work it belongs to. Keyless and CC0. Null when Open Library
- * has never heard of it, which still leaves every seller's ISBN link working.
+ * One edition from Google Books. Null when Google has no such book, undefined
+ * when it did not answer. GOOGLE_BOOKS_API_KEY lifts the shared keyless quota.
+ */
+async function googleBooksEdition(isbn13, get) {
+  const key = process.env.GOOGLE_BOOKS_API_KEY;
+  const url = `https://www.googleapis.com/books/v1/volumes?q=isbn:${isbn13}${key ? `&key=${encodeURIComponent(key)}` : ''}`;
+  const json = await get(url).catch(() => null);
+  if (!json) return undefined;
+  const v = json.items?.[0]?.volumeInfo;
+  if (!v?.title) return null;
+  const cover = v.imageLinks?.thumbnail ?? v.imageLinks?.smallThumbnail ?? null;
+  return {
+    title: v.title,
+    subtitle: v.subtitle ?? null,
+    authors: Array.isArray(v.authors) ? v.authors : [],
+    publishers: v.publisher ? [v.publisher] : [],
+    publishDate: v.publishedDate ?? null,
+    pages: v.pageCount || null,
+    cover: cover ? cover.replace(/^http:/, 'https:') : null,
+    subjects: (v.categories ?? []).slice(0, 10),
+    openLibrary: null,
+    googleBooks: v.infoLink ?? null,
+    editionKey: null,
+    workKey: null,
+  };
+}
+
+/** Registration groups, longest prefix first. Not exhaustive: an unknown group simply says nothing. */
+const ISBN_GROUPS = [
+  ['9798', 'United States'],
+  ['97910', 'France'],
+  ['97911', 'South Korea'],
+  ['97912', 'Italy'],
+  ['9780', 'English-speaking countries'],
+  ['9781', 'English-speaking countries'],
+  ['9782', 'French-speaking countries'],
+  ['9783', 'German-speaking countries'],
+  ['9784', 'Japan'],
+  ['9785', 'Russia and former Soviet states'],
+  ['9787', 'China'],
+];
+
+/** What the number itself says, true of any ISBN even when no catalogue has heard of the book. */
+export function isbnFacts(isbn13) {
+  const group = ISBN_GROUPS.find(([prefix]) => isbn13.startsWith(prefix));
+  return {
+    registeredIn: group?.[1] ?? null,
+    selfPublishingLikely: isbn13.startsWith('9798'),
+  };
+}
+
+/**
+ * One edition by ISBN: title, authors, publisher, pages, cover. Open Library
+ * first (keyless, CC0, and it knows the work), then Google Books, which holds
+ * many self-published titles Open Library never saw. Null when neither has it,
+ * which still leaves every seller's ISBN link working.
+ *
+ * "Nobody has it" is remembered for a day. "Google would not say" (a spent
+ * quota, an outage) is not, or one bad minute would blank a book for a day.
  */
 export async function isbnEdition(isbn13, { fetchJson = null } = {}) {
   const hit = editionCache.get(isbn13);
@@ -379,11 +435,13 @@ export async function isbnEdition(isbn13, { fetchJson = null } = {}) {
       return res.ok ? res.json() : null;
     });
   const key = `ISBN:${isbn13}`;
+  const openLibraryAnswered = { ok: true };
   const json = await get(
     `https://openlibrary.org/api/books?bibkeys=${key}&format=json&jscmd=data`,
   ).catch(() => null);
+  if (!json) openLibraryAnswered.ok = false;
   const d = json?.[key];
-  const value = d
+  let value = d
     ? {
         title: d.title ?? null,
         subtitle: d.subtitle ?? null,
@@ -403,6 +461,13 @@ export async function isbnEdition(isbn13, { fetchJson = null } = {}) {
     const ed = await get(`https://openlibrary.org${value.editionKey}.json`).catch(() => null);
     value.workKey = ed?.works?.[0]?.key ?? null;
   }
+  let certain = openLibraryAnswered.ok;
+  if (!value) {
+    const google = await googleBooksEdition(isbn13, get);
+    if (google === undefined) certain = false;
+    else value = google;
+  }
+  if (!value && !certain) return null;
   if (editionCache.size > 5000) editionCache.delete(editionCache.keys().next().value);
   editionCache.set(isbn13, { at: Date.now(), value });
   return value;
@@ -470,14 +535,24 @@ export async function answer({ book, row, zip }) {
       };
     }
   }
-  return { book, edition, item, zip: near?.zip ?? '', near, stores, zipError };
+  return {
+    book,
+    edition,
+    item,
+    zip: near?.zip ?? '',
+    near,
+    stores,
+    zipError,
+    facts: book.isbn ? isbnFacts(book.isbn.isbn13) : null,
+  };
 }
 
 export const buyAnswer = (a) => ({
   isbn: a.book.isbn,
-  title: a.edition?.title ?? a.book.title ?? null,
+  title: a.edition?.title || a.book.title || null,
   author: a.book.author || null,
   edition: a.edition,
+  facts: a.facts ?? null,
   item: a.item ? { id: a.item.id, title: a.item.title, url: `/i/${a.item.id}` } : null,
   online: buyLinks(a.book),
   inStore: a.zip

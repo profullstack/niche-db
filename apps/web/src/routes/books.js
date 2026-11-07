@@ -43,6 +43,7 @@ export function registerBooks(app) {
           canonical={a.book.isbn ? `/isbn/${a.book.isbn.isbn13}` : '/books/buy'}
           book={a.book}
           edition={a.edition}
+          facts={a.facts}
           item={a.item}
           zip={a.zip || (c.req.query('zip') ?? '')}
           near={a.near}

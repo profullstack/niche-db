@@ -2,8 +2,16 @@ import { describe, expect, test } from 'bun:test';
 
 process.env.DATABASE_URL ??= 'postgres://test:test@localhost:5432/test';
 
-const { bookQuery, buyLinks, isbnEdition, normaliseIsbn, storeFinders, storesNear, zipPoint } =
-  await import('./books.js');
+const {
+  bookQuery,
+  buyLinks,
+  isbnEdition,
+  isbnFacts,
+  normaliseIsbn,
+  storeFinders,
+  storesNear,
+  zipPoint,
+} = await import('./books.js');
 
 describe('normaliseIsbn', () => {
   test('a hyphenated ISBN-13 gives both forms', () => {
@@ -103,6 +111,20 @@ describe('in store', () => {
   });
 });
 
+describe('isbnFacts', () => {
+  test('says what the number itself says, and nothing it does not', () => {
+    expect(isbnFacts('9798162954880')).toEqual({
+      registeredIn: 'United States',
+      selfPublishingLikely: true,
+    });
+    expect(isbnFacts('9780140328721')).toEqual({
+      registeredIn: 'English-speaking countries',
+      selfPublishingLikely: false,
+    });
+    expect(isbnFacts('9786000000000')).toEqual({ registeredIn: null, selfPublishingLikely: false });
+  });
+});
+
 describe('isbnEdition', () => {
   test('reads the data view and the work key, then caches', async () => {
     let calls = 0;
@@ -132,5 +154,54 @@ describe('isbnEdition', () => {
   });
   test('an unknown ISBN is null', async () => {
     expect(await isbnEdition('9780000000019', { fetchJson: async () => ({}) })).toBeNull();
+  });
+  test('Google Books fills in what Open Library never saw', async () => {
+    const fetchJson = async (url) =>
+      url.includes('googleapis')
+        ? {
+            items: [
+              {
+                volumeInfo: {
+                  title: 'A Self-Published Book',
+                  authors: ['An Author'],
+                  publisher: 'Independently published',
+                  publishedDate: '2024-01-02',
+                  pageCount: 212,
+                  categories: ['Fiction'],
+                  imageLinks: { thumbnail: 'http://books.google.com/c.jpg' },
+                  infoLink: 'https://books.google.com/books?id=x',
+                },
+              },
+            ],
+          }
+        : {};
+    expect(await isbnEdition('9798000000012', { fetchJson })).toMatchObject({
+      title: 'A Self-Published Book',
+      authors: ['An Author'],
+      publishers: ['Independently published'],
+      pages: 212,
+      cover: 'https://books.google.com/c.jpg',
+      googleBooks: 'https://books.google.com/books?id=x',
+    });
+  });
+  test('a spent quota is not remembered as an unknown book', async () => {
+    let up = false;
+    const fetchJson = async (url) => {
+      if (!url.includes('googleapis')) return {};
+      return up ? { items: [{ volumeInfo: { title: 'Back Again' } }] } : null;
+    };
+    expect(await isbnEdition('9798000000029', { fetchJson })).toBeNull();
+    up = true;
+    expect((await isbnEdition('9798000000029', { fetchJson }))?.title).toBe('Back Again');
+  });
+  test('a book nobody has is remembered, so each view does not ask twice', async () => {
+    let calls = 0;
+    const fetchJson = async () => {
+      calls++;
+      return {};
+    };
+    await isbnEdition('9798000000036', { fetchJson });
+    await isbnEdition('9798000000036', { fetchJson });
+    expect(calls).toBe(2);
   });
 });
