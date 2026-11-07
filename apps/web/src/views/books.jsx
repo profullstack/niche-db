@@ -126,13 +126,14 @@ export const BuyPage = ({
   canonical,
   book,
   edition = null,
+  facts = null,
   item = null,
   zip = '',
   near = null,
   stores = null,
   error = null,
 }) => {
-  const title = edition?.title ?? book.title ?? (book.isbn ? `ISBN ${book.isbn.isbn13}` : 'A book');
+  const title = edition?.title || book.title || (book.isbn ? `ISBN ${book.isbn.isbn13}` : 'A book');
   const links = buyLinks(book);
   return (
     <Layout
@@ -161,6 +162,31 @@ export const BuyPage = ({
         ) : book.author ? (
           <p class="item-meta">{book.author}</p>
         ) : null}
+        {edition?.subtitle ? <p>{edition.subtitle}</p> : null}
+        {edition?.subjects?.length ? (
+          <ul class="tags">
+            {edition.subjects.map((s) => (
+              <li key={s}>
+                <span class="tag">{s}</span>
+              </li>
+            ))}
+          </ul>
+        ) : null}
+        {!edition && book.isbn ? (
+          <p>
+            No catalogue we can read has a record for this edition yet, so its title and author are
+            not known here.
+            {facts?.registeredIn ? ` The number was registered in ${facts.registeredIn}.` : ''}
+            {facts?.selfPublishingLikely
+              ? ' Numbers starting 979-8 are often issued to self-published books.'
+              : ''}{' '}
+            The sellers below can still look it up, and if you know the book you can{' '}
+            <a href="https://openlibrary.org/books/add" rel="noopener nofollow">
+              add it to Open Library
+            </a>
+            .
+          </p>
+        ) : null}
         {book.isbn ? (
           <p class="small muted">
             ISBN-13 <code>{book.isbn.isbn13}</code>
@@ -175,6 +201,14 @@ export const BuyPage = ({
                 {' · '}
                 <a href={edition.openLibrary} rel="noopener nofollow">
                   Open Library ↗
+                </a>
+              </>
+            ) : null}
+            {edition?.googleBooks ? (
+              <>
+                {' · '}
+                <a href={edition.googleBooks} rel="noopener nofollow">
+                  Google Books ↗
                 </a>
               </>
             ) : null}
@@ -243,7 +277,7 @@ export const BuyPage = ({
         </section>
 
         <p class="small muted">
-          Edition data from Open Library (CC0). The same answer as JSON:{' '}
+          Edition data from Open Library (CC0) and Google Books. The same answer as JSON:{' '}
           <code>GET /api/v1/books/buy?isbn=&amp;title=&amp;author=&amp;zip=</code>
         </p>
       </article>
