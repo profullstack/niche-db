@@ -96,7 +96,10 @@ export async function keepCrawledMcp({ user, records }) {
   if (!user) throw new Denied('Sign in with an API key to push records.', 401);
   if (!isAdmin(user)) throw new Denied('Pushing crawled records is for the index operators.', 403);
   if (!Array.isArray(records) || records.length === 0)
-    throw new Denied('send { "records": [ { "mcp": "https://…", "name": "…", "tools": [] } ] }', 400);
+    throw new Denied(
+      'send { "records": [ { "mcp": "https://…", "name": "…", "tools": [] } ] }',
+      400,
+    );
   if (records.length > RECORDS_MAX)
     throw new Denied(
       `At most ${RECORDS_MAX} records a call; send ${records.length} as batches.`,
