@@ -6,7 +6,8 @@
   "exports": {
     ".": "./src/index.js",
     "./membership": "./src/membership.js",
-    "./referrals": "./src/referrals.js"
+    "./referrals": "./src/referrals.js",
+    "./coinpay-pass": "./src/coinpay-pass.js"
   },
   "dependencies": {
     "@profullstack/coinpay": "^0.25.0",
