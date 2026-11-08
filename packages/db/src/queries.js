@@ -680,8 +680,6 @@ export async function finishRun({
     update sources set
       last_ok_at = case when ${status === 'ok'} then now() else last_ok_at end,
       last_error = ${status === 'ok' ? null : error},
-      flag = ${flagged},
-      flagged_at = case when ${flagged !== null} then now() else null end,
       cursor = coalesce(${cursor === undefined ? null : JSON.stringify(cursor)}::jsonb, cursor),
       next_run_at = coalesce(${nextRunAt ?? null}, next_run_at),
       item_count = case
@@ -692,6 +690,15 @@ export async function finishRun({
       updated_at = now()
     where id = ${sourceId}
   `;
+  // The flag lives in source_flags (see migration 0044 for why not a column).
+  if (flagged) {
+    await sql`
+      insert into source_flags (source_id, flag, flagged_at) values (${sourceId}, ${flagged}, now())
+      on conflict (source_id) do update set flag = excluded.flag, flagged_at = excluded.flagged_at
+    `;
+  } else {
+    await sql`delete from source_flags where source_id = ${sourceId}`;
+  }
 }
 
 /**
@@ -721,7 +728,7 @@ export async function rescheduleFailedSources({ retryMinutes = 15 } = {}) {
       updated_at = now()
     where enabled
       and last_error is not null
-      and flag is null
+      and not exists (select 1 from source_flags f where f.source_id = sources.id)
       and next_run_at > now() + make_interval(mins => ${retryMinutes})
     returning slug
   `;

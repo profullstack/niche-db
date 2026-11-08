@@ -1,15 +1,18 @@
 -- The fleet crawler rule (2026-11-08): a source whose upstream was slow or
 -- broken (timeout, DNS/TLS/connection error, HTTP 5xx) is flagged and left
--- alone for 30 days (next_run_at), then tried once. `flag` is 'slow' or
--- 'broken' while that holds, `flagged_at` when it was set (the failure time);
--- both clear on the next run that ends any other way. Boot's
--- rescheduleFailedSources skips flagged rows, or every deploy would undo it.
+-- alone for 30 days (sources.next_run_at), then tried once. A row here says
+-- so: `flag` is 'slow' or 'broken', `flagged_at` the failure time; finishRun
+-- deletes it on the next run that ends any other way. Boot's
+-- rescheduleFailedSources skips flagged sources, or every deploy would undo it.
 --
--- sources is small (hundreds of rows) and both columns are nullable with no
--- default, so this is a catalogue change, not a rewrite. lock_timeout keeps a
--- busy worker from holding the deploy: the migration fails and retries.
-set local lock_timeout = '10s';
-
-alter table sources
-  add column if not exists flag text check (flag in ('slow', 'broken')),
-  add column if not exists flagged_at timestamptz;
+-- A side table, not columns on sources: ALTER TABLE sources needs an ACCESS
+-- EXCLUSIVE lock, and the web's long collection queries hold ACCESS SHARE on
+-- sources for minutes at a time, so the first deploy of this hit its
+-- lock_timeout five times and never applied. No foreign key for the same
+-- reason (adding one locks sources too); a deleted source's row is harmless
+-- and finishRun is the only writer.
+create table if not exists source_flags (
+  source_id integer primary key,
+  flag text not null check (flag in ('slow', 'broken')),
+  flagged_at timestamptz not null default now()
+);
