@@ -90,6 +90,33 @@ describe('failureClass', () => {
   });
 });
 
+describe('our own services keep the short retry (rule 4)', () => {
+  test('a house site, a pit.world host or our Supabase is never flagged', () => {
+    expect(failureClass(sysErr('ENOTFOUND', 'getaddrinfo ENOTFOUND abcxyz.supabase.co'))).toBe(
+      null,
+    );
+    expect(
+      failureClass(
+        Object.assign(new Error('502 from https://ch4nnels.com/api/v1/seedboxes'), { status: 502 }),
+      ),
+    ).toBe(null);
+    expect(
+      failureClass(
+        Object.assign(new Error('The operation timed out.'), {
+          name: 'TimeoutError',
+          upstreamUrl: 'https://built.indie.pit.world/api/v1/products',
+        }),
+      ),
+    ).toBe(null);
+    // A third party on a lookalike name is still a third party.
+    expect(
+      failureClass(
+        Object.assign(new Error('502 from https://notpit.world.example/x'), { status: 502 }),
+      ),
+    ).toBe('broken');
+  });
+});
+
 describe('runSource: a slow or broken upstream is flagged for 30 days', () => {
   const fail = (err) => ({ name: 'fake', pull: async () => Promise.reject(err) });
   const run = (adapter) => {

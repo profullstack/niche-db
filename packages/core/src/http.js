@@ -23,7 +23,7 @@ export function makeHttp({ userAgent, log = () => {} }) {
     try {
       return await send(url, opts);
     } catch (err) {
-      throw markUpstream(err);
+      throw markUpstream(err, url);
     }
   }
 
@@ -186,14 +186,16 @@ async function httpError(res, url) {
   return Object.assign(new Error(`${res.status} from ${String(url).slice(0, 400)}${detail}`), {
     status: res.status,
     upstream: true,
+    upstreamUrl: String(url),
   });
 }
 
 /** Mark a fetch failure as the upstream's, keeping the error itself (its name, code and cause). */
-function markUpstream(err) {
+function markUpstream(err, url) {
   if (err && typeof err === 'object') {
     try {
       err.upstream = true;
+      err.upstreamUrl ??= String(url);
     } catch {
       // A frozen error stays as it is.
     }
