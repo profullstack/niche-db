@@ -666,7 +666,11 @@ export async function finishRun({
   note = null,
   cursor,
   nextRunAt,
+  flag = null,
 }) {
+  // flag: 'slow' | 'broken' when the upstream failed the crawler rule (the
+  // caller sets nextRunAt 30 days out); cleared by any other outcome.
+  const flagged = status !== 'ok' && (flag === 'slow' || flag === 'broken') ? flag : null;
   await sql`
     update runs set finished_at = now(), status = ${status}, seen = ${seen}, added = ${added},
       updated = ${updated}, error = ${error}, note = ${note}
@@ -676,6 +680,8 @@ export async function finishRun({
     update sources set
       last_ok_at = case when ${status === 'ok'} then now() else last_ok_at end,
       last_error = ${status === 'ok' ? null : error},
+      flag = ${flagged},
+      flagged_at = case when ${flagged !== null} then now() else null end,
       cursor = coalesce(${cursor === undefined ? null : JSON.stringify(cursor)}::jsonb, cursor),
       next_run_at = coalesce(${nextRunAt ?? null}, next_run_at),
       item_count = case
@@ -715,6 +721,7 @@ export async function rescheduleFailedSources({ retryMinutes = 15 } = {}) {
       updated_at = now()
     where enabled
       and last_error is not null
+      and flag is null
       and next_run_at > now() + make_interval(mins => ${retryMinutes})
     returning slug
   `;

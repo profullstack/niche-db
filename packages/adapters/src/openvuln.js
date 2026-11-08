@@ -86,7 +86,7 @@ export async function readIndex(doc, fetchedFrom, http, { limit = 500 } = {}) {
     if (!entry?.summary && entry?.url) {
       if (!sameHost(entry.url, fetchedFrom)) continue;
       try {
-        record = await http.json(entry.url, { timeoutMs: 20_000 });
+        record = await http.json(entry.url);
       } catch {
         continue;
       }
@@ -142,7 +142,7 @@ export const openvuln = defineAdapter({
     for (const url of urls) {
       if (Date.now() > deadline) break;
       try {
-        const doc = await http.json(url, { timeoutMs: 20_000 });
+        const doc = await http.json(url);
         const { items: got, rejected } = await readIndex(doc, url, http);
         if (rejected) notes.push(`${hostOf(url)} rejected (${rejected})`);
         else {

@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { defineAdapter } from '@nichedb/core/adapter';
+import { BROWSER_SETTLE_MS, CRAWL_BROWSER_TIMEOUT_MS } from '@nichedb/core/crawl';
 import { offer, offerItem } from './hosting.js';
 import {
   kindOf,
@@ -173,10 +174,27 @@ export function productItem(product, { platform, domain, provider, providerName,
   return item;
 }
 
-/** Ask an Obscura MCP server for a page's rendered HTML. */
-export async function renderWithObscura(mcpUrl, url, { timeoutMs = 60_000 } = {}) {
-  const call = async (id, name, args) => {
-    const res = await fetch(mcpUrl, {
+/**
+ * Ask an Obscura MCP server for a page's rendered HTML.
+ *
+ * The fleet crawler rule: 30 s for the whole render (navigate, settle, read),
+ * waiting for `load` plus a bounded settle, never `networkidle` (a page with a
+ * chat widget or an analytics beacon never goes idle). Running out of time
+ * rejects, so the caller records a failure instead of reading half a page.
+ */
+export async function renderWithObscura(
+  mcpUrl,
+  url,
+  {
+    timeoutMs = CRAWL_BROWSER_TIMEOUT_MS,
+    settleMs = BROWSER_SETTLE_MS,
+    sleep = Bun.sleep,
+    fetchImpl = fetch,
+  } = {},
+) {
+  const deadline = AbortSignal.timeout(timeoutMs);
+  const call = async (id, name, args, signal = deadline) => {
+    const res = await fetchImpl(mcpUrl, {
       method: 'POST',
       headers: {
         'content-type': 'application/json',
@@ -188,7 +206,7 @@ export async function renderWithObscura(mcpUrl, url, { timeoutMs = 60_000 } = {}
         method: 'tools/call',
         params: { name, arguments: args },
       }),
-      signal: AbortSignal.timeout(timeoutMs),
+      signal,
     });
     const text = await res.text();
     const body = text.includes('data:') ? text.split('data:').pop() : text;
@@ -196,12 +214,22 @@ export async function renderWithObscura(mcpUrl, url, { timeoutMs = 60_000 } = {}
     if (json.error) throw new Error(json.error.message ?? 'obscura error');
     return json.result?.content?.find((c) => c.type === 'text')?.text ?? '';
   };
-  await call(1, 'browser_navigate', { url, waitUntil: 'networkidle' });
-  const html = await call(2, 'browser_evaluate', {
-    expression: 'document.documentElement.outerHTML',
-  });
-  await call(3, 'browser_close', {}).catch(() => {});
-  return html;
+  try {
+    await call(1, 'browser_navigate', { url, waitUntil: 'load', timeout: timeoutMs });
+    // Late scripts get a moment, bounded and inside the same budget.
+    await Promise.race([
+      sleep(Math.min(settleMs, 2_000)),
+      new Promise((_, reject) =>
+        deadline.addEventListener('abort', () => reject(deadline.reason), { once: true }),
+      ),
+    ]);
+    return await call(2, 'browser_evaluate', {
+      expression: 'document.documentElement.outerHTML',
+    });
+  } finally {
+    // Close the tab whatever happened, on its own short budget.
+    await call(3, 'browser_close', {}, AbortSignal.timeout(5_000)).catch(() => {});
+  }
 }
 
 /**
@@ -220,7 +248,7 @@ export async function readHost(
     const u = new URL(url);
     if (!robots.has(u.origin)) {
       requests++;
-      const txt = await http.request(`${u.origin}/robots.txt`, { timeoutMs: 15_000 }).then(
+      const txt = await http.request(`${u.origin}/robots.txt`).then(
         (r) => (r.ok ? r.text() : ''),
         () => '',
       );
@@ -231,10 +259,7 @@ export async function readHost(
     if (requests >= maxRequests || Date.now() > deadline) return null;
     if (requests > 1) await sleep(1000);
     requests++;
-    const res = await http.request(url, {
-      headers: { accept: 'text/html,*/*' },
-      timeoutMs: 15_000,
-    });
+    const res = await http.request(url, { headers: { accept: 'text/html,*/*' } });
     const html = (await res.text()).slice(0, 600_000);
     return {
       status: res.status,

@@ -96,7 +96,7 @@ export const statuspage = defineAdapter({
     for (const host of hosts) {
       if (Date.now() > deadline) break;
       try {
-        const res = await http.json(`https://${host}/api/v2/incidents.json`, { timeoutMs: 15_000 });
+        const res = await http.json(`https://${host}/api/v2/incidents.json`);
         for (const inc of (res.incidents ?? []).slice(0, 50))
           items.push(toItem(host, res.page, inc));
       } catch (err) {

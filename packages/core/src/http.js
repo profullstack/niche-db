@@ -5,14 +5,32 @@
  * police the User-Agent (SEC refuses a blank one outright) and the rate. So this
  * always identifies the deployment, always has a timeout, and turns a 429 into
  * one polite wait rather than a retry storm.
+ *
+ * The timeout is the fleet crawler rule's 10 s for a page or API call
+ * (CRAWL_FETCH_TIMEOUT_MS); an adapter reading a big document passes its own,
+ * and `download` keeps an hour for a dump. What it throws is marked
+ * `upstream` (and an HTTP error carries `status`), so ingest can tell a slow
+ * or broken upstream, flagged for 30 days, from anything else.
  */
 
 import { mkdir, open, stat, unlink } from 'node:fs/promises';
 import { dirname } from 'node:path';
+import { BULK_DOWNLOAD_TIMEOUT_MS, CRAWL_FETCH_TIMEOUT_MS } from './crawl.js';
 import { requestMusicBrainz, retryDelay } from './musicbrainz-http.js';
 
 export function makeHttp({ userAgent, log = () => {} }) {
-  async function request(url, { headers = {}, timeoutMs = 30_000, method = 'GET', body } = {}) {
+  async function request(url, opts = {}) {
+    try {
+      return await send(url, opts);
+    } catch (err) {
+      throw markUpstream(err);
+    }
+  }
+
+  async function send(
+    url,
+    { headers = {}, timeoutMs = CRAWL_FETCH_TIMEOUT_MS, method = 'GET', body } = {},
+  ) {
     const doFetch = () =>
       fetch(url, {
         method,
@@ -39,7 +57,7 @@ export function makeHttp({ userAgent, log = () => {} }) {
    *
    * The dumps this serves are 1.7 to 11 GB, so the body is streamed chunk by
    * chunk onto an open file handle and never held in memory; the timeout covers
-   * the whole transfer and defaults to an hour, because `request`'s 30 s is a
+   * the whole transfer and defaults to an hour, because `request`'s 10 s is a
    * ceiling on an API call, not on a download. The user agent goes with it:
    * Podcast Index answers 403 without one.
    *
@@ -59,7 +77,7 @@ export function makeHttp({ userAgent, log = () => {} }) {
   async function download(
     url,
     filePath,
-    { timeoutMs = 60 * 60_000, headers = {}, onProgress } = {},
+    { timeoutMs = BULK_DOWNLOAD_TIMEOUT_MS, headers = {}, onProgress } = {},
   ) {
     await mkdir(dirname(filePath), { recursive: true });
     const have = (await stat(filePath).catch(() => null))?.size ?? 0;
@@ -165,7 +183,22 @@ async function httpError(res, url) {
   } catch {
     // An unreadable body is no worse than the message without it.
   }
-  return new Error(`${res.status} from ${String(url).slice(0, 400)}${detail}`);
+  return Object.assign(new Error(`${res.status} from ${String(url).slice(0, 400)}${detail}`), {
+    status: res.status,
+    upstream: true,
+  });
+}
+
+/** Mark a fetch failure as the upstream's, keeping the error itself (its name, code and cause). */
+function markUpstream(err) {
+  if (err && typeof err === 'object') {
+    try {
+      err.upstream = true;
+    } catch {
+      // A frozen error stays as it is.
+    }
+  }
+  return err;
 }
 
 /** The total out of `Content-Range: bytes 0-99/1000` (or the `bytes` star form of a 416), or null. */
