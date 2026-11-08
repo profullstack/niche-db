@@ -55,8 +55,10 @@ const FEED_URL = /\/comments\/|\/feeds?\/|\.(?:xml|rss|atom)(?:$|\?)/i;
 /**
  * brisk renders a card image on demand at its own `/api/screenshot`. Carrying
  * that would point every image in this collection at another site's renderer.
+ * brisk now serves from brisk.pwa.pit.world and builds these URLs on its own
+ * host, so both the old and the current host are matched.
  */
-const SCREENSHOT = /^https?:\/\/[^/]*brisk\.news\/api\/screenshot/i;
+const SCREENSHOT = /^https?:\/\/[^/]*(?:brisk\.news|brisk\.pwa\.pit\.world)\/api\/screenshot/i;
 
 /**
  * Decoded, whitespace-collapsed, and null when nothing is left.

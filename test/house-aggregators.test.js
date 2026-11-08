@@ -350,7 +350,10 @@ describe('aiornot', () => {
       { config: { feeds: ['trending', 'latest'] } },
     );
     await adapterByName('aiornot').pull(c);
-    expect(seen).toEqual(['https://aiornot.pwa.pit.world/rss.xml', 'https://aiornot.pwa.pit.world/rss/trending.xml']);
+    expect(seen).toEqual([
+      'https://aiornot.pwa.pit.world/rss.xml',
+      'https://aiornot.pwa.pit.world/rss/trending.xml',
+    ]);
   });
 });
 
@@ -361,7 +364,9 @@ describe('agenticjobs', () => {
     expect(it.kind).toBe('job');
     expect(it.externalId).toBe('3b0d293e-e2af-4609-af4d-1c4762a48a1e');
     expect(it.title).toBe('promote us to your other communities — Profullstack, Inc.');
-    expect(it.url).toBe('https://agenticjobs.pwa.pit.world/jobs/promote-us-to-your-other-communities');
+    expect(it.url).toBe(
+      'https://agenticjobs.pwa.pit.world/jobs/promote-us-to-your-other-communities',
+    );
     expect(it.publishedAt.toISOString()).toBe('2026-09-11T11:33:18.752Z');
     expect(it.tags).toEqual([
       'agenticjobs',
@@ -387,7 +392,9 @@ describe('agenticjobs', () => {
 
   test('walks offset pages and stops at the total', async () => {
     const page = await fixture('agenticjobs-jobs.json');
-    const { ctx: c, seen } = ctx('agenticjobs', { 'https://agenticjobs.pwa.pit.world/api/v1/jobs': page });
+    const { ctx: c, seen } = ctx('agenticjobs', {
+      'https://agenticjobs.pwa.pit.world/api/v1/jobs': page,
+    });
     const out = await adapterByName('agenticjobs').pull(c);
     expect(out.items.length).toBe(2);
     // Two postings of a total of two: the first page is also the last.
@@ -431,7 +438,9 @@ describe('tsbb', () => {
       'tsbb',
       {
         'https://tsbb.pwa.pit.world/api/v1/forums': await fixture('tsbb-forums.json'),
-        'https://tsbb.pwa.pit.world/f/announcements/feed.xml': await fixture('tsbb-feed-announcements.xml'),
+        'https://tsbb.pwa.pit.world/f/announcements/feed.xml': await fixture(
+          'tsbb-feed-announcements.xml',
+        ),
         'https://tsbb.pwa.pit.world/f/general/feed.xml': await fixture('tsbb-feed-general.xml'),
       },
       { log: (m) => lines.push(m) },
@@ -532,7 +541,10 @@ describe('c0upons', () => {
     const full = Array.from({ length: 200 }, (_, i) => ({ ...rows[2], id: 1000 + i }));
     const { ctx: c, seen } = ctx('c0upons', {
       'https://c0upons.pwa.pit.world/api/coupons?limit=200&offset=0': JSON.stringify(full),
-      'https://c0upons.pwa.pit.world/api/coupons?limit=200&offset=200': JSON.stringify([full[199], rows[0]]),
+      'https://c0upons.pwa.pit.world/api/coupons?limit=200&offset=200': JSON.stringify([
+        full[199],
+        rows[0],
+      ]),
     });
     const out = await adapterByName('c0upons').pull(c);
     expect(seen.length).toBe(2);
@@ -843,7 +855,9 @@ describe('weedforcrypto', () => {
       batches.push(step.value);
       step = await run.next();
     }
-    expect(seen).toEqual(['https://weedforcrypto.pwa.pit.world/api/v1/dispensaries?limit=200&page=1']);
+    expect(seen).toEqual([
+      'https://weedforcrypto.pwa.pit.world/api/v1/dispensaries?limit=200&page=1',
+    ]);
     expect(batches).toHaveLength(1);
     expect(batches[0].items).toHaveLength(2);
     expect(batches[0].cursor).toEqual({});
