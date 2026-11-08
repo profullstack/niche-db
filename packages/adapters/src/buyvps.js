@@ -188,7 +188,7 @@ export const buyvps = defineAdapter({
       });
       if (html) via = 'obscura';
     }
-    if (!html) html = await http.text(url, { headers: { accept: 'text/html' }, timeoutMs: 30_000 });
+    if (!html) html = await http.text(url, { headers: { accept: 'text/html' } });
     const fetchedAt = new Date();
     const plans = parsePlans(html);
     const items = plans.map((p) => toItem(p, fetchedAt)).filter(Boolean);

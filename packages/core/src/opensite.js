@@ -15,6 +15,8 @@
  * wants to see what each one saw.
  */
 
+import { CRAWL_FETCH_TIMEOUT_MS } from './crawl.js';
+
 export const VERSION = '0.1';
 export const SPEC = 'https://logicsrc.com/opensite';
 export const AGENT = `OpenSite/${VERSION} (+${SPEC})`;
@@ -36,9 +38,9 @@ export const KINDS = [
   'other',
 ];
 
-/** The limits the spec sets on a read. */
+/** The limits on a read: the spec's size cap, and the fleet crawler rule's 10 s (was 15). */
 export const MAX_BYTES = 2 * 1024 * 1024;
-export const TIMEOUT_MS = 15_000;
+export const TIMEOUT_MS = CRAWL_FETCH_TIMEOUT_MS;
 export const MAX_REDIRECTS = 5;
 /** A record is never bigger than this; JSON-LD is the first thing cut. */
 export const MAX_RECORD_BYTES = 256 * 1024;

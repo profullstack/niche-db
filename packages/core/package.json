@@ -6,6 +6,7 @@
   "exports": {
     ".": "./src/index.js",
     "./adapter": "./src/adapter.js",
+    "./crawl": "./src/crawl.js",
     "./http": "./src/http.js",
     "./names": "./src/names.js",
     "./opensite": "./src/opensite.js",

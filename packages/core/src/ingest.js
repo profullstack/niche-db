@@ -6,6 +6,7 @@ import { retryTransient } from '@nichedb/db/resilience';
 import { normaliseItem } from './adapter.js';
 import { makeHttp } from './http.js';
 import { profileItem } from './profiles.js';
+import { failureClass, flaggedUntil } from './crawl.js';
 import { retryMinutes } from './retry.js';
 
 const UA = () =>
@@ -158,7 +159,11 @@ export async function runSource(
     return { ...totals };
   } catch (err) {
     const message = String(err?.message ?? err).slice(0, 1000);
-    const nextRunAt = await retryAt(source).catch(() => null);
+    // The fleet crawler rule: an upstream that timed out, failed DNS/TLS or a
+    // connection, or answered 5xx is flagged and left alone for 30 days, then
+    // tried once; anything else takes the short doubling retry.
+    const flag = failureClass(err);
+    const nextRunAt = flag ? flaggedUntil() : await retryAt(source).catch(() => null);
     /*
      * A run that died because Postgres went away must still be closed once it
      * is back. Left 'running', the row parks the source: `dueSources` treats it
@@ -169,11 +174,21 @@ export async function runSource(
      * most, before giving up and leaving the row to the reaper as before.
      */
     await retryTransient(
-      () => q.finishRun({ runId, sourceId: source.id, status: 'error', error: message, nextRunAt }),
+      () =>
+        q.finishRun({
+          runId,
+          sourceId: source.id,
+          status: 'error',
+          error: message,
+          nextRunAt,
+          flag,
+        }),
       { label: `${tag} closing the run`, log: l, budgetMs: 3 * 60_000, ...closeRetry },
     );
-    l(`failed: ${message}${nextRunAt ? `; retrying at ${nextRunAt.toISOString()}` : ''}`);
-    return { error: message };
+    l(
+      `failed${flag ? ` (${flag} upstream, flagged)` : ''}: ${message}${nextRunAt ? `; retrying at ${nextRunAt.toISOString()}` : ''}`,
+    );
+    return flag ? { error: message, flag } : { error: message };
   }
 }
 
