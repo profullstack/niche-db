@@ -80,7 +80,7 @@ describe('which rows, and where their servers are', () => {
 
   test('the record id drops the endpoint name, as the spec derives it', () => {
     expect(recordId('https://mcp.anakin.io/mcp', 'anakin.io')).toBe('mcp.anakin.io');
-    expect(recordId('https://agenticjobs.work/api/mcp', 'x')).toBe('agenticjobs.work');
+    expect(recordId('https://agenticjobs.pwa.pit.world/api/mcp', 'x')).toBe('agenticjobs.work');
     expect(recordId('https://a.example/v1/mcp', 'x')).toBe('a.example');
     expect(recordId('https://a.example/tenant/mcp', 'x')).toBe('a.example/tenant');
     expect(recordId(null, 'Example.com')).toBe('example.com');

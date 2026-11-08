@@ -15,7 +15,7 @@ import { defineAdapter, first, slugify, stripHtml, xmlItems } from '@nichedb/cor
  * `latest` first, because that is the feed with the most items in it.
  */
 
-const BASE = 'https://aiornot.vote';
+const BASE = 'https://aiornot.pwa.pit.world';
 
 /** The three documents, keyed by the tag a feed adds to what it carries. */
 export const FEEDS = {
@@ -105,7 +105,7 @@ export const aiornot = defineAdapter({
   collection: 'ai-media',
   description:
     'Photorealistic images and videos submitted to aiornot.vote for people to judge as AI or not: the newest, the featured set and what is trending, each with its media file, categories and the votes so far. Three keyless RSS feeds; a submission on more than one is stored once and tagged with each.',
-  docs: 'https://aiornot.vote/rss.xml',
+  docs: 'https://aiornot.pwa.pit.world/rss.xml',
   kinds: ['submission'],
   cadenceMinutes: 30,
   configFields: [

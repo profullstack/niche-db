@@ -13,8 +13,8 @@ import { decodeEntities, defineAdapter, slugify } from '@nichedb/core/adapter';
  * token -- which is the shape a bounty on this board actually takes.
  */
 
-const BASE = 'https://agenticjobs.work/api/v1/jobs';
-const SITE = 'https://agenticjobs.work';
+const BASE = 'https://agenticjobs.pwa.pit.world/api/v1/jobs';
+const SITE = 'https://agenticjobs.pwa.pit.world';
 
 /** The documented ceiling per page. */
 const PAGE = 100;
@@ -111,7 +111,7 @@ export const agenticjobs = defineAdapter({
   collection: 'jobs',
   description:
     'Every published posting on the agenticjobs.work board, newest first: title, company, location, whether it is remote, the pay in whatever shape it was written, the stack, and whether an AI agent may apply. Keyless public API.',
-  docs: 'https://agenticjobs.work/api/v1/jobs',
+  docs: 'https://agenticjobs.pwa.pit.world/api/v1/jobs',
   kinds: ['job'],
   cadenceMinutes: 30,
   configFields: [

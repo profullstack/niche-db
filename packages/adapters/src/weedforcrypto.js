@@ -15,7 +15,7 @@ import { decodeEntities, defineAdapter, slugify } from '@nichedb/core/adapter';
  * null.
  */
 
-const DEFAULT_URL = 'https://weedforcrypto.com/api/v1/dispensaries';
+const DEFAULT_URL = 'https://weedforcrypto.pwa.pit.world/api/v1/dispensaries';
 const PAGE = 200;
 
 const clean = (s) => {
@@ -134,7 +134,7 @@ export const weedforcrypto = defineAdapter({
   collection: 'weed',
   description:
     'Every licensed cannabis dispensary in the weedforcrypto.com directory, from official regulator licence lists in the US, Canada, Uruguay, the Netherlands and Thailand: licence number, type and status, address and coordinates, medical or adult-use, delivery, and whether the store takes crypto through CoinPay, walked page by page from the keyless directory API once a day.',
-  docs: 'https://weedforcrypto.com/api/v1/coverage',
+  docs: 'https://weedforcrypto.pwa.pit.world/api/v1/coverage',
   kinds: ['dispensary'],
   cadenceMinutes: 1440,
   configFields: [

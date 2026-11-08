@@ -31,7 +31,7 @@ const item = (url, outlet) => ({ url, outlet, dedupeKey: canonicalUrl(url) });
 
 describe('folding one pull', () => {
   test('one article through two of a publisher own feeds is one story', () => {
-    const url = 'https://aiornot.vote/m/ai-or-not-event-mtt0l711';
+    const url = 'https://aiornot.pwa.pit.world/m/ai-or-not-event-mtt0l711';
     const kept = fold([
       item(url, 'aiornot-vote-latest-media'),
       item(url, 'aiornot-vote-photorealistic'),

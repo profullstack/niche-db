@@ -16,7 +16,7 @@ import { decodeEntities, defineAdapter, first, slugify, xmlItems } from '@niched
  * list rather than fetched and found empty.
  */
 
-const BASE = 'https://tsbb.dev';
+const BASE = 'https://tsbb.pwa.pit.world';
 
 /** Forums read per run, however many the board has. */
 const MAX_FORUMS = 40;
@@ -88,7 +88,7 @@ export const tsbb = defineAdapter({
   collection: 'forums',
   description:
     'Every topic on the tsbb.dev bulletin board, forum by forum: the title, the opening post, the author and the forum it was posted in. The forum list comes from the keyless JSON API and each forum’s topics from its own RSS feed.',
-  docs: 'https://tsbb.dev/api/v1',
+  docs: 'https://tsbb.pwa.pit.world/api/v1',
   kinds: ['post'],
   cadenceMinutes: 30,
   configFields: [
