@@ -54,6 +54,24 @@ const BROKEN_CODES = new Set([
 const TLS_CODE =
   /^(ERR_TLS_|ERR_SSL_|CERT_|UNABLE_TO_|DEPTH_ZERO_SELF_SIGNED_CERT|SELF_SIGNED_CERT_IN_CHAIN|HOSTNAME_MISMATCH)/;
 
+/**
+ * Our own services and the vendors behind them (rule 4 of the crawler rule):
+ * a house site, a pit.world host, our Supabase projects. A failure talking to
+ * one of these is ours to fix, not a slow third party, so it keeps the short
+ * retry instead of 30 days. Matched on the host the request went to.
+ */
+export const OWN_HOSTS =
+  /(^|\.)(pit\.world|profullstack\.com|nichedb\.dev|bittorrented\.com|ch4nnels\.com|c0upons\.com|outreachgraph\.com|smshub\.dev|rssamplifier\.com|p0dcasters\.com|logicsrc\.com|c0mpute\.com|crawlproof\.com|r4ck\.dev|weedforcrypto\.com|supabase\.co|coinpayportal\.com)$/i;
+
+/** The host a failed request went to: makeHttp records it; otherwise the first one the message names. */
+export function failedHost(err) {
+  const raw = err?.upstreamUrl ?? String(err?.message ?? '');
+  const m =
+    String(raw).match(/https?:\/\/([^/\s:?#]+)/i) ??
+    String(raw).match(/\b(?:ENOTFOUND|EAI_AGAIN)\s+([a-z0-9.-]+\.[a-z]{2,})/i);
+  return m ? m[1].toLowerCase() : null;
+}
+
 function codesOf(err) {
   const out = [];
   for (let e = err, depth = 0; e && depth < 4; e = e.cause, depth++) {
@@ -76,6 +94,8 @@ export function failureClass(err) {
   if (!err || (typeof err !== 'object' && typeof err !== 'function')) return null;
   if ('flag' in err && (err.flag === 'slow' || err.flag === 'broken' || err.flag === null))
     return err.flag;
+  const host = failedHost(err);
+  if (host && OWN_HOSTS.test(host)) return null;
   const codes = codesOf(err);
   if (codes.includes('EAI_AGAIN')) return null;
   // Our own database failing is never the upstream's fault: Bun SQL errors
