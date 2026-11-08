@@ -16,7 +16,7 @@ import { decodeEntities, defineAdapter, slugify } from '@nichedb/core/adapter';
  * message). The public directory is the products endpoint.
  */
 
-const BASE = 'https://saasrow.com/api/v1/products';
+const BASE = 'https://saasrow.pwa.pit.world/api/v1/products';
 
 /** The documented ceiling per page. */
 const PAGE = 100;
@@ -110,7 +110,7 @@ export const saasrow = defineAdapter({
   collection: 'saas',
   description:
     'Every product in the saasrow.com software directory with its category, tags, pricing model, platforms, alternatives, votes and views, walked newest first through the keyless public API. The listings endpoint is per-account and needs a key, so it is not read.',
-  docs: 'https://saasrow.com/api/v1/products',
+  docs: 'https://saasrow.pwa.pit.world/api/v1/products',
   kinds: ['product'],
   cadenceMinutes: 60,
   configFields: [

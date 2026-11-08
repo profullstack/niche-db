@@ -41,16 +41,16 @@ const HOUSE = [
   ],
   ['logicsrc', 'https://logicsrc.com', 'logicsrc.com: every spec and its landing page'],
   ['rssamplifier', 'https://rssamplifier.com', 'rssamplifier.com: the small-web feed directory'],
-  ['saasrow', 'https://saasrow.com', 'saasrow.com: the SaaS directory'],
+  ['saasrow', 'https://saasrow.pwa.pit.world', 'saasrow.com: the SaaS directory'],
   [
     'outreachgraph',
     'https://outreachgraph.com',
     'outreachgraph.com: the public profiles and company pages',
   ],
-  ['tsbb', 'https://tsbb.dev', 'tsbb.dev: the bulletin boards'],
-  ['agenticjobs', 'https://agenticjobs.work', 'agenticjobs.work: the job board'],
+  ['tsbb', 'https://tsbb.pwa.pit.world', 'tsbb.dev: the bulletin boards'],
+  ['agenticjobs', 'https://agenticjobs.pwa.pit.world', 'agenticjobs.work: the job board'],
   ['d0rz', 'https://d0rz.com', 'd0rz.com: the marketplace'],
-  ['aiornot', 'https://aiornot.vote', 'aiornot.vote: real or generated, judged by people'],
+  ['aiornot', 'https://aiornot.pwa.pit.world', 'aiornot.vote: real or generated, judged by people'],
 ];
 
 export const opensite = defineAdapter({

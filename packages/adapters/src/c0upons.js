@@ -17,8 +17,8 @@ import { decodeEntities, defineAdapter } from '@nichedb/core/adapter';
  * run's page count is the site's size, not the count it brings back.
  */
 
-const BASE = 'https://c0upons.com/api/coupons';
-const SITE = 'https://c0upons.com';
+const BASE = 'https://c0upons.pwa.pit.world/api/coupons';
+const SITE = 'https://c0upons.pwa.pit.world';
 
 /** Rows per page. The route caps nothing; this is one request's worth. */
 const PAGE = 200;
@@ -119,7 +119,7 @@ export const c0upons = defineAdapter({
   collection: 'coupons',
   description:
     "Every coupon c0upons.com took in on its own: codes people submitted on the site and the listings it reads from r/couponcodes, each under its store with the code, discount and expiry as fields and a link to the coupon page. Rows c0upons copied from this database's deals collection are left where they already are.",
-  docs: 'https://c0upons.com/docs',
+  docs: 'https://c0upons.pwa.pit.world/docs',
   kinds: ['coupon'],
   cadenceMinutes: 15,
   configFields: [

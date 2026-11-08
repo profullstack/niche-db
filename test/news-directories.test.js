@@ -184,7 +184,7 @@ describe('brisk: the small web only', () => {
   });
 
   test('the on-demand screenshot placeholder is not carried as an image', () => {
-    const shot = 'https://brisk.news/api/screenshot?url=https%3A%2F%2Fexample.com';
+    const shot = 'https://brisk.pwa.pit.world/api/screenshot?url=https%3A%2F%2Fexample.com';
     expect(brisk.toItem(row({ imageUrl: shot })).imageUrl).toBeNull();
     expect(brisk.toItem(row()).imageUrl).toBe('https://popcorn.cx/img/moc.jpg');
   });

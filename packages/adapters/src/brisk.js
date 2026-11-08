@@ -28,7 +28,7 @@ import { decodeEntities, defineAdapter } from '@nichedb/core/adapter';
  * walks pages rather than asking per desk.
  */
 
-const BASE = 'https://brisk.news/api/news';
+const BASE = 'https://brisk.pwa.pit.world/api/news';
 
 /**
  * brisk caps a response at 50 rows however large a `limit` is asked for, and the
@@ -133,7 +133,7 @@ export const brisk = defineAdapter({
   collection: 'news',
   description:
     'Posts from the ~33,000 independent feeds brisk.news polls — the Kagi small-web catalogue and a curated set. Blogs rather than newsrooms, filed under their own "independent" desk. Keyless. The mainstream wire and the Google News stubs the same endpoint carries are deliberately not taken.',
-  docs: 'https://brisk.news',
+  docs: 'https://brisk.pwa.pit.world',
   kinds: ['story'],
   cadenceMinutes: 60,
   configFields: [
