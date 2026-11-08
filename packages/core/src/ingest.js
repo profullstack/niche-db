@@ -4,9 +4,9 @@ import * as profiles from '@nichedb/db/profiles';
 import * as q from '@nichedb/db/queries';
 import { retryTransient } from '@nichedb/db/resilience';
 import { normaliseItem } from './adapter.js';
+import { failureClass, flaggedUntil } from './crawl.js';
 import { makeHttp } from './http.js';
 import { profileItem } from './profiles.js';
-import { failureClass, flaggedUntil } from './crawl.js';
 import { retryMinutes } from './retry.js';
 
 const UA = () =>
