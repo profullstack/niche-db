@@ -7,6 +7,7 @@ import { npmStats } from './npm.js';
 import { opengraph } from './opengraph.js';
 import { openlibraryWork } from './openlibrary.js';
 import { population } from './population.js';
+import { scrapeExchange } from './scrape-exchange.js';
 import { secCompany } from './sec.js';
 import { semanticScholar } from './semanticscholar.js';
 import { tmdbArtwork } from './tmdb-artwork.js';
@@ -29,6 +30,7 @@ export const ENRICHERS = [
   corpusdata,
   mapillary,
   population,
+  scrapeExchange,
 ];
 
 const byName = new Map(ENRICHERS.map((e) => [e.name, e]));
