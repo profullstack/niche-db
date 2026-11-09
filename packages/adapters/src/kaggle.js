@@ -154,7 +154,16 @@ export const kaggle = defineAdapter({
       }
       const params = new URLSearchParams({ sortBy: sort, page: String(page) });
       if (config.search) params.set('search', String(config.search));
-      const rows = await http.json(`${API}?${params}`, { timeoutMs: 10_000 });
+      let rows;
+      try {
+        rows = await http.json(`${API}?${params}`, { timeoutMs: 10_000 });
+      } catch (err) {
+        // After ~60 quick pages Kaggle answers 404 (a throttle, not a missing page).
+        // Keep what this run read; the first page failing is still a real failure.
+        if (page === 1) throw err;
+        stop = `stopped at page ${page}: ${String(err?.message ?? err).slice(0, 80)}`;
+        break;
+      }
       if (!Array.isArray(rows) || rows.length === 0) {
         stop = 'end';
         break;
@@ -182,7 +191,7 @@ export const kaggle = defineAdapter({
         break;
       }
       // A short page is not the end: Kaggle drops rows it hides after paging (19 of 20).
-      await Bun.sleep(500);
+      await Bun.sleep(1500);
     }
     const note = `${kept} of ${read} ${sort} datasets kept, ${pages} pages${stop ? ` (${stop})` : ''}`;
     log(note);
