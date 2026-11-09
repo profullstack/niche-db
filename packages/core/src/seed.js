@@ -22,7 +22,7 @@ export const COLLECTIONS = [
     slug: 'packages',
     name: 'Packages & models',
     description:
-      'Every new version on npm, PyPI and crates.io, every model pushed to Hugging Face, every release on the GitHub repos you name.',
+      'Every new version on npm, PyPI and crates.io, every model pushed to Hugging Face, every public dataset on Kaggle, every release on the GitHub repos you name.',
   },
   {
     slug: 'filings',
@@ -943,6 +943,14 @@ export const DEFAULT_FEEDS = [
     slug: 'huggingface-models',
     name: 'Hugging Face: new models',
     query: { sources: ['huggingface-models'] },
+  },
+  {
+    collection: 'packages',
+    slug: 'kaggle-datasets',
+    name: 'Kaggle: datasets',
+    description:
+      'Public Kaggle datasets with licence, size, usability score, votes and downloads: what changed lately plus the most voted. Listings link back to Kaggle; no data is copied.',
+    query: { sources: ['kaggle-datasets-updated', 'kaggle-datasets-top'] },
   },
   {
     collection: 'packages',

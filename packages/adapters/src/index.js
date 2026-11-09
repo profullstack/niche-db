@@ -79,6 +79,7 @@ import { igdb } from './igdb.js';
 import { igdbCatalog } from './igdb-catalog.js';
 import { imdbRatings } from './imdb.js';
 import { installmapYcMcp, installmapYcPeople } from './installmap.js';
+import { kaggle } from './kaggle.js';
 import { kitsuAnime } from './kitsu-anime.js';
 import { landRegistrySales } from './landregistry.js';
 import { launchLibrary } from './launchlibrary.js';
@@ -208,6 +209,7 @@ export const ADAPTERS = [
   crates,
   goModules,
   huggingface,
+  kaggle,
   githubReleases,
   edgar,
   federalRegister,

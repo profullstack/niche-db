@@ -19,6 +19,7 @@ import { toItem as frItem } from '../packages/adapters/src/federalregister.js';
 import { parseFeed as parseGdacs } from '../packages/adapters/src/gdacs.js';
 import { toItem as hfItem } from '../packages/adapters/src/huggingface.js';
 import { ADAPTERS, adapterByName } from '../packages/adapters/src/index.js';
+import { toItem as kaggleItem } from '../packages/adapters/src/kaggle.js';
 import { toItem as launchItem } from '../packages/adapters/src/launchlibrary.js';
 import { toItem as npmItem } from '../packages/adapters/src/npm.js';
 import { parseUpdates } from '../packages/adapters/src/pypi.js';
@@ -273,6 +274,33 @@ describe('simple mappers', () => {
     expect(it.url).toBe('https://huggingface.co/org/model');
     expect(it.tags).toEqual(['huggingface', 'text-generation', 'transformers']);
     expect(hfItem({ id: 'd/s' }, 'datasets').url).toBe('https://huggingface.co/datasets/d/s');
+  });
+  test('kaggle', () => {
+    const row = {
+      id: 1,
+      ref: 'jessicali9530/acnh',
+      title: 'Animal Crossing',
+      subtitle: 'Items and villagers',
+      ownerRef: 'jessicali9530',
+      licenseName: 'CC0: Public Domain',
+      totalBytes: 1000,
+      lastUpdated: '2021-06-08T15:05:09.513Z',
+      usabilityRating: 1,
+      voteCount: 60634,
+      downloadCount: 104816,
+      tags: [{ ref: 'video games', name: 'video games' }],
+    };
+    const it = kaggleItem(row);
+    expect(it.externalId).toBe('dataset:jessicali9530/acnh');
+    expect(it.kind).toBe('dataset');
+    expect(it.url).toBe('https://www.kaggle.com/datasets/jessicali9530/acnh');
+    expect(it.summary).toBe('Items and villagers');
+    expect(it.tags).toEqual(['kaggle', 'dataset', 'cc0-public-domain', 'video-games']);
+    expect(it.data.votes).toBe(60634);
+    // Machine-generated uploads score 0.25 and fall below the default bar.
+    expect(kaggleItem({ ...row, usabilityRating: 0.25 }, { minUsability: 0.5 })).toBeNull();
+    expect(kaggleItem({ ...row, isPrivate: true })).toBeNull();
+    expect(kaggleItem({ ...row, ref: 'noslash' })).toBeNull();
   });
   test('federal register', () => {
     const it = frItem({
