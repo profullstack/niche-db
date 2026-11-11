@@ -117,6 +117,7 @@ describe('registry', () => {
         'aircraft',
         'satellites',
         'ships',
+        'trains',
       ]).toContain(a.collection);
     }
     expect(adapterByName('steam').title).toContain('Steam');

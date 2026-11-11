@@ -185,6 +185,7 @@ export const Layout = (props) => (
           <a href="/airplanes">Airplanes</a>
           <a href="/satellites">Satellites</a>
           <a href="/ships">Ships</a>
+          <a href="/trains">Trains</a>
           <a href="/traffic">Bad IPs</a>
           {props.user?.role === 'admin' || props.user?.moderates ? (
             <a href="/admin/submissions">Queue</a>

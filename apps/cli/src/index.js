@@ -15,7 +15,7 @@ import { homedir, tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createInterface } from 'node:readline';
 
-export const VERSION = '0.62.0';
+export const VERSION = '0.63.0';
 const GEO_FLAGS = ['lat', 'long', 'radius', 'unit', 'bbox', 'sort', 'offset'];
 const DEFAULT_API = process.env.NICHEDB_API ?? 'https://nichedb.dev';
 const CONFIG_DIR = join(process.env.XDG_CONFIG_HOME ?? join(homedir(), '.config'), 'nichedb');
@@ -250,6 +250,13 @@ export const COMMANDS = [
     usage: 'satellite <NORAD number | designator | name> [--json]',
     summary:
       'A satellite, rocket stage or piece of debris: GCAT catalogue entry and where it is over the Earth right now.',
+    options: ['--json'],
+  },
+  {
+    name: 'train',
+    usage: 'train <number | station | words> [--json]',
+    summary:
+      'A train run (Amtrak, VIA Rail, Finland): where it is, its next stop and how late; or a European station.',
     options: ['--json'],
   },
   {
@@ -1200,10 +1207,16 @@ export async function run(
     }
     case 'airplane':
     case 'satellite':
-    case 'ship': {
+    case 'ship':
+    case 'train': {
       const term = rest.join(' ').trim();
       if (!term) throw new Error(`${cmd} <id or name>`);
-      const path = { airplane: 'airplanes', satellite: 'satellites', ship: 'ships' }[cmd];
+      const path = {
+        airplane: 'airplanes',
+        satellite: 'satellites',
+        ship: 'ships',
+        train: 'trains',
+      }[cmd];
       const r = await client.get(`/api/v1/${path}/${encodeURIComponent(term)}`);
       if (json) {
         out(JSON.stringify(r, null, 2));
@@ -1215,6 +1228,8 @@ export async function run(
         return 0;
       }
       if (r.record) out(r.record.summary);
+      if (cmd === 'train' && r.live?.delay)
+        out(`now: ${r.live.delay}${r.live.nextStop ? `, next ${r.live.nextStop.name}` : ''}`);
       const now = r.position ?? r.live?.[0] ?? (Array.isArray(r.live) ? null : r.live);
       if (now?.lat !== undefined && now?.lat !== null) {
         const extra = [

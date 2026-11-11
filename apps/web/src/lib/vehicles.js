@@ -1,4 +1,12 @@
-import { DIGITRAFFIC, DIGITRAFFIC_HEADERS, NAV_STATUS } from '@nichedb/adapters';
+import {
+  amtrakItem,
+  DIGITRAFFIC,
+  DIGITRAFFIC_HEADERS,
+  FINTRAFFIC_HEADERS,
+  FINTRAFFIC_RAIL,
+  finnishItem,
+  NAV_STATUS,
+} from '@nichedb/adapters';
 import { config } from '@nichedb/config';
 import * as q from '@nichedb/db/queries';
 import {
@@ -372,5 +380,98 @@ export async function shipReport(raw) {
       error: `No vessel ${parsed.type.toUpperCase()} ${parsed.value} in range or on record.`,
       status: 404,
     };
+  return { query: raw, parsed, record, live };
+}
+
+/* --------------------------------------------------------------- trains -- */
+
+/** A stored row id (amtk-5-2026-11-09, fi-2026-11-11-1, trainline-3389), a train number, or words. */
+export function parseTrainQuery(raw) {
+  const s = String(raw ?? '').trim();
+  if (!s) return null;
+  if (/^(amtk|via|fi|trainline)-[\w-]+$/i.test(s)) return { type: 'id', value: s.toLowerCase() };
+  const num = /^(?:(amtrak|via|ic|s|pyo|hdm|ak|pvv|[a-z])\s*)?(\d{1,5})$/i.exec(s);
+  if (num) return { type: 'number', value: num[2], operator: num[1]?.toLowerCase() ?? null };
+  return { type: 'text', value: s };
+}
+
+/** Rows for a train number: the runs that carry it, newest first. */
+export async function trainRuns(number) {
+  const col = await q.getCollection('trains');
+  if (!col) return [];
+  return q
+    .recentItems({
+      collectionId: col.id,
+      tags: [`train-${String(number).toLowerCase()}`],
+      sort: 'updated',
+      limit: 12,
+      timeoutMs: 8_000,
+    })
+    .catch(() => []);
+}
+
+/** The same row rebuilt from the upstream right now, so a page is never ten minutes old. */
+export async function liveTrain(record) {
+  const d = record?.data ?? {};
+  if (!d.trainNumber) return null;
+  if (record.externalId.startsWith('fi-')) {
+    const [trains, locs] = await Promise.all([
+      cachedJson(`${FINTRAFFIC_RAIL}/trains/${d.startedOn}/${d.trainNumber}`, {
+        ttlMs: 30_000,
+        headers: FINTRAFFIC_HEADERS,
+      }),
+      cachedJson(`${FINTRAFFIC_RAIL}/train-locations/latest/${d.trainNumber}`, {
+        ttlMs: 30_000,
+        headers: FINTRAFFIC_HEADERS,
+      }),
+    ]);
+    const t = Array.isArray(trains) ? trains[0] : null;
+    if (!t) return null;
+    const names = new Map(
+      [...(d.stops ?? []), d.origin, d.destination].filter(Boolean).map((x) => [x.code, x.name]),
+    );
+    const location = Array.isArray(locs) ? locs.find((l) => l.departureDate === d.startedOn) : null;
+    return finnishItem(t, { names, location })?.data ?? null;
+  }
+  const body = await cachedJson(
+    `https://api-v3.amtraker.com/v3/trains/${encodeURIComponent(d.trainNumber)}`,
+    { ttlMs: 30_000 },
+  );
+  const runs = Object.values(body ?? {}).flat();
+  const same = runs.map(amtrakItem).find((i) => i?.externalId === record.externalId);
+  return same?.data ?? null;
+}
+
+export async function trainReport(raw) {
+  const parsed = parseTrainQuery(raw);
+  if (!parsed)
+    return { error: 'Type a train number (Amtrak 5, IC 1), a station or a route.', status: 400 };
+  if (parsed.type === 'text') {
+    return {
+      query: raw,
+      parsed,
+      matches: (await searchCollection('trains', parsed.value)).map(rowOut),
+    };
+  }
+  if (parsed.type === 'number') {
+    let runs = (await trainRuns(parsed.value)).map(rowOut);
+    const op = parsed.operator;
+    if (op === 'amtrak') runs = runs.filter((r) => r.externalId.startsWith('amtk-'));
+    else if (op === 'via') runs = runs.filter((r) => r.externalId.startsWith('via-'));
+    else if (op) runs = runs.filter((r) => r.externalId.startsWith('fi-'));
+    if (runs.length === 1) return trainReport(runs[0].externalId);
+    if (!runs.length)
+      return {
+        query: raw,
+        parsed,
+        error: `No train ${parsed.value} running or on record today.`,
+        status: 404,
+      };
+    return { query: raw, parsed, matches: runs };
+  }
+  const record = rowOut(await q.itemByExternalId('trains', parsed.value));
+  if (!record)
+    return { query: raw, parsed, error: `No train or station ${parsed.value}.`, status: 404 };
+  const live = record.externalId.startsWith('trainline-') ? null : await liveTrain(record);
   return { query: raw, parsed, record, live };
 }

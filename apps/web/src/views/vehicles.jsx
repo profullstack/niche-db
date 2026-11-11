@@ -702,3 +702,216 @@ export function ShipPage({ user, report }) {
     </Layout>
   );
 }
+
+/* --------------------------------------------------------------- trains -- */
+
+const trainHref = (r) => `/trains/${encodeURIComponent(r.externalId)}`;
+
+export function TrainsLanding({ user, counts, late = [] }) {
+  return (
+    <Layout
+      user={user}
+      canonical="/trains"
+      title="Trains: what is running now, how late, and every station"
+      description="Look up a train by number (Amtrak 5, IC 1) for where it is, its next stop and how late it is, or any of 70,000 European stations. Amtrak and VIA Rail live, every Finnish passenger train, Trainline's open station list."
+    >
+      <section class="hero">
+        <h1>Trains</h1>
+        <p class="lede">
+          Every Amtrak and VIA Rail train on the line and every Finnish passenger train today, with
+          where it is, its next stop and how late it is, plus about 70,000 European stations. Type a
+          train number or a station.
+        </p>
+        <Lookup
+          action="/trains"
+          placeholder="Amtrak 5, IC 1, Paris Gare de Lyon"
+          label="Train number or station"
+        />
+      </section>
+
+      <section>
+        <h2>Running late right now</h2>
+        <RowList rows={late} href={trainHref} />
+      </section>
+
+      <Counts
+        counts={counts}
+        labels={[
+          ['running', 'Running at the last pass'],
+          ['late', 'More than 15 minutes late'],
+          ['amtk', 'Amtrak runs'],
+          ['via', 'VIA Rail runs'],
+          ['finland', 'Finnish trains'],
+          ['station', 'Stations'],
+          ['main-station', 'Main stations'],
+          ['country-ch', 'Swiss stations'],
+          ['country-de', 'German stations'],
+          ['country-fr', 'French stations'],
+        ]}
+      />
+
+      <section>
+        <h2>Follow</h2>
+        <ul>
+          <li>
+            <a href="/f/late-trains">Trains running late</a>,{' '}
+            <a href="/f/amtrak-trains">Amtrak and VIA Rail</a>,{' '}
+            <a href="/f/finland-trains">Finland</a>,{' '}
+            <a href="/f/railway-stations">European stations</a>
+          </li>
+          <li>
+            API: <code>/api/v1/trains/amtrak%205</code>, and <a href="/c/trains">/c/trains</a> with
+            RSS, JSON, near= and MCP
+          </li>
+        </ul>
+        <p class="muted">
+          Sources: Amtraker (community API over Amtrak and VIA Rail data), Fintraffic rail open data
+          (CC BY 4.0), and trainline-eu/stations (ODbL 1.0, © Trainline and contributors).
+        </p>
+      </section>
+    </Layout>
+  );
+}
+
+const stopTime = (s) => when(s.scheduled ?? s.scheduledDeparture ?? s.scheduledArrival);
+const stopActual = (s) => when(s.actual ?? s.estimate ?? s.departure ?? s.arrival);
+
+export function TrainPage({ user, report }) {
+  const r = report ?? {};
+  const stored = r.record?.data ?? {};
+  const d = r.live ?? stored;
+  const station = r.record?.externalId?.startsWith('trainline-');
+  const id = r.record?.externalId ?? r.query;
+  const last = d.lastStop;
+  const next = d.nextStop;
+  return (
+    <Layout
+      user={user}
+      canonical={`/trains/${encodeURIComponent(id ?? '')}`}
+      title={r.record?.title ?? `Train ${r.query ?? ''}`}
+      description={r.record?.summary ?? `Train lookup for ${r.query ?? ''}.`}
+    >
+      <section class="hero">
+        <h1>{r.record?.title ?? r.query}</h1>
+        <Lookup
+          action="/trains"
+          value={r.parsed?.type === 'id' ? '' : (r.query ?? '')}
+          placeholder="Train number or station"
+          label="Train number or station"
+        />
+      </section>
+      {r.error ? <ErrorBox report={r} /> : null}
+      {r.matches ? (
+        <section>
+          <h2>Matches for “{r.query}”</h2>
+          {r.matches.length ? (
+            <RowList rows={r.matches} href={trainHref} />
+          ) : (
+            <p>Nothing matches.</p>
+          )}
+        </section>
+      ) : null}
+      {!r.error && !r.matches && station ? (
+        <section>
+          <p>{r.record.summary}</p>
+          <Facts
+            rows={[
+              ['Country', stored.country],
+              ['UIC code', stored.uic],
+              ['Time zone', stored.timeZone],
+              ['Sold by', stored.servedBy?.length ? stored.servedBy.join(', ') : null],
+              [
+                'Where',
+                stored.place ? (
+                  <a href={osm(stored.place.lat, stored.place.lon, 15)}>
+                    {stored.place.lat.toFixed(5)}, {stored.place.lon.toFixed(5)}
+                  </a>
+                ) : null,
+              ],
+            ]}
+          />
+          <p class="muted">Source: {stored.source}</p>
+        </section>
+      ) : null}
+      {!r.error && !r.matches && !station ? (
+        <>
+          <section>
+            <h2>{r.live ? 'Right now' : 'At the last pass'}</h2>
+            <Facts
+              rows={[
+                ['Operator', d.operator],
+                ['Route', d.route ?? d.commuterLine],
+                ['From', d.origin?.name],
+                ['To', d.destination?.name],
+                ['Left on', d.startedOn],
+                ['State', d.cancelled ? 'cancelled' : (d.state ?? null)],
+                ['Delay', d.delay],
+                [
+                  'Last stop',
+                  last
+                    ? `${last.name}${last.departed || last.at ? ` at ${when(last.departed ?? last.at)}` : ''}`
+                    : null,
+                ],
+                [
+                  'Next stop',
+                  next
+                    ? `${next.name}${next.due || next.scheduled ? `, due ${when(next.due ?? next.scheduled)}` : ''}${next.platform ? `, platform ${next.platform}` : ''}`
+                    : null,
+                ],
+                [
+                  'Speed',
+                  d.speedMph ? `${d.speedMph} mph` : d.speedKmh ? `${d.speedKmh} km/h` : null,
+                ],
+                [
+                  'Position',
+                  d.place ? (
+                    <a href={osm(d.place.lat, d.place.lon, 10)}>
+                      {d.place.lat.toFixed(4)}, {d.place.lon.toFixed(4)}
+                    </a>
+                  ) : null,
+                ],
+                ['Alerts', d.alerts?.length ? d.alerts.join(' · ') : null],
+              ]}
+            />
+          </section>
+          {d.stops?.length ? (
+            <section>
+              <h2>Stops</h2>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Station</th>
+                    <th>Scheduled</th>
+                    <th>Actual or expected</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {d.stops.map((s) => (
+                    <tr>
+                      <td>
+                        {s.name}
+                        {s.type ? ` (${s.type})` : ''}
+                        {s.cancelled ? ' (cancelled)' : ''}
+                      </td>
+                      <td>{stopTime(s)}</td>
+                      <td>
+                        {stopActual(s)}
+                        {Number.isFinite(s.lateMinutes) && s.lateMinutes
+                          ? ` (${s.lateMinutes > 0 ? '+' : ''}${s.lateMinutes} min)`
+                          : ''}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </section>
+          ) : null}
+          <p class="muted">
+            Source: {stored.source}. <a href={r.record.url}>Elsewhere</a>.
+          </p>
+          <Json href={`/api/v1/trains/${encodeURIComponent(id ?? '')}`} />
+        </>
+      ) : null}
+    </Layout>
+  );
+}
