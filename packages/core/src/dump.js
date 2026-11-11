@@ -606,6 +606,20 @@ async function* processLines(cmd, opts) {
 }
 
 /**
+ * Lines of one member of a zip, streamed through `unzip -p`, for a member too
+ * big to hold as one string (the FAA register's 195 MB MASTER.txt). Like
+ * `splitLines`, `skip` lines are counted, not decoded, so `skip + lines
+ * yielded` is the position to keep in a cursor.
+ *
+ * @param {string} path
+ * @param {string} member
+ * @param {{ skip?: number }} [opts]
+ */
+export function zipMemberLines(path, member, opts = {}) {
+  return processLines(['unzip', '-p', path, member], opts);
+}
+
+/**
  * The text of a small zip's members, concatenated (`unzip -p`). For files of a
  * few megabytes that arrive zipped (the Census Gazetteer, GeoNames' city
  * lists); anything larger belongs on a streaming reader instead.

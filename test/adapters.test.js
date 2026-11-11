@@ -114,6 +114,9 @@ describe('registry', () => {
         'weed',
         'launches',
         'blacklists',
+        'aircraft',
+        'satellites',
+        'ships',
       ]).toContain(a.collection);
     }
     expect(adapterByName('steam').title).toContain('Steam');

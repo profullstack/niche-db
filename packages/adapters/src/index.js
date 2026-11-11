@@ -3,6 +3,7 @@ import { adsbFlights } from './adsb.js';
 import { agenticjobs } from './agenticjobs.js';
 import { aiid } from './aiid.js';
 import { aiornot } from './aiornot.js';
+import { digitrafficAis } from './ais.js';
 import {
   aitmplAgents,
   aitmplCommands,
@@ -58,6 +59,7 @@ import { espnPlays } from './espnplays.js';
 import { eurostat } from './eurostat.js';
 import { exploitdb, metasploit, nuclei } from './exploit-signals.js';
 import { exploitgym } from './exploitgym.js';
+import { faaRegistry } from './faa-registry.js';
 import { faaAirportStatus } from './faanas.js';
 import { fbiCrimeEstimates } from './fbicrime.js';
 import { fdicInstitutions, fdicStructureChanges } from './fdic.js';
@@ -65,6 +67,7 @@ import { federalRegister } from './federalregister.js';
 import { findhost } from './findhost.js';
 import { freddieMacRates } from './freddiemac.js';
 import { fueleconomyCatalog } from './fueleconomy.js';
+import { gcatSatcat } from './gcat.js';
 import { gdacs } from './gdacs.js';
 import { gdelt } from './gdelt.js';
 import { geonamesCities } from './geonames-cities.js';
@@ -456,6 +459,10 @@ export const ADAPTERS = [
   searchpeptides,
   weedforcrypto,
   builtindie,
+  // Airplanes, satellites and ships: the FAA register, GCAT and open AIS.
+  faaRegistry,
+  gcatSatcat,
+  digitrafficAis,
 ];
 
 /**
@@ -475,5 +482,13 @@ export function adapterByName(name) {
   return byName.get(String(name)) ?? null;
 }
 
+export {
+  DIGITRAFFIC,
+  DIGITRAFFIC_HEADERS,
+  flagOf,
+  NAV_STATUS,
+  shipType,
+  toItem as aisVesselItem,
+} from './ais.js';
 export { HOUSE as OPENVULN_HOUSE } from './openvuln.js';
 export { POLICE_CITIES, POLICE_SCOPE } from './police-updates.js';
