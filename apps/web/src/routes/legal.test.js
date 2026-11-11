@@ -2,12 +2,12 @@ import { describe, expect, test } from 'bun:test';
 import { Hono } from 'hono';
 
 process.env.DATABASE_URL ??= 'postgres://test:test@localhost:5432/test';
-const { config } = await import('../packages/config/src/index.js');
+const { config } = await import('@nichedb/config');
 // Signed-out pages render through Redis otherwise, and there is none here.
 config.cache.enabled = false;
-const { render } = await import('../apps/web/src/lib/http.js');
-const { LEGAL_EFFECTIVE_DATE, Privacy, Terms } = await import('../apps/web/src/views/legal.jsx');
-const { isReservedNicheSlug } = await import('../packages/knowledge/src/index.js');
+const { render } = await import('../lib/http.js');
+const { LEGAL_EFFECTIVE_DATE, Privacy, Terms } = await import('../views/legal.jsx');
+const { isReservedNicheSlug } = await import('@nichedb/knowledge');
 
 /** /privacy and /terms, rendered without a database the way the routes render them. */
 const app = new Hono();
