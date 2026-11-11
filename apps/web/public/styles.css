@@ -1880,3 +1880,19 @@ pre.lyrics {
   padding: 0;
   margin: 1rem 0 2rem;
 }
+
+/* /privacy and /terms: one readable column of prose. */
+.legal {
+  max-width: 46rem;
+  line-height: 1.65;
+}
+.legal h2 {
+  font-size: 1.15rem;
+  margin: 1.8rem 0 0.5rem;
+}
+.legal ul {
+  padding-left: 1.25rem;
+}
+.legal li {
+  margin: 0.4rem 0;
+}

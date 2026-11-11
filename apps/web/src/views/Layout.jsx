@@ -25,10 +25,15 @@ const faviconFor = (user) => {
  * fetched (refreshed in the background, cached an hour by the package): Layout
  * is a sync component, and the x402 gateway's crawl page renders it without await.
  */
+/** Pages that carry no ad unit: the homepage and the legal pages. */
+const NO_AD_PAGES = new Set(['/', '/privacy', '/terms']);
+
 const FOOTER = {
   site: 'https://nichedb.dev/',
   links: [
     { label: 'About', href: '/about' },
+    { label: 'Privacy', href: '/privacy' },
+    { label: 'Terms', href: '/terms' },
     { label: 'API', href: '/docs/api' },
     { label: 'CLI', href: '/docs/cli' },
     { label: 'MCP', href: '/docs/mcp' },
@@ -224,7 +229,7 @@ export const Layout = (props) => (
       <main id="main" class={props.wide ? 'wide' : ''}>
         {/* Top of the content, never down by the footer. Put the ad-free offer
             beside the ad it removes. The homepage carries no ad. */}
-        {config.ads.enabled && currentModules().ads && props.canonical !== '/' ? (
+        {config.ads.enabled && currentModules().ads && !NO_AD_PAGES.has(props.canonical) ? (
           <aside class="ad-slot">
             <div data-cp-ad data-slot={config.ads.slot} data-format="text_link" />
             <p class="small muted upsell">

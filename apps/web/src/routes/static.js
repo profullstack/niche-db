@@ -209,6 +209,8 @@ export function registerStatic(app, gateway) {
     const urls = [
       { loc: '/' },
       { loc: '/about' },
+      { loc: '/privacy' },
+      { loc: '/terms' },
       { loc: '/sources' },
       { loc: '/crawlstatus' },
       { loc: '/feeds' },
