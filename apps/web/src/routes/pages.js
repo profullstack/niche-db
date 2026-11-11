@@ -13,6 +13,7 @@ import { buildJsonFeed, buildRss } from '../lib/rss.js';
 import { scannerContextOptions } from '../lib/scanner-context.js';
 import { allowedEnrichers } from '../lib/serialize.js';
 import { canEditFeed } from '../lib/service.js';
+import { Privacy, Terms } from '../views/legal.jsx';
 import {
   About,
   CollectionPage,
@@ -321,6 +322,9 @@ export function registerPages(app) {
     const [follows, items] = await Promise.all([q.listFollows(user.id), q.followedItems(user.id)]);
     return c.html(await render(<Following user={user} follows={follows} items={items} />));
   });
+
+  app.get('/privacy', async (c) => c.html(await render(<Privacy user={c.get('user')} />)));
+  app.get('/terms', async (c) => c.html(await render(<Terms user={c.get('user')} />)));
 
   app.get('/about', async (c) =>
     c.html(await render(<About user={c.get('user')} stats={await q.siteStats()} />)),
