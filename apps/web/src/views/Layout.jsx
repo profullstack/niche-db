@@ -135,6 +135,17 @@ export const Layout = (props) => (
           async
         />
       ) : null}
+      {/* WebMCP (@profullstack/webmcp): site_info, open_page, search_site and this
+          site's /mcp tools for the AI agent in the visitor's browser. No-op without WebMCP. */}
+      <script
+        type="module"
+        data-webmcp=""
+        src="https://cdn.jsdelivr.net/npm/@profullstack/webmcp@0/src/embed.js"
+        data-mcp="/mcp"
+        data-mcp-exclude="add_source,run_source,delete_webhook,rotate_webhook_secret"
+        data-search-api="/api/v1/search?q={query}&limit={limit}"
+        data-pages='{"feeds":"/feeds","mcp_servers":"/c/mcp","profiles":"/profiles","tlds":"/tlds","traffic":"/traffic","submit":"/submit","premium":"/premium"}'
+      />
     </head>
     <body
       data-tz={props.user?.timezone ?? null}
