@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'bun:test';
 import { Hono } from 'hono';
 
-process.env.DATABASE_URL ??= 'postgres://test:test@localhost:5432/test';
+process.env.DATABASE_URL ??= 'postgres://localhost:5432/test';
 const { config } = await import('@nichedb/config');
 // Signed-out pages render through Redis otherwise, and there is none here.
 config.cache.enabled = false;
