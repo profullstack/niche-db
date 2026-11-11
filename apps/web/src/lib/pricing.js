@@ -131,6 +131,10 @@ export function gatewayOptions(priceCents) {
       // charge them to read.
       '/opportunities',
       '/opportunities/',
+      // The legal pages stay readable by every crawler: a connector directory's
+      // review bot reads them before listing the MCP server.
+      '/privacy',
+      '/terms',
     ],
     /*
      * The item, feed and TLD pages are walked by a residential swarm wearing

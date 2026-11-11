@@ -8,6 +8,7 @@ config.cache.enabled = false;
 const { render } = await import('../lib/http.js');
 const { LEGAL_EFFECTIVE_DATE, Privacy, Terms } = await import('../views/legal.jsx');
 const { isReservedNicheSlug } = await import('@nichedb/knowledge');
+const { gatewayOptions } = await import('../lib/pricing.js');
 
 /** /privacy and /terms, rendered without a database the way the routes render them. */
 const app = new Hono();
@@ -49,5 +50,10 @@ describe('legal pages', () => {
   test('no niche can take either path', () => {
     expect(isReservedNicheSlug('privacy')).toBe(true);
     expect(isReservedNicheSlug('terms')).toBe(true);
+  });
+  test('both stay open to AI crawlers, which the x402 gate otherwise charges', () => {
+    const open = gatewayOptions(100).openPaths;
+    expect(open).toContain('/privacy');
+    expect(open).toContain('/terms');
   });
 });
