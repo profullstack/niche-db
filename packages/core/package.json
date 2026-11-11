@@ -1,6 +1,6 @@
 {
   "name": "@nichedb/core",
-  "version": "0.63.0",
+  "version": "0.64.0",
   "private": true,
   "type": "module",
   "exports": {
@@ -15,6 +15,7 @@
     "./data-dumps": "./src/data-dumps.js",
     "./geo": "./src/geo.js",
     "./population": "./src/population.js",
+    "./transit": "./src/transit.js",
     "./tlds": "./src/tlds/index.js",
     "./traffic": "./src/traffic/index.js",
     "./traffic/review": "./src/traffic/review.js",
@@ -30,6 +31,7 @@
     "@nichedb/db": "workspace:*",
     "@nichedb/enrichers": "workspace:*",
     "@profullstack/openprofile": "^0.2.0",
+    "gtfs-realtime-bindings": "1.1.1",
     "unbzip2-stream": "^1.4.3"
   }
 }

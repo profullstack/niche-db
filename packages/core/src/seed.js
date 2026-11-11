@@ -437,9 +437,39 @@ export const COLLECTIONS = [
     description:
       'Trains running now and the stations they run between. Every Amtrak and VIA Rail run on the line (Amtraker), refreshed every ten minutes, and every Finnish passenger train today (Fintraffic, CC BY 4.0) every fifteen: one row per run with its route, where it is, its last and next stop, how late it is and every stop’s scheduled and actual time. Plus about 70,000 European stations from Trainline’s open list (ODbL), with UIC codes, coordinates and the operators that sell tickets to them. Look one up at /trains.',
   },
+  {
+    slug: 'transit',
+    name: 'Transit',
+    description:
+      'Public transit in big cities: every line and station of the New York subway, the MBTA, BART, the Chicago L and London’s Underground, DLR, Overground and Elizabeth line, each station with the lines that serve it and, per line and direction, its first and last train, trips and busiest hour on weekdays and weekends. Live service alerts, written again when they clear. At /transit each city has a live map of its trains and buses (also Toronto TTC and Philadelphia SEPTA) and every station its next arrivals. Keyless agency feeds.',
+  },
 ];
 
 export const DEFAULT_FEEDS = [
+  {
+    collection: 'transit',
+    slug: 'transit-alerts',
+    name: 'Transit service alerts (all cities)',
+    query: { kinds: ['service-alert'] },
+  },
+  {
+    collection: 'transit',
+    slug: 'nyc-subway-alerts',
+    name: 'NYC subway alerts',
+    query: { sources: ['transit-alerts-nyc'] },
+  },
+  {
+    collection: 'transit',
+    slug: 'london-tube-status',
+    name: 'London Underground, DLR, Overground and Elizabeth line disruptions',
+    query: { sources: ['transit-alerts-london'] },
+  },
+  {
+    collection: 'transit',
+    slug: 'transit-stations',
+    name: 'Transit stations',
+    query: { kinds: ['transit-station'] },
+  },
   {
     collection: 'trains',
     slug: 'amtrak-trains',

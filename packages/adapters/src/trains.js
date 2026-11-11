@@ -386,7 +386,9 @@ export function stationItem(row) {
     kind: 'station',
     title: `${row.name} (${row.country})`,
     summary: `${row.name}, a ${t('is_airport') ? 'station at an airport' : t('is_city') ? 'city (all its stations)' : t('is_main_station') ? 'main station' : 'station'} in ${row.country}${row.uic ? `, UIC ${row.uic}` : ''}${served.length ? `, sold by ${served.join(', ')}` : ''}.`,
-    url: `https://www.openstreetmap.org/?mlat=${lat}&mlon=${lon}#map=16/${lat}/${lon}`,
+    // No url: a map link is shared by every station at the same point, and a
+    // shared url dedupes the rows away (11,400 of 69,993 on the first run).
+    url: null,
     publishedAt: null,
     timeKnown: false,
     precision: 'day',

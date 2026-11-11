@@ -15,7 +15,7 @@ import { homedir, tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createInterface } from 'node:readline';
 
-export const VERSION = '0.63.0';
+export const VERSION = '0.64.0';
 const GEO_FLAGS = ['lat', 'long', 'radius', 'unit', 'bbox', 'sort', 'offset'];
 const DEFAULT_API = process.env.NICHEDB_API ?? 'https://nichedb.dev';
 const CONFIG_DIR = join(process.env.XDG_CONFIG_HOME ?? join(homedir(), '.config'), 'nichedb');
@@ -257,6 +257,13 @@ export const COMMANDS = [
     usage: 'train <number | station | words> [--json]',
     summary:
       'A train run (Amtrak, VIA Rail, Finland): where it is, its next stop and how late; or a European station.',
+    options: ['--json'],
+  },
+  {
+    name: 'transit',
+    usage: 'transit [<city> [<station id>]] [--json]',
+    summary:
+      'Public transit: the cities, a city’s lines and alerts, or a station’s next arrivals and timetable.',
     options: ['--json'],
   },
   {
@@ -1244,6 +1251,35 @@ export async function run(
         out('now: not seen live');
       }
       if (r.record?.url) out(r.record.url);
+      return 0;
+    }
+    case 'transit': {
+      const [city, station] = rest;
+      const path = ['/api/v1/transit', city, station]
+        .filter(Boolean)
+        .map((p, i) => (i ? encodeURIComponent(p) : p))
+        .join('/');
+      const r = await client.get(path);
+      if (json) {
+        out(JSON.stringify(r, null, 2));
+        return 0;
+      }
+      if (r.cities)
+        for (const c of r.cities) out(`${pad(c.slug, 14)} ${c.name}: ${c.system} (${c.live})`);
+      else if (r.arrivals) {
+        out(`${r.station.name}: ${r.station.lines.join(', ')}`);
+        if (!r.arrivals.length) out('  no live arrivals');
+        for (const a of r.arrivals.slice(0, 15))
+          out(
+            `  ${pad(String(a.inMinutes === 0 ? 'now' : `${a.inMinutes} min`), 8)} ${pad(a.line ?? a.route ?? '', 14)} ${a.toward ?? ''}`,
+          );
+      } else {
+        out(`${r.name}: ${r.system}`);
+        out(
+          `  ${r.lines.length} lines, ${r.stations.length} stations, ${r.alerts.length} alerts in force`,
+        );
+        for (const a of r.alerts.slice(0, 10)) out(`  ! ${a.title}`);
+      }
       return 0;
     }
     case 'business': {

@@ -36,6 +36,7 @@ import { registerStatic } from './routes/static.js';
 import { registerSubmit } from './routes/submit.js';
 import { registerTlds } from './routes/tlds.js';
 import { registerTraffic } from './routes/traffic.js';
+import { registerTransit } from './routes/transit.js';
 import { registerVehicles } from './routes/vehicles.js';
 import { registerVulns } from './routes/vulns.js';
 import { NotFound } from './views/pages.jsx';
@@ -181,6 +182,8 @@ registerBlacklists(app);
 registerVulns(app);
 /** Airplanes, satellites and ships: /airplanes, /satellites, /ships, one page per thing, and /api/v1/<kind>/<id>. */
 registerVehicles(app);
+/** Transit: /transit, a live map per city, every station's arrivals and timetable, /api/v1/transit. */
+registerTransit(app);
 /** Lyrics for our own bands: /lyrics and /api/v1/lyrics, read and written by the nixamp radio servers. */
 registerLyrics(app);
 registerMcp(app);
