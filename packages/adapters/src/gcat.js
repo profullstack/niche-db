@@ -49,10 +49,21 @@ export const STATUS = {
   E: 'exploded',
   N: 'no orbit reached',
   TFR: 'transferred to another catalogue',
+  GRP: 'part of a combined spacecraft (a station module)',
+  ATT: 'attached to another object',
+  'R?': 'probably reentered',
+  'L?': 'probably landed',
 };
 
-/** Statuses for an object that is still up there. */
-const UP = new Set(['O', 'OX', 'AO', 'DK', 'DSO']);
+/**
+ * Statuses for an object that is still up there, and for one that is not.
+ * GCAT has more codes than these (ATT, DSA, ERR, REL...); for those `inOrbit`
+ * is null, unknown, rather than a guess either way. The ISS modules are GRP:
+ * an early version counted every code not listed as up as down, and the ISS
+ * page lost its position.
+ */
+const UP = new Set(['O', 'OX', 'AO', 'DK', 'DSO', 'GRP']);
+const DOWN = new Set(['R', 'D', 'L', 'AR', 'AL', 'E', 'N', 'R?', 'L?']);
 
 export const ORBIT = {
   LLEO: 'very low Earth orbit',
@@ -129,7 +140,7 @@ export function toItem(line) {
   const decayed = gcatDate(f[11]);
   const statusCode = clean(f[12]);
   const status = STATUS[statusCode] ?? statusCode;
-  const up = UP.has(statusCode);
+  const up = UP.has(statusCode) ? true : DOWN.has(statusCode) ? false : null;
   const owner = clean(f[14]);
   const state = clean(f[15]);
   const opOrbit = clean(f[39]);
@@ -169,7 +180,7 @@ export function toItem(line) {
     tags: [
       'space',
       slugify(objectType),
-      up ? 'in-orbit' : 'down',
+      up === true ? 'in-orbit' : up === false ? 'down' : null,
       statusCode ? `status-${slugify(statusCode)}` : null,
       state ? `state-${slugify(state)}` : null,
       owner ? `owner-${slugify(owner)}` : null,

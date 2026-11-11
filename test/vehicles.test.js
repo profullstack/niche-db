@@ -82,6 +82,15 @@ describe('GCAT', () => {
       expect.arrayContaining(['in-orbit', 'payload', 'state-ru', 'orbit-lleo']),
     );
   });
+  test('a station module (GRP) is up, an unknown code is unknown, not down', () => {
+    const grp = gcatItem(ISS.replace('\tO\t-\tRSA', '\tGRP\t-\tRSA'));
+    expect(grp.data.inOrbit).toBe(true);
+    expect(grp.tags).toContain('in-orbit');
+    const odd = gcatItem(ISS.replace('\tO\t-\tRSA', '\tERR\t-\tRSA'));
+    expect(odd.data.inOrbit).toBeNull();
+    expect(odd.tags).not.toContain('down');
+    expect(gcatItem(ISS.replace('\tO\t-\tRSA', '\tR\t-\tRSA')).data.inOrbit).toBe(false);
+  });
   test('headers, dates and families', () => {
     expect(gcatItem('#JCAT\tSatcat')).toBeNull();
     expect(gcatDate('1957 Dec  1 1000?')).toBe('1957-12-01');
