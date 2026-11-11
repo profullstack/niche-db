@@ -535,7 +535,7 @@ export function ShipsLanding({ user, counts, ferries = [] }) {
       user={user}
       canonical="/ships"
       title="Ships: vessels on open AIS, and where they are now"
-      description="Look up a ship or boat by name, MMSI or IMO number: type, flag, size, call sign, stated destination and live position from open AIS (Digitraffic, northern Baltic, CC BY 4.0)."
+      description="Look up a ship or boat by name, MMSI or IMO number: type, flag, size, call sign, stated destination and position from AIS, worldwide (aisstream.io) and live in the northern Baltic (Digitraffic, CC BY 4.0)."
     >
       <section class="hero">
         <h1>Ships and boats</h1>
@@ -577,7 +577,9 @@ export function ShipsLanding({ user, counts, ferries = [] }) {
         <ul>
           <li>
             <a href="/f/ships-passenger">Passenger ships</a>, <a href="/f/ships-cargo">cargo</a>,{' '}
-            <a href="/f/ships-tankers">tankers</a>, <a href="/f/ships-baltic-ais">every vessel</a>
+            <a href="/f/ships-tankers">tankers</a>,{' '}
+            <a href="/f/ships-worldwide-ais">every vessel worldwide</a>,{' '}
+            <a href="/f/ships-baltic-ais">the northern Baltic</a>
           </li>
           <li>
             Sea state: <a href="/c/water">NOAA buoys and surf forecasts</a>
@@ -588,8 +590,9 @@ export function ShipsLanding({ user, counts, ferries = [] }) {
           </li>
         </ul>
         <p class="muted">
-          Coverage: Finland’s coastal AIS network (Digitraffic, Fintraffic, CC BY 4.0), the northern
-          Baltic. There is no keyless worldwide AIS feed; more open networks will join as sources.
+          Coverage: worldwide from the aisstream.io receiver network, re-read every three hours,
+          plus Finland’s coastal AIS network (Digitraffic, Fintraffic, CC BY 4.0) for the northern
+          Baltic, where positions are also live on each ship’s page.
         </p>
       </section>
     </Layout>
@@ -642,7 +645,32 @@ export function ShipPage({ user, report }) {
                 ]}
               />
             ) : (
-              <p class="muted">Out of range of the open AIS networks we read right now.</p>
+              <>
+                {d.place ? (
+                  <Facts
+                    rows={[
+                      [
+                        'Last heard at',
+                        <a href={osm(d.place.lat, d.place.lon, 10)}>
+                          {d.place.lat.toFixed(4)}, {d.place.lon.toFixed(4)}
+                        </a>,
+                      ],
+                      ['Status', d.navStatus],
+                      [
+                        'Speed',
+                        d.speedKn !== null && d.speedKn !== undefined ? `${d.speedKn} kn` : null,
+                      ],
+                      ['Heard', when(d.positionAt)],
+                    ]}
+                  />
+                ) : null}
+                <p class="muted">
+                  No live fix right now;{' '}
+                  {d.place
+                    ? 'that is the last position we heard.'
+                    : 'out of range of the networks we read.'}
+                </p>
+              </>
             )}
           </section>
           {r.record ? (

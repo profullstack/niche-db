@@ -7,6 +7,7 @@ import {
   subpoint,
 } from '../apps/web/src/lib/vehicles.js';
 import { toItem as aisItem, flagOf, shipType } from '../packages/adapters/src/ais.js';
+import { absorb, streamTime, vesselItem } from '../packages/adapters/src/aisstream.js';
 import {
   toItem as faaItem,
   parseEngines,
@@ -146,6 +147,72 @@ describe('AIS', () => {
     expect(shipType(0)).toBeNull();
     expect(flagOf(111230000)).toBeNull();
     expect(flagOf(636012345).code).toBe('LR');
+  });
+});
+
+describe('aisstream', () => {
+  const pos = {
+    MessageType: 'PositionReport',
+    MetaData: {
+      MMSI: 244700463,
+      ShipName: 'INTERMEZZO   ',
+      time_utc: '2026-11-11 05:27:01.1 +0000 UTC',
+    },
+    Message: {
+      PositionReport: {
+        Latitude: 52.478,
+        Longitude: 4.661,
+        Sog: 0,
+        Cog: 360,
+        TrueHeading: 511,
+        NavigationalStatus: 5,
+      },
+    },
+  };
+  const stat = {
+    MessageType: 'ShipStaticData',
+    MetaData: {
+      MMSI: 244700463,
+      ShipName: 'INTERMEZZO',
+      time_utc: '2026-11-11 05:28:00 +0000 UTC',
+    },
+    Message: {
+      ShipStaticData: {
+        Name: 'INTERMEZZO@@@',
+        CallSign: 'PD1',
+        ImoNumber: 0,
+        Type: 79,
+        Destination: 'IJMUIDEN',
+        MaximumStaticDraught: 3.2,
+        Dimension: { A: 50, B: 30, C: 5, D: 5 },
+      },
+    },
+  };
+  test('position and static data fold into one vessel row', () => {
+    const state = new Map();
+    absorb(state, pos);
+    absorb(state, stat);
+    const it = vesselItem(state.get(244700463));
+    expect(it.externalId).toBe('mmsi-244700463');
+    expect(it.title).toBe('INTERMEZZO (cargo)');
+    expect(it.data.lengthM).toBe(80);
+    expect(it.data.draughtM).toBe(3.2);
+    expect(it.data.place).toEqual({ lat: 52.478, lon: 4.661 });
+    expect(it.data.navStatus).toBe('moored');
+    expect(it.data.network).toContain('aisstream');
+    expect(it.tags).toContain('worldwide');
+    expect(it.tags).not.toContain('in-range');
+  });
+  test('AIS no-position values are dropped and times parse', () => {
+    const state = new Map();
+    absorb(state, {
+      ...pos,
+      Message: { PositionReport: { ...pos.Message.PositionReport, Latitude: 91, Longitude: 181 } },
+    });
+    expect(state.get(244700463).pos).toBeNull();
+    expect(streamTime('2026-11-11 05:25:46.689292372 +0000 UTC')).toBe(
+      Date.parse('2026-11-11T05:25:46Z'),
+    );
   });
 });
 

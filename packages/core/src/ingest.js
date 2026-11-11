@@ -26,6 +26,7 @@ export function envFor() {
     nvdApiKey: config.adapters.nvdApiKey,
     courtlistenerToken: config.adapters.courtlistenerToken,
     glamaApiKey: config.adapters.glamaApiKey,
+    aisstreamApiKey: config.adapters.aisstreamApiKey,
     alpacaKeyId: config.adapters.alpacaKeyId,
     alpacaSecretKey: config.adapters.alpacaSecretKey,
     alpacaFeed: config.adapters.alpacaFeed,
