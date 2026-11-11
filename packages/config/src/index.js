@@ -180,6 +180,8 @@ export const config = {
     courtlistenerToken: opt('COURTLISTENER_TOKEN'),
     /** Glama's MCP directory API (glama.ai/settings/api-keys). Licensed: rows must credit Glama. */
     glamaApiKey: opt('GLAMA_API_KEY'),
+    /** aisstream.io worldwide AIS WebSocket (key from aisstream.io/account, GitHub sign-in). */
+    aisstreamApiKey: opt('AISSTREAM_API_KEY'),
     /**
      * Alpaca, for US corporate actions and the market news wire.
      *

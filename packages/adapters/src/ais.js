@@ -169,7 +169,13 @@ const sentinel = (v, na) => {
  * One vessel as an item: the register entry from `/vessels` and, when the
  * vessel is in range, its last position from `/locations`.
  */
-export function toItem(v, loc = null) {
+export const DIGITRAFFIC_ORIGIN = {
+  network: 'Digitraffic (Fintraffic) coastal AIS, northern Baltic',
+  source: 'Digitraffic marine AIS, Fintraffic, CC BY 4.0',
+  dataset: `${DIGITRAFFIC}/vessels`,
+};
+
+export function toItem(v, loc = null, origin = DIGITRAFFIC_ORIGIN) {
   const mmsi = Number(v?.mmsi);
   if (!Number.isFinite(mmsi) || mmsi <= 0) return null;
   const name = clean(v.name) ?? `MMSI ${mmsi}`;
@@ -251,9 +257,9 @@ export function toItem(v, loc = null) {
       place: Number.isFinite(lat) && Number.isFinite(lon) ? { lat, lon } : null,
       positionAt: p?.timestampExternal ? new Date(p.timestampExternal).toISOString() : null,
       registerAt: v.timestamp ? new Date(v.timestamp).toISOString() : null,
-      network: 'Digitraffic (Fintraffic) coastal AIS, northern Baltic',
-      source: 'Digitraffic marine AIS, Fintraffic, CC BY 4.0',
-      dataset: `${DIGITRAFFIC}/vessels`,
+      network: origin.network,
+      source: origin.source,
+      dataset: origin.dataset,
     },
   };
 }

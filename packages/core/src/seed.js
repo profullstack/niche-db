@@ -429,7 +429,7 @@ export const COLLECTIONS = [
     slug: 'ships',
     name: 'Ships',
     description:
-      'Ships and boats from open AIS: every vessel Finland\u2019s coastal network has heard in the northern Baltic, about 19,500, with name, MMSI, IMO, call sign, type, flag, size and stated destination, and the last position, speed and navigation status of each one in range (so near= and sort=distance work). Look one up by name, MMSI or IMO at /ships for its live position. Digitraffic, CC BY 4.0. There is no keyless worldwide AIS feed; more open networks join as sources.',
+      'Ships and boats from AIS, worldwide: every vessel the aisstream.io receiver network hears, re-read every three hours, plus every vessel Finland\u2019s coastal network has heard in the northern Baltic (about 19,500, Digitraffic, CC BY 4.0). Each with name, MMSI, IMO, call sign, type, flag, size and stated destination, and its last position, speed and navigation status (so near= and sort=distance work). Look one up by name, MMSI or IMO at /ships.',
   },
 ];
 
@@ -489,6 +489,12 @@ export const DEFAULT_FEEDS = [
     slug: 'ships-baltic-ais',
     name: 'Ships and boats in the northern Baltic (AIS)',
     query: { sources: ['digitraffic-ais-vessels'] },
+  },
+  {
+    collection: 'ships',
+    slug: 'ships-worldwide-ais',
+    name: 'Ships and boats worldwide (aisstream.io AIS)',
+    query: { sources: ['aisstream-worldwide'] },
   },
   {
     collection: 'ships',

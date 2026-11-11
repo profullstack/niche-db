@@ -4,6 +4,7 @@ import { agenticjobs } from './agenticjobs.js';
 import { aiid } from './aiid.js';
 import { aiornot } from './aiornot.js';
 import { digitrafficAis } from './ais.js';
+import { aisstream } from './aisstream.js';
 import {
   aitmplAgents,
   aitmplCommands,
@@ -463,6 +464,7 @@ export const ADAPTERS = [
   faaRegistry,
   gcatSatcat,
   digitrafficAis,
+  aisstream,
 ];
 
 /**
