@@ -41,6 +41,12 @@ describe('MCP tools/list', () => {
     expect(missing).toEqual([]);
   });
 
+  test('every tool has a human title, and tools/list sends it', () => {
+    const missing = TOOLS.filter((t) => typeof t.title !== 'string' || !t.title.trim());
+    expect(missing.map((t) => t.name)).toEqual([]);
+    for (const t of TOOLS) expect(describeTool(t).title).toBe(t.title);
+  });
+
   test('tools/list sends the annotations', () => {
     for (const t of TOOLS) expect(describeTool(t).annotations).toEqual(t.annotations);
   });
