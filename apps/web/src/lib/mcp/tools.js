@@ -91,6 +91,7 @@ const list = (d) => ({ type: 'array', items: { type: 'string' }, description: d 
 export const TOOLS = [
   {
     name: 'stats',
+    title: 'Database Stats',
     annotations: READ,
     description:
       'What this deployment holds: collections, sources, items, items added today, feeds.',
@@ -99,6 +100,7 @@ export const TOOLS = [
   },
   {
     name: 'list_collections',
+    title: 'List Collections',
     annotations: READ,
     description: 'The collections (niches) with their source, feed and item counts.',
     inputSchema: { type: 'object', properties: {} },
@@ -106,6 +108,7 @@ export const TOOLS = [
   },
   {
     name: 'list_adapters',
+    title: 'List Adapters',
     annotations: READ,
     description:
       'Every adapter this deployment can run, with the config fields each takes. Use before add_source.',
@@ -114,6 +117,7 @@ export const TOOLS = [
   },
   {
     name: 'list_enrichers',
+    title: 'List Enrichers',
     annotations: READ,
     description:
       'Every enricher (YouTube videos, Wikipedia, repo stats, downloads, company profiles, TL;DRs) and which collections turn it on by default. Items carry their results under `enrichment`.',
@@ -122,6 +126,7 @@ export const TOOLS = [
   },
   {
     name: 'list_sources',
+    title: 'List Sources',
     annotations: READ,
     description: 'Sources with status, last run and item counts. Optionally one collection.',
     inputSchema: {
@@ -138,6 +143,7 @@ export const TOOLS = [
   },
   {
     name: 'list_feeds',
+    title: 'List Feeds',
     annotations: READ,
     description: 'Public feeds, most followed first. Optionally one collection.',
     inputSchema: {
@@ -152,6 +158,7 @@ export const TOOLS = [
   },
   {
     name: 'feed_items',
+    title: 'Feed Items',
     annotations: READ,
     description: 'What a feed selects, newest first. Page with before_id.',
     inputSchema: {
@@ -185,6 +192,7 @@ export const TOOLS = [
   },
   {
     name: 'recent_items',
+    title: 'Recent Items',
     annotations: READ,
     description: 'Newest items, optionally narrowed to a collection, source or kind.',
     inputSchema: {
@@ -221,6 +229,7 @@ export const TOOLS = [
   },
   {
     name: 'upcoming',
+    title: 'Upcoming Items',
     annotations: READ,
     description: 'Items dated in the future (releases, launches, deadlines), soonest first.',
     inputSchema: {
@@ -246,6 +255,7 @@ export const TOOLS = [
   },
   {
     name: 'search_items',
+    title: 'Search Items',
     annotations: READ,
     description:
       'Full-text search over titles, summaries and tags. Use this first when you know a name.',
@@ -274,6 +284,7 @@ export const TOOLS = [
   },
   {
     name: 'match_items',
+    title: 'Match Names to Items',
     annotations: READ,
     description:
       'Which title, channel or fixture is this name? Give a file name, a release name or a playlist entry ("Top.Gun.Maverick.2022.1080p.mkv", "US: ESPN2 HD"); it is cleaned (year, season and episode, quality tags, playlist decorations) and matched by similarity. A matchup ("NFL: Chiefs vs Bills", "Lakers @ Celtics", "Rangers at Celtic 19:45") is answered by the fixture whose two teams those are, kicking off between 36 hours ago and 7 days ahead unless date narrows it. Each result carries a score in 0..1. Use screen for films and TV, channels for television channels, sports for fixtures.',
@@ -316,6 +327,7 @@ export const TOOLS = [
   },
   {
     name: 'get_item',
+    title: 'Get Item',
     annotations: READ,
     description: 'One item with its full adapter payload.',
     inputSchema: {
@@ -331,6 +343,7 @@ export const TOOLS = [
   },
   {
     name: 'population',
+    title: 'Population Lookup',
     annotations: READ,
     description:
       'Population and demography, drilled down from the world to the ZIP code. Give a `key` (us, us-ca, us-ca-los-angeles, gb, gb-england-london), a US `zip`, or a place name in `q`; no argument is the world. Answers with the area (population, year, measures: age, income, home value, rent, poverty, education, unemployment, race and Hispanic origin for the US; growth, age structure, births, deaths, fertility, life expectancy, migration, GDP per head and Gini for countries), how many areas of each level it contains, and the largest of its children at `level` (country, state, city or zip). Sources: World Bank, US Census ACS 5-year, GeoNames.',
@@ -387,6 +400,7 @@ export const TOOLS = [
   },
   {
     name: 'where_to_buy_book',
+    title: 'Where to Buy a Book',
     annotations: LOOKUP,
     description:
       "Where to buy a book. Give an `isbn` (10 or 13 digits, hyphens fine), or a `title` and `author`, or `item` (a books-collection item id). Answers with the edition from Open Library (title, authors, publisher, pages, cover), `online`: links at Amazon, Bookshop.org, Barnes & Noble, Books-A-Million, Target, Walmart, Powell's, ThriftBooks, Better World Books, AbeBooks, eBay, BookFinder, Google Play Books, Kobo, Libby and WorldCat, each with `kind` (new, used, ebook, borrow) and `sponsored`. Give a US `zip` for `inStore`: the chains' store finders for that ZIP and the bookshops and libraries within 10 miles from OpenStreetMap, with address, phone, hours and distance. Sellers publish no stock or prices, so call a shop with the ISBN.",
@@ -408,6 +422,7 @@ export const TOOLS = [
   },
   {
     name: 'create_feed',
+    title: 'Create Feed',
     annotations: write(),
     description:
       'Save a query as a feed (needs a key). Sources, kinds and tags narrow; q is a text match; upcoming keeps only future-dated items.',
@@ -455,6 +470,7 @@ export const TOOLS = [
   },
   {
     name: 'follow_feed',
+    title: 'Follow Feed',
     annotations: write({ idempotentHint: true }),
     description: 'Follow a feed as the key owner (needs a key). Channels: webpush, email, webhook.',
     inputSchema: {
@@ -485,6 +501,7 @@ export const TOOLS = [
   },
   {
     name: 'list_webhooks',
+    title: 'List Webhooks',
     annotations: READ,
     description:
       "The key owner's account webhook endpoints (never their secrets) and the event types this site emits. Needs a key.",
@@ -499,6 +516,7 @@ export const TOOLS = [
   },
   {
     name: 'create_webhook',
+    title: 'Create Webhook',
     annotations: write(),
     description:
       'Add an account webhook: signed POSTs (Standard Webhooks + CloudEvents) to an https URL for events such as feed.item.published (new items in feeds you follow), feed.followed, feed.created, submission.approved. Patterns like feed.* work; omit events for all. Returns the signing secret. Needs a key.',
@@ -524,6 +542,7 @@ export const TOOLS = [
   },
   {
     name: 'update_webhook',
+    title: 'Update Webhook',
     annotations: write({ destructiveHint: true, idempotentHint: true }),
     description:
       'Change an account webhook: url, events, description, or enabled (true turns it back on and clears its failure count). Needs a key.',
@@ -548,6 +567,7 @@ export const TOOLS = [
   },
   {
     name: 'delete_webhook',
+    title: 'Delete Webhook',
     annotations: write({ destructiveHint: true, idempotentHint: true }),
     description: 'Remove an account webhook and its delivery log. Needs a key.',
     inputSchema: {
@@ -562,6 +582,7 @@ export const TOOLS = [
   },
   {
     name: 'test_webhook',
+    title: 'Send Test Webhook',
     annotations: write({ openWorldHint: true }),
     description:
       'Send a webhook.test event to one of your endpoints now and report the HTTP status. Needs a key.',
@@ -577,6 +598,7 @@ export const TOOLS = [
   },
   {
     name: 'rotate_webhook_secret',
+    title: 'Rotate Webhook Secret',
     annotations: write({ destructiveHint: true }),
     description:
       'Replace a webhook signing secret; the old one stops working at once. Returns the new secret. Needs a key.',
@@ -592,6 +614,7 @@ export const TOOLS = [
   },
   {
     name: 'webhook_deliveries',
+    title: 'Webhook Deliveries',
     annotations: READ,
     description:
       'Recent webhook deliveries with status, attempts, last error and payload: for one endpoint, or all of yours. Needs a key.',
@@ -613,6 +636,7 @@ export const TOOLS = [
   },
   {
     name: 'submit_feed',
+    title: 'Suggest a Feed',
     annotations: write({ idempotentHint: true }),
     description:
       'Suggest an RSS or Atom feed for the index. No key needed. An admin reviews every suggestion before anything is fetched; approved podcast feeds are handed to rssamplifier, everything else becomes a source here.',
@@ -648,6 +672,7 @@ export const TOOLS = [
   },
   {
     name: 'search_profiles',
+    title: 'Search Profiles',
     annotations: READ,
     description:
       'People: one entry per person assembled from every app that serves their OpenProfile.md (podcasters from p0dcasters, public profiles from OutreachGraph). Search by name, headline or anything in the document; newest change first. Each answer carries the page, the openprofile.md URL, accounts, topics, Broadcast shows, the Guest section, and the job title, company and seniority the person published (filter on them with title, company, seniority or tags).',
@@ -688,6 +713,7 @@ export const TOOLS = [
   },
   {
     name: 'find_profile_by_linkedin',
+    title: 'Find Profile by LinkedIn',
     annotations: READ,
     description:
       'The public profile a LinkedIn profile or company URL belongs to (linkedin.com/in/… or /company/…), or null. LinkedIn only: profiles are never looked up by email.',
@@ -704,6 +730,7 @@ export const TOOLS = [
   },
   {
     name: 'get_profile',
+    title: 'Get Profile',
     annotations: READ,
     description:
       'One person by id, `<slug>-<id>` or handle: the parsed view and the OpenProfile.md as served.',
@@ -722,6 +749,7 @@ export const TOOLS = [
   },
   {
     name: 'claim_profile',
+    title: 'Claim Profile',
     annotations: write({ idempotentHint: true }),
     description:
       'Claim a profile as the key owner (needs a key). Proven when the key owner’s email is one the profile lists, or when the person’s site or show page links back to the profile’s nichedb page. An admin may claim on behalf of an email.',
@@ -743,6 +771,7 @@ export const TOOLS = [
   },
   {
     name: 'update_profile',
+    title: 'Update Profile',
     annotations: write({ destructiveHint: true, idempotentHint: true }),
     description:
       'Edit a profile you own (needs a key). Send `markdown`, a whole OpenProfile.md that replaces what you wrote before, or any of `name`, `headline`, `emoji`, `pronouns`, `web`, `identity` (key: value, null removes), `sections` (name: body, `none` removes), `handle`, `public`. What you write wins over every source and survives every re-read.',
@@ -798,6 +827,7 @@ export const TOOLS = [
   },
   {
     name: 'add_source',
+    title: 'Add Source',
     annotations: write({ openWorldHint: true }),
     description:
       'Add a source: an adapter with a config, fetched on a schedule (needs a key; admins and Pro). Call list_adapters first for the fields.',
@@ -830,6 +860,7 @@ export const TOOLS = [
   },
   {
     name: 'run_source',
+    title: 'Run Source Now',
     annotations: write({ openWorldHint: true }),
     description:
       'Fetch a source now instead of waiting for its schedule (needs a key; owner or admin).',
@@ -850,6 +881,7 @@ export const TOOLS = [
   },
   {
     name: 'search_tlds',
+    title: 'Search TLDs',
     annotations: READ,
     description:
       "Top-level domains: every label in IANA's root, with type, registry, RDAP server and each registrar's one-year register/renew/transfer price (Porkbun, Dynadot, Cloudflare, OVHcloud). Sorted by renewal by default, because the first year is a promotion. `best` is the cheapest USD price across registrars; with `registrar` it is that registrar's own price in its currency. Answers carry facet counts. `trap: true` keeps only labels that renew at 2x the first year or more.",
@@ -894,6 +926,7 @@ export const TOOLS = [
   },
   {
     name: 'get_tld',
+    title: 'Get TLD',
     annotations: READ,
     description:
       'One top-level domain: type, registry, RDAP server, when it entered or left the root, every registrar price (register, renew, transfer, restore, promotions, privacy, restrictions) and its change history.',
@@ -919,6 +952,7 @@ export const TOOLS = [
   },
   {
     name: 'tld_changes',
+    title: 'TLD Changes',
     annotations: READ,
     description:
       "Top-level domains added to or removed from IANA's root, newest first, with the IANA list version each happened in. Nobody else publishes this diff.",
@@ -939,6 +973,7 @@ export const TOOLS = [
   },
   {
     name: 'check_domain',
+    title: 'Check Domain Registration',
     annotations: LOOKUP,
     description:
       'Is a domain name registered? Asks each registry over RDAP. Give `name` as a full name (foo.watches), or a bare word with `tlds` (foo + com,dev,io), or several names comma separated. Each answer is registered (with registrar and expiry), not_registered, or unknown. not_registered means the registry holds no registration; the name may still be reserved or premium, so it is not a promise that it is for sale. unknown (no RDAP server, a timeout, a 429) is never a yes. Each answer carries the cheapest known USD price for its ending.',
@@ -969,6 +1004,7 @@ export const TOOLS = [
   },
   {
     name: 'airplane_lookup',
+    title: 'Aircraft Lookup',
     annotations: LOOKUP,
     description:
       'An aircraft by N-number (N172SP, or 172SP), Mode S hex (A2D8E1) or flight callsign (UAL1895), or words to search the US register (Cessna 172). Answers `record` (the FAA registration: maker, model, year, seats, engines, airworthiness, status, expiry, hex; private owners are withheld) and `live` (where adsb.lol sees it now: lat, lon, altitude, speed, squawk), or `matches` for words. A foreign aircraft has no record but may be live.',
@@ -985,6 +1021,7 @@ export const TOOLS = [
   },
   {
     name: 'satellite_lookup',
+    title: 'Satellite Lookup',
     annotations: LOOKUP,
     description:
       'A satellite, rocket stage or piece of debris by NORAD number (25544), international designator (1998-067A) or name. Answers `record` (GCAT: owner, country, maker, launch and reentry dates, mass, orbit, status), `tle` (latest elements from SatNOGS) and `position` (where it is over the Earth now: lat, lon, altitude km, speed, period, and how old the elements are), or `matches` for a designator or name.',
@@ -1001,6 +1038,7 @@ export const TOOLS = [
   },
   {
     name: 'ship_lookup',
+    title: 'Ship Lookup',
     annotations: LOOKUP,
     description:
       'A ship or boat by MMSI (9 digits), IMO number (7 digits) or name, from open AIS (Digitraffic, northern Baltic). Answers `record` (name, type, flag, size, call sign, stated destination, last position) and `live` (position, speed, course, navigation status now, when in range), or `matches` for a name.',
@@ -1017,6 +1055,7 @@ export const TOOLS = [
   },
   {
     name: 'train_lookup',
+    title: 'Train Lookup',
     annotations: LOOKUP,
     description:
       'A train by number (Amtrak 5, VIA 1, IC 1, or a bare number) or a European station by name. Answers `record` (the stored run: operator, route, origin, destination, state, delay, last and next stop, every stop with scheduled and actual times; or a station with UIC code, coordinates and operators) and `live` (the same run rebuilt from the upstream now), or `matches` when several runs or stations fit. Amtrak and VIA Rail via Amtraker, Finland via Fintraffic, stations via Trainline (ODbL).',
@@ -1033,6 +1072,7 @@ export const TOOLS = [
   },
   {
     name: 'transit_station',
+    title: 'Transit Station Arrivals',
     annotations: LOOKUP,
     description:
       'Next arrivals and the timetable at a public transit station. Give `city` (nyc, boston, bay-area, chicago, london) and `station` (a station id from transit_city, or a name to match). Answers the station (lines, place, step-free), `arrivals` (line, toward, due time, minutes away; live from the agency) and `schedule` (per line and direction on weekdays, Saturday and Sunday: first and last departure, trips and busiest hour).',
@@ -1070,6 +1110,7 @@ export const TOOLS = [
   },
   {
     name: 'transit_city',
+    title: 'City Transit Overview',
     annotations: LOOKUP,
     description:
       'A city’s public transit now: its lines, its stations (id, name, lines), the service alerts in force and, with `vehicles: true`, every vehicle position the agency publishes. Cities: nyc, boston, bay-area, chicago, london, toronto, philadelphia.',
@@ -1101,6 +1142,7 @@ export const TOOLS = [
   },
   {
     name: 'business_standing',
+    title: 'Business Standing Check',
     annotations: LOOKUP,
     description:
       "Is a business on anybody's list? Give its `name`, and any of `domain`, `state` (two letters), `number` (state entity number) and `ein`. Answers with `standing` (flagged, incomplete or clear; clear only when every list was checked and found nothing), the `findings` behind it, and each section: US Treasury OFAC sanctions (SDN and consolidated, aliases included), GLEIF LEI records, SEC EDGAR filers, state registry status (OpenCorporates) and SAM.gov exclusions when keyed, and the domain over RDAP plus Spamhaus/URIBL/SURBL/Safe Browsing when the operator enabled them. A name match is not an identity: confirm against address and identifiers.",
@@ -1122,6 +1164,7 @@ export const TOOLS = [
   },
   {
     name: 'reputation_lookup',
+    title: 'IP and Domain Reputation',
     annotations: LOOKUP,
     description:
       'Is an IP address or a domain on a blocklist? Give `indicator` (an IPv4/IPv6 address or a domain; a URL is reduced to its host). Answers `listed`, a rough 0-100 `score` with the `reasons` behind it, the nichedb /traffic record (addresses our own servers banned and a person approved), the abuse.ch indicators (ThreatFox, URLhaus, Feodo Tracker; a domain is checked with its parent domains), the SURBL standing of a watched domain, and live DNS blocklists in `dnsbl` (an address: Spamhaus ZEN with SBL/CSS/XBL/PBL decoded, SpamCop, PSBL, Mailspike; a domain and its parents: Spamhaus DBL, URIBL, SURBL). A domain is also resolved and each A/AAAA address is checked the same way, in `addresses` (each with `ip`, `listed`, `traffic`, `indicators`, `dnsbl`). A list whose own test entry failed is named in `unknown`, not treated as a miss. Not listed is not the same as clean.',
@@ -1142,6 +1185,7 @@ export const TOOLS = [
   },
   {
     name: 'vuln_lookup',
+    title: 'Vulnerability Lookup',
     annotations: LOOKUP,
     description:
       'Everything known about one vulnerability, as an OpenVuln record (a valid OSV record). Give `id`: a CVE (CVE-2026-12537), GHSA, OSV, PYSEC, GO, RUSTSEC, MAL (malicious package) or NDB (nichedb.dev write-up) id. Answers OSV fields (`aliases`, `summary`, `details`, `affected` with version ranges, `severity` vectors, `references`) and `database_specific.openvuln`: `label` (critical/high/medium/low), `fix` (`status` fixed/partial/mitigated/unfixed/unknown, first fixed `versions`, `workaround`), `exploitation` (`status` exploited-ransomware/exploited/poc-public/none-known; `kev` from CISA with added/due/ransomware, null when checked and absent; `epss` score and percentile read live from FIRST; `ai`, AI exploit benchmark tasks such as ExploitGym with `result`, where `unstated` means in the benchmark with no published result), `subject` (package, agent, campaign...), `class`, and `sources` naming where each field came from. Never contains exploit code.',
@@ -1160,6 +1204,7 @@ export const TOOLS = [
   },
   {
     name: 'traffic_list',
+    title: 'Traffic Blocklist',
     annotations: READ,
     description:
       'The nichedb /traffic blocklist: IP addresses our own servers banned for exploit attempts, scanning, brute force or spam, each published only after a reviewer (a person, or riotcoder applying published rules) read the evidence and approved it. Newest approvals first. Optional `days` keeps addresses seen in the last N days, `category` one of exploit, brute-force, scanner, spam, other. Without an API key the newest 100 are returned; with one, `limit` (up to 1000) and `offset` page the whole list.',
@@ -1192,6 +1237,7 @@ export const TOOLS = [
   },
   {
     name: 'redeem_code',
+    title: 'Redeem Credit Code',
     annotations: write(),
     description:
       'Redeem a credit code (CR-XXXX-XXXX-XXXX-XXXX) for the key owner. A code is worth days of Premium, added after any term already held. Needs a key.',
@@ -1211,6 +1257,7 @@ export const TOOLS = [
   },
   {
     name: 'list_invites',
+    title: 'List Invites',
     annotations: READ,
     description:
       "The key owner's invites: how many are left of the quota, and each invite with its status (open, used, expired, revoked). Needs a key.",
@@ -1219,6 +1266,7 @@ export const TOOLS = [
   },
   {
     name: 'create_invite',
+    title: 'Create Invite',
     annotations: write(),
     description:
       'Make one invite link as the key owner. Invites are scarce (a few per account); when the invited person signs up, both get days of Premium. The link is returned once. Needs a key.',
@@ -1240,6 +1288,7 @@ export const TOOLS_BY_NAME = new Map(TOOLS.map((t) => [t.name, t]));
 
 export const describe = (t) => ({
   name: t.name,
+  title: t.title,
   description: t.description,
   inputSchema: t.inputSchema,
   annotations: t.annotations,
