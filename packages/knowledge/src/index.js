@@ -85,6 +85,7 @@ export const RESERVED_NICHE_SLUGS = new Set([
   'pro',
   'reputation',
   'robots.txt',
+  'railways',
   'rings',
   's',
   'satellites',
@@ -97,6 +98,7 @@ export const RESERVED_NICHE_SLUGS = new Set([
   'sw.js',
   'tlds',
   'traffic',
+  'trains',
   'well-known',
 ]);
 

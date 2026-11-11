@@ -8,6 +8,7 @@ import {
   satelliteTle,
   shipReport,
   subpoint,
+  trainReport,
 } from '../lib/vehicles.js';
 import {
   AirplanePage,
@@ -16,6 +17,8 @@ import {
   SatellitesLanding,
   ShipPage,
   ShipsLanding,
+  TrainPage,
+  TrainsLanding,
 } from '../views/vehicles.jsx';
 
 /**
@@ -52,12 +55,40 @@ const KINDS = [
     Page: ShipPage,
     canonicalId: (r) => r.record?.data?.mmsi ?? null,
   },
+  {
+    path: 'trains',
+    report: trainReport,
+    Page: TrainPage,
+    canonicalId: (r) => r.record?.externalId ?? null,
+  },
 ];
 
 export function registerVehicles(app) {
   app.get('/boats', (c) => c.redirect('/ships', 301));
   app.get('/vessels', (c) => c.redirect('/ships', 301));
   app.get('/aircraft', (c) => c.redirect('/airplanes', 301));
+  app.get('/railways', (c) => c.redirect('/trains', 301));
+
+  app.get('/trains', async (c) => {
+    const term = (c.req.query('q') ?? '').trim();
+    if (term) return c.redirect(`/trains/${encodeURIComponent(term)}`, 303);
+    const counts = await collectionCounts('trains');
+    const late = counts.collection
+      ? await q
+          .recentItems({
+            collectionId: counts.collection.id,
+            tags: ['late', 'running'],
+            sort: 'updated',
+            limit: 15,
+            timeoutMs: 5_000,
+          })
+          .catch(() => [])
+      : [];
+    setCache(c, 60);
+    return c.html(
+      await render(<TrainsLanding user={c.get('user')} counts={counts} late={late.map(rowOut)} />),
+    );
+  });
 
   app.get('/airplanes', async (c) => {
     const term = (c.req.query('q') ?? '').trim();

@@ -37,7 +37,7 @@ import { allowedEnrichers, collectionOut, feedOut, itemOut, sourceOut } from '..
 import { addSource, createFeed, Denied, editSource } from '../service.js';
 import { submissionOut, submitFeed } from '../submissions.js';
 import { catalogueRows, namesFrom } from '../tlds.js';
-import { airplaneReport, satelliteReport, shipReport } from '../vehicles.js';
+import { airplaneReport, satelliteReport, shipReport, trainReport } from '../vehicles.js';
 import { vulnReport } from '../vulns.js';
 import { follow, hookCall, hooks } from '../webhooks.js';
 
@@ -1009,6 +1009,22 @@ export const TOOLS = [
     },
     run: async ({ query }) => {
       const r = await shipReport(query);
+      if (r.error) throw toolError(r.error);
+      return r;
+    },
+  },
+  {
+    name: 'train_lookup',
+    annotations: LOOKUP,
+    description:
+      'A train by number (Amtrak 5, VIA 1, IC 1, or a bare number) or a European station by name. Answers `record` (the stored run: operator, route, origin, destination, state, delay, last and next stop, every stop with scheduled and actual times; or a station with UIC code, coordinates and operators) and `live` (the same run rebuilt from the upstream now), or `matches` when several runs or stations fit. Amtrak and VIA Rail via Amtraker, Finland via Fintraffic, stations via Trainline (ODbL).',
+    inputSchema: {
+      type: 'object',
+      properties: { query: str('Train number, run id or station name, e.g. Amtrak 5') },
+      required: ['query'],
+    },
+    run: async ({ query }) => {
+      const r = await trainReport(query);
       if (r.error) throw toolError(r.error);
       return r;
     },

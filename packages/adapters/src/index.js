@@ -177,6 +177,7 @@ import { tedNotices } from './ted.js';
 import { theAlgorithms } from './thealgorithms.js';
 import { thetvdbCatalog } from './thetvdb-catalog.js';
 import { tmdbReleases } from './tmdb.js';
+import { amtraker, fintrafficRail, trainlineStations } from './trains.js';
 import { tsbb } from './tsbb.js';
 import { tvmazeSchedule } from './tvmaze.js';
 import { tvmazeCatalog } from './tvmaze-catalog.js';
@@ -465,6 +466,10 @@ export const ADAPTERS = [
   gcatSatcat,
   digitrafficAis,
   aisstream,
+  // Trains: Amtrak/VIA runs, Finnish trains, European stations.
+  amtraker,
+  fintrafficRail,
+  trainlineStations,
 ];
 
 /**
@@ -494,3 +499,10 @@ export {
 } from './ais.js';
 export { HOUSE as OPENVULN_HOUSE } from './openvuln.js';
 export { POLICE_CITIES, POLICE_SCOPE } from './police-updates.js';
+export {
+  amtrakItem,
+  FINTRAFFIC_HEADERS,
+  FINTRAFFIC_RAIL,
+  finnishItem,
+  lateness,
+} from './trains.js';

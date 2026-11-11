@@ -431,9 +431,39 @@ export const COLLECTIONS = [
     description:
       'Ships and boats from AIS, worldwide: every vessel the aisstream.io receiver network hears, re-read every three hours, plus every vessel Finland\u2019s coastal network has heard in the northern Baltic (about 19,500, Digitraffic, CC BY 4.0). Each with name, MMSI, IMO, call sign, type, flag, size and stated destination, and its last position, speed and navigation status (so near= and sort=distance work). Look one up by name, MMSI or IMO at /ships.',
   },
+  {
+    slug: 'trains',
+    name: 'Trains',
+    description:
+      'Trains running now and the stations they run between. Every Amtrak and VIA Rail run on the line (Amtraker), refreshed every ten minutes, and every Finnish passenger train today (Fintraffic, CC BY 4.0) every fifteen: one row per run with its route, where it is, its last and next stop, how late it is and every stop’s scheduled and actual time. Plus about 70,000 European stations from Trainline’s open list (ODbL), with UIC codes, coordinates and the operators that sell tickets to them. Look one up at /trains.',
+  },
 ];
 
 export const DEFAULT_FEEDS = [
+  {
+    collection: 'trains',
+    slug: 'amtrak-trains',
+    name: 'Amtrak and VIA Rail trains',
+    query: { sources: ['amtraker-trains'] },
+  },
+  {
+    collection: 'trains',
+    slug: 'late-trains',
+    name: 'Trains running more than 15 minutes late',
+    query: { tags: ['late'] },
+  },
+  {
+    collection: 'trains',
+    slug: 'finland-trains',
+    name: 'Finnish passenger trains',
+    query: { sources: ['fintraffic-trains'] },
+  },
+  {
+    collection: 'trains',
+    slug: 'railway-stations',
+    name: 'European railway stations',
+    query: { kinds: ['station'] },
+  },
   {
     collection: 'aircraft',
     slug: 'faa-aircraft-register',
