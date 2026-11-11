@@ -413,9 +413,101 @@ export const COLLECTIONS = [
     description:
       'Indie product launches from the built.indie launch board: every live product with its tagline and description, its own site, logo, card image and homepage screenshot, votes, categories, the maker, the stack it is built with (from OpenStack) and its plans (from OpenSaaS), and whether the product links back with a verified built.indie badge. Re-read hourly, so votes and the Featured slot stay current. Follow a category, verified launches, or Featured launches.',
   },
+  {
+    slug: 'aircraft',
+    name: 'Aircraft',
+    description:
+      'Every aircraft on the US civil register, about 319,000, one row per N-number from the FAA\u2019s nightly Releasable Aircraft Database: maker, model, year, seats, engines, airworthiness class, registration status and expiry, and the Mode S hex its transponder broadcasts, so a live ADS-B sighting can be named. Look one up by N-number or hex at /airplanes, which adds where it is flying right now from the adsb.lol receiver network. Private owners\u2019 names and street addresses are left out. Public domain.',
+  },
+  {
+    slug: 'satellites',
+    name: 'Satellites',
+    description:
+      'Every catalogued object in Earth orbit since Sputnik, about 70,000: satellites, rocket stages and debris, with NORAD number, owner, country, maker, launch and reentry dates, mass and orbit, from Jonathan McDowell\u2019s General Catalog of Artificial Space Objects (CC-BY). Look one up at /satellites, which adds the latest orbital elements from SatNOGS and where it is over the Earth right now. Follow Starlink, geostationary satellites, debris or new launches.',
+  },
+  {
+    slug: 'ships',
+    name: 'Ships',
+    description:
+      'Ships and boats from open AIS: every vessel Finland\u2019s coastal network has heard in the northern Baltic, about 19,500, with name, MMSI, IMO, call sign, type, flag, size and stated destination, and the last position, speed and navigation status of each one in range (so near= and sort=distance work). Look one up by name, MMSI or IMO at /ships for its live position. Digitraffic, CC BY 4.0. There is no keyless worldwide AIS feed; more open networks join as sources.',
+  },
 ];
 
 export const DEFAULT_FEEDS = [
+  {
+    collection: 'aircraft',
+    slug: 'faa-aircraft-register',
+    name: 'US aircraft register (FAA)',
+    description:
+      'Every aircraft on the US civil register; after the first walk, new rows are newly registered aircraft.',
+    query: { sources: ['faa-aircraft-registry'] },
+  },
+  {
+    collection: 'aircraft',
+    slug: 'faa-rotorcraft',
+    name: 'Helicopters on the US register',
+    query: { tags: ['rotorcraft'] },
+  },
+  {
+    collection: 'aircraft',
+    slug: 'faa-experimental-aircraft',
+    name: 'Experimental and kit-built aircraft',
+    query: { tags: ['cert-experimental', 'kit-built'] },
+  },
+  {
+    collection: 'satellites',
+    slug: 'space-objects',
+    name: 'Every catalogued space object (GCAT)',
+    query: { sources: ['gcat-satcat'] },
+  },
+  {
+    collection: 'satellites',
+    slug: 'satellites-payloads',
+    name: 'Satellites (payloads only)',
+    query: { kinds: ['satellite'] },
+  },
+  {
+    collection: 'satellites',
+    slug: 'starlink-satellites',
+    name: 'Starlink satellites',
+    query: { tags: ['family-starlink'] },
+  },
+  {
+    collection: 'satellites',
+    slug: 'geostationary-satellites',
+    name: 'Geosynchronous satellites',
+    query: { tags: ['orbit-geo'] },
+  },
+  {
+    collection: 'satellites',
+    slug: 'space-debris',
+    name: 'Space debris',
+    query: { tags: ['debris'] },
+  },
+  {
+    collection: 'ships',
+    slug: 'ships-baltic-ais',
+    name: 'Ships and boats in the northern Baltic (AIS)',
+    query: { sources: ['digitraffic-ais-vessels'] },
+  },
+  {
+    collection: 'ships',
+    slug: 'ships-passenger',
+    name: 'Passenger ships and ferries',
+    query: { tags: ['passenger'] },
+  },
+  {
+    collection: 'ships',
+    slug: 'ships-tankers',
+    name: 'Tankers',
+    query: { tags: ['tanker'] },
+  },
+  {
+    collection: 'ships',
+    slug: 'ships-cargo',
+    name: 'Cargo ships',
+    query: { tags: ['cargo'] },
+  },
   {
     collection: 'iptv',
     slug: 'iptv-providers',

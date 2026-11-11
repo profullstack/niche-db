@@ -37,6 +37,7 @@ import { allowedEnrichers, collectionOut, feedOut, itemOut, sourceOut } from '..
 import { addSource, createFeed, Denied, editSource } from '../service.js';
 import { submissionOut, submitFeed } from '../submissions.js';
 import { catalogueRows, namesFrom } from '../tlds.js';
+import { airplaneReport, satelliteReport, shipReport } from '../vehicles.js';
 import { vulnReport } from '../vulns.js';
 import { follow, hookCall, hooks } from '../webhooks.js';
 
@@ -962,6 +963,54 @@ export const TOOLS = [
         truncated,
         results: results.map((r) => ({ ...r, cheapest: byTld.get(r.tld)?.best ?? null })),
       };
+    },
+  },
+  {
+    name: 'airplane_lookup',
+    annotations: LOOKUP,
+    description:
+      'An aircraft by N-number (N172SP, or 172SP), Mode S hex (A2D8E1) or flight callsign (UAL1895), or words to search the US register (Cessna 172). Answers `record` (the FAA registration: maker, model, year, seats, engines, airworthiness, status, expiry, hex; private owners are withheld) and `live` (where adsb.lol sees it now: lat, lon, altitude, speed, squawk), or `matches` for words. A foreign aircraft has no record but may be live.',
+    inputSchema: {
+      type: 'object',
+      properties: { query: str('N-number, hex, callsign or words, e.g. N172SP') },
+      required: ['query'],
+    },
+    run: async ({ query }) => {
+      const r = await airplaneReport(query);
+      if (r.error) throw toolError(r.error);
+      return r;
+    },
+  },
+  {
+    name: 'satellite_lookup',
+    annotations: LOOKUP,
+    description:
+      'A satellite, rocket stage or piece of debris by NORAD number (25544), international designator (1998-067A) or name. Answers `record` (GCAT: owner, country, maker, launch and reentry dates, mass, orbit, status), `tle` (latest elements from SatNOGS) and `position` (where it is over the Earth now: lat, lon, altitude km, speed, period, and how old the elements are), or `matches` for a designator or name.',
+    inputSchema: {
+      type: 'object',
+      properties: { query: str('NORAD number, designator or name, e.g. 25544') },
+      required: ['query'],
+    },
+    run: async ({ query }) => {
+      const r = await satelliteReport(query);
+      if (r.error) throw toolError(r.error);
+      return r;
+    },
+  },
+  {
+    name: 'ship_lookup',
+    annotations: LOOKUP,
+    description:
+      'A ship or boat by MMSI (9 digits), IMO number (7 digits) or name, from open AIS (Digitraffic, northern Baltic). Answers `record` (name, type, flag, size, call sign, stated destination, last position) and `live` (position, speed, course, navigation status now, when in range), or `matches` for a name.',
+    inputSchema: {
+      type: 'object',
+      properties: { query: str('MMSI, IMO or name, e.g. 230629000') },
+      required: ['query'],
+    },
+    run: async ({ query }) => {
+      const r = await shipReport(query);
+      if (r.error) throw toolError(r.error);
+      return r;
     },
   },
   {

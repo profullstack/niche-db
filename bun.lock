@@ -14,14 +14,14 @@
     },
     "apps/cli": {
       "name": "@profullstack/nichedb",
-      "version": "0.58.1",
+      "version": "0.61.0",
       "bin": {
         "nichedb": "./bin/nichedb.js",
       },
     },
     "apps/web": {
       "name": "@nichedb/web",
-      "version": "0.58.1",
+      "version": "0.61.0",
       "dependencies": {
         "@logicsrc/openaccess": "^0.3.1",
         "@nichedb/adapters": "workspace:*",
@@ -50,11 +50,12 @@
         "@profullstack/x402-gateway": "0.13.1",
         "@simplewebauthn/browser": "^14.0.0",
         "hono": "^4.13.14",
+        "satellite.js": "5.0.0",
       },
     },
     "apps/worker": {
       "name": "@nichedb/worker",
-      "version": "0.58.1",
+      "version": "0.61.0",
       "dependencies": {
         "@nichedb/config": "workspace:*",
         "@nichedb/core": "workspace:*",
@@ -65,7 +66,7 @@
     },
     "packages/adapters": {
       "name": "@nichedb/adapters",
-      "version": "0.58.1",
+      "version": "0.61.0",
       "dependencies": {
         "@nichedb/core": "workspace:*",
         "@profullstack/openprofile": "^0.2.0",
@@ -73,7 +74,7 @@
     },
     "packages/auth": {
       "name": "@nichedb/auth",
-      "version": "0.58.1",
+      "version": "0.61.0",
       "dependencies": {
         "@nichedb/config": "workspace:*",
         "@nichedb/db": "workspace:*",
@@ -83,11 +84,11 @@
     },
     "packages/config": {
       "name": "@nichedb/config",
-      "version": "0.58.1",
+      "version": "0.61.0",
     },
     "packages/core": {
       "name": "@nichedb/core",
-      "version": "0.58.1",
+      "version": "0.61.0",
       "dependencies": {
         "@nichedb/adapters": "workspace:*",
         "@nichedb/config": "workspace:*",
@@ -99,7 +100,7 @@
     },
     "packages/db": {
       "name": "@nichedb/db",
-      "version": "0.58.1",
+      "version": "0.61.0",
       "dependencies": {
         "@nichedb/config": "workspace:*",
         "@nichedb/core": "workspace:*",
@@ -109,7 +110,7 @@
     },
     "packages/enrichers": {
       "name": "@nichedb/enrichers",
-      "version": "0.58.1",
+      "version": "0.61.0",
       "dependencies": {
         "@nichedb/config": "workspace:*",
         "@nichedb/core": "workspace:*",
@@ -118,11 +119,11 @@
     },
     "packages/knowledge": {
       "name": "@nichedb/knowledge",
-      "version": "0.58.1",
+      "version": "0.61.0",
     },
     "packages/notify": {
       "name": "@nichedb/notify",
-      "version": "0.58.1",
+      "version": "0.61.0",
       "dependencies": {
         "@nichedb/config": "workspace:*",
         "@nichedb/db": "workspace:*",
@@ -133,7 +134,7 @@
     },
     "packages/payments": {
       "name": "@nichedb/payments",
-      "version": "0.58.1",
+      "version": "0.61.0",
       "dependencies": {
         "@profullstack/coinpay": "^0.25.0",
         "@profullstack/referrals": "^0.1.0",
@@ -141,11 +142,11 @@
     },
     "packages/premium": {
       "name": "@nichedb/premium",
-      "version": "0.58.1",
+      "version": "0.61.0",
     },
     "packages/queue": {
       "name": "@nichedb/queue",
-      "version": "0.58.1",
+      "version": "0.61.0",
       "dependencies": {
         "@nichedb/config": "workspace:*",
         "@nichedb/core": "workspace:*",
@@ -678,6 +679,8 @@
     "rxjs": ["rxjs@7.8.2", "", { "dependencies": { "tslib": "^2.1.0" } }, "sha512-dhKf903U/PQZY6boNNtAGdWbG85WAbjT/1xYoZIC7FAY0yWapOBQVsVrDl58W86//e1VpMNBtRV4MaXfdMySFA=="],
 
     "safer-buffer": ["safer-buffer@2.1.2", "", {}, "sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg=="],
+
+    "satellite.js": ["satellite.js@5.0.0", "", {}, "sha512-ie3yiJ2LJAJIhVUKdYhgp7V0btXKAMImDjRnuaNfJGl8rjwP2HwVIh4HLFcpiXYEiYwXc5fqh5+yZqCe6KIwWw=="],
 
     "sax": ["sax@1.6.1", "", {}, "sha512-42tBVwLWnaQvW5zc4HbZrTuWccECCZfBi92FDuwtqxasH+JbPB3/FOKb1m222K42R4WxuxzzMsTswfzgtSu64Q=="],
 

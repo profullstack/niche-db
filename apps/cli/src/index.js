@@ -15,7 +15,7 @@ import { homedir, tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createInterface } from 'node:readline';
 
-export const VERSION = '0.60.0';
+export const VERSION = '0.61.0';
 const GEO_FLAGS = ['lat', 'long', 'radius', 'unit', 'bbox', 'sort', 'offset'];
 const DEFAULT_API = process.env.NICHEDB_API ?? 'https://nichedb.dev';
 const CONFIG_DIR = join(process.env.XDG_CONFIG_HOME ?? join(homedir(), '.config'), 'nichedb');
@@ -237,6 +237,26 @@ export const COMMANDS = [
     summary:
       'Is a domain name registered? Asks the registry over RDAP; a bare word is tried under each ending.',
     options: ['--tlds <list>', '--json'],
+  },
+  {
+    name: 'airplane',
+    usage: 'airplane <N-number | hex | callsign | words> [--json]',
+    summary:
+      'An aircraft: its FAA registration (maker, model, year, status) and where it is flying right now (adsb.lol).',
+    options: ['--json'],
+  },
+  {
+    name: 'satellite',
+    usage: 'satellite <NORAD number | designator | name> [--json]',
+    summary:
+      'A satellite, rocket stage or piece of debris: GCAT catalogue entry and where it is over the Earth right now.',
+    options: ['--json'],
+  },
+  {
+    name: 'ship',
+    usage: 'ship <MMSI | IMO | name> [--json]',
+    summary: 'A ship or boat on open AIS: type, flag, size, destination and its live position.',
+    options: ['--json'],
   },
   {
     name: 'business',
@@ -1176,6 +1196,39 @@ export async function run(
         out(`${pad(x.name, 32)} ${pad(word[x.status] ?? x.status, 15)} ${detail}`);
       }
       if (r.truncated) out('(only the first names were checked)');
+      return 0;
+    }
+    case 'airplane':
+    case 'satellite':
+    case 'ship': {
+      const term = rest.join(' ').trim();
+      if (!term) throw new Error(`${cmd} <id or name>`);
+      const path = { airplane: 'airplanes', satellite: 'satellites', ship: 'ships' }[cmd];
+      const r = await client.get(`/api/v1/${path}/${encodeURIComponent(term)}`);
+      if (json) {
+        out(JSON.stringify(r, null, 2));
+        return 0;
+      }
+      if (r.matches) {
+        if (!r.matches.length) out('no matches');
+        for (const m of r.matches) out(`${m.title}  ${m.page}`);
+        return 0;
+      }
+      if (r.record) out(r.record.summary);
+      const now = r.position ?? r.live?.[0] ?? (Array.isArray(r.live) ? null : r.live);
+      if (now?.lat !== undefined && now?.lat !== null) {
+        const extra = [
+          now.altitudeKm !== undefined ? `${now.altitudeKm} km up` : null,
+          now.altitudeFt !== undefined && now.altitudeFt !== null ? `${now.altitudeFt} ft` : null,
+          now.groundSpeedKt ? `${now.groundSpeedKt} kt` : null,
+          now.speedKn ? `${now.speedKn} kn` : null,
+          now.navStatus ?? null,
+        ].filter(Boolean);
+        out(`now: ${now.lat}, ${now.lon}${extra.length ? ` (${extra.join(', ')})` : ''}`);
+      } else {
+        out('now: not seen live');
+      }
+      if (r.record?.url) out(r.record.url);
       return 0;
     }
     case 'business': {
