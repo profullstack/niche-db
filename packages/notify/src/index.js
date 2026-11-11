@@ -1,5 +1,6 @@
 import { config } from '@nichedb/config';
 import * as q from '@nichedb/db/queries';
+import { hostOf, promoBlock } from '@profullstack/cross-promo';
 import { createEmailer } from '@profullstack/emailer';
 import { sendPushToMany } from '@profullstack/notifications/server';
 
@@ -132,27 +133,40 @@ export async function sendSubmissionNotice({ feedUrl, collection, note, probe, q
   return sent;
 }
 
-/** Tell a submitter what became of their suggestion, when they left an address. */
-export async function sendSubmissionDecision({ email, feedUrl, approved, note, resultUrl }) {
-  if (!email || !config.mail.enabled) return false;
+/**
+ * The decision mail, built but not sent. An approved feed's owner runs a blog or
+ * site, so that mail ends with the "more from the network" block for publishers
+ * (never this deployment's own host; never throws). A refusal gets no promo.
+ */
+export async function submissionDecisionMail({ email, feedUrl, approved, note, resultUrl }) {
   const verdict = approved ? 'is now live' : 'was not added';
+  const promo = approved
+    ? await promoBlock({ site: hostOf(config.siteUrl), audience: 'publishers', seed: email })
+    : { text: '', html: '' };
   const text = [
     `Your feed suggestion for ${config.siteName} ${verdict}:`,
     '',
     feedUrl,
     note ? `\n${note}` : null,
     resultUrl ? `\n${resultUrl}` : null,
+    promo.text ? `\n${promo.text}` : null,
   ]
     .filter((l) => l !== null)
     .join('\n');
-  const html = `<p>Your feed suggestion for ${esc(config.siteName)} ${verdict}:</p><p>${esc(feedUrl)}</p>${note ? `<p>${esc(note)}</p>` : ''}${resultUrl ? `<p><a href="${esc(resultUrl)}">${esc(resultUrl)}</a></p>` : ''}`;
+  const html = `<p>Your feed suggestion for ${esc(config.siteName)} ${verdict}:</p><p>${esc(feedUrl)}</p>${note ? `<p>${esc(note)}</p>` : ''}${resultUrl ? `<p><a href="${esc(resultUrl)}">${esc(resultUrl)}</a></p>` : ''}${promo.html}`;
+  return {
+    to: email,
+    subject: `[${config.siteName}] your feed suggestion ${verdict}`,
+    text,
+    html,
+  };
+}
+
+/** Tell a submitter what became of their suggestion, when they left an address. */
+export async function sendSubmissionDecision(opts) {
+  if (!opts?.email || !config.mail.enabled) return false;
   try {
-    await deliverMail({
-      to: email,
-      subject: `[${config.siteName}] your feed suggestion ${verdict}`,
-      text,
-      html,
-    });
+    await deliverMail(await submissionDecisionMail(opts));
     return true;
   } catch (err) {
     console.error('[notify] submission decision mail failed:', err.message);
