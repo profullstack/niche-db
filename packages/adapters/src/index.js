@@ -178,6 +178,7 @@ import { theAlgorithms } from './thealgorithms.js';
 import { thetvdbCatalog } from './thetvdb-catalog.js';
 import { tmdbReleases } from './tmdb.js';
 import { amtraker, fintrafficRail, trainlineStations } from './trains.js';
+import { gtfsTransit, tflNetwork, transitAlerts } from './transit.js';
 import { tsbb } from './tsbb.js';
 import { tvmazeSchedule } from './tvmaze.js';
 import { tvmazeCatalog } from './tvmaze-catalog.js';
@@ -470,6 +471,10 @@ export const ADAPTERS = [
   amtraker,
   fintrafficRail,
   trainlineStations,
+  // Public transit: lines, stations with timetables, service alerts.
+  gtfsTransit,
+  transitAlerts,
+  tflNetwork,
 ];
 
 /**

@@ -13,6 +13,7 @@ import {
   tldOut,
 } from '@nichedb/core/tlds';
 import { CATEGORIES as TRAFFIC_CATEGORIES } from '@nichedb/core/traffic';
+import { CITIES as TRANSIT_CITIES } from '@nichedb/core/transit';
 import * as pop from '@nichedb/db/population';
 import * as profiles from '@nichedb/db/profiles';
 import * as q from '@nichedb/db/queries';
@@ -37,6 +38,7 @@ import { allowedEnrichers, collectionOut, feedOut, itemOut, sourceOut } from '..
 import { addSource, createFeed, Denied, editSource } from '../service.js';
 import { submissionOut, submitFeed } from '../submissions.js';
 import { catalogueRows, namesFrom } from '../tlds.js';
+import { cityAlerts, cityTables, findStation, liveArrivals, liveVehicles } from '../transit.js';
 import { airplaneReport, satelliteReport, shipReport, trainReport } from '../vehicles.js';
 import { vulnReport } from '../vulns.js';
 import { follow, hookCall, hooks } from '../webhooks.js';
@@ -1027,6 +1029,74 @@ export const TOOLS = [
       const r = await trainReport(query);
       if (r.error) throw toolError(r.error);
       return r;
+    },
+  },
+  {
+    name: 'transit_station',
+    annotations: LOOKUP,
+    description:
+      'Next arrivals and the timetable at a public transit station. Give `city` (nyc, boston, bay-area, chicago, london) and `station` (a station id from transit_city, or a name to match). Answers the station (lines, place, step-free), `arrivals` (line, toward, due time, minutes away; live from the agency) and `schedule` (per line and direction on weekdays, Saturday and Sunday: first and last departure, trips and busiest hour).',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        city: str('City slug, e.g. nyc'),
+        station: str('Station id or name, e.g. 127 or Times Sq'),
+      },
+      required: ['city', 'station'],
+    },
+    run: async ({ city, station }) => {
+      if (!TRANSIT_CITIES[city])
+        throw toolError(`Unknown city ${city}: ${Object.keys(TRANSIT_CITIES).join(', ')}`);
+      let s = await findStation(city, station);
+      if (!s) {
+        const t = await cityTables(city);
+        const want = String(station).toLowerCase();
+        s =
+          t.stations.find((x) => x.data.name.toLowerCase() === want) ??
+          t.stations.find((x) => x.data.name.toLowerCase().includes(want));
+      }
+      if (!s) throw toolError(`No station ${station} in ${city}`);
+      return {
+        station: {
+          id: s.data.stationId,
+          name: s.data.name,
+          lines: s.data.lines,
+          place: s.data.place,
+        },
+        arrivals: await liveArrivals(city, s),
+        schedule: s.data.schedule,
+      };
+    },
+  },
+  {
+    name: 'transit_city',
+    annotations: LOOKUP,
+    description:
+      'A city’s public transit now: its lines, its stations (id, name, lines), the service alerts in force and, with `vehicles: true`, every vehicle position the agency publishes. Cities: nyc, boston, bay-area, chicago, london, toronto, philadelphia.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        city: str('City slug, e.g. london'),
+        vehicles: { type: 'boolean', description: 'Include live vehicle positions' },
+      },
+      required: ['city'],
+    },
+    run: async ({ city, vehicles }) => {
+      const c = TRANSIT_CITIES[city];
+      if (!c) throw toolError(`Unknown city ${city}: ${Object.keys(TRANSIT_CITIES).join(', ')}`);
+      const [t, alerts] = await Promise.all([cityTables(city), cityAlerts(city)]);
+      return {
+        city: c.name,
+        system: c.system,
+        lines: t.lines.map((l) => ({ id: l.data.routeId, name: l.data.name, color: l.data.color })),
+        stations: t.stations.map((s) => ({
+          id: s.data.stationId,
+          name: s.data.name,
+          lines: (s.data.lines ?? []).map((l) => l.name),
+        })),
+        alerts: alerts.map((a) => a.title),
+        ...(vehicles ? { vehicles: await liveVehicles(city) } : {}),
+      };
     },
   },
   {
