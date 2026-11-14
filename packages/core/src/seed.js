@@ -198,6 +198,12 @@ export const COLLECTIONS = [
       'What is on sale and which coupon codes work right now, from the deal communities and editorial deal desks that publish keyless feeds: the Slickdeals front page, popular list and coupon-code search, DealNews with the retailer, price and expiry as fields, Dealcatcher, Ben’s Bargains, and r/deals and r/coupons. Every row names its store under the same key across sources, and a code written in the post is lifted into a field, so a coupon site can list it without reading the thread.',
   },
   {
+    slug: 'prices',
+    name: 'Prices',
+    description:
+      'What people paid for products by barcode, read off receipts and price tags they photographed at shops that are OpenStreetMap places, from Open Prices (prices.openfoodfacts.org, ODbL). Every price also joins the product graph at /products, beside the prices shops state online.',
+  },
+  {
     slug: 'coupons',
     name: 'Coupons',
     description:
@@ -2940,6 +2946,20 @@ export const DEFAULT_FEEDS = [
     name: 'SMS scam numbers',
     description: 'Only the numbers flagged as scams, not just spam.',
     query: { kinds: ['phone-number'], tags: ['reason:scam'] },
+  },
+  {
+    collection: 'prices',
+    slug: 'prices-latest',
+    name: 'Newest prices',
+    description: 'Every price Open Prices users recorded, newest upload first.',
+    query: { kinds: ['price'] },
+  },
+  {
+    collection: 'prices',
+    slug: 'prices-discounted',
+    name: 'Discounted prices',
+    description: 'Only prices recorded as discounted.',
+    query: { kinds: ['price'], tags: ['discounted'] },
   },
   {
     collection: 'coupons',
