@@ -11,12 +11,13 @@
  * payment proof when there is one (that is the price the settlement checks),
  * off an old pass otherwise, or off a `?payer=` hint on the sales page.
  */
+
+import * as auth from '@nichedb/auth';
 import { config } from '@nichedb/config';
 import * as q from '@nichedb/db/queries';
 import { createGateway, decodePayment } from '@profullstack/x402-gateway';
 import { renderCrawlPage } from '../views/crawl.jsx';
 import { attributeCrawlSale } from './attribution.js';
-import * as auth from '@nichedb/auth';
 import { sessionCookie, splitSale } from './partners.js';
 import { planForUser } from './premium.js';
 
