@@ -357,7 +357,8 @@ describe('keepProductOffers (the crawler push)', () => {
 
 describe('product keys in paths', () => {
   test('Hono hands a {.+} param back decoded, so routes must not decode it again', async () => {
-    const { Hono } = await import('hono');
+    // hono is apps/web's dependency; CI's isolated install does not hoist it to the root.
+    const { Hono } = await import(Bun.resolveSync('hono', `${import.meta.dir}/../apps/web`));
     const app = new Hono();
     app.get('/products/:key{.+}', (c) => c.text(c.req.param('key')));
     const key = 'url:https://a.example/p?x=1&y=100%';
