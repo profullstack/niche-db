@@ -10,9 +10,9 @@
  * every page is an index range, never a scan of items. Resumable: it prints
  * the last id after each batch; pass it back as --before.
  */
-import { offersFromRecord } from '@nichedb/core/products';
-import { sql } from '@nichedb/db';
-import { keepOffers } from '@nichedb/db/products';
+import { offersFromRecord } from '../packages/core/src/products.js';
+import { sql } from '../packages/db/src/index.js';
+import { keepOffers } from '../packages/db/src/products.js';
 
 const arg = (name, fallback) => {
   const i = process.argv.indexOf(`--${name}`);
