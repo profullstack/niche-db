@@ -18,6 +18,19 @@ JSON-LD product gives one offer from those.
 A page's offers are replaced as a set each time it is read, so an offer a store
 stops stating disappears. A graph write never fails the crawler's push.
 
+## Other sources
+
+- **Open Prices** (prices.openfoodfacts.org, ODbL): what people paid, from
+  receipts and price tags, by barcode, at OpenStreetMap shops. The `openprices`
+  adapter writes each price to `/c/prices` and its `data.offer` to the graph
+  (ingest's `absorbOffers`; any adapter can do the same). One offer per
+  (barcode, shop); a newer price at that shop replaces the older. The variant
+  text carries the receipt date, since `seenAt` is when we read the row.
+- **Stores to crawl**: pitbot seeds shops from c0upons.com (`seed --from
+  c0upons`) and from Wikidata's online shops and retail chains with an official
+  website (`seed --from wikidata-shops`), and reads product sitemaps and
+  product-looking pages first, so a shop's 1,000 pages are mostly products.
+
 ## Identity
 
 | key | when | joins stores? |

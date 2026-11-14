@@ -121,6 +121,7 @@ import { openlibrary } from './openlibrary.js';
 import { openlibraryCatalog } from './openlibrary-catalog.js';
 import { openlisting } from './openlisting.js';
 import { openmodel } from './openmodel.js';
+import { openprices } from './openprices.js';
 import { openprofiles } from './openprofiles.js';
 import { opensaas } from './opensaas.js';
 import { openserver } from './openserver.js';
@@ -383,6 +384,8 @@ export const ADAPTERS = [
   agenticjobs,
   tsbb,
   c0upons,
+  // Prices people paid, by barcode, at OSM shops; also feeds the product graph.
+  openprices,
   smshubBlacklist,
   // Hosting: who sells servers, at what price, and the deals the small ones announce.
   findhost,

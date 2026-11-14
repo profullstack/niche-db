@@ -1,5 +1,6 @@
 import { ADAPTERS, adapterByName } from '@nichedb/adapters';
 import { config } from '@nichedb/config';
+import { keepOffers } from '@nichedb/db/products';
 import * as profiles from '@nichedb/db/profiles';
 import * as q from '@nichedb/db/queries';
 import { retryTransient } from '@nichedb/db/resilience';
@@ -354,7 +355,28 @@ async function writeBatch({ source, adapter, items: raw, log }) {
     added += r.added;
     updated += r.updated;
   }
+  await absorbOffers({ items, log });
   return { seen: items.length, added, updated };
+}
+
+/**
+ * Items that also state a product-graph offer (`data.offer`, the shape
+ * core/products.js reads from pages) land in product_offers too, keyed by their
+ * own page so a newer row for the same page replaces the older one. Done after
+ * the items are written and never fatal: the items are the run's contract, the
+ * graph is derived from them.
+ */
+export async function absorbOffers({ items, log, keep = keepOffers }) {
+  const offers = items
+    .map((it) => it.data?.offer)
+    .filter((o) => o && o.key && o.pageUrl && o.offerUrl && o.name);
+  if (!offers.length) return;
+  try {
+    const { kept } = await keep({ pages: offers.map((o) => o.pageUrl), offers });
+    log(`${kept} offers into the product graph`);
+  } catch (err) {
+    log(`product graph write failed: ${String(err?.message ?? err).slice(0, 120)}`);
+  }
 }
 
 /** The openprofiles adapter's documents into the profiles tables; back come the people. */
