@@ -9,8 +9,6 @@ import {
 import { toItem as vultrItem, stockOf as vultrStock } from '../packages/adapters/src/vultr.js';
 import { normaliseItem } from '../packages/core/src/adapter.js';
 
-process.env.DATABASE_URL ??= 'postgres://test:test@localhost:5432/test';
-process.env.SITE_URL ??= 'https://nichedb.test';
 const { retireMissing } = await import('../packages/core/src/ingest.js');
 
 /** A GPU offer as Scaleway's products endpoint sends it in 2026-11: priced at zero. */
