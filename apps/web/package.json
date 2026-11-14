@@ -33,7 +33,7 @@
     "@profullstack/redeem-credits": "^0.2.0",
     "@profullstack/throttle": "^0.4.0",
     "@profullstack/webhooks": "0.2.1",
-    "@profullstack/x402-gateway": "0.13.1",
+    "@profullstack/x402-gateway": "^0.18.0",
     "@simplewebauthn/browser": "^14.0.0",
     "hono": "^4.13.14",
     "satellite.js": "5.0.0"

@@ -25,7 +25,7 @@ const store = sqlStore({ execute, dialect: 'postgres' });
 // switched on, so enabling it later needs no migration.
 
 /** The session cookie, read off a bare Request rather than a Hono context. */
-function sessionCookie(request) {
+export function sessionCookie(request) {
   const header = request.headers.get('cookie') ?? '';
   for (const part of header.split(';')) {
     const eq = part.indexOf('=');

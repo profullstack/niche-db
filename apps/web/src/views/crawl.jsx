@@ -56,6 +56,13 @@ export function CrawlPage(ctx) {
             <p class="small muted">Paid in USDC through CoinPay.</p>
           </div>
         </section>
+        {ctx.mass ? (
+          <p class="feedback">
+            {ctx.mass.surge
+              ? `${ctx.siteName} is being scraped in bulk right now, so every page is read with a pass until it stops.`
+              : 'This address has read more pages than a person does. A pass keeps it reading.'}
+          </p>
+        ) : null}
         {ctx.quota?.exceeded ? (
           <p class="feedback">
             Your free allowance of {ctx.quota.requests} requests per {ctx.quota.windowSeconds}{' '}
