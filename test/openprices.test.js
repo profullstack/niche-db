@@ -2,7 +2,7 @@ import { describe, expect, test } from 'bun:test';
 import { CREDIT, openprices, toItem } from '../packages/adapters/src/openprices.js';
 import { normaliseItem } from '../packages/core/src/adapter.js';
 
-process.env.DATABASE_URL ??= 'postgres://test:test@localhost:5432/test';
+process.env.DATABASE_URL ??= 'postgres://localhost/unused';
 process.env.SITE_URL ??= 'https://nichedb.test';
 const { adapterByName } = await import('../packages/adapters/src/index.js');
 const { COLLECTIONS, DEFAULT_FEEDS } = await import('../packages/core/src/seed.js');
