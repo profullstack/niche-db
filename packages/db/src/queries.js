@@ -1110,6 +1110,23 @@ export async function previousItemData({ sourceId, externalIds }) {
  * saying -- a fixture deleted upstream is never fetched again, so nothing would
  * ever overwrite the last thing it said about it.
  */
+/**
+ * Every row this source holds whose external id is not in `keep`, as stored:
+ * what a complete pull of a catalogue no longer lists (see ingest's
+ * retireMissing). Bounded, because a catalogue source holds hundreds of rows,
+ * not millions; a source that big should not be claiming complete pulls.
+ */
+export async function sourceItemsExcept({ sourceId, keep = [], limit = 5000 }) {
+  return sql`
+    select external_id, kind, title, summary, url, image_url, published_at, time_known,
+           precision, tags, data
+    from items
+    where source_id = ${sourceId}
+      and not (external_id = any(${pgArray(keep)}::text[]))
+    limit ${limit}
+  `;
+}
+
 export async function heldItems({ sourceId, tags = [], from, to, limit = 500 }) {
   return sql`
     select external_id, kind, title, summary, url, image_url, published_at, time_known,

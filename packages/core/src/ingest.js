@@ -139,6 +139,10 @@ export async function runSource(
       totals.seen += w.seen;
       totals.added += w.added;
       totals.updated += w.updated;
+      // A pull that says it read the whole catalogue lets the adapter mark what it no longer lists.
+      if (result?.complete === true && typeof adapter.retire === 'function') {
+        totals.updated += await retireMissing({ source, adapter, items: result.items, log: l });
+      }
     }
 
     const nextRunAt = outcome?.nextInMinutes
@@ -357,6 +361,61 @@ async function writeBatch({ source, adapter, items: raw, log }) {
   }
   await absorbOffers({ items, log });
   return { seen: items.length, added, updated };
+}
+
+/**
+ * Rows this source wrote before that a complete pull no longer lists, handed to
+ * the adapter's `retire(item)`, which returns the item to store in their place
+ * (an offer marked discontinued, say) or null to leave the row alone.
+ *
+ * Only for a pull that returned `complete: true`: the adapter read the whole
+ * upstream catalogue, so a missing id means the provider dropped it. The rows
+ * are rewritten, never deleted, so a reader holding an id still finds it and
+ * anything keyed on the row (price history downstream) survives; the next pull
+ * that lists the id again overwrites the retired row with the live one. As a
+ * guard against a half-empty answer that still claimed to be complete, nothing
+ * is retired when more rows would go than the pull returned.
+ */
+export async function retireMissing({ source, adapter, items, log = () => {}, query = q }) {
+  const keep = (items ?? []).map(normaliseItem).filter(Boolean);
+  const missing = await query.sourceItemsExcept({
+    sourceId: source.id,
+    keep: keep.map((it) => it.externalId),
+  });
+  if (missing.length === 0) return 0;
+  if (missing.length > keep.length) {
+    log(`${missing.length} rows missing from a pull of ${keep.length}: not retiring any`);
+    return 0;
+  }
+  const retired = missing
+    .map((r) =>
+      adapter.retire({
+        externalId: r.external_id,
+        kind: r.kind,
+        title: r.title,
+        summary: r.summary,
+        url: r.url,
+        imageUrl: r.image_url,
+        publishedAt: r.published_at,
+        timeKnown: r.time_known,
+        precision: r.precision,
+        tags: r.tags ?? [],
+        data: (typeof r.data === 'string' ? JSON.parse(r.data) : r.data) ?? {},
+      }),
+    )
+    .map((it) => (it ? normaliseItem(it) : null))
+    .filter(Boolean);
+  let changed = 0;
+  for (let i = 0; i < retired.length; i += 200) {
+    const r = await query.upsertItems({
+      collectionId: source.collection_id,
+      sourceId: source.id,
+      items: retired.slice(i, i + 200),
+    });
+    changed += r.updated + r.added;
+  }
+  if (changed) log(`${changed} rows no longer listed upstream, retired`);
+  return changed;
 }
 
 /**

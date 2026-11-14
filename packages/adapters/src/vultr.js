@@ -1,5 +1,12 @@
 import { defineAdapter } from '@nichedb/core/adapter';
-import { countriesOf, offer, offerItem, VULTR_COUNTRIES } from './hosting.js';
+import {
+  countriesOf,
+  offer,
+  offerItem,
+  retireOffer,
+  stockFrom,
+  VULTR_COUNTRIES,
+} from './hosting.js';
 
 /**
  * Vultr's catalogue: every cloud compute plan and every bare metal plan, with
@@ -16,13 +23,29 @@ import { countriesOf, offer, offerItem, VULTR_COUNTRIES } from './hosting.js';
  * as a tag. RAM arrives in MB, disk and bandwidth in GB, prices in USD. A
  * bare metal plan is a dedicated box (`bare-metal`, tenancy dedicated); the
  * rest are `vps`, off-prem, unmanaged, shared tenancy, centralized.
+ *
+ * STOCK. `locations` is where a plan is sold, not where it can be deployed
+ * today: the L40S plans list none at all. `/v2/regions/{id}/availability`
+ * (keyless too) names the plans each region can deploy right now, so every
+ * region is read once a run and a plan is `in_stock` where any region can take
+ * it and `out_of_stock` where none can. If a region cannot be read, nothing is
+ * claimed from availability and only the plain facts stand (no locations, or
+ * `deploy_ondemand: false`, is out of stock; anything else is unknown).
+ *
+ * RETIRED PLANS. Vultr drops plans from the list (the whole first A16/A40
+ * line went in 2026-10, some renamed: vcg-a16-6c-64g became -60g), and a row
+ * nobody overwrites would sit in the collection forever at its old price. A
+ * run that read both lists returns `complete: true`, and ingest hands each
+ * stored plan the lists no longer carry to `retire`, which marks it
+ * discontinued.
  */
 const PLANS_URL = 'https://api.vultr.com/v2/plans?per_page=500';
 const METAL_URL = 'https://api.vultr.com/v2/plans-metal?per_page=500';
+const REGIONS_URL = 'https://api.vultr.com/v2/regions?per_page=500';
 const PRICING_URL = 'https://www.vultr.com/pricing/';
 export const PROVIDER = 'vultr';
 
-export function toItem(p, { metal = false } = {}) {
+export function toItem(p, { metal = false, available } = {}) {
   if (!p?.id) return null;
   const gpu =
     p.gpu_brand && p.gpu_brand !== 'none'
@@ -58,7 +81,7 @@ export function toItem(p, { metal = false } = {}) {
     amount: p.monthly_cost,
     currency: 'USD',
     interval: 'month',
-    stock: p.deploy_ondemand === false ? 'out_of_stock' : 'unknown',
+    stock: stockOf(p, available),
   });
   return offerItem({
     provider: PROVIDER,
@@ -70,9 +93,51 @@ export function toItem(p, { metal = false } = {}) {
       cpuVendor: p.cpu_vendor ?? p.cpu_manufacturer ?? null,
       cpuModel: p.cpu_model ?? null,
       invoiceType: p.invoice_type ?? null,
+      availableIn: Array.isArray(available) ? available : null,
     },
     raw: p,
   });
+}
+
+/**
+ * Out of stock when Vultr says so plainly (on-demand deploys off, or sold in
+ * no location); otherwise what the availability read says, when there is one.
+ */
+export function stockOf(p, available) {
+  if (p.deploy_ondemand === false) return 'out_of_stock';
+  if (Array.isArray(available)) return stockFrom(available);
+  return Array.isArray(p.locations) && !p.locations.length ? 'out_of_stock' : 'unknown';
+}
+
+/**
+ * Which regions can deploy each plan now: a Map of plan id to region ids, from
+ * every region's availability list. Null if any region could not be read, so a
+ * partial read never makes a plan look sold out.
+ */
+export async function readAvailability(http, { log = () => {}, pauseMs = 300 } = {}) {
+  const body = await http.json(REGIONS_URL, { timeoutMs: 30_000 });
+  const regions = (body?.regions ?? []).map((r) => r.id).filter(Boolean);
+  if (!regions.length) return null;
+  const byPlan = new Map();
+  for (const region of regions) {
+    let list;
+    try {
+      const a = await http.json(`https://api.vultr.com/v2/regions/${region}/availability`, {
+        timeoutMs: 30_000,
+      });
+      list = a?.available_plans;
+    } catch (err) {
+      log(`availability for ${region} failed: ${String(err?.message ?? err).slice(0, 80)}`);
+      return null;
+    }
+    if (!Array.isArray(list)) return null;
+    for (const plan of list) {
+      if (!byPlan.has(plan)) byPlan.set(plan, []);
+      byPlan.get(plan).push(region);
+    }
+    if (pauseMs) await Bun.sleep(pauseMs);
+  }
+  return byPlan;
 }
 
 async function page(http, url, key) {
@@ -100,19 +165,30 @@ export const vultrPlans = defineAdapter({
   cadenceMinutes: 1440,
   configFields: [],
   defaultSources: [{ slug: 'vultr-plans', name: 'Hosting: Vultr plans' }],
+  retire: retireOffer,
   async pull({ http, log }) {
+    let metalOk = true;
     const [cloud, metal] = await Promise.all([
       page(http, PLANS_URL, 'plans'),
       page(http, METAL_URL, 'plans_metal').catch((err) => {
+        metalOk = false;
         log(`bare metal list failed: ${err.message.slice(0, 80)}`);
         return [];
       }),
     ]);
+    const byPlan = await readAvailability(http, { log }).catch((err) => {
+      log(`availability read failed: ${String(err?.message ?? err).slice(0, 80)}`);
+      return null;
+    });
+    const available = (id) => (byPlan ? (byPlan.get(id) ?? []) : undefined);
     const items = [
-      ...cloud.map((p) => toItem(p)),
-      ...metal.map((p) => toItem(p, { metal: true })),
+      ...cloud.map((p) => toItem(p, { available: available(p.id) })),
+      ...metal.map((p) => toItem(p, { metal: true, available: available(p.id) })),
     ].filter(Boolean);
-    log(`${cloud.length} cloud plans, ${metal.length} bare metal`);
-    return { items, note: `${cloud.length} cloud plans, ${metal.length} bare metal` };
+    const inStock = items.filter((i) => i.data.offer.stock === 'in_stock').length;
+    const note = `${cloud.length} cloud plans, ${metal.length} bare metal, ${byPlan ? `${inStock} deployable now` : 'availability unread'}`;
+    log(note);
+    // Both lists read and non-empty: the catalogue is whole, so what it lacks is gone.
+    return { items, note, complete: metalOk && cloud.length > 0 && metal.length > 0 };
   },
 });

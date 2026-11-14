@@ -300,3 +300,31 @@ export function ovhCountry(dc) {
 export const countriesOf = (regions, lookup) => [
   ...new Set(regions.map((r) => lookup(r)).filter(Boolean)),
 ];
+
+/**
+ * Stock from a per-region availability read: deployable somewhere is
+ * `in_stock`, sold out everywhere it was looked for is `out_of_stock`.
+ * `available` is the list of regions that can deploy it now, or null when
+ * availability could not be read for every region, and then nothing is claimed.
+ */
+export function stockFrom(available) {
+  if (!Array.isArray(available)) return 'unknown';
+  return available.length > 0 ? 'in_stock' : 'out_of_stock';
+}
+
+/**
+ * A stored offer the provider no longer lists, as the item that marks it
+ * `discontinued`; null when it already is. This is an adapter's `retire` hook:
+ * ingest calls it for each row a complete pull left out. The row is kept,
+ * because a reader may hold its id and its price history still matters, and
+ * the next read that lists the offer again overwrites it with the live one.
+ */
+export function retireOffer(item) {
+  const offer = item?.data?.offer;
+  if (!offer || offer.stock === 'discontinued') return null;
+  return {
+    ...item,
+    tags: [...new Set([...(item.tags ?? []), 'discontinued'])],
+    data: { ...item.data, offer: { ...offer, stock: 'discontinued' }, discontinued: true },
+  };
+}
