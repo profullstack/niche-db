@@ -14,6 +14,8 @@ import {
   urlsForPath,
   webUrl,
 } from '@nichedb/core/opensite';
+import { offersFromRecord } from '@nichedb/core/products';
+import { keepOffers } from '@nichedb/db/products';
 import * as q from '@nichedb/db/queries';
 import { canAddSources, Denied, isAdmin } from './service.js';
 
@@ -293,10 +295,13 @@ export async function keepCrawled({ user, records }) {
     throw new Denied('The crawler source is not set up on this deployment yet.', 503);
   const items = [];
   const rejected = [];
+  const pages = [];
   records.forEach((entry, index) => {
     const out = crawledItem(entry);
-    if (out.item) items.push(out.item);
-    else rejected.push({ index, error: out.error });
+    if (out.item) {
+      items.push(out.item);
+      pages.push(entry?.record ?? entry);
+    } else rejected.push({ index, error: out.error });
   });
   const { added, updated } = items.length
     ? await q.upsertItems({
@@ -305,11 +310,42 @@ export async function keepCrawled({ user, records }) {
         items,
       })
     : { added: 0, updated: 0 };
+  const products = await keepProductOffers(pages);
   return {
     accepted: items.length,
     added,
     updated,
     unchanged: items.length - added - updated,
     rejected,
+    products,
   };
+}
+
+/**
+ * The product graph's share of a push: the offers each accepted page states in
+ * its Product JSON-LD (core/products.js). Pages are replaced as sets, so a page
+ * that stopped stating an offer loses it. Never fails the push: the sites rows
+ * are the contract with the crawler, the graph is derived from them and the
+ * backfill script can rebuild it.
+ */
+export async function keepProductOffers(pages, { keep = keepOffers } = {}) {
+  const read = [];
+  const offers = [];
+  for (const record of pages) {
+    const canonical = publicWebUrl(record?.canonical ?? record?.url);
+    if (!canonical) continue;
+    const found = offersFromRecord({ ...record, canonical });
+    // A page with no product JSON-LD and no kind 'product' never held offers; skip its delete.
+    if (found.length === 0 && record?.kind !== 'product') continue;
+    read.push(canonical);
+    offers.push(...found);
+  }
+  if (read.length === 0) return { offers: 0, removed: 0 };
+  try {
+    const { kept, removed } = await keep({ pages: read, offers });
+    return { offers: kept, removed };
+  } catch (err) {
+    console.error(`product graph: ${err?.message ?? err}`);
+    return { offers: 0, removed: 0, error: 'product graph write failed' };
+  }
 }

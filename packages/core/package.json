@@ -1,6 +1,6 @@
 {
   "name": "@nichedb/core",
-  "version": "0.64.0",
+  "version": "0.65.0",
   "private": true,
   "type": "module",
   "exports": {
@@ -23,7 +23,8 @@
     "./traffic/owners": "./src/traffic/owners.js",
     "./traffic/rdap": "./src/traffic/rdap.js",
     "./lyrics": "./src/lyrics.js",
-    "./openvuln": "./src/openvuln.js"
+    "./openvuln": "./src/openvuln.js",
+    "./products": "./src/products.js"
   },
   "dependencies": {
     "@nichedb/adapters": "workspace:*",

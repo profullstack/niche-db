@@ -1,6 +1,6 @@
 {
   "name": "@nichedb/db",
-  "version": "0.64.0",
+  "version": "0.65.0",
   "private": true,
   "type": "module",
   "exports": {
@@ -24,7 +24,8 @@
     "./reputation": "./src/reputation.js",
     "./blacklists": "./src/blacklists.js",
     "./lyrics": "./src/lyrics.js",
-    "./vulns": "./src/vulns.js"
+    "./vulns": "./src/vulns.js",
+    "./products": "./src/products.js"
   },
   "dependencies": {
     "@nichedb/config": "workspace:*",
