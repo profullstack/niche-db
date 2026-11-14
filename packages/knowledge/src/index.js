@@ -83,6 +83,7 @@ export const RESERVED_NICHE_SLUGS = new Set([
   'opportunities',
   'population',
   'privacy',
+  'products',
   'pro',
   'reputation',
   'robots.txt',

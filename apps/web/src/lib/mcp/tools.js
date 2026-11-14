@@ -26,6 +26,7 @@ import { businessReport, hasInput, normaliseInput, rdapLookup } from '../busines
 import * as credits from '../credits.js';
 import { liveReputationDeps } from '../dnsbl.js';
 import { areaOut } from '../population.js';
+import { searchProducts } from '../products.js';
 import {
   claimProfile,
   editProfile,
@@ -403,7 +404,7 @@ export const TOOLS = [
     title: 'Where to Buy a Book',
     annotations: LOOKUP,
     description:
-      "Where to buy a book. Give an `isbn` (10 or 13 digits, hyphens fine), or a `title` and `author`, or `item` (a books-collection item id). Answers with the edition from Open Library (title, authors, publisher, pages, cover), `online`: links at Amazon, Bookshop.org, Barnes & Noble, Books-A-Million, Target, Walmart, Powell's, ThriftBooks, Better World Books, AbeBooks, eBay, BookFinder, Google Play Books, Kobo, Libby and WorldCat, each with `kind` (new, used, ebook, borrow) and `sponsored`. Give a US `zip` for `inStore`: the chains' store finders for that ZIP and the bookshops and libraries within 10 miles from OpenStreetMap, with address, phone, hours and distance. Sellers publish no stock or prices, so call a shop with the ISBN.",
+      "Where to buy a book. Give an `isbn` (10 or 13 digits, hyphens fine), or a `title` and `author`, or `item` (a books-collection item id). Answers with the edition from Open Library (title, authors, publisher, pages, cover), `online`: links at Amazon, Bookshop.org, Barnes & Noble, Books-A-Million, Target, Walmart, Powell's, ThriftBooks, Better World Books, AbeBooks, eBay, BookFinder, Google Play Books, Kobo, Libby and WorldCat, each with `kind` (new, used, ebook, borrow) and `sponsored`. Give a US `zip` for `inStore`: the chains' store finders for that ZIP and the bookshops and libraries within 10 miles from OpenStreetMap, with address, phone, hours and distance. Most sellers publish no stock or prices, so call a shop with the ISBN; `statedOffers` lists the ones whose own page data does state a price and stock for this ISBN (from the product graph, with `seenAt`).",
     inputSchema: {
       type: 'object',
       properties: {
@@ -418,6 +419,35 @@ export const TOOLS = [
       const out = await whereToBuy(args);
       if (out.error) throw toolError(out.error);
       return out;
+    },
+  },
+  {
+    name: 'find_product',
+    title: 'Find a Product Across Stores',
+    annotations: LOOKUP,
+    description:
+      'Find a product and every store selling it, from the product graph: offers that stores state in their own product page data (schema.org Product/Offer), read by the pit.world crawler and joined across stores by barcode or part number. Give `gtin` (any UPC, EAN, ISBN-13 or GTIN-14; hyphens fine) or `brand` + `mpn` for an exact product, or `q` for words (a name, brand, part number or SKU; a bare barcode in `q` works too). `host` keeps one store. Each product has `key`, `name`, `brand`, `gtin`, `mpn`, `stores`, `lowPrice` + `currency` (only when every buyable offer shares one currency) and `offers` sorted buyable-first then cheapest: `seller`, `host`, `price`, `currency`, `availability` (schema.org word: InStock, OutOfStock, PreOrder...), `condition`, `variant`, `offerUrl`, `seenAt`. Prices are what the page said when last read, not live; quote `seenAt` with them. No store pays to be listed.',
+    inputSchema: {
+      type: 'object',
+      properties: {
+        q: str('Words to match (optional), e.g. sony wh-1000xm5'),
+        gtin: str('A UPC, EAN, ISBN-13 or GTIN-14 (optional), e.g. 0027242923232'),
+        brand: str('Brand, with mpn (optional), e.g. Bosch'),
+        mpn: str("The maker's part number, with brand (optional), e.g. GSR12V-300B22"),
+        host: str('Only this store (optional), e.g. example-shop.com'),
+        limit: int('Products to return, integer 1-50, default 10, e.g. 5'),
+      },
+    },
+    run: async (args) => {
+      const out = await searchProducts({ limit: 10, ...args });
+      if (out.error) throw toolError(out.error);
+      return {
+        count: out.products.length,
+        products: out.products.map((p) => ({
+          ...p,
+          page: `${config.siteUrl}/products/${encodeURIComponent(p.key)}`,
+        })),
+      };
     },
   },
   {

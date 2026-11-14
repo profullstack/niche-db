@@ -1,6 +1,7 @@
 import { config } from '@nichedb/config';
 import { normaliseZip, zipKey } from '@nichedb/core/population';
 import * as pop from '@nichedb/db/population';
+import { findProducts } from '@nichedb/db/products';
 import * as queries from '@nichedb/db/queries';
 import {
   amazonTagged,
@@ -573,5 +574,31 @@ export const buyAnswer = (a) => ({
 export async function whereToBuy({ isbn, title, author, item, zip }) {
   const found = await bookFrom({ isbn, title, author, item });
   if (found.error) return found;
-  return buyAnswer(await answer({ ...found, zip: zip?.trim() ?? '' }));
+  const out = buyAnswer(await answer({ ...found, zip: zip?.trim() ?? '' }));
+  return { ...out, statedOffers: await statedOffers(found.book?.isbn?.isbn13) };
+}
+
+/**
+ * Offers that stores DO state for this ISBN, from the product graph: an
+ * ISBN-13 is a GTIN-13, and some shops publish price and stock in their page
+ * data. Empty when none has been read; never fails the answer.
+ */
+async function statedOffers(isbn13) {
+  if (!isbn13) return [];
+  try {
+    const { products } = await findProducts({ gtin: isbn13 });
+    return (products[0]?.offers ?? []).map((o) => ({
+      seller: o.seller,
+      host: o.host,
+      price: o.price,
+      currency: o.currency,
+      availability: o.availability,
+      condition: o.condition,
+      variant: o.variant,
+      url: o.offerUrl,
+      seenAt: o.seenAt,
+    }));
+  } catch {
+    return [];
+  }
 }
