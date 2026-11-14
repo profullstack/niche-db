@@ -12,7 +12,7 @@ import { migratedPglite, pgliteSql } from './helpers/pglite.js';
 
 process.env.DATABASE_URL ??= 'postgres://localhost/unused';
 process.env.SITE_URL ??= 'https://nichedb.test';
-const { findProducts, keepOffers, productByKey, productStats } = await import(
+const { findProducts, keepOffers, productByKey, productStats, stalePages } = await import(
   '../packages/db/src/products.js'
 );
 const { keepProductOffers } = await import('../apps/web/src/lib/sites.js');
@@ -328,6 +328,62 @@ describe('the graph in Postgres', () => {
     // A product page that now states nothing loses everything it had.
     await keepOffers({ pages: [page.canonical], offers: [] }, { db });
     expect(await productByKey(`url:${page.canonical}`, { db })).toBeNull();
+  });
+
+  test('a re-read with a new price keeps the old one and when it changed', async () => {
+    const offer = (price) =>
+      offersFromRecord({
+        url: 'https://drop.example/kettle',
+        jsonld: [
+          {
+            '@type': 'Product',
+            name: 'Kettle',
+            gtin13: '4006381333931',
+            offers: { price, priceCurrency: 'USD' },
+          },
+        ],
+      });
+    await keepOffers({ pages: ['https://drop.example/kettle'], offers: offer('30.00') }, { db });
+    await keepOffers({ pages: ['https://drop.example/kettle'], offers: offer('30.00') }, { db });
+    let [o] = (await productByKey('gtin:04006381333931', { db })).offers;
+    expect(o).toMatchObject({ price: 30, previousPrice: null, priceChangedAt: null });
+    await keepOffers({ pages: ['https://drop.example/kettle'], offers: offer('24.99') }, { db });
+    [o] = (await productByKey('gtin:04006381333931', { db })).offers;
+    expect(o).toMatchObject({ price: 24.99, previousPrice: 30 });
+    expect(o.priceChangedAt).toBe(o.seenAt);
+  });
+
+  test('stale pages: shop pages past the age, Open Prices left to its adapter, keyset paged', async () => {
+    await keepOffers(
+      {
+        pages: ['https://prices.openfoodfacts.org/products/4006381333931?location=1'],
+        offers: [
+          {
+            key: 'gtin:04006381333931',
+            name: 'Kettle',
+            pageUrl: 'https://prices.openfoodfacts.org/products/4006381333931?location=1',
+            offerUrl: 'https://prices.openfoodfacts.org/products/4006381333931?location=1',
+            host: 'prices.openfoodfacts.org',
+            price: 20,
+            currency: 'EUR',
+          },
+        ],
+      },
+      { db },
+    );
+    expect((await stalePages({ olderThanHours: 20 }, { db })).pages).toEqual([]);
+    const all = await stalePages({ olderThanHours: 0, limit: 1 }, { db });
+    expect(all.pages).toHaveLength(1);
+    expect(all.next).not.toBeNull();
+    const pages = new Set(all.pages);
+    let next = all.next;
+    while (next !== null) {
+      const page = await stalePages({ olderThanHours: 0, limit: 1, after: next }, { db });
+      for (const p of page.pages) pages.add(p);
+      next = page.next;
+    }
+    expect([...pages].some((p) => p.includes('openfoodfacts'))).toBe(false);
+    expect(pages.has('https://drop.example/kettle')).toBe(true);
   });
 
   test('a bad GTIN is an answer, not a query', async () => {

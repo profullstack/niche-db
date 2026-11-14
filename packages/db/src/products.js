@@ -69,7 +69,14 @@ export async function keepOffers({ pages, offers }, { db = sql } = {}) {
           name = excluded.name, variant = excluded.variant, category = excluded.category,
           image_url = excluded.image_url, page_url = excluded.page_url, host = excluded.host,
           seller = excluded.seller, price = excluded.price, currency = excluded.currency,
-          availability = excluded.availability, condition = excluded.condition, seen_at = excluded.seen_at
+          availability = excluded.availability, condition = excluded.condition, seen_at = excluded.seen_at,
+          -- A re-read that finds a new price keeps the old one and when it changed.
+          previous_price = case when excluded.price is distinct from product_offers.price
+                                 and product_offers.price is not null
+                                then product_offers.price else product_offers.previous_price end,
+          price_changed_at = case when excluded.price is distinct from product_offers.price
+                                   and product_offers.price is not null
+                                  then excluded.seen_at else product_offers.price_changed_at end
         returning id
       `;
       kept = out.length;
@@ -103,8 +110,12 @@ const camel = (r) => ({
   currency: r.currency,
   availability: r.availability,
   condition: r.condition,
-  seenAt: r.seen_at instanceof Date ? r.seen_at.toISOString() : r.seen_at,
+  seenAt: iso(r.seen_at),
+  previousPrice: r.previous_price == null ? null : Number(r.previous_price),
+  priceChangedAt: iso(r.price_changed_at),
 });
+
+const iso = (v) => (v instanceof Date ? v.toISOString() : (v ?? null));
 
 /** Every offer for these product keys, at most OFFERS_PER_PRODUCT each, grouped in key order. */
 async function productsFor(keys, db) {
@@ -206,5 +217,41 @@ export async function productStats({ db = sql } = {}) {
     identified: Number(r.identified),
     stores: Number(r.stores),
     lastSeen: r.last_seen instanceof Date ? r.last_seen.toISOString() : (r.last_seen ?? null),
+  };
+}
+
+/** Open Prices rows refresh through their own adapter; only shop pages are re-read. */
+const SELF_REFRESHING = ['prices.openfoodfacts.org'];
+
+/**
+ * Shop product pages whose offers were last read more than `olderThanHours`
+ * ago, for the crawler's daily re-read (pit.world reprice). Keyset by offer id:
+ * pass back `next` as `after`. A page with several offers (variants) can appear
+ * once per offer across calls; the crawler dedupes.
+ */
+export async function stalePages(
+  { after = 0, limit = 5000, olderThanHours = 20 } = {},
+  { db = sql } = {},
+) {
+  const n = Math.max(1, Math.min(10_000, Number(limit) || 5000));
+  const hours =
+    Number.isFinite(Number(olderThanHours)) && olderThanHours !== null && olderThanHours !== ''
+      ? Number(olderThanHours)
+      : 20;
+  const rows = await bounded(
+    db,
+    READ_MS,
+    (d) => d`
+      select id, page_url from product_offers
+      where id > ${Number(after) || 0}
+        and seen_at < now() - make_interval(hours => ${hours})
+        and host <> all(${pgArray(SELF_REFRESHING)}::text[])
+      order by id
+      limit ${n}
+    `,
+  );
+  return {
+    pages: [...new Set(rows.map((r) => r.page_url))],
+    next: rows.length === n ? Number(rows.at(-1).id) : null,
   };
 }
