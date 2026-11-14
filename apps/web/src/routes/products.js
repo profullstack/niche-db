@@ -2,6 +2,7 @@ import { config } from '@nichedb/config';
 import * as products from '@nichedb/db/products';
 import { render } from '../lib/http.js';
 import { searchProducts as search } from '../lib/products.js';
+import { isAdmin } from '../lib/service.js';
 import { ProductPage, ProductsPage, productPath } from '../views/products.jsx';
 
 /**
@@ -75,6 +76,24 @@ export function registerProducts(app) {
       );
     c.header('cache-control', 'public, max-age=300');
     return c.json({ count: out.products.length, products: out.products.map(withLinks) });
+  });
+
+  /**
+   * Shop product pages due for a re-read (pit.world's daily reprice). The
+   * crawler's admin key only: it is a work list, not a public read.
+   */
+  app.get('/api/v1/products/pages', async (c) => {
+    const user = c.get('user');
+    if (!user) return c.json({ error: 'Sign in with an API key.' }, 401);
+    if (!isAdmin(user))
+      return c.json({ error: 'The re-read list is for the index operators.' }, 403);
+    const out = await products.stalePages({
+      after: c.req.query('after'),
+      limit: c.req.query('limit'),
+      olderThanHours: c.req.query('olderThanHours'),
+    });
+    c.header('cache-control', 'no-store');
+    return c.json(out);
   });
 
   app.get('/api/v1/products/:key{.+}', async (c) => {

@@ -59,7 +59,16 @@ const Offers = ({ offers }) => (
             </a>{' '}
             <small>{o.host}</small>
           </td>
-          <td>{money(o.price, o.currency)}</td>
+          <td>
+            {money(o.price, o.currency)}
+            {o.previousPrice != null && o.previousPrice !== o.price ? (
+              <small>
+                {' '}
+                (was {money(o.previousPrice, o.currency)}
+                {o.priceChangedAt ? `, changed ${o.priceChangedAt.slice(0, 10)}` : ''})
+              </small>
+            ) : null}
+          </td>
           <td>{stock(o.availability)}</td>
           <td>{o.variant ?? ''}</td>
         </tr>
@@ -143,8 +152,8 @@ export function ProductPage({ user, product }) {
       </section>
       <Offers offers={p.offers} />
       <p class="meta">
-        Prices and stock are what each store's page stated when it was last read. API:{' '}
-        <code>GET /api/v1/products/{encodeURIComponent(p.key)}</code>
+        Prices and stock are what each store's page stated when it was last read; shop pages are
+        read again every day. API: <code>GET /api/v1/products/{encodeURIComponent(p.key)}</code>
       </p>
     </Layout>
   );
