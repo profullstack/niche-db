@@ -11,12 +11,15 @@
  * payment proof when there is one (that is the price the settlement checks),
  * off an old pass otherwise, or off a `?payer=` hint on the sales page.
  */
+
+import * as auth from '@nichedb/auth';
 import { config } from '@nichedb/config';
 import * as q from '@nichedb/db/queries';
 import { createGateway, decodePayment } from '@profullstack/x402-gateway';
 import { renderCrawlPage } from '../views/crawl.jsx';
 import { attributeCrawlSale } from './attribution.js';
-import { splitSale } from './partners.js';
+import { sessionCookie, splitSale } from './partners.js';
+import { planForUser } from './premium.js';
 
 /** "1000:20,5000:40" → [{ spentCents: 1000, off: 0.2 }, …], ascending by spend. */
 export function parseLoyalty(spec) {
@@ -91,12 +94,42 @@ export async function payerFor(request) {
   return hint && /^0x[0-9a-fA-F]{40}$/.test(hint) ? hint : null;
 }
 
+/*
+ * A paying member reads through a mass-scrape surge; nobody else does.
+ *
+ * x402-gateway 0.18 answers every anonymous page load with a 402 while the
+ * site is being scraped in bulk, and it runs that gate before `exempt`, so a
+ * session cookie that is merely present (which a swarm can send) buys
+ * nothing. `authenticate` is the verified way through: the session must
+ * resolve to a user on a paid plan. A free account pays like anyone else.
+ * Cached a minute per session so a member's page loads cost one lookup.
+ */
+const memberCache = new Map();
+async function payingMember(request) {
+  const sid = sessionCookie(request);
+  if (!sid) return null;
+  const now = Date.now();
+  const hit = memberCache.get(sid);
+  if (hit && hit.until > now) return hit.ok ? true : null;
+  let ok = false;
+  try {
+    const user = await auth.userFromRequest(sid);
+    ok = Boolean(user) && (await planForUser(user)) !== 'free';
+  } catch {
+    ok = false;
+  }
+  if (memberCache.size > 10_000) memberCache.clear();
+  memberCache.set(sid, { ok, until: now + 60_000 });
+  return ok ? true : null;
+}
+
 /** The options every gateway shares; only the price differs. */
 export function gatewayOptions(priceCents) {
   return {
     siteUrl: config.siteUrl,
     siteName: config.siteName,
     page: renderCrawlPage,
+    authenticate: payingMember,
     coinpay: { apiKey: config.x402.coinpayKey },
     payTo: config.x402.payTo,
     priceCents,
