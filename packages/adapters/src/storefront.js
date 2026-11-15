@@ -551,7 +551,7 @@ export const storefront = defineAdapter({
       label: 'Discovery feeds',
       type: 'list',
       placeholder: 'les, lowendbox',
-      help: 'Offer forums read for hosts not yet on the list: les (LowEndSpirit offers), lowendbox. Empty turns discovery off.',
+      help: 'Offer forums read for hosts not yet on the list: les (LowEndSpirit offers), lowendbox, lowendbox-gpu. Empty turns discovery off.',
     },
   ],
   defaults: { hosts: [], maxHosts: 60, discover: Object.keys(DISCOVERY_FEEDS) },

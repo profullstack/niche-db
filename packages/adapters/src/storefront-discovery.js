@@ -16,6 +16,10 @@ import { registrableDomain } from './storefront-platforms.js';
  * - LowEndBox's feed (`lowendbox.com/feed/?paged=N`), deal posts plus
  *   editorial, so a LowEndBox post counts only when it links a host's own
  *   order page (cart, store, order form).
+ * - LowEndBox's GPU tag (`lowendbox.com/tag/gpu/feed/`), for GPU sellers.
+ *   Its "Cheap GPU list" directory page names seven sellers (Crunchbits,
+ *   InterServer, TensorDock, Vultr, PureGPU, Vast.ai, Scaleway); those are
+ *   seeded or have their own source, and only their names were taken.
  *
  * LowEndTalk and WebHostingTalk would be the obvious next two, and both
  * answer every path, robots.txt and RSS included, with a Cloudflare
@@ -46,6 +50,15 @@ export const DISCOVERY_FEEDS = {
     // Editorial too: only a post linking a host's order page counts.
     needsOrderLink: true,
     maxPages: 120,
+  },
+  'lowendbox-gpu': {
+    name: 'LowEndBox GPU tag',
+    url: (page) => `https://lowendbox.com/tag/gpu/feed/?paged=${page}`,
+    // GPU posts link the seller's GPU page more often than a cart; the
+    // most-linked host is the seller (NVIDIA, the clouds and the forums are
+    // never a host).
+    needsOrderLink: false,
+    maxPages: 30,
   },
 };
 
