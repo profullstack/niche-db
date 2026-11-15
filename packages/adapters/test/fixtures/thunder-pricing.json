@@ -1,0 +1,31 @@
+{
+ "pricing": {
+  "a100xl": 1.09,
+  "a100xl_native": 1.79,
+  "a100xl_x1": 1.09,
+  "a100xl_x2": 2.18,
+  "a100xl_x4": 5.96,
+  "a100xl_x8": 11.92,
+  "a6000_x1": 0.35,
+  "additional_vcpus": 0.04,
+  "disk_gb": 0.0003,
+  "ephemeral_disk_gb": 0.0002,
+  "h100": 3.2,
+  "h100_native": 3.2,
+  "h100_x1": 3.2,
+  "h100_x2": 6.4,
+  "h100_x4": 12.8,
+  "h100_x8": 25.6,
+  "l40": 0.79,
+  "l40_x1": 0.79,
+  "l40_x2": 1.58,
+  "l40_x4": 3.96,
+  "l40_x8": 7.92,
+  "sandbox_a100xl": 1.95,
+  "sandbox_h100": 2.95,
+  "sandbox_memory_gb": 0.016,
+  "sandbox_storage_gb": 0.00012,
+  "sandbox_vcpu": 0.051,
+  "snapshot_gb": 6.849e-05
+ }
+}

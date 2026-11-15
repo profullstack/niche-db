@@ -1,0 +1,304 @@
+{
+ "server": [
+  {
+   "Id": 3113581,
+   "Hardware": {
+    "CPU": {
+     "Name": "Intel Core i7-6700",
+     "CoreCount": 1
+    },
+    "RAM": {
+     "RealSize": 8192,
+     "Size": 32,
+     "SizeUnit": "GB",
+     "Amount": 4,
+     "ecc": false
+    },
+    "Storage": {
+     "RealSize": 8192,
+     "Size": 4096,
+     "SizeUnit": "GB",
+     "Amount": 2,
+     "Disks": [
+      "4.0 TB Enterprise HDD",
+      "4.0 TB Enterprise HDD"
+     ],
+     "Details": {
+      "nvme": [],
+      "sata": [],
+      "hdd": [
+       4000,
+       4000
+      ],
+      "general": [
+       4000
+      ]
+     }
+    }
+   },
+   "Prices": {
+    "monthly": {
+     "EUR": 77,
+     "USD": 86
+    },
+    "hourly": {
+     "EUR": 0.1234,
+     "USD": 0.1378
+    },
+    "setup": {
+     "EUR": 0,
+     "USD": 0
+    },
+    "fixed": false
+   },
+   "IPPrices": {
+    "monthly": {
+     "EUR": 1.7,
+     "USD": 1.9
+    },
+    "hourly": {
+     "EUR": 0.0027,
+     "USD": 0.003
+    },
+    "Amount": 1
+   },
+   "Details": {
+    "Description": [
+     "IPv4",
+     "iNIC",
+     "ENT.HDD",
+     "INIC",
+     "Intel Core i7-6700",
+     "4x RAM 8192 MB DDR4",
+     "2x HDD SATA 4,0 TB Enterprise",
+     "NIC 1 Gbit - Intel I219-LM"
+    ],
+    "Information": [
+     "4 x RAM 8192 MB DDR4",
+     "2 x HDD SATA 4,0 TB Enterprise",
+     "NIC 1 Gbit - Intel I219-LM"
+    ],
+    "Specials": [
+     "IPv4",
+     "iNIC"
+    ],
+    "Traffic": "unlimited",
+    "Bandwidth": 1000,
+    "OS": [
+     "Rescue system"
+    ],
+    "Datacenter": {
+     "Name": "HEL1-DC2",
+     "Datacenter": "#HEL1-DC2"
+    }
+   },
+   "Timer": {
+    "ReduceNext": 5350,
+    "ReduceNextHr": true,
+    "ReduceNextTimestamp": 1794706632
+   }
+  },
+  {
+   "Id": 3113457,
+   "Hardware": {
+    "CPU": {
+     "Name": "Intel Core i7-6700",
+     "CoreCount": 1
+    },
+    "RAM": {
+     "RealSize": 16384,
+     "Size": 64,
+     "SizeUnit": "GB",
+     "Amount": 4,
+     "ecc": false
+    },
+    "Storage": {
+     "RealSize": 4096,
+     "Size": 2048,
+     "SizeUnit": "GB",
+     "Amount": 2,
+     "Disks": [
+      "2.0 TB Enterprise HDD",
+      "2.0 TB Enterprise HDD"
+     ],
+     "Details": {
+      "nvme": [],
+      "sata": [],
+      "hdd": [
+       2000,
+       2000
+      ],
+      "general": [
+       2000
+      ]
+     }
+    }
+   },
+   "Prices": {
+    "monthly": {
+     "EUR": 77,
+     "USD": 86
+    },
+    "hourly": {
+     "EUR": 0.1234,
+     "USD": 0.1378
+    },
+    "setup": {
+     "EUR": 0,
+     "USD": 0
+    },
+    "fixed": false
+   },
+   "IPPrices": {
+    "monthly": {
+     "EUR": 1.7,
+     "USD": 1.9
+    },
+    "hourly": {
+     "EUR": 0.0027,
+     "USD": 0.003
+    },
+    "Amount": 1
+   },
+   "Details": {
+    "Description": [
+     "IPv4",
+     "iNIC",
+     "ENT.HDD",
+     "INIC",
+     "Intel Core i7-6700",
+     "4x RAM 16384 MB DDR4",
+     "2x HDD SATA 2,0 TB Enterprise",
+     "NIC 1 Gbit - Intel I219-LM"
+    ],
+    "Information": [
+     "4 x RAM 16384 MB DDR4",
+     "2 x HDD SATA 2,0 TB Enterprise",
+     "NIC 1 Gbit - Intel I219-LM"
+    ],
+    "Specials": [
+     "IPv4",
+     "iNIC"
+    ],
+    "Traffic": "unlimited",
+    "Bandwidth": 1000,
+    "OS": [
+     "Rescue system"
+    ],
+    "Datacenter": {
+     "Name": "FSN1-DC1",
+     "Datacenter": "#FSN1-DC1"
+    }
+   },
+   "Timer": {
+    "ReduceNext": 24362,
+    "ReduceNextHr": true,
+    "ReduceNextTimestamp": 1794725644
+   }
+  },
+  {
+   "Id": 3107676,
+   "Hardware": {
+    "CPU": {
+     "Name": "Intel Core i7-7700",
+     "CoreCount": 1
+    },
+    "RAM": {
+     "RealSize": 16384,
+     "Size": 64,
+     "SizeUnit": "GB",
+     "Amount": 4,
+     "ecc": false
+    },
+    "Storage": {
+     "RealSize": 1024,
+     "Size": 512,
+     "SizeUnit": "GB",
+     "Amount": 2,
+     "Disks": [
+      "512 GB SSD",
+      "512 GB SSD"
+     ],
+     "Details": {
+      "nvme": [],
+      "sata": [
+       512,
+       512
+      ],
+      "hdd": [],
+      "general": [
+       512
+      ]
+     }
+    }
+   },
+   "Prices": {
+    "monthly": {
+     "EUR": 86,
+     "USD": 96
+    },
+    "hourly": {
+     "EUR": 0.1378,
+     "USD": 0.1538
+    },
+    "setup": {
+     "EUR": 0,
+     "USD": 0
+    },
+    "fixed": false
+   },
+   "IPPrices": {
+    "monthly": {
+     "EUR": 1.7,
+     "USD": 1.9
+    },
+    "hourly": {
+     "EUR": 0.0027,
+     "USD": 0.003
+    },
+    "Amount": 1
+   },
+   "Details": {
+    "Description": [
+     "IPv4",
+     "GPU",
+     "iNIC",
+     "SSD",
+     "GPU",
+     "INIC",
+     "Intel Core i7-7700",
+     "4x RAM 16384 MB DDR4",
+     "2x SSD SATA 512 GB",
+     "GPU - GeForce GTX 1080",
+     "NIC 1 Gbit - Intel I219-LM"
+    ],
+    "Information": [
+     "4 x RAM 16384 MB DDR4",
+     "2 x SSD SATA 512 GB",
+     "GPU - GeForce GTX 1080",
+     "NIC 1 Gbit - Intel I219-LM"
+    ],
+    "Specials": [
+     "IPv4",
+     "GPU",
+     "iNIC"
+    ],
+    "Traffic": "unlimited",
+    "Bandwidth": 1000,
+    "OS": [
+     "Rescue system"
+    ],
+    "Datacenter": {
+     "Name": "HEL1-DC12",
+     "Datacenter": "#HEL1-DC12"
+    }
+   },
+   "Timer": {
+    "ReduceNext": 23315,
+    "ReduceNextHr": true,
+    "ReduceNextTimestamp": 1794724597
+   }
+  }
+ ],
+ "serverCount": 3
+}

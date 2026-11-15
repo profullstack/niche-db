@@ -1,0 +1,3871 @@
+{
+ "locale": {
+  "currencyCode": "USD",
+  "subsidiary": "US",
+  "taxRate": 0
+ },
+ "plans": [
+  {
+   "planCode": "24risegame012-ca",
+   "invoiceName": "RISE-GAME-1 | AMD Ryzen 5 5600X",
+   "addonFamilies": [
+    {
+     "name": "storage",
+     "exclusive": true,
+     "mandatory": true,
+     "addons": [
+      "softraid-2x512nvme-24risegame-ca"
+     ],
+     "default": "softraid-2x512nvme-24risegame-ca"
+    },
+    {
+     "name": "bandwidth",
+     "exclusive": true,
+     "mandatory": true,
+     "addons": [
+      "bandwidth-1000-rise-game-ca"
+     ],
+     "default": "bandwidth-1000-rise-game-ca"
+    },
+    {
+     "name": "memory",
+     "exclusive": true,
+     "mandatory": true,
+     "addons": [
+      "ram-32g-ecc-2400-24risegame01-ca"
+     ],
+     "default": "ram-32g-ecc-2400-24risegame01-ca"
+    }
+   ],
+   "product": "24risegame01",
+   "pricingType": "rental",
+   "consumptionConfiguration": null,
+   "pricings": [
+    {
+     "phase": 0,
+     "capacities": [
+      "installation"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": 10
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 9000000000,
+     "formattedPrice": "$90.00 USD",
+     "tax": 0,
+     "mode": "default",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 1,
+     "capacities": [
+      "renew"
+     ],
+     "commitment": 0,
+     "description": "rental for 1 month",
+     "interval": 1,
+     "intervalUnit": "month",
+     "quantity": {
+      "min": 1,
+      "max": 10
+     },
+     "repeat": {
+      "min": 1,
+      "max": null
+     },
+     "price": 9000000000,
+     "formattedPrice": "$90.00 USD",
+     "tax": 0,
+     "mode": "default",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "installation"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": 10
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront12",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 1,
+     "capacities": [
+      "renew"
+     ],
+     "commitment": 12,
+     "description": "rental for 12 months",
+     "interval": 12,
+     "intervalUnit": "month",
+     "quantity": {
+      "min": 1,
+      "max": 10
+     },
+     "repeat": {
+      "min": 1,
+      "max": null
+     },
+     "price": 102600000000,
+     "formattedPrice": "$1026.00 USD",
+     "tax": 0,
+     "mode": "upfront12",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": {
+      "defaultEndAction": "REACTIVATE_ENGAGEMENT",
+      "duration": "P12M",
+      "type": "upfront"
+     }
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "installation"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": 10
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront24",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 1,
+     "capacities": [
+      "renew"
+     ],
+     "commitment": 24,
+     "description": "rental for 24 months",
+     "interval": 24,
+     "intervalUnit": "month",
+     "quantity": {
+      "min": 1,
+      "max": 10
+     },
+     "repeat": {
+      "min": 1,
+      "max": null
+     },
+     "price": 205200000000,
+     "formattedPrice": "$2052.00 USD",
+     "tax": 0,
+     "mode": "upfront24",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": {
+      "defaultEndAction": "REACTIVATE_ENGAGEMENT",
+      "duration": "P24M",
+      "type": "upfront"
+     }
+    }
+   ],
+   "configurations": [
+    {
+     "name": "dedicated_datacenter",
+     "isCustom": false,
+     "isMandatory": false,
+     "values": [
+      "bhs"
+     ]
+    },
+    {
+     "name": "dedicated_os",
+     "isCustom": false,
+     "isMandatory": true,
+     "values": [
+      "none_64.en"
+     ]
+    },
+    {
+     "name": "region",
+     "isCustom": false,
+     "isMandatory": true,
+     "values": [
+      "united_states"
+     ]
+    }
+   ],
+   "family": null,
+   "blobs": {
+    "commercial": {
+     "features": [
+      {
+       "name": "baremetal-server-usecases",
+       "value": "gaming"
+      }
+     ],
+     "name": "RISE-GAME-1"
+    }
+   }
+  },
+  {
+   "planCode": "24skgame012-v1-ca",
+   "invoiceName": "KS-GAME | Intel Core i7 7700K",
+   "addonFamilies": [
+    {
+     "name": "storage",
+     "exclusive": true,
+     "mandatory": true,
+     "addons": [
+      "softraid-2x450nvme-24skgame-ca"
+     ],
+     "default": "softraid-2x450nvme-24skgame-ca"
+    },
+    {
+     "name": "bandwidth",
+     "exclusive": true,
+     "mandatory": true,
+     "addons": [
+      "bandwidth-300-24skgame-ca"
+     ],
+     "default": "bandwidth-300-24skgame-ca"
+    },
+    {
+     "name": "memory",
+     "exclusive": true,
+     "mandatory": true,
+     "addons": [
+      "ram-32g-noecc-2133-24skgame01-ca"
+     ],
+     "default": "ram-32g-noecc-2133-24skgame01-ca"
+    }
+   ],
+   "product": "24skgame01",
+   "pricingType": "rental",
+   "consumptionConfiguration": null,
+   "pricings": [
+    {
+     "phase": 0,
+     "capacities": [
+      "installation"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": 10
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 3300000000,
+     "formattedPrice": "$33.00 USD",
+     "tax": 0,
+     "mode": "default",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 1,
+     "capacities": [
+      "renew"
+     ],
+     "commitment": 0,
+     "description": "rental for 1 month",
+     "interval": 1,
+     "intervalUnit": "month",
+     "quantity": {
+      "min": 1,
+      "max": 10
+     },
+     "repeat": {
+      "min": 1,
+      "max": null
+     },
+     "price": 3300000000,
+     "formattedPrice": "$33.00 USD",
+     "tax": 0,
+     "mode": "default",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "installation"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": 10
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront12",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 1,
+     "capacities": [
+      "renew"
+     ],
+     "commitment": 12,
+     "description": "rental for 12 months",
+     "interval": 12,
+     "intervalUnit": "month",
+     "quantity": {
+      "min": 1,
+      "max": 10
+     },
+     "repeat": {
+      "min": 1,
+      "max": null
+     },
+     "price": 37620000000,
+     "formattedPrice": "$376.20 USD",
+     "tax": 0,
+     "mode": "upfront12",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": {
+      "defaultEndAction": "REACTIVATE_ENGAGEMENT",
+      "duration": "P12M",
+      "type": "upfront"
+     }
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "installation"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": 10
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront24",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 1,
+     "capacities": [
+      "renew"
+     ],
+     "commitment": 24,
+     "description": "rental for 24 months",
+     "interval": 24,
+     "intervalUnit": "month",
+     "quantity": {
+      "min": 1,
+      "max": 10
+     },
+     "repeat": {
+      "min": 1,
+      "max": null
+     },
+     "price": 75240000000,
+     "formattedPrice": "$752.40 USD",
+     "tax": 0,
+     "mode": "upfront24",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": {
+      "defaultEndAction": "REACTIVATE_ENGAGEMENT",
+      "duration": "P24M",
+      "type": "upfront"
+     }
+    }
+   ],
+   "configurations": [
+    {
+     "name": "dedicated_datacenter",
+     "isCustom": false,
+     "isMandatory": false,
+     "values": [
+      "bhs"
+     ]
+    },
+    {
+     "name": "dedicated_os",
+     "isCustom": false,
+     "isMandatory": true,
+     "values": [
+      "none_64.en"
+     ]
+    },
+    {
+     "name": "region",
+     "isCustom": false,
+     "isMandatory": true,
+     "values": [
+      "united_states"
+     ]
+    }
+   ],
+   "family": null,
+   "blobs": {
+    "commercial": {
+     "features": [
+      {
+       "name": "baremetal-server-usecases",
+       "value": "gaming"
+      }
+     ],
+     "name": "KS-GAME"
+    }
+   }
+  },
+  {
+   "planCode": "24sysgame012-v1-ca",
+   "invoiceName": "SYS-GAME-1 | AMD Ryzen 5 3600X",
+   "addonFamilies": [
+    {
+     "name": "bandwidth",
+     "exclusive": true,
+     "mandatory": true,
+     "addons": [
+      "bandwidth-500-24sysgame-ca"
+     ],
+     "default": "bandwidth-500-24sysgame-ca"
+    },
+    {
+     "name": "storage",
+     "exclusive": true,
+     "mandatory": true,
+     "addons": [
+      "softraid-2x512nvme-24sysgame-ca"
+     ],
+     "default": "softraid-2x512nvme-24sysgame-ca"
+    },
+    {
+     "name": "memory",
+     "exclusive": true,
+     "mandatory": true,
+     "addons": [
+      "ram-32g-ecc-2666-24sysgame01-ca"
+     ],
+     "default": "ram-32g-ecc-2666-24sysgame01-ca"
+    }
+   ],
+   "product": "24sysgame01",
+   "pricingType": "rental",
+   "consumptionConfiguration": null,
+   "pricings": [
+    {
+     "phase": 0,
+     "capacities": [
+      "installation"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": 10
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 5200000000,
+     "formattedPrice": "$52.00 USD",
+     "tax": 0,
+     "mode": "default",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 1,
+     "capacities": [
+      "renew"
+     ],
+     "commitment": 0,
+     "description": "rental for 1 month",
+     "interval": 1,
+     "intervalUnit": "month",
+     "quantity": {
+      "min": 1,
+      "max": 10
+     },
+     "repeat": {
+      "min": 1,
+      "max": null
+     },
+     "price": 5200000000,
+     "formattedPrice": "$52.00 USD",
+     "tax": 0,
+     "mode": "default",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "installation"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": 10
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront12",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 1,
+     "capacities": [
+      "renew"
+     ],
+     "commitment": 12,
+     "description": "rental for 12 months",
+     "interval": 12,
+     "intervalUnit": "month",
+     "quantity": {
+      "min": 1,
+      "max": 10
+     },
+     "repeat": {
+      "min": 1,
+      "max": null
+     },
+     "price": 59280000000,
+     "formattedPrice": "$592.80 USD",
+     "tax": 0,
+     "mode": "upfront12",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": {
+      "defaultEndAction": "REACTIVATE_ENGAGEMENT",
+      "duration": "P12M",
+      "type": "upfront"
+     }
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "installation"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": 10
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront24",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 1,
+     "capacities": [
+      "renew"
+     ],
+     "commitment": 24,
+     "description": "rental for 24 months",
+     "interval": 24,
+     "intervalUnit": "month",
+     "quantity": {
+      "min": 1,
+      "max": 10
+     },
+     "repeat": {
+      "min": 1,
+      "max": null
+     },
+     "price": 118560000000,
+     "formattedPrice": "$1185.60 USD",
+     "tax": 0,
+     "mode": "upfront24",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": {
+      "defaultEndAction": "REACTIVATE_ENGAGEMENT",
+      "duration": "P24M",
+      "type": "upfront"
+     }
+    }
+   ],
+   "configurations": [
+    {
+     "name": "dedicated_datacenter",
+     "isCustom": false,
+     "isMandatory": false,
+     "values": [
+      "bhs"
+     ]
+    },
+    {
+     "name": "dedicated_os",
+     "isCustom": false,
+     "isMandatory": true,
+     "values": [
+      "none_64.en"
+     ]
+    },
+    {
+     "name": "region",
+     "isCustom": false,
+     "isMandatory": true,
+     "values": [
+      "united_states"
+     ]
+    }
+   ],
+   "family": null,
+   "blobs": {
+    "commercial": {
+     "features": [
+      {
+       "name": "baremetal-server-usecases",
+       "value": "gaming"
+      }
+     ],
+     "name": "SYS-GAME-1"
+    }
+   }
+  }
+ ],
+ "products": [
+  {
+   "name": "24sysgame01",
+   "description": "AMD Ryzen 5 3600X",
+   "blobs": {
+    "technical": {
+     "server": {
+      "cpu": {
+       "boost": 4.4,
+       "brand": "AMD",
+       "cores": 6,
+       "model": "Ryzen 5 3600X",
+       "score": 20496,
+       "number": 1,
+       "threads": 12,
+       "frequency": 3.8
+      },
+      "frame": {
+       "size": "1U",
+       "model": "OVH",
+       "dualPowerSupply": false
+      },
+      "range": "soyoustart",
+      "services": {
+       "sla": 99.9,
+       "antiddos": "game"
+      }
+     }
+    }
+   },
+   "configurations": [
+    {
+     "name": "extra_reservation",
+     "isCustom": true,
+     "isMandatory": false,
+     "values": null
+    }
+   ]
+  },
+  {
+   "name": "ram-32g-noecc-2133",
+   "description": "32GB DDR4 2133MHz",
+   "blobs": {
+    "technical": {
+     "memory": {
+      "ecc": false,
+      "size": 32,
+      "ramType": "DDR4",
+      "frequency": 2133
+     }
+    }
+   },
+   "configurations": []
+  },
+  {
+   "name": "bandwidth-1000",
+   "description": "1Gbps unmetered and guaranteed public bandwidth",
+   "blobs": {
+    "technical": {
+     "bandwidth": {
+      "burst": 0,
+      "level": 1000,
+      "limit": 0,
+      "guaranteed": true
+     }
+    }
+   },
+   "configurations": []
+  },
+  {
+   "name": "softraid-2x450nvme",
+   "description": "2x SSD NVMe 450GB Datacenter Class Soft RAID",
+   "blobs": {
+    "technical": {
+     "storage": {
+      "raid": "Soft RAID",
+      "disks": [
+       {
+        "specs": "2.5in 7mm",
+        "usage": "data",
+        "number": 2,
+        "capacity": 450,
+        "interface": "NVMe",
+        "technology": "SSD"
+       }
+      ],
+      "hotSwap": false,
+      "raidDetails": {
+       "type": "Soft RAID"
+      }
+     }
+    }
+   },
+   "configurations": []
+  },
+  {
+   "name": "ram-32g-ecc-2666",
+   "description": "32GB DDR4 ECC 2666MHz",
+   "blobs": {
+    "technical": {
+     "memory": {
+      "ecc": true,
+      "size": 32,
+      "ramType": "DDR4",
+      "frequency": 2666
+     }
+    }
+   },
+   "configurations": []
+  },
+  {
+   "name": "24skgame01",
+   "description": "Intel Core i7-7700K",
+   "blobs": {
+    "technical": {
+     "server": {
+      "cpu": {
+       "boost": 4.5,
+       "brand": "Intel",
+       "cores": 4,
+       "model": "Core i7-7700K",
+       "score": 9688,
+       "number": 1,
+       "threads": 8,
+       "frequency": 4.2
+      },
+      "frame": {
+       "size": "1U",
+       "model": "OVH",
+       "dualPowerSupply": false
+      },
+      "range": "kimsufi",
+      "services": {
+       "sla": 99.9,
+       "antiddos": "standard"
+      }
+     }
+    }
+   },
+   "configurations": [
+    {
+     "name": "extra_reservation",
+     "isCustom": true,
+     "isMandatory": false,
+     "values": null
+    }
+   ]
+  },
+  {
+   "name": "bandwidth-500",
+   "description": "500 Mbps unmetered public bandwidth",
+   "blobs": {
+    "technical": {
+     "bandwidth": {
+      "burst": 0,
+      "level": 500,
+      "limit": 0,
+      "guaranteed": false
+     }
+    }
+   },
+   "configurations": []
+  },
+  {
+   "name": "ram-32g-ecc-2400",
+   "description": "32GB DDR4 ECC 2400MHz",
+   "blobs": {
+    "technical": {
+     "memory": {
+      "ecc": true,
+      "size": 32,
+      "ramType": "DDR4",
+      "frequency": 2400
+     }
+    }
+   },
+   "configurations": []
+  },
+  {
+   "name": "bandwidth-300",
+   "description": "300Mbps unmetered public bandwidth",
+   "blobs": {
+    "technical": {
+     "bandwidth": {
+      "burst": 0,
+      "level": 300,
+      "limit": 0,
+      "guaranteed": false
+     }
+    }
+   },
+   "configurations": []
+  },
+  {
+   "name": "24risegame01",
+   "description": "AMD Ryzen 5 5600X",
+   "blobs": {
+    "technical": {
+     "server": {
+      "cpu": {
+       "boost": 4.6,
+       "brand": "AMD",
+       "cores": 6,
+       "model": "Ryzen 5 5600X",
+       "score": 22206,
+       "number": 1,
+       "threads": 12,
+       "frequency": 3.7
+      },
+      "frame": {
+       "size": "1U",
+       "model": "OVH",
+       "dualPowerSupply": false
+      },
+      "range": "rise",
+      "services": {
+       "sla": 99.95,
+       "antiddos": "game"
+      }
+     }
+    }
+   },
+   "configurations": [
+    {
+     "name": "extra_reservation",
+     "isCustom": true,
+     "isMandatory": false,
+     "values": null
+    }
+   ]
+  },
+  {
+   "name": "softraid-2x512nvme",
+   "description": "2x SSD NVMe 512GB Datacenter Class Soft RAID",
+   "blobs": {
+    "technical": {
+     "storage": {
+      "raid": "Soft RAID",
+      "disks": [
+       {
+        "specs": "M.2 80",
+        "usage": "data",
+        "number": 2,
+        "capacity": 512,
+        "interface": "NVMe",
+        "technology": "SSD"
+       }
+      ],
+      "hotSwap": false,
+      "raidDetails": {
+       "type": "Soft RAID"
+      }
+     }
+    }
+   },
+   "configurations": []
+  }
+ ],
+ "addons": [
+  {
+   "planCode": "ram-32g-ecc-2400-24risegame01-ca",
+   "invoiceName": "32GB DDR4 ECC 2400MHz",
+   "addonFamilies": [],
+   "product": "ram-32g-ecc-2400",
+   "pricingType": "rental",
+   "consumptionConfiguration": null,
+   "pricings": [
+    {
+     "phase": 0,
+     "capacities": [
+      "installation"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "default",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 1,
+     "capacities": [
+      "renew"
+     ],
+     "commitment": 0,
+     "description": "rental for 1 month",
+     "interval": 1,
+     "intervalUnit": "month",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": null
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "default",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "installation"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront12",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 1,
+     "capacities": [
+      "renew"
+     ],
+     "commitment": 12,
+     "description": "rental for 12 months",
+     "interval": 12,
+     "intervalUnit": "month",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": null
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront12",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": {
+      "defaultEndAction": "REACTIVATE_ENGAGEMENT",
+      "duration": "P12M",
+      "type": "upfront"
+     }
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "installation"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront24",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 1,
+     "capacities": [
+      "renew"
+     ],
+     "commitment": 24,
+     "description": "rental for 24 months",
+     "interval": 24,
+     "intervalUnit": "month",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": null
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront24",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": {
+      "defaultEndAction": "REACTIVATE_ENGAGEMENT",
+      "duration": "P24M",
+      "type": "upfront"
+     }
+    }
+   ],
+   "configurations": [],
+   "family": null,
+   "blobs": null
+  },
+  {
+   "planCode": "bandwidth-300-24skgame-ca",
+   "invoiceName": "300Mbps unmetered public bandwidth",
+   "addonFamilies": [],
+   "product": "bandwidth-300",
+   "pricingType": "rental",
+   "consumptionConfiguration": null,
+   "pricings": [
+    {
+     "phase": 0,
+     "capacities": [
+      "installation"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "default",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "upgrade"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "default",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 1,
+     "capacities": [
+      "renew"
+     ],
+     "commitment": 0,
+     "description": "rental for 1 month",
+     "interval": 1,
+     "intervalUnit": "month",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": null
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "default",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "installation"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "degressivity12",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "upgrade"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "degressivity12",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 1,
+     "capacities": [
+      "renew"
+     ],
+     "commitment": 12,
+     "description": "rental for 1 month",
+     "interval": 1,
+     "intervalUnit": "month",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": null
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "degressivity12",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": {
+      "defaultEndAction": "REACTIVATE_ENGAGEMENT",
+      "duration": "P12M",
+      "type": "periodic"
+     }
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "installation"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "degressivity3",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "upgrade"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "degressivity3",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 1,
+     "capacities": [
+      "renew"
+     ],
+     "commitment": 3,
+     "description": "rental for 1 month",
+     "interval": 1,
+     "intervalUnit": "month",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": null
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "degressivity3",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": {
+      "defaultEndAction": "REACTIVATE_ENGAGEMENT",
+      "duration": "P3M",
+      "type": "periodic"
+     }
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "installation"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "degressivity6",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "upgrade"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "degressivity6",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 1,
+     "capacities": [
+      "renew"
+     ],
+     "commitment": 6,
+     "description": "rental for 1 month",
+     "interval": 1,
+     "intervalUnit": "month",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": null
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "degressivity6",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": {
+      "defaultEndAction": "REACTIVATE_ENGAGEMENT",
+      "duration": "P6M",
+      "type": "periodic"
+     }
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "installation"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront12",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "upgrade"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront12",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 1,
+     "capacities": [
+      "renew"
+     ],
+     "commitment": 12,
+     "description": "rental for 12 months",
+     "interval": 12,
+     "intervalUnit": "month",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": null
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront12",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": {
+      "defaultEndAction": "REACTIVATE_ENGAGEMENT",
+      "duration": "P12M",
+      "type": "upfront"
+     }
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "upgrade"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront24",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "installation"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront24",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 1,
+     "capacities": [
+      "renew"
+     ],
+     "commitment": 24,
+     "description": "rental for 24 months",
+     "interval": 24,
+     "intervalUnit": "month",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": null
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront24",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": {
+      "defaultEndAction": "REACTIVATE_ENGAGEMENT",
+      "duration": "P24M",
+      "type": "upfront"
+     }
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "installation"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront3",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "upgrade"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront3",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 1,
+     "capacities": [
+      "renew"
+     ],
+     "commitment": 3,
+     "description": "rental for 3 months",
+     "interval": 3,
+     "intervalUnit": "month",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": null
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront3",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": {
+      "defaultEndAction": "REACTIVATE_ENGAGEMENT",
+      "duration": "P3M",
+      "type": "upfront"
+     }
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "installation"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront6",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "upgrade"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront6",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 1,
+     "capacities": [
+      "renew"
+     ],
+     "commitment": 6,
+     "description": "rental for 6 months",
+     "interval": 6,
+     "intervalUnit": "month",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": null
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront6",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": {
+      "defaultEndAction": "REACTIVATE_ENGAGEMENT",
+      "duration": "P6M",
+      "type": "upfront"
+     }
+    }
+   ],
+   "configurations": [],
+   "family": "public-bandwidth",
+   "blobs": null
+  },
+  {
+   "planCode": "bandwidth-500-24sysgame-ca",
+   "invoiceName": "500 Mbps unmetered public bandwidth",
+   "addonFamilies": [],
+   "product": "bandwidth-500",
+   "pricingType": "rental",
+   "consumptionConfiguration": null,
+   "pricings": [
+    {
+     "phase": 0,
+     "capacities": [
+      "installation"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "default",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 1,
+     "capacities": [
+      "renew"
+     ],
+     "commitment": 0,
+     "description": "rental for 1 month",
+     "interval": 1,
+     "intervalUnit": "month",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": null
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "default",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "installation"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "degressivity12",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 1,
+     "capacities": [
+      "renew"
+     ],
+     "commitment": 12,
+     "description": "rental for 1 month",
+     "interval": 1,
+     "intervalUnit": "month",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": null
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "degressivity12",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": {
+      "defaultEndAction": "REACTIVATE_ENGAGEMENT",
+      "duration": "P12M",
+      "type": "periodic"
+     }
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "installation"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "degressivity3",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 1,
+     "capacities": [
+      "renew"
+     ],
+     "commitment": 3,
+     "description": "rental for 1 month",
+     "interval": 1,
+     "intervalUnit": "month",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": null
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "degressivity3",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": {
+      "defaultEndAction": "REACTIVATE_ENGAGEMENT",
+      "duration": "P3M",
+      "type": "periodic"
+     }
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "installation"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "degressivity6",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 1,
+     "capacities": [
+      "renew"
+     ],
+     "commitment": 6,
+     "description": "rental for 1 month",
+     "interval": 1,
+     "intervalUnit": "month",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": null
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "degressivity6",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": {
+      "defaultEndAction": "REACTIVATE_ENGAGEMENT",
+      "duration": "P6M",
+      "type": "periodic"
+     }
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "installation"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront12",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 1,
+     "capacities": [
+      "renew"
+     ],
+     "commitment": 12,
+     "description": "rental for 12 months",
+     "interval": 12,
+     "intervalUnit": "month",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": null
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront12",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": {
+      "defaultEndAction": "REACTIVATE_ENGAGEMENT",
+      "duration": "P12M",
+      "type": "upfront"
+     }
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "installation"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront24",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 1,
+     "capacities": [
+      "renew"
+     ],
+     "commitment": 24,
+     "description": "rental for 24 months",
+     "interval": 24,
+     "intervalUnit": "month",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": null
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront24",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": {
+      "defaultEndAction": "REACTIVATE_ENGAGEMENT",
+      "duration": "P24M",
+      "type": "upfront"
+     }
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "installation"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront3",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 1,
+     "capacities": [
+      "renew"
+     ],
+     "commitment": 3,
+     "description": "rental for 3 months",
+     "interval": 3,
+     "intervalUnit": "month",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": null
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront3",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": {
+      "defaultEndAction": "REACTIVATE_ENGAGEMENT",
+      "duration": "P3M",
+      "type": "upfront"
+     }
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "installation"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront6",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 1,
+     "capacities": [
+      "renew"
+     ],
+     "commitment": 6,
+     "description": "rental for 6 months",
+     "interval": 6,
+     "intervalUnit": "month",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": null
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront6",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": {
+      "defaultEndAction": "REACTIVATE_ENGAGEMENT",
+      "duration": "P6M",
+      "type": "upfront"
+     }
+    }
+   ],
+   "configurations": [],
+   "family": null,
+   "blobs": null
+  },
+  {
+   "planCode": "ram-32g-noecc-2133-24skgame01-ca",
+   "invoiceName": "32GB DDR4 2133MHz",
+   "addonFamilies": [],
+   "product": "ram-32g-noecc-2133",
+   "pricingType": "rental",
+   "consumptionConfiguration": null,
+   "pricings": [
+    {
+     "phase": 0,
+     "capacities": [
+      "installation"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "default",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 1,
+     "capacities": [
+      "renew"
+     ],
+     "commitment": 0,
+     "description": "rental for 1 month",
+     "interval": 1,
+     "intervalUnit": "month",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": null
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "default",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "installation"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront12",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 1,
+     "capacities": [
+      "renew"
+     ],
+     "commitment": 12,
+     "description": "rental for 12 months",
+     "interval": 12,
+     "intervalUnit": "month",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": null
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront12",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": {
+      "defaultEndAction": "REACTIVATE_ENGAGEMENT",
+      "duration": "P12M",
+      "type": "upfront"
+     }
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "installation"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront24",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 1,
+     "capacities": [
+      "renew"
+     ],
+     "commitment": 24,
+     "description": "rental for 24 months",
+     "interval": 24,
+     "intervalUnit": "month",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": null
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront24",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": {
+      "defaultEndAction": "REACTIVATE_ENGAGEMENT",
+      "duration": "P24M",
+      "type": "upfront"
+     }
+    }
+   ],
+   "configurations": [],
+   "family": null,
+   "blobs": null
+  },
+  {
+   "planCode": "bandwidth-1000-rise-game-ca",
+   "invoiceName": "1Gbps unmetered public bandwidth",
+   "addonFamilies": [],
+   "product": "bandwidth-1000",
+   "pricingType": "rental",
+   "consumptionConfiguration": null,
+   "pricings": [
+    {
+     "phase": 0,
+     "capacities": [
+      "installation"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "default",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "upgrade"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "default",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 1,
+     "capacities": [
+      "renew"
+     ],
+     "commitment": 0,
+     "description": "rental for 1 month",
+     "interval": 1,
+     "intervalUnit": "month",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": null
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "default",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "installation"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "degressivity12",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "upgrade"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "degressivity12",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 1,
+     "capacities": [
+      "renew"
+     ],
+     "commitment": 12,
+     "description": "rental for 1 month",
+     "interval": 1,
+     "intervalUnit": "month",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": null
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "degressivity12",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": {
+      "defaultEndAction": "REACTIVATE_ENGAGEMENT",
+      "duration": "P12M",
+      "type": "periodic"
+     }
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "installation"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "degressivity24",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "upgrade"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "degressivity24",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 1,
+     "capacities": [
+      "renew"
+     ],
+     "commitment": 24,
+     "description": "rental for 1 month",
+     "interval": 1,
+     "intervalUnit": "month",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": null
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "degressivity24",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": {
+      "defaultEndAction": "REACTIVATE_ENGAGEMENT",
+      "duration": "P24M",
+      "type": "periodic"
+     }
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "installation"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "degressivity6",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "upgrade"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "degressivity6",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 1,
+     "capacities": [
+      "renew"
+     ],
+     "commitment": 6,
+     "description": "rental for 1 month",
+     "interval": 1,
+     "intervalUnit": "month",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": null
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "degressivity6",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": {
+      "defaultEndAction": "REACTIVATE_ENGAGEMENT",
+      "duration": "P6M",
+      "type": "periodic"
+     }
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "upgrade"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront12",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "installation"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront12",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 1,
+     "capacities": [
+      "renew"
+     ],
+     "commitment": 12,
+     "description": "rental for 12 months",
+     "interval": 12,
+     "intervalUnit": "month",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": null
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront12",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": {
+      "defaultEndAction": "REACTIVATE_ENGAGEMENT",
+      "duration": "P12M",
+      "type": "upfront"
+     }
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "installation"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront24",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "upgrade"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront24",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 1,
+     "capacities": [
+      "renew"
+     ],
+     "commitment": 24,
+     "description": "rental for 24 months",
+     "interval": 24,
+     "intervalUnit": "month",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": null
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront24",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": {
+      "defaultEndAction": "REACTIVATE_ENGAGEMENT",
+      "duration": "P24M",
+      "type": "upfront"
+     }
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "installation"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront6",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "upgrade"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront6",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 1,
+     "capacities": [
+      "renew"
+     ],
+     "commitment": 6,
+     "description": "rental for 6 months",
+     "interval": 6,
+     "intervalUnit": "month",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": null
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront6",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": {
+      "defaultEndAction": "REACTIVATE_ENGAGEMENT",
+      "duration": "P6M",
+      "type": "upfront"
+     }
+    }
+   ],
+   "configurations": [],
+   "family": "public-bandwidth",
+   "blobs": null
+  },
+  {
+   "planCode": "softraid-2x512nvme-24sysgame-ca",
+   "invoiceName": "2x SSD NVMe 512GB Enterprise Class Soft RAID",
+   "addonFamilies": [],
+   "product": "softraid-2x512nvme",
+   "pricingType": "rental",
+   "consumptionConfiguration": null,
+   "pricings": [
+    {
+     "phase": 0,
+     "capacities": [
+      "installation"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "default",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 1,
+     "capacities": [
+      "renew"
+     ],
+     "commitment": 0,
+     "description": "rental for 1 month",
+     "interval": 1,
+     "intervalUnit": "month",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": null
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "default",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "installation"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront12",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 1,
+     "capacities": [
+      "renew"
+     ],
+     "commitment": 12,
+     "description": "rental for 12 months",
+     "interval": 12,
+     "intervalUnit": "month",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": null
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront12",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": {
+      "defaultEndAction": "REACTIVATE_ENGAGEMENT",
+      "duration": "P12M",
+      "type": "upfront"
+     }
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "installation"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront24",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 1,
+     "capacities": [
+      "renew"
+     ],
+     "commitment": 24,
+     "description": "rental for 24 months",
+     "interval": 24,
+     "intervalUnit": "month",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": null
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront24",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": {
+      "defaultEndAction": "REACTIVATE_ENGAGEMENT",
+      "duration": "P24M",
+      "type": "upfront"
+     }
+    }
+   ],
+   "configurations": [],
+   "family": null,
+   "blobs": null
+  },
+  {
+   "planCode": "softraid-2x450nvme-24skgame-ca",
+   "invoiceName": "2x 450Gb SSD NVMe Soft RAID",
+   "addonFamilies": [],
+   "product": "softraid-2x450nvme",
+   "pricingType": "rental",
+   "consumptionConfiguration": null,
+   "pricings": [
+    {
+     "phase": 0,
+     "capacities": [
+      "installation"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "default",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 1,
+     "capacities": [
+      "renew"
+     ],
+     "commitment": 0,
+     "description": "rental for 1 month",
+     "interval": 1,
+     "intervalUnit": "month",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": null
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "default",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "installation"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront12",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 1,
+     "capacities": [
+      "renew"
+     ],
+     "commitment": 12,
+     "description": "rental for 12 months",
+     "interval": 12,
+     "intervalUnit": "month",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": null
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront12",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": {
+      "defaultEndAction": "REACTIVATE_ENGAGEMENT",
+      "duration": "P12M",
+      "type": "upfront"
+     }
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "installation"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront24",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 1,
+     "capacities": [
+      "renew"
+     ],
+     "commitment": 24,
+     "description": "rental for 24 months",
+     "interval": 24,
+     "intervalUnit": "month",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": null
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront24",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": {
+      "defaultEndAction": "REACTIVATE_ENGAGEMENT",
+      "duration": "P24M",
+      "type": "upfront"
+     }
+    }
+   ],
+   "configurations": [],
+   "family": null,
+   "blobs": null
+  },
+  {
+   "planCode": "ram-32g-ecc-2666-24sysgame01-ca",
+   "invoiceName": "32GB DDR4 ECC 2666MHz",
+   "addonFamilies": [],
+   "product": "ram-32g-ecc-2666",
+   "pricingType": "rental",
+   "consumptionConfiguration": null,
+   "pricings": [
+    {
+     "phase": 0,
+     "capacities": [
+      "installation"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "default",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 1,
+     "capacities": [
+      "renew"
+     ],
+     "commitment": 0,
+     "description": "rental for 1 month",
+     "interval": 1,
+     "intervalUnit": "month",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": null
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "default",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "installation"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront12",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 1,
+     "capacities": [
+      "renew"
+     ],
+     "commitment": 12,
+     "description": "rental for 12 months",
+     "interval": 12,
+     "intervalUnit": "month",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": null
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront12",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": {
+      "defaultEndAction": "REACTIVATE_ENGAGEMENT",
+      "duration": "P12M",
+      "type": "upfront"
+     }
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "installation"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront24",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 1,
+     "capacities": [
+      "renew"
+     ],
+     "commitment": 24,
+     "description": "rental for 24 months",
+     "interval": 24,
+     "intervalUnit": "month",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": null
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront24",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": {
+      "defaultEndAction": "REACTIVATE_ENGAGEMENT",
+      "duration": "P24M",
+      "type": "upfront"
+     }
+    }
+   ],
+   "configurations": [],
+   "family": null,
+   "blobs": null
+  },
+  {
+   "planCode": "softraid-2x512nvme-24risegame-ca",
+   "invoiceName": "2x SSD NVMe 512GB Enterprise Class Soft RAID",
+   "addonFamilies": [],
+   "product": "softraid-2x512nvme",
+   "pricingType": "rental",
+   "consumptionConfiguration": null,
+   "pricings": [
+    {
+     "phase": 0,
+     "capacities": [
+      "installation"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "default",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 1,
+     "capacities": [
+      "renew"
+     ],
+     "commitment": 0,
+     "description": "rental for 1 month",
+     "interval": 1,
+     "intervalUnit": "month",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": null
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "default",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "installation"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront12",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 1,
+     "capacities": [
+      "renew"
+     ],
+     "commitment": 12,
+     "description": "rental for 12 months",
+     "interval": 12,
+     "intervalUnit": "month",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": null
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront12",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": {
+      "defaultEndAction": "REACTIVATE_ENGAGEMENT",
+      "duration": "P12M",
+      "type": "upfront"
+     }
+    },
+    {
+     "phase": 0,
+     "capacities": [
+      "installation"
+     ],
+     "commitment": 0,
+     "description": "rental (only applicable for 1 time)",
+     "interval": 0,
+     "intervalUnit": "none",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": 1
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront24",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": null
+    },
+    {
+     "phase": 1,
+     "capacities": [
+      "renew"
+     ],
+     "commitment": 24,
+     "description": "rental for 24 months",
+     "interval": 24,
+     "intervalUnit": "month",
+     "quantity": {
+      "min": 1,
+      "max": null
+     },
+     "repeat": {
+      "min": 1,
+      "max": null
+     },
+     "price": 0,
+     "formattedPrice": "$0.00 USD",
+     "tax": 0,
+     "mode": "upfront24",
+     "strategy": "tiered",
+     "mustBeCompleted": false,
+     "type": "rental",
+     "promotions": [],
+     "engagementConfiguration": {
+      "defaultEndAction": "REACTIVATE_ENGAGEMENT",
+      "duration": "P24M",
+      "type": "upfront"
+     }
+    }
+   ],
+   "configurations": [],
+   "family": null,
+   "blobs": null
+  }
+ ]
+}

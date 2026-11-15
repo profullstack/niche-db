@@ -279,16 +279,21 @@ export function parseSpecs(text) {
   const ipv4 = t.match(/(\d+)\s*(?:x\s*)?(?:dedicated\s*)?ipv4/i);
   const ipv6 = /ipv6/i.test(t);
   const gpu = t.match(
-    /\b(?:nvidia|amd|rtx|gtx|tesla|a100|h100|l40s?|a\d{2,4}|rx\s?\d{3,4})\b[^,.;]{0,40}/i,
+    /\b(?:nvidia|amd\s+(?:radeon|instinct|mi\d{3})|radeon|instinct|rtx|gtx|tesla|a100|h100|h200|l40s?|rx\s?\d{3,4})\b[^,.;]{0,40}/i,
   );
   const portMbps = port
     ? /g/i.test(port[2])
       ? Math.round(num(port[1]) * 1000)
       : Math.round(num(port[1]))
     : null;
+  // A CPU model is not a GPU ("AMD Ryzen 7 5800X"), and "5800X CPU" is not 5800 vCPUs.
+  const gpuText =
+    gpu && !/ryzen|epyc|threadripper|opteron|xeon|\bcpu\b|processor/i.test(gpu[0]) ? gpu[0] : null;
+  const vcpu = cpu ? num(cpu[1]) : cpuAlt ? num(cpuAlt[1]) : null;
+  const ramMb = ram ? toMb(ram[1], ram[2]) : ramAlt ? toMb(ramAlt[1], ramAlt[2]) : null;
   return {
-    vcpu: cpu ? num(cpu[1]) : cpuAlt ? num(cpuAlt[1]) : null,
-    ramMb: ram ? toMb(ram[1], ram[2]) : ramAlt ? toMb(ramAlt[1], ramAlt[2]) : null,
+    vcpu: vcpu !== null && vcpu > 0 && vcpu <= 512 ? vcpu : null,
+    ramMb: ramMb !== null && ramMb > 0 && ramMb <= 4 * 1024 * 1024 ? ramMb : null,
     disk: disk
       ? { size_gb: toGb(disk[1], disk[2]), type: diskType(disk[3]) }
       : diskAlt
@@ -303,7 +308,7 @@ export function parseSpecs(text) {
     bandwidthMbps: portMbps,
     ipv4: ipv4 ? num(ipv4[1]) : null,
     ipv6: ipv6 ? true : null,
-    gpu: gpu ? gpu[0].trim() : null,
+    gpu: gpuText ? gpuText.trim() : null,
   };
 }
 

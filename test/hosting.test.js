@@ -429,7 +429,7 @@ describe('the listed-company enrichment', () => {
 });
 
 describe('the hosting collection is registered', () => {
-  test('twelve adapters, all daily, all in the collection, with the seeded feeds', () => {
+  test('the original twelve adapters, all daily, all in the collection, with the seeded feeds', () => {
     const names = [
       'findhost',
       'buyvps',
@@ -450,7 +450,7 @@ describe('the hosting collection is registered', () => {
       expect(a.collection).toBe('hosting');
       expect(a.cadenceMinutes).toBe(1440);
     }
-    expect(ADAPTERS.filter((a) => a.collection === 'hosting')).toHaveLength(12);
+    expect(ADAPTERS.filter((a) => a.collection === 'hosting')).toHaveLength(20);
     // The keyed three are seeded paused until their credential exists.
     expect(adapterByName('hetzner-plans').needsEnv).toEqual(['hetznerApiToken']);
     expect(adapterByName('digitalocean-sizes').needsEnv).toEqual(['digitaloceanToken']);

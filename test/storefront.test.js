@@ -551,7 +551,7 @@ describe('reading a host end to end, with no network', () => {
     for (const h of hosts) pages[h] = store;
     const run = (cursor) =>
       storefront.pull({
-        config: { hosts, maxHosts: 2 },
+        config: { hosts, maxHosts: 2, discover: [], seeds: false },
         cursor,
         env: {},
         http,
@@ -560,11 +560,13 @@ describe('reading a host end to end, with no network', () => {
         sleep: async () => {},
       });
     const r1 = await run({});
-    expect(r1.cursor).toEqual({ next: 2 });
+    expect(r1.cursor.next).toBe(2);
     expect(r1.items.length).toBe(6);
-    expect(r1.note).toBe('6 products from 2 of 2 hosts');
+    expect(r1.note).toStartWith('6 products from 2 of 2 hosts (list 3, 0 awaiting a first read)');
+    // The three example hosts share one store page, so the cursor remembers it once per domain.
+    expect(Object.keys(r1.cursor.hosts).length).toBeGreaterThan(0);
     const r2 = await run(r1.cursor);
-    expect(r2.cursor).toEqual({ next: 1 });
+    expect(r2.cursor.next).toBe(1);
   });
 
   test('the default host list comes from the survey and skips challenged hosts', () => {
