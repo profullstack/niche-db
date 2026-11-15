@@ -1,0 +1,603 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0"
+    xmlns:content="http://purl.org/rss/1.0/modules/content/"
+    xmlns:dc="http://purl.org/dc/elements/1.1/"
+    xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>Offers — LowEndSpirit</title>
+        <link>https://lowendspirit.com/</link>
+        <pubDate>Sun, 15 Nov 2026 00:10:52 +0000</pubDate>
+        <language>en</language>
+            <description>Offers — LowEndSpirit</description>
+    <atom:link href="https://lowendspirit.com/categories/offers/p1/feed.rss" rel="self" type="application/rss+xml"/>
+    <item>
+        <title>More NetBSD-current fun at Linveo!</title>
+        <link>https://lowendspirit.com/discussion/9142/more-netbsd-current-fun-at-linveo</link>
+        <pubDate>Fri, 21 Feb 2025 05:56:18 +0000</pubDate>
+        <category>Offers</category>
+        <dc:creator>Not_Oles</dc:creator>
+        <guid isPermaLink="false">9142@/discussions</guid>
+        <description><![CDATA[<p><img src="https://lowendspirit.com/uploads/editor/8k/l1g5b7sorvmp.png" alt="" title="" /></p>
+
+<p>Hello!</p>
+
+<ul>
+<li><strong>VPS Share</strong></li>
+</ul>
+
+<p>Would anybody be interested in sharing my free <a rel="nofollow" href="https://linveo.com">Linveo</a> AMD Ryzen 9 9950X <a rel="nofollow" href="https://netbsd.org">NetBSD</a> VPS in Arizona? It's open to friends who want to help me learn.</p>
+
+<ul>
+<li><strong>Goals</strong></li>
+</ul>
+
+<p>Tonight I decided to <strong>(1) try some method of rolling release updates of NetBSD</strong> <a rel="nofollow" href="https://pkgsrc.org"><strong>pkgsrc.</strong></a> For example, please see <a rel="nofollow" href="https://pkgsrc-users.netbsd.narkive.com/j4E4xSRa/new-package-pkg-rolling-replace">pkg_rolling-replace (mailing list, 2008 introduction)</a>, please see also the <a rel="nofollow" href="https://cdn.netbsd.org/pub/pkgsrc/current/pkgsrc/pkgtools/pkg_rolling-replace/">man page.</a> I could use help figuring out the best method of rolling updates with pkgsrc.</p>
+
+<p>Also, I think it might be fun to <strong>(2) see whether I can get</strong> <a rel="nofollow" href="https://swtch.com/9vx/"><strong>9vx</strong></a> <strong>working.</strong> I could use help with the code and the compiling on 64 bit NetBSD of the <a rel="nofollow" href="http://pdos.csail.mit.edu/~baford/vm/">vx32 sandboxing library</a> used by 9vx.</p>
+
+<p>Maybe I could <strong>(3) try the X Windows installation from pkgsrc</strong> instead of the xsrc version, but I haven't looked into pkgsrc X, very much as yet.</p>
+
+<ul>
+<li><strong>Procedure</strong></li>
+</ul>
+
+<p>I&#39;m beginning by wiping and reinstalling my NetBSD-current VPS at Linveo. &amp;lt;3 The reinstall is from Linveo vmcontrol, which offers <a href="https://lowendspirit.com/profile/cmeerw" rel="nofollow">@cmeerw</a>'s <img src="https://lowendspirit.com/plugins/emojiextender/emoji/twitter/heart.png" title="&lt;3" alt="&lt;3" height="18" /> NetBSD 10.1 image.</p>
+
+<p>The process is installing NetBSD 10.1, then, with changes appropriate for 10.1, following the simple NetBSD 10 to NetBSD-current steps in <a rel="nofollow" href="https://lowendspirit.com/discussion/8525/quick-recipe-for-self-compiled-netbsd-current-on-a-linveo-vps">Quick Recipe For Self-Compiled NetBSD-current On A Linveo VPS.</a></p>
+
+<pre><code>linveo# ftp -o - https://cdn.netbsd.org/pub/NetBSD/NetBSD-10.1/amd64/binary/sets/comp.tar.xz | progress -z tar xpf - -C /
+linveo# which gcc
+/usr/bin/gcc
+linveo# cd /usr
+linveo# mkdir obj src tools
+linveo# mkdir /home
+linveo# useradd -m -G wheel tom
+linveo# passwd tom
+Changing password for tom.
+New Password:
+Retype New Password:
+linveo# chown tom obj src tools
+linveo# su tom
+linveo# 
+</code></pre>
+
+<pre><code>linveo$ pwd
+/usr
+linveo$ export CVSROOT="anoncvs@anoncvs.NetBSD.org:/cvsroot"
+linveo$ export CVS_RSH="ssh"
+linveo$ cvs checkout -A -P src
+linveo$ cd src
+linveo$ nohup ./build.sh -j 2 -O ../obj -T ../tools -U distribution &amp;&amp; \
+&gt; nohup ./build.sh -j 2 -O ../obj -T ../tools -U kernel=GENERIC
+</code></pre>
+
+<p>I like <code>nohup</code> because it gives me a full transcript of all the terminal output and because I don't have to stay connected. Back in the old days I used to start a NetBSD-current build and then sleep. I don't remember a build which failed to complete, but there might have been one.</p>
+
+<p>I will post again, later, or maybe tomorrow, about whether this build completes.</p>
+]]>
+        </description>
+    </item>
+<item>
+        <title>1.99€/2TB Per Month Storage Box!  1.99€/1TB Seedbox! The Eternal Väinämöinen</title>
+        <link>https://lowendspirit.com/discussion/10922/1-99-2tb-per-month-storage-box-1-99-1tb-seedbox-the-eternal-vaeinaemoeinen</link>
+        <pubDate>Mon, 01 Jun 2026 19:07:56 +0000</pubDate>
+        <category>Offers</category>
+        <dc:creator>PulsedMedia</dc:creator>
+        <guid isPermaLink="false">10922@/discussions</guid>
+        <description><![CDATA[<p>Hi,</p>
+
+<p>I'll write proper thread sooner or later, with all the bonuses etc.<br />
+But here is the DEALS First: <a href="https://pulsedmedia.com/eternal-vainamoinen.php" rel="nofollow">https://pulsedmedia.com/eternal-vainamoinen.php</a></p>
+
+<p>We got shadowbanned on the LET for this. Here you go, LES get's the earlier pickings now <img src="https://lowendspirit.com/plugins/emojiextender/emoji/twitter/wink.png" title=";)" alt=";)" height="18" /></p>
+
+<p>Hosted from our DC in Helsinki, Finland. Following EU/Finnish Laws, not USA. Payments are Paypal and Crypto. 14 day moneyback guarantee.</p>
+
+<p>Oh well, what am i explaining this to you, you probably already know us regardless 🤷</p>
+
+<p>Variety of 1.99€ deals, upto 8TB Seedbox for 9.99€ per month! 😲😲<br />
+Just check our site, and look out for new deal thread soon(ish). This dealio is going to run for 7 months but expect to be constantly sold out after initial blast as the slots drip out over that time span.</p>
+
+<p><strong>NOW HEAD TO: <a href="https://pulsedmedia.com/eternal-vainamoinen.php" rel="nofollow">https://pulsedmedia.com/eternal-vainamoinen.php</a>  and pick the deal of <em>The Year!</em></strong>.</p>
+
+<p>Then have a chat with Väinämöinen on the tickets, ask anything you want from him <img src="https://lowendspirit.com/plugins/emojiextender/emoji/twitter/smile.png" title=":)" alt=":)" height="18" /> There will be bonuses and extra months, the 700 years of free service giveaway starts soon(ish).</p>
+
+<p>Includes VPN, SSH, SFTP, rTorrent, qBittorrent, rClone and all the goodies!</p>
+]]>
+        </description>
+    </item>
+<item>
+        <title>TierHive New Location - 10% bonus Bank Holiday - 15 locations - from $0.10 /mo - New 8GB Plans!</title>
+        <link>https://lowendspirit.com/discussion/11307/tierhive-new-location-10-bonus-bank-holiday-15-locations-from-0-10-mo-new-8gb-plans</link>
+        <pubDate>Mon, 31 Aug 2026 14:03:02 +0000</pubDate>
+        <category>Offers</category>
+        <dc:creator>AnthonySmith</dc:creator>
+        <guid isPermaLink="false">11307@/discussions</guid>
+        <description><![CDATA[<p>Check the price calculator here: <a href="https://tierhive.com" rel="nofollow">https://tierhive.com</a></p>
+
+<p>Just a quick one; only posting it here.</p>
+
+<p>As its a new location launch day and the last bank holiday of the year (excluding christmas) For the rest of the day there is a 10% bonus on any tokens purchased, it is applied pre checkout so if you top up $3 you get 3.3 tokens, if you add $10 you get 11 tokens etc etc.</p>
+
+<p>New Location: France Gravelines. This location is up to 8GB Ram (now) and will also probably be the first to move to 16GB Ram configs with up to 4 vCPU in the neer future.</p>
+
+<p>Seemed odd to go to a 3rd location in France, but honestly it's ridiculously popular all the time and often out of stock, so we figured why not. For those who want bigger configs in France, this might be good to migrate to, and it may reduce some pressure on the other 2 locations.</p>
+
+<p>Again as a reminder, TierHive is hourly, and when shut down you only pay for the storage.</p>
+
+<p>The cheapest config is available at around $0.10 per month with low priority and 128mb ram and 1gb disk.</p>
+
+<p>The most expensive (none storage option)  is: 8GB Ram, 2vcpu, 50 GB disk, high priority everything and that is around $6 per month.</p>
+
+<p>Currently 8GB Ram plans are available in Gravelines FR, Germany, Canada and Australia only, everywhere is is limited to 4GB.</p>
+
+<p>Enjoy... or don't, up to you <img src="https://lowendspirit.com/plugins/emojiextender/emoji/twitter/smile.png" title=":)" alt=":)" height="18" /></p>
+]]>
+        </description>
+    </item>
+<item>
+        <title>NameCrane Black Friday - CraneMail Email Hosting + Cloud Storage Launch with Lifetime Deal</title>
+        <link>https://lowendspirit.com/discussion/8685/namecrane-black-friday-cranemail-email-hosting-cloud-storage-launch-with-lifetime-deal</link>
+        <pubDate>Fri, 29 Nov 2024 04:31:51 +0000</pubDate>
+        <category>Offers</category>
+        <dc:creator>NameCrane</dc:creator>
+        <guid isPermaLink="false">8685@/discussions</guid>
+        <description><![CDATA[<h1>CraneMail - Black Friday Launch Deals</h1>
+
+<p>This thanksgiving we're thankful for many things - but mostly that we finally get to launch our new email hosting product.</p>
+
+<p>CraneMail is a professional business email suite with included cloud storage, an amazing webmail experience, amazing spam protection - powered by SpamExperts, and much much more. A fantastic alternative to Google Workspace and Office 365 at a fraction of the price.</p>
+
+<p>Take advantage of our Black Friday launch pricing, including a <strong>Special LIFETIME Deal</strong> at the lowest price it will ever be offered at.</p>
+
+<h2>CraneMail Black Friday Plans</h2>
+
+<h3><strong>CraneMail BF 100G - $10 / year, $20 / 3 years</strong></h3>
+
+<ul>
+<li>100GB Combined Mail &amp; File Storage</li>
+<li>15 Primary Domains</li>
+<li>Unlimited Domain Aliases</li>
+<li>Unlimited Mailboxes per Domain</li>
+<li>SpamExperts Premium Spam Filtering</li>
+<li>600 Sent Emails/hour per Domain</li>
+</ul>
+
+<p><strong><a rel="nofollow" href="https://namecrane.com/store/email-hosting-deals" title="Only $10/year or $20/3 years - Order Here">Only $10/year or $20/3 years - Order Here</a></strong></p>
+
+<h3><strong>CraneMail LIFETIME 250G - $69.42 One-Time Payment</strong></h3>
+
+<ul>
+<li>250GB Combined Mail &amp; File Storage</li>
+<li>15 Primary Domains</li>
+<li>Unlimited Domain Aliases</li>
+<li>Unlimited Mailboxes per Domain</li>
+<li>SpamExperts Premium Spam Filtering</li>
+<li>600 Sent Emails/hour per Domain</li>
+</ul>
+
+<p><strong><a rel="nofollow" href="https://namecrane.com/store/email-hosting-deals" title="$69.42* Lifetime Plan - One-Time Payment. Order Here">$69.42* Lifetime Deal - One-Time Payment - Order Here</a></strong></p>
+
+<ul>
+<li><em>Lifetime price will increase on new orders over time, this is the lowest you'll ever see it.</em></li>
+</ul>
+
+<p>Lifetime services are not eligible for any refunds/account credits and cannot be transferred to other accounts. Refer to <a rel="nofollow" href="https://namecrane.com/legal/terms-of-service">Section 5.6 of our Terms of Service</a>.</p>
+
+<hr />
+
+<h2>CraneMail Reseller Plans</h2>
+
+<p><a rel="nofollow" href="#reseller" title="Learn more about the Reseller plans below">Learn more about the Reseller plans below</a>.</p>
+
+<h3><strong>CraneMail Reseller 150G - $5/m, $50/yr, $120/3yrs</strong></h3>
+
+<ul>
+<li>150GB Reseller Mail &amp; Cloud Storage</li>
+<li>Up to 30 Sub-Accounts/Primary Domains</li>
+<li>Unlimited Domain Aliases</li>
+<li>Unlimited Mailboxes per Domain</li>
+<li>WHMCS/Blesta Billing Plugins</li>
+<li>SpamExperts Premium Spam Filtering</li>
+<li>600 Sent Emails/hour per Domain</li>
+</ul>
+
+<p><strong><a rel="nofollow" href="https://namecrane.com/store/email-hosting-reseller" title="$5/month, $50/year, $120/3 years">$5/month, $50/year, $120/3 years</a></strong></p>
+
+<p><strong>30% Off First Invoice - Launch Discount</strong><br />
+Use the coupon code <code>mailresellerlaunch30</code> for a 30% discount on your first invoice. Enjoy a discount as we're still working to add new features.</p>
+
+<p>Coupon expires Dec 31st, 2024. Coupon applicable to all CraneMail Reseller plan sizes.</p>
+
+<h3><strong><a rel="nofollow" href="https://namecrane.com/store/email-hosting-reseller" title="View larger reseller plans - all the way up to 10TB (or more, just ticket).">View larger reseller plans - all the way up to 10TB (or more, just ticket).</a></strong></h3>
+
+<hr />
+
+<h1>CraneMail Features</h1>
+
+<p><img src="https://files.namecrane.com/cranemail/CraneMail-menus.jpg" alt="https://files.namecrane.com/cranemail/CraneMail-menus.jpg" title="" /></p>
+
+<h3><strong>Professional Business Email Suite with Collaboration Features</strong></h3>
+
+<p>Fully featured business mail suite with all the fixings - cloud file storage &amp; folder sharing, contact and calendar sharing, chat, online meetings (voice/video), tasklist management/notes, and much more. Powered by SmarterMail, you can dive into the <a rel="nofollow" href="https://www.smartertools.com/smartermail/business-email-server" title="full feature set and documentation here">full feature set and documentation here</a>.</p>
+
+<h3><strong>Amazing Webmail Experience</strong></h3>
+
+<p><img src="https://files.namecrane.com/cranemail/CraneMail-accept-calendar-invite.jpg" alt="" title="" /><br />
+The webmail user experience has been a huge hit with our beta testers, offering a much more Outlook-like experience for email. Mail, contacts, calendars, online meetings and tasks are closely integrated as you’d expect with something like Google Workspace.</p>
+
+<p>Get more details on the <a rel="nofollow" href="https://www.smartertools.com/smartermail/webmail-client" title="webmail features and additional screenshots here">webmail features and additional screenshots here</a>.</p>
+
+<h3><strong>Included Cloud Storage</strong></h3>
+
+<p><img src="https://files.namecrane.com/cranemail/CraneMail-files.jpg" alt="" title="" /><br />
+All plans offer a combined amount of storage for mail and files. Easily upload and share large files with family/coworkers or in email/publicly via URL. WebDAV support is still being developed but will be available in the future, so you can utilize the storage with rClone and other desktop sync tools.</p>
+
+<p>Cloud connect features let you sign into your existing cloud storage accounts and browse/manage files, plus copy them over to your CraneMail account.</p>
+
+<p><img src="https://files.namecrane.com/cranemail/CraneMail-cloud-connect.jpg" alt="" title="" /></p>
+
+<h3><strong>IMAP/SMTP/POP Support, plus free eM Client Pro licenses</strong></h3>
+
+<p>Standard mail options for utilizing the service with your own clients. Also, each domain gets access to 3 free Pro licenses for <a rel="nofollow" href="https://www.emclient.com/" title="eM Client">eM Client</a>.</p>
+
+<p><img src="https://files.namecrane.com/cranemail/CraneMail-domain-admin-emclient.jpg" alt="" title="" /></p>
+
+<h3><strong>Built-in Mail Migration</strong></h3>
+
+<p>Easily move your mailboxes from your existing providers with the built-in mail migration tool. Provide your existing email account’s login details, or authenticate your gmail/outlook/etc accounts, and start a bulk mail move from your current mail provider that runs in the background.</p>
+
+<p>Gmail/Google Workspace, Outlook/Office365, and standard mail providers with IMAP have worked excellently for our beta testers. iCloud mail migrations haven’t been as successful though.</p>
+
+<h3><strong>Premium Spam Filtering from SpamExperts</strong></h3>
+
+<p>Bundled with every CraneMail account is spam filtering from SpamExperts. Filtering is done via our on-prem SpamExperts nodes. You get access to the control panel to tune spam filtering settings, release/train mail, and more.</p>
+
+<p><img src="https://files.namecrane.com/features/spamexperts-dashboard.png" alt="" title="" /></p>
+
+<h3><strong>Great Email Deliverability</strong></h3>
+
+<p>Mail is sent via our own spam filtering outbound relays to retain our clean sender reputation and make sure the mail we send ends up in the recipient's inbox. We’ve built a sufficient reputation with large mail providers in the last few months and feel confident in our ability to deliver your messages.</p>
+
+<p>Our default sending limits are 300 emails/hour per domain. This isn’t a service for bulk mailing, marketing emails, etc - it’s a primarily inbound business/personal email hosting service.</p>
+
+<p><img src="https://files.namecrane.com/cranemail/CraneMail-sender-rep.png" alt="" title="" /></p>
+
+<h3><strong>No Per-Mailbox Costs, Easy Administration</strong></h3>
+
+<p><img src="https://files.namecrane.com/cranemail/CraneMail-domain-admin-users.jpg" alt="" title="" /></p>
+
+<p>Your domain administrator access allows you to easily add, impersonate (login as), and manage your users. We don’t limit mailboxes so you can create as many as you need without increasing your bill.</p>
+
+<p>Primary domains allowed on each plan are effectively separate overall accounts per-domain. These are limited based on the size of plan you purchase. We don’t limit domain aliases (multiple domains attached to the same mailboxes).</p>
+
+<h3><strong>Other Features That Set CraneMail Apart</strong></h3>
+
+<ul>
+<li>2-Factor Authentication for Webmail</li>
+<li>Voice/Video/Text chat (XMPP/Jabber) with external client support, file sharing w/ previews</li>
+<li>Contact &amp; Calendar Sharing, full CardDAV/CalDAV support</li>
+<li>Fetch emails from your mailboxes with other email providers - <a rel="nofollow" href="https://files.namecrane.com/cranemail/CraneMail-email-retrieval.jpg">screenshot</a></li>
+<li>OnlyOffice web-based document editing for documents/spreadsheets/presentations (BETA)</li>
+<li>Email archiving - keep an extra copy of in/outbound mail for certain mailboxes, so you never accidentally delete a message (counted against main storage)</li>
+<li>Simple unsubscribe for newsletters/mailing lists</li>
+<li>Much much much more. Seriously we can’t list it all, this would be 10x as long. <a rel="nofollow" href="https://www.smartertools.com/smartermail/business-email-server" title="Check out SmarterMail’s site for the full feature set">Check out SmarterMail’s site for the full feature set</a>.</li>
+</ul>
+
+<h3><strong>Technical Details</strong></h3>
+
+<p>CraneMail nodes use ZFS-backed storage with mirrored NVMe storage for mail. Offsite backups are taken daily for disaster recovery purposes only - not individual account restores or accidental email deletion (use the Email Archiving feature!). Backup frequency will increase in coming months. 10 gigabit networking for fast uploads/file sharing.</p>
+
+<p>At launch CraneMail is only available in our US (Las Vegas) datacenter.</p>
+
+<h3><strong><a rel="nofollow" href="https://namecrane.com/store/email-hosting-deals" title="View CraneMail Launch/Black Friday Deal Plans Here">View CraneMail Launch/Black Friday Deal Plans Here</a></strong></h3>
+
+<hr />
+
+<p><a name="reseller"></a></p>
+
+<h1>Reseller Plans</h1>
+
+<p>We’re also launching reseller plans today which include all of the above features, but allow you to resell custom plans to your own clients. We’re proud of the feature set as it stands, but are still actively developing reseller functionality.</p>
+
+<h3><strong>White Label Server Names &amp; Login Page URL</strong></h3>
+
+<p>Domains selected/connected to the service are whitelabeled, plus as a reseller you have the ability to create a custom login page on your domain. Your customers can easily login to their webmail/administration or SpamExperts directly.</p>
+
+<p>As we add servers/locations, the login page will stay the same and allow for a single point of login no matter which server a specific client is on. Branding, customization and more for this page is currently being developed.</p>
+
+<p><img src="https://files.namecrane.com/cranemail/CraneMail-custom-login-page.jpg" alt="" title="" /></p>
+
+<h3><strong>Extensive Plan Customization &amp; Upsell Potential</strong></h3>
+
+<p>Create very precise, custom plans for your clients and upsell them on the features we include. Limit accounts by the standard specs: disk space, mailbox count, and aliases. You can also include or upsell specific features like email archiving, SpamExperts filtering, cloud/file storage features, and the (still in beta) online document editing.</p>
+
+<h3><strong>WHMCS &amp; Blesta Billing Modules</strong></h3>
+
+<p>Francisco has been working hard the past week and launched both WHMCS and Blesta billing modules so you can easily deploy, modify, suspend, and terminate customer accounts.</p>
+
+<p>Modules are available on the NameCrane Github:<br />
+<a rel="nofollow" href="https://github.com/namecrane/cranemail-whmcs-module" title="WHMCS Module">WHMCS Module</a><br />
+<a rel="nofollow" href="https://github.com/namecrane/cranemail-blesta-module" title="Blesta Module">Blesta Module</a></p>
+
+<h2>Reseller Launch Discount</h2>
+
+<p>As we’re still actively building out the reseller featureset to allow more tweaking and customization we’re extending a first invoice launch discount.</p>
+
+<p>Use the coupon <code>mailresellerlaunch30</code> for a 30% discount on your first invoice - any sized plan, any billing term.</p>
+
+<p><strong><a rel="nofollow" href="https://namecrane.com/store/email-hosting-reseller" title="View all CraneMail Reseller plans here.">View all CraneMail Reseller plans here.</a></strong></p>
+
+<p><strong>Update Nov 30th</strong>: Primary Domain limits increased to 15 each on the Black Friday Plan &amp; Lifetime. Sending limit increased to 600 emails sent/hr per domain on all plans. These changes will be bulk applied to all who have already purchased as well.</p>
+]]>
+        </description>
+    </item>
+<item>
+        <title>TierHive - NAT VPS &amp; Static Hosting - Vouchers for free tokens inside - 12 locations</title>
+        <link>https://lowendspirit.com/discussion/11061/tierhive-nat-vps-static-hosting-vouchers-for-free-tokens-inside-12-locations</link>
+        <pubDate>Tue, 14 Jul 2026 11:02:50 +0000</pubDate>
+        <category>Offers</category>
+        <dc:creator>AnthonySmith</dc:creator>
+        <guid isPermaLink="false">11061@/discussions</guid>
+        <description><![CDATA[<p><a rel="nofollow" href="https://tierhive.com" title="TierHive">TierHive</a> in a nutshell is a NAT VPS, its KVM based, and a little bit different, every customer is assigned a /24 from 10.0.0.0/8 and your /24 works across all 12 locations, you can assign an IP to your VPS, and you get up to 10 NAT ports per VPS that forward from the external IP to any port you want on your VPS. If you want to use 80/443 externally, we have HAProxy, which can also handle SSL for you.</p>
+
+<p>We only charge for what you use 1 hour in advance, if you shut down, you are only billed for the storage not the compute.</p>
+
+<p>Sign up, add $3 (minimum) or use a voucher code, and then start creating VPS.</p>
+
+<p>We also offer lifetime free tier static hosting for anyone who makes a single payment ever, and you get to use the credit from your payment on the VPS side of things anyway.</p>
+
+<p>We now have around 30 public recipes for deploying everything automatically from WireGuard to Flarum to Laravel. You can see more on <a href="https://tierhive.com/" rel="nofollow">https://tierhive.com/</a> on the recipe marketplace scroller.</p>
+
+<p>Read more here if you want to know about how it works in terms of allocations and limits <a href="https://tierhive.com/about.php" rel="nofollow">https://tierhive.com/about.php</a></p>
+
+<p>Still in Alpha, but fairly stable, late Alpha is probably the best description.</p>
+
+<p><img src="https://lowendspirit.com/uploads/editor/vh/yflhm2pxsqzd.png" alt="" title="" /><br />
+<img src="https://lowendspirit.com/uploads/editor/ck/91rncnfvzk2q.png" alt="" title="" /><br />
+<img src="https://lowendspirit.com/uploads/editor/h6/8j6v94f45e6t.png" alt="" title="" /></p>
+
+<p><strong>All vouchers now used.</strong></p>
+
+<p><strong>Voucher codes - Anyone</strong></p>
+
+<p>v0To-rXhJ-NUoK-cCfe<br />
+QNf3-u7DG-xGSj-olf5<br />
+7URG-Wgcp-WHQv-JYr4<br />
+U5bN-PDAX-RzYk-yDr3<br />
+Ocyl-bjZs-lCha-7bTs<br />
+nn1I-oY2p-WHne-QOC7<br />
+GabX-DmEN-18Ad-GtQE<br />
+NIOh-DLyx-ZrP7-oBXy<br />
+uyKq-aCzH-sSFp-aaZN<br />
+cls5-lDsQ-NZca-yjOz<br />
+txAx-KBuA-EYuo-jVai<br />
+kpNJ-zt8j-pptL-0jVB<br />
+H4Oo-wKxj-qWjB-Q8G8<br />
+cFSw-4VCt-uN4q-zZmW<br />
+6HzU-nktM-6eIr-IkNY<br />
+rSTI-MuXI-wO8e-1G2l<br />
+jB8B-pYvH-vksz-lFr9<br />
+iOCR-HdgC-bsBl-ODOf<br />
+spWT-visv-9bUu-sEGU<br />
+YgHG-mE2D-ldBR-SibQ</p>
+
+<hr />
+
+<p><strong>Below Voucher codes - New users only please</strong><br />
+<strong>We are doing a test on the voucher system to see if they work end to end in the real world for new users to automatically activate the entire account and new mesh, so ideally, new users only please</strong></p>
+
+<p>MgCF-CVwn-5QEa-xr64<br />
+VTo1-3E5J-zoD2-6Hxd<br />
+SO6G-j09b-32sb-FKgJ<br />
+HvPM-Vsp8-9p93-mCG1<br />
+D84k-o1Q2-QR6z-EUsT<br />
+jjbc-5GDn-YFu5-TbN6<br />
+rvNu-h1cr-okkO-0xyS<br />
+l3ZU-MlDP-mtqF-mOff<br />
+KhD1-oQWT-YoTT-yGws<br />
+kpYW-SAfJ-vtiu-dqHZ</p>
+]]>
+        </description>
+    </item>
+<item>
+        <title>CrownCloud - 8 GB RAM / 80 GB NVMe / EPYC / 10 Gbps / KVM at AMS - $7/month</title>
+        <link>https://lowendspirit.com/discussion/10928/crowncloud-8-gb-ram-80-gb-nvme-epyc-10-gbps-kvm-at-ams-7-month</link>
+        <pubDate>Thu, 04 Jun 2026 12:28:43 +0000</pubDate>
+        <category>Offers</category>
+        <dc:creator>SpeedBus</dc:creator>
+        <guid isPermaLink="false">10928@/discussions</guid>
+        <description><![CDATA[<p>Hello,<br />
+We've been around for 12+ years and own &amp; colocate our hardware / networking gear and have our own ARIN / RIPE issued IPs as well.</p>
+
+<p>We've refreshed our hardware line-up at various locations with 3rd Gen AMD EPYC CPUs, NVMe Disks and 10 Gbps networking and better network carriers such as GlobalSecureLayer.</p>
+
+<p><strong>Our website:</strong> <a href="https://crowncloud.net/" rel="nofollow">https://crowncloud.net/</a></p>
+
+<p><strong>Test IPs:</strong></p>
+
+<p>Amsterdam, The Netherlands:</p>
+
+<ul>
+<li>Test IPv4: 2.58.15.20 (GlobalSecureLayer/GSL Network)</li>
+<li>Test IPv6: 2a07:efc0:1001:1265::1 (GlobalSecureLayer/GSL Network)</li>
+</ul>
+
+<p><strong>Plan 1:</strong></p>
+
+<p>6 GB RAM<br />
+60 GB SSD<br />
+3 TB Bandwidth per month<br />
+2 CPU cores fair-share access include (AMD EPYC 7763 CPU)<br />
+1 IPv4 &amp; /64 IPv6<br />
+10 Gbps uplink<br />
+1 Full VPS Snapshot Slot<br />
+KVM powered VPS</p>
+
+<p>$5/month or $25/semi-annually or $50/year</p>
+
+<p><strong>Order Links:</strong></p>
+
+<ul>
+<li>Amsterdam, The Netherlands: <a href="https://crowncloud.net/clients/index.php?rp=/store/specials/ams-6g-60g-epyc-10g-1s" rel="nofollow">https://crowncloud.net/clients/index.php?rp=/store/specials/ams-6g-60g-epyc-10g-1s</a></li>
+</ul>
+
+<p><strong>Plan 2:</strong></p>
+
+<p>8 GB RAM<br />
+80 GB SSD<br />
+4 TB Bandwidth per month<br />
+4 CPU cores fair-share access include (AMD EPYC 7763 CPU)<br />
+1 IPv4 &amp; /64 IPv6<br />
+10 Gbps uplink<br />
+1 Full VPS Snapshot Slot<br />
+KVM powered VPS</p>
+
+<p>$7/month or $35/semi-annually or $70/annually</p>
+
+<p><strong>Order Links:</strong></p>
+
+<ul>
+<li>Amsterdam, The Netherlands: <a href="https://crowncloud.net/clients/index.php?rp=/store/specials/ams-8g-80g-epyc-10g-1s" rel="nofollow">https://crowncloud.net/clients/index.php?rp=/store/specials/ams-8g-80g-epyc-10g-1s</a></li>
+</ul>
+
+<p><strong>Operating systems:</strong></p>
+
+<ul>
+<li>We've got 1-click install templates for CentOS 8/9-Stream, AlmaLinux 8/9/10, Rocky Linux 8/9/10, Debian 11/12/13, various Ubuntu(s) upto 26.04, Windows 2016/2019/2022/2025.</li>
+<li>Also do note, We do not provide licenses for Windows, the customer is responsible for the license on the machine.</li>
+</ul>
+
+<p><strong>Other information / Features</strong></p>
+
+<ul>
+<li>Port 25 is available only via ticket/request. Nothing else is blocked.</li>
+<li>API and CLI app to manage VPSes available as well (<a href="https://api.docs.crowncloud.net/" rel="nofollow">https://api.docs.crowncloud.net/</a>)</li>
+<li>CPU Passthrough can be enabled/disabled as needed (<a href="https://wiki.crowncloud.net/?how_to_enable_cpu_passthrough" rel="nofollow">https://wiki.crowncloud.net/?how_to_enable_cpu_passthrough</a>)</li>
+<li>Network Card can be switched between VirtIO and e1000 as needed (<a href="https://wiki.crowncloud.net/?How_to_Use_VirtIO_Network_Card_on_Windows_Servers#Switching+the+network+card+to+VirtIO" rel="nofollow">https://wiki.crowncloud.net/?How_to_Use_VirtIO_Network_Card_on_Windows_Servers#Switching+the+network+card+to+VirtIO</a>)</li>
+<li>SSH Key insert during install (<a href="https://wiki.crowncloud.net/?using_ssh_keys_with_your_kvm_vps_crownpanel" rel="nofollow">https://wiki.crowncloud.net/?using_ssh_keys_with_your_kvm_vps_crownpanel</a>)</li>
+<li>In-control panel rDNS support (<a href="https://wiki.crowncloud.net/?setting_rdns_on_crownpanel" rel="nofollow">https://wiki.crowncloud.net/?setting_rdns_on_crownpanel</a>)</li>
+<li>Custom ISOs can be requested to be mounted onto your VPS for free as well via ticket. (<a href="https://wiki.crowncloud.net/index.php?mounting_cdrom_on_your_vm_in_crownpanel" rel="nofollow">https://wiki.crowncloud.net/index.php?mounting_cdrom_on_your_vm_in_crownpanel</a>)</li>
+<li>Labels can be setup on VPSes (<a href="https://wiki.crowncloud.net/?How_to_set_a_label_on_a_VPS_in_CrownPanel" rel="nofollow">https://wiki.crowncloud.net/?How_to_set_a_label_on_a_VPS_in_CrownPanel</a>)</li>
+<li>2Factor Authentication available in billing/client-area and VPS control panel (<a href="https://wiki.crowncloud.net/?2factor_authentication_in_crownpanel" rel="nofollow">https://wiki.crowncloud.net/?2factor_authentication_in_crownpanel</a>)</li>
+<li>Snapshot support in panel (<a href="https://wiki.crowncloud.net/index.php?How_to_use_Snapshots_in_CrownPanel" rel="nofollow">https://wiki.crowncloud.net/index.php?How_to_use_Snapshots_in_CrownPanel</a>)</li>
+<li>VPS Resellers are welcome! If you resell VPSes, feel free to contact us for more information to get started!</li>
+</ul>
+
+<p>Thank you! <img src="https://lowendspirit.com/plugins/emojiextender/emoji/twitter/smile.png" title=":)" alt=":)" height="18" /></p>
+]]>
+        </description>
+    </item>
+<item>
+        <title>£15/TB/yr UK Storage KVM | 1TB £15 / 2TB £30 / 5TB £75 - Vive Hosting</title>
+        <link>https://lowendspirit.com/discussion/10919/15-tb-yr-uk-storage-kvm-1tb-15-2tb-30-5tb-75-vive-hosting</link>
+        <pubDate>Mon, 01 Jun 2026 01:16:51 +0000</pubDate>
+        <category>Offers</category>
+        <dc:creator>ViveHosting</dc:creator>
+        <guid isPermaLink="false">10919@/discussions</guid>
+        <description><![CDATA[<p>Hi all, Michael from Vive Hosting here.</p>
+
+<p>It's been a while since my last post and that was on purpose. We went quiet whilst we rebuilt our infrastructure from the ground up, and I'm glad to say we're back.</p>
+
+<p>If you saw our earlier posts you'll know we kicked things off with our KVM storage servers, and the response was incredible. That's where we made the biggest impact on price so it's where we're picking back up.</p>
+
+<p>Quick bit of background on the quiet spell. We come from a software development background and ran hosting in-house for our own clients for well over 15 years. When we first opened to the public we did it the way we always had: WHMCS for billing and a mixture of virtualisation platforms bolted together, simply because that's how we'd done it for years in our other business. It worked, but it was never really built for this. So we rebuilt the lot. We've resolved countless issues, streamlined everything end to end and launched a fully bespoke platform of our own. No more WHMCS, no more patchwork. It's ours top to bottom.</p>
+
+<p>To celebrate, here are some of our biggest discounts yet, on everything:<br />
+<strong>60% off monthly with code VH60MONTH</strong><br />
+<strong>70% off annual with code VH70ANNUAL</strong></p>
+
+<h2>Storage servers (the main event)</h2>
+
+<p>These are KVM storage servers: a fast SSD OS disk paired with a big enterprise storage array. Ideal as backup and archive targets, Nextcloud, media libraries, secondary storage or anything else within our TOS. Every plan comes with 2 vCPU, 2 GB RAM, a 25 GB SSD OS disk, 5 TB of monthly transfer on a 400 Mbps port and a dedicated IPv4 address. Storage sits on our ZFS-backed enterprise SAS array.</p>
+
+<p>After discount that works out at a flat £15 per TB per year:</p>
+
+<p>1 TB - £50/yr <strong>£15 per year</strong> (annual only)<br />
+2 TB - £100/yr <strong>£30 per year</strong> (annual only)<br />
+5 TB - £25/mo <strong>£10 per month</strong> or £250/yr <strong>£75 per year</strong></p>
+
+<h2>Compute servers</h2>
+
+<p>If you need more cores and memory rather than capacity, our standard KVM compute plans are on the same codes. Each includes a 25 GB SSD disk, 5 TB monthly transfer on a 400 Mbps port and one IPv4 address.</p>
+
+<p>1 vCPU / 2 GB RAM - <strong>£30 per year</strong> (annual only)<br />
+2 vCPU / 4 GB RAM - <strong>£8 per month</strong> or <strong>£60 per year</strong><br />
+4 vCPU / 8 GB RAM - <strong>£16 per month</strong> or <strong>£120 per year</strong><br />
+8 vCPU / 16 GB RAM - <strong>£24 per month</strong> or <strong>£180 per year</strong></p>
+
+<h2>The bits that apply to everything</h2>
+
+<p>A quick note on IPv6: we fully support it and can enable it on any plan via a support ticket, but real-world uptake has been so minimal that we've left it off the standard build for now. If you want it, just ask and we'll sort it.</p>
+
+<p>Everything runs on enterprise-grade Dell PowerEdge hardware with Intel Xeon Gold CPUs and fast SSDs, hosted in UK data centres with daily off-site backups and DDoS protection as standard. Setup is fully automated, with most servers deployed within 1 to 2 minutes of ordering.</p>
+
+<p>To order, head to <a href="https://vivehosting.com" rel="nofollow">https://vivehosting.com</a>, pick your plan and hit Order Now. Apply VH60MONTH for 60% off monthly or VH70ANNUAL for 70% off annual at checkout. We accept PayPal and card.</p>
+
+<p>Any questions, please open a support ticket and we'll do our best to help.</p>
+
+<p>Thanks<br />
+Michael</p>
+
+<p><a rel="nofollow" href="https://vivehosting.com/uk-web-hosting">UK Web Hosting</a> | <a rel="nofollow" href="https://vivehosting.com/uk-virtual-servers">Compute</a> | <a rel="nofollow" href="https://vivehosting.com/uk-storage-servers">Storage</a> | <a rel="nofollow" href="https://vivehosting.com/uk-dedicated-servers">Dedicated</a></p>
+]]>
+        </description>
+    </item>
+<item>
+        <title>Directadmin Hosting with Loyalty benefit - 1GB free every month | 100GB webhosting @ $18.18/yr</title>
+        <link>https://lowendspirit.com/discussion/10911/directadmin-hosting-with-loyalty-benefit-1gb-free-every-month-100gb-webhosting-18-18-yr</link>
+        <pubDate>Wed, 27 May 2026 17:50:51 +0000</pubDate>
+        <category>Offers</category>
+        <dc:creator>SmokyHosts</dc:creator>
+        <guid isPermaLink="false">10911@/discussions</guid>
+        <description><![CDATA[<p><a rel="nofollow" href="https://0frills.com"><div><img src="https://0frills.com/assets/img/logo.png" alt="0frills" /><div></div></div></a></p>
+
+<p>A subsidiary of <a rel="nofollow" href="https://smokyhosts.com" title="SmokyHosts.com">SmokyHosts.com</a>, <a rel="nofollow" href="https://0frills.com" title="0frills.com">0frills.com</a> is here to offer webhosting services on Directadmin control panel and help everyone get a webhosting deal that fits everyone's needs. We are here to remove any confusion in the different packages and deals that make non-techy people have difficulty in choosing. We offer only 1 package, the 0Plan and no more.</p>
+
+<hr />
+
+<h2>The USP</h2>
+
+<p><strong>You get 1GB storage added to your allocated storage, each month, free of cost!</strong></p>
+
+<p>No need to reply to any threads.<br />
+No need to request for it each month.<br />
+It's all automated.<br />
+It's a loyalty reward to continue to stay with us!</p>
+
+<hr />
+
+<h2>LES special coupon code</h2>
+
+<p>Use coupon code <strong>Special1818</strong> and get <strong>100GB webhosting for $18.18/year</strong></p>
+
+<hr />
+
+<p>Let's not confuse you anymore</p>
+
+<h2>0Plan Webhosting</h2>
+
+<p>Start with <strong>100GB SSD storage</strong> and scale to unlimited. <strong>We add 1GB storage to your account each month perpetually, till you continue to renew your account.</strong><br />
+Unmetered traffic<br />
+Host unlimited websites<br />
+Unlimited other features<br />
+Daily remote backups<br />
+DirectAdmin control panel<br />
+Free migration from your old host<br />
+Server location: France<br />
+Test IP: 51.254.7.77<br />
+Order Link - <a href="https://members.0frills.com/order.php?step=1&amp;productGroup=1" rel="nofollow">https://members.0frills.com/order.php?step=1&amp;productGroup=1</a><br />
+Yearly - $18.18/year on using coupon code <strong>Special1818</strong></p>
+
+<hr />
+
+<p><strong>Note</strong><br />
+1. We do not offer custom packages<br />
+2. Please clarify all queries prior to purchasing, no refund requests are allowed<br />
+3. All the offers are recurring offers<br />
+4. Coupon codes valid only on yearly deals</p>
+]]>
+        </description>
+    </item>
+</channel>
+</rss>

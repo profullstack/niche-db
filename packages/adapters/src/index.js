@@ -34,6 +34,7 @@ import { censusAcs } from './census-acs.js';
 import { cfpbComplaints } from './cfpb.js';
 import { ch4nnels, ch4nnelsIptv } from './ch4nnels.js';
 import { channels } from './channels.js';
+import { cherryPlans } from './cherry.js';
 import { cisaKev } from './cisa-kev.js';
 import { clinicalTrials } from './clinicaltrials.js';
 import { coopsWaterLevels } from './coops.js';
@@ -76,8 +77,16 @@ import { githubAgentTopics, githubMcpTopics } from './ghtopics.js';
 import { githubReleases } from './github.js';
 import { glamaMcp } from './glama.js';
 import { goModules } from './golang.js';
+import {
+  datacrunchInstances,
+  runpodGpus,
+  tensordockGpus,
+  thunderGpus,
+  vastOffers,
+} from './gpu-clouds.js';
 import { gutenbergCatalog } from './gutenberg-catalog.js';
 import { hetznerPlans } from './hetzner.js';
+import { hetznerDedicated } from './hetzner-dedicated.js';
 import { huggingface } from './huggingface.js';
 import { igdb } from './igdb.js';
 import { igdbCatalog } from './igdb-catalog.js';
@@ -132,6 +141,7 @@ import { openwebring } from './openwebring.js';
 import { osv } from './osv.js';
 import { outreachgraph } from './outreachgraph.js';
 import { ovhVps } from './ovh.js';
+import { ovhDedicated } from './ovh-dedicated.js';
 import { p0dcasters } from './p0dcasters.js';
 import { buildingPermits } from './permits.js';
 import { pitCrawlerMcp } from './pit-crawler-mcp.js';
@@ -399,6 +409,16 @@ export const ADAPTERS = [
   storefront,
   lowendbox,
   openserver,
+  // Dedicated servers read from the provider's own public catalogue, with stock.
+  hetznerDedicated,
+  ovhDedicated,
+  cherryPlans,
+  // GPU sellers with a keyless catalogue, priced per hour as they bill.
+  vastOffers,
+  runpodGpus,
+  datacrunchInstances,
+  thunderGpus,
+  tensordockGpus,
   // Threats: what OpenThreat reporters found in the open, read off each one's own descriptor.
   openthreat,
   // The NVD's CVE catalogue, and SURBL's lists with watched domains checked against them.

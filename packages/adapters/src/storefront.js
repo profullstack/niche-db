@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import { defineAdapter } from '@nichedb/core/adapter';
 import { BROWSER_SETTLE_MS, CRAWL_BROWSER_TIMEOUT_MS } from '@nichedb/core/crawl';
 import { offer, offerItem } from './hosting.js';
+import { DISCOVERY_FEEDS, discover, hostList } from './storefront-discovery.js';
 import {
   kindOf,
   normalisePrice,
@@ -108,8 +109,145 @@ export function findhostIdFor(url, homes = FINDHOST_HOMES) {
   return null;
 }
 
+/**
+ * A product name with the store's stock words taken out of it.
+ *
+ * WHMCS themes print the quantity left beside the name ("Virtual-3 0
+ * Available", "KVM-1 (Out of Stock)"), and a parser that takes the heading
+ * text whole puts it in the name. Then one plan reads as a different plan
+ * every time its count changes. The words go to `stock`, never the name.
+ */
+export function cleanName(name) {
+  let n = String(name ?? '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  let stock = null;
+  let quantity = null;
+  const qty = n.match(/[\s(\-–|]*\b(\d+)\s+(?:available|left|in stock|remaining)\)?\s*$/i);
+  if (qty) {
+    quantity = Number(qty[1]);
+    stock = quantity > 0 ? 'in_stock' : 'out_of_stock';
+    n = n.slice(0, qty.index);
+  }
+  const words = n.match(
+    /[\s(\-–|[]*\b(out of stock|sold out|unavailable|agotado|in stock|available)\b[)\]]?\s*$/i,
+  );
+  if (words) {
+    stock = /^(in stock|available)$/i.test(words[1]) ? 'in_stock' : 'out_of_stock';
+    n = n.slice(0, words.index);
+  }
+  n = n.replace(/[\s\-–|:(]+$/, '').trim();
+  return { name: n || String(name ?? '').trim(), stock, quantity };
+}
+
+/** The stored-id part a product carries on a host: `storefront:<platform>:<domain>:<id>`. */
+const productKey = (item) => item.externalId.split(':').slice(3).join(':');
+
+/**
+ * Compare what a run read on each host with what the cursor remembers from
+ * that host's last read (`known[domain] = { platform, ids, groups, at }`).
+ *
+ * - A product id the host never listed before is a NEW OFFERING: tagged
+ *   `new-offering`, with `data.newOffering = { detectedAt }`, kept for seven
+ *   days. A host read for the first time has nothing new: everything is
+ *   simply first seen.
+ * - A product group (a WHMCS `/store/<group>`) never seen on the host before
+ *   tags its products `new-group`.
+ * - A product the host listed last time and not now, on a read that found
+ *   products, is retired: its stored row comes back marked discontinued.
+ *
+ * `data.firstSeenAt` is carried from the stored row, so it is when nichedb
+ * first saw the offer, whatever happened since. Prices are only ever the
+ * ones the host's own order form showed.
+ */
+export async function diffHosts(results, { known, previous, now = new Date().toISOString() }) {
+  const items = [];
+  const retiredIds = [];
+  const perHost = [];
+  for (const r of results) {
+    const plans = r.items ?? [];
+    if (!plans.length) continue;
+    const { domain, platform } = plans[0].data;
+    const before = known[domain] ?? null;
+    perHost.push({ domain, platform, plans, before });
+    if (before && before.platform === platform) {
+      const now_ = new Set(plans.map(productKey));
+      for (const id of before.ids ?? [])
+        if (!now_.has(id)) retiredIds.push(`storefront:${platform}:${domain}:${id}`);
+    }
+  }
+  const allIds = [...perHost.flatMap((h) => h.plans.map((p) => p.externalId)), ...retiredIds];
+  const stored =
+    typeof previous === 'function' && allIds.length ? await previous(allIds) : new Map();
+  let newOfferings = 0;
+  let newGroups = 0;
+  const weekAgo = Date.parse(now) - 7 * 86_400_000;
+  for (const { domain, platform, plans, before } of perHost) {
+    const ids = new Set(before?.ids ?? []);
+    const groups = new Set(before?.groups ?? []);
+    for (const item of plans) {
+      const prev = stored.get(item.externalId) ?? null;
+      item.data.firstSeenAt = prev?.firstSeenAt ?? now;
+      const fresh = before && !ids.has(productKey(item)) && !prev;
+      const still =
+        prev?.newOffering?.detectedAt && Date.parse(prev.newOffering.detectedAt) > weekAgo;
+      if (fresh || still) {
+        item.data.newOffering = { detectedAt: still ? prev.newOffering.detectedAt : now };
+        item.tags = [...new Set([...item.tags, 'new-offering'])];
+        if (fresh) newOfferings++;
+      }
+      const g = item.data.group ?? null;
+      if (before && g && !groups.has(g)) {
+        item.data.newGroup = g;
+        item.tags = [...new Set([...item.tags, 'new-group'])];
+      }
+      items.push(item);
+    }
+    const nowGroups = [...new Set(plans.map((p) => p.data.group).filter(Boolean))];
+    if (before) newGroups += nowGroups.filter((g) => !groups.has(g)).length;
+    known[domain] = { platform, ids: plans.map(productKey), groups: nowGroups, at: now };
+  }
+  let retired = 0;
+  for (const id of retiredIds) {
+    const data = stored.get(id);
+    if (!data?.offer || data.offer.stock === 'discontinued') continue;
+    const { offer: o, provider, providerName, raw, priceHourly, ...extra } = data;
+    const item = offerItem({
+      provider,
+      providerName,
+      offer: { ...o, stock: 'discontinued' },
+      priceHourly,
+      extraTags: [data.platform ? `platform:${data.platform}` : null, 'discontinued'].filter(
+        Boolean,
+      ),
+      extra: { ...extra, discontinued: true, discontinuedAt: now },
+      raw,
+    });
+    item.externalId = id;
+    items.push(item);
+    retired++;
+  }
+  return { items, newOfferings, newGroups, retired };
+}
+
 /** One parsed product as a hosting item. */
 export function productItem(product, { platform, domain, provider, providerName, fetchedAt }) {
+  const cleaned = cleanName(product.name);
+  // An id made from the name must not carry the stock words either, or the
+  // plan becomes a new row each time its count changes.
+  const id = String(product.id).replace(
+    /-(?:\d+-(?:available|left|in-stock|remaining)|out-of-stock|sold-out|unavailable|in-stock|available)$/i,
+    '',
+  );
+  product = {
+    ...product,
+    id: id || product.id,
+    name: cleaned.name,
+    stock:
+      product.stock && product.stock !== 'unknown'
+        ? product.stock
+        : (cleaned.stock ?? product.stock),
+  };
   const specs = parseSpecs(product.description);
   const countries = parseCountries(`${product.name} ${product.group ?? ''} ${product.description}`);
   const price = normalisePrice(product.price, product.cycle);
@@ -341,9 +479,21 @@ export async function readHost(
     for (const p of parsed) products.set(p.id, p);
     if (Date.now() > deadline) break;
   }
-  const items = [...products.values()].map((p) =>
-    productItem(p, { platform, domain, provider, providerName, fetchedAt }),
-  );
+  // Two products with one name (the same plan in two groups or locations)
+  // are two offers: say which, so they never read as a duplicate.
+  const byName = new Map();
+  for (const p of products.values()) {
+    const n = cleanName(p.name).name.toLowerCase();
+    byName.set(n, (byName.get(n) ?? 0) + 1);
+  }
+  const items = [...products.values()].map((p) => {
+    const n = cleanName(p.name).name;
+    const label = byName.get(n.toLowerCase()) > 1 && p.group ? `${n} (${p.group})` : p.name;
+    return productItem(
+      { ...p, name: label },
+      { platform, domain, provider, providerName, fetchedAt },
+    );
+  });
   return {
     items,
     note: note(
@@ -396,54 +546,145 @@ export const storefront = defineAdapter({
       placeholder: '60',
       help: 'How many hosts one run reads; the rest wait for the next run, in rotation.',
     },
+    {
+      key: 'discover',
+      label: 'Discovery feeds',
+      type: 'list',
+      placeholder: 'les, lowendbox',
+      help: 'Offer forums read for hosts not yet on the list: les (LowEndSpirit offers), lowendbox. Empty turns discovery off.',
+    },
   ],
-  defaults: { hosts: [], maxHosts: 60 },
+  defaults: { hosts: [], maxHosts: 60, discover: Object.keys(DISCOVERY_FEEDS) },
   defaultSources: [
     {
       slug: 'storefronts',
       name: 'Hosting: storefront catalogues',
       description:
         'Plans read daily off the WHMCS, Blesta and WooCommerce order forms of the small hosts the storefront survey found.',
-      config: { hosts: [], maxHosts: 60 },
+      config: { hosts: [], maxHosts: 60, discover: Object.keys(DISCOVERY_FEEDS) },
     },
   ],
-  async pull({ config, cursor, env, http, log, deadline, sleep = Bun.sleep }) {
+  async pull({ config, cursor, env, http, log, deadline, previous, sleep = Bun.sleep }) {
     const configured = (
       Array.isArray(config.hosts) ? config.hosts : String(config.hosts ?? '').split(',')
     )
       .map((h) => String(h).trim())
       .filter(Boolean)
       .map((h) => (/^https?:\/\//.test(h) ? h : `https://${h}/`));
-    const hosts = configured.length ? configured : surveyedHosts();
+    const feeds = (
+      Array.isArray(config.discover) ? config.discover : String(config.discover ?? '').split(',')
+    )
+      .map((f) => String(f).trim())
+      .filter((f) => DISCOVERY_FEEDS[f]);
+
+    // 1. New hosts from the offer forums, only threads newer than each feed's mark.
+    let discovery = {
+      discovered: cursor?.discovered ?? [],
+      pages: cursor?.pages ?? {},
+      done: cursor?.done ?? {},
+      marks: cursor?.marks ?? {},
+      at: cursor?.discoveredAt ?? null,
+    };
+    let pending = Array.isArray(cursor?.pending) ? [...cursor.pending] : [];
+    const everyMs = (Number(config.discoverEveryMinutes) || 180) * 60_000;
+    const due = !discovery.at || Date.now() - Date.parse(discovery.at) >= everyMs;
+    const backfilling = feeds.some((f) => !discovery.done[f]);
+    let discoveryNote = '';
+    if (feeds.length && (due || backfilling)) {
+      const d = await discover({
+        http,
+        state: discovery,
+        feeds,
+        maxRequests: Number(config.discoveryRequests) || 20,
+        deadline: Math.min(deadline, Date.now() + 90_000),
+        sleep,
+        log,
+      });
+      discovery = {
+        discovered: d.discovered,
+        pages: d.pages,
+        done: d.done,
+        marks: d.marks,
+        at: new Date().toISOString(),
+      };
+      pending.push(...d.addedHosts.map((h) => h.start ?? `https://${h.domain}/`));
+      const fresh = Object.entries(d.fresh)
+        .map(([k, n]) => `${k} ${n}`)
+        .join(', ');
+      discoveryNote = `; forums: ${fresh || 'none'} new threads, ${d.added} new hosts (${d.discovered.length} known)`;
+      log(`discovery: ${fresh} new threads, ${d.added} new hosts, ${d.requests} requests`);
+    }
+
+    // 2. Who to read: hosts never read yet first, then the daily rotation.
+    const hosts = hostList(
+      configured.length ? configured : surveyedHosts(),
+      discovery.discovered,
+      config.seeds === false ? [] : undefined,
+    );
     if (!hosts.length) return { items: [], note: 'no hosts configured and no survey fixture' };
     const perRun = Math.max(1, Number(config.maxHosts) || 60);
+    const firstReads = pending.slice(0, Math.ceil(perRun / 3));
     const startAt = Number(cursor?.next ?? 0) % hosts.length;
-    const batch = hosts.slice(startAt, startAt + perRun);
-    if (batch.length < perRun) batch.push(...hosts.slice(0, perRun - batch.length));
-    const items = [];
+    const want = perRun - firstReads.length;
+    const rotation = hosts.slice(startAt, startAt + want);
+    if (rotation.length < want) rotation.push(...hosts.slice(0, want - rotation.length));
+    const batch = [
+      ...firstReads.map((host) => ({ host, first: true })),
+      ...rotation.map((host) => ({ host, first: false })),
+    ];
+
+    // 3. Read them, a few at a time.
+    const results = [];
     const notes = [];
-    let read = 0;
+    let readRotation = 0;
+    const firstDone = new Set();
+    let at = 0;
     const CONCURRENCY = 4;
-    let next = 0;
     const worker = async () => {
-      while (next < batch.length && Date.now() < deadline) {
-        const host = batch[next++];
+      while (at < batch.length && Date.now() < deadline) {
+        const { host, first } = batch[at++];
         const r = await readHost(host, { http, env, log, deadline, sleep }).catch((err) => ({
           items: [],
           note: `${host}: ${err.message.slice(0, 60)}`,
         }));
-        items.push(...r.items);
+        results.push(r);
         notes.push(r.note);
-        read++;
+        if (first) firstDone.add(host);
+        else readRotation++;
       }
     };
     await Promise.all(Array.from({ length: CONCURRENCY }, worker));
-    const withPlans = notes.filter((n) => /\d+ products$/.test(n) && !/ 0 products/.test(n)).length;
+    pending = pending.filter((h) => !firstDone.has(h));
+
+    // 4. What is new on each host since its last read, and what it stopped selling.
+    const known = { ...(cursor?.hosts ?? {}) };
+    const { items, newOfferings, newGroups, retired } = await diffHosts(results, {
+      known,
+      previous,
+      now: new Date().toISOString(),
+    });
+
+    const withPlans = notes.filter((n) => /\d+ products/.test(n) && !/ 0 products/.test(n)).length;
     for (const n of notes) log(n);
+    // A lap of the whole list a day: each run reads what fits its deadline,
+    // so the source comes back as often as one lap of `hosts` needs.
+    const nextAt = (startAt + readRotation) % hosts.length;
+    const runsPerDay = Math.ceil(hosts.length / Math.max(1, readRotation));
+    const nextInMinutes = Math.max(30, Math.min(1440, Math.floor(1440 / Math.max(1, runsPerDay))));
     return {
       items,
-      cursor: { next: (startAt + read) % hosts.length },
-      note: `${items.length} products from ${withPlans} of ${read} hosts`,
+      cursor: {
+        next: nextAt,
+        pending,
+        hosts: known,
+        discovered: discovery.discovered,
+        pages: discovery.pages,
+        done: discovery.done,
+        marks: discovery.marks,
+        discoveredAt: discovery.at,
+      },
+      nextInMinutes,
+      note: `${items.length} products from ${withPlans} of ${results.length} hosts (list ${hosts.length}, ${pending.length} awaiting a first read); ${newOfferings} new offerings, ${newGroups} new groups, ${retired} discontinued${discoveryNote}`,
     };
   },
 });

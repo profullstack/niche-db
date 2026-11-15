@@ -1,0 +1,413 @@
+{
+ "server": [
+  {
+   "name": "AX42",
+   "product": {
+    "id": 169048,
+    "key": 169048,
+    "productKey": "ROBOT_1719+ROBOT_1266",
+    "category": "Dedicated Root Server AX",
+    "matrixName": "AX Servers",
+    "link": "https://www.hetzner.com/dedicated-rootserver/ax42/configurator/",
+    "instantAvailable": true,
+    "variationCount": 2
+   },
+   "variations": [
+    {
+     "ram": [
+      {
+       "RealSize": 64,
+       "Size": 64,
+       "SizeUnit": "GB",
+       "Amount": 1,
+       "Generation": "DDR5",
+       "Type": null
+      }
+     ],
+     "drive": [
+      {
+       "RealSize": 512,
+       "Size": 512,
+       "SizeUnit": "GB",
+       "Amount": 2,
+       "Generation": null,
+       "Type": "NVMe",
+       "DCEdition": 0
+      }
+     ]
+    },
+    {
+     "ram": [
+      {
+       "RealSize": 64,
+       "Size": 64,
+       "SizeUnit": "GB",
+       "Amount": 1,
+       "Generation": "DDR5",
+       "Type": "ECC"
+      }
+     ],
+     "drive": [
+      {
+       "RealSize": 512,
+       "Size": 512,
+       "SizeUnit": "GB",
+       "Amount": 2,
+       "Generation": null,
+       "Type": "NVMe",
+       "DCEdition": 0
+      }
+     ]
+    }
+   ],
+   "priceData": {
+    "price": 99,
+    "hourPrice": 0.1586,
+    "setupPrice": 49,
+    "maxPrice": 99,
+    "ipPrice": {
+     "Monthly": 1.7,
+     "Hourly": 0.0027,
+     "Amount": 1
+    }
+   },
+   "cpuData": {
+    "cpu": "AMD Ryzen™ 7 PRO 8700GE",
+    "cpuName": "AMD Ryzen™ 7 PRO 8700GE  Octa-Core Phoenix 1 (Zen4) Simultaneous Multithreading",
+    "cores": 8,
+    "threads": 16,
+    "cpuBenchmark": 0,
+    "cpuGeneration": "Octa-Core Phoenix 1 (Zen4)",
+    "frequency": 3.65
+   },
+   "gpuData": null,
+   "details": {
+    "traffic": "Unlimited",
+    "bandwidth": 1000,
+    "bandwidthMax": 1000,
+    "countries": [
+     {
+      "name": "Finland",
+      "shortcode": "fi"
+     },
+     {
+      "name": "Germany",
+      "shortcode": "de"
+     }
+    ],
+    "datacenter": {
+     "HEL1": {
+      "datacenter": "HEL1",
+      "countryShortCode": "fi",
+      "locationId": 5
+     },
+     "FSN1": {
+      "datacenter": "FSN1",
+      "countryShortCode": "de",
+      "locationId": 2
+     }
+    }
+   },
+   "filterData": {
+    "ramMin": 64,
+    "ramMax": 64,
+    "ramEcc": true,
+    "driveMin": 512,
+    "driveMax": 512,
+    "driveAmount": 2,
+    "driveCountDetailed": {
+     "HDD": 0,
+     "SATA": 0,
+     "NVMe": 2
+    },
+    "driveSizeDetailed": {
+     "HDD": 0,
+     "SATA": 0,
+     "NVMe": 512
+    }
+   },
+   "specials": [
+    "IPv4",
+    "ECC"
+   ]
+  },
+  {
+   "name": "EX63",
+   "product": {
+    "id": 172843,
+    "key": 172843,
+    "productKey": "ROBOT_1729+ROBOT_1266",
+    "category": "Dedicated Root Server Skylake",
+    "matrixName": "EX Server",
+    "link": "https://www.hetzner.com/dedicated-rootserver/ex63/configurator/",
+    "instantAvailable": true,
+    "variationCount": 4
+   },
+   "variations": [
+    {
+     "ram": [
+      {
+       "RealSize": 64,
+       "Size": 64,
+       "SizeUnit": "GB",
+       "Amount": 1,
+       "Generation": "DDR5",
+       "Type": null
+      }
+     ],
+     "drive": [
+      {
+       "RealSize": 1000,
+       "Size": 1,
+       "SizeUnit": "TB",
+       "Amount": 2,
+       "Generation": null,
+       "Type": "NVMe",
+       "DCEdition": 0
+      }
+     ]
+    },
+    {
+     "ram": [
+      {
+       "RealSize": 64,
+       "Size": 64,
+       "SizeUnit": "GB",
+       "Amount": 1,
+       "Generation": "DDR5",
+       "Type": "ECC"
+      }
+     ],
+     "drive": [
+      {
+       "RealSize": 1000,
+       "Size": 1,
+       "SizeUnit": "TB",
+       "Amount": 2,
+       "Generation": null,
+       "Type": "NVMe",
+       "DCEdition": 0
+      }
+     ]
+    },
+    {
+     "ram": [
+      {
+       "RealSize": 192,
+       "Size": 192,
+       "SizeUnit": "GB",
+       "Amount": 1,
+       "Generation": "DDR5",
+       "Type": "ECC"
+      }
+     ],
+     "drive": [
+      {
+       "RealSize": 1920,
+       "Size": 1.92,
+       "SizeUnit": "TB",
+       "Amount": 2,
+       "Generation": null,
+       "Type": "NVMe",
+       "DCEdition": 1
+      }
+     ]
+    },
+    {
+     "ram": [
+      {
+       "RealSize": 192,
+       "Size": 192,
+       "SizeUnit": "GB",
+       "Amount": 1,
+       "Generation": "DDR5",
+       "Type": "ECC"
+      }
+     ],
+     "drive": [
+      {
+       "RealSize": 3840,
+       "Size": 3.84,
+       "SizeUnit": "TB",
+       "Amount": 4,
+       "Generation": null,
+       "Type": "NVMe",
+       "DCEdition": 1
+      }
+     ]
+    }
+   ],
+   "priceData": {
+    "price": 149,
+    "hourPrice": 0.2388,
+    "setupPrice": 74,
+    "maxPrice": 149,
+    "ipPrice": {
+     "Monthly": 1.7,
+     "Hourly": 0.0027,
+     "Amount": 1
+    }
+   },
+   "cpuData": {
+    "cpu": "Intel® Core™ Ultra 7 265",
+    "cpuName": "Intel® Core™ Ultra 7 Prozessor 265 Arrow Lake ",
+    "cores": 20,
+    "threads": 20,
+    "cpuBenchmark": 0,
+    "cpuGeneration": "Arrow Lake",
+    "frequency": 2.4
+   },
+   "gpuData": null,
+   "details": {
+    "traffic": "Unlimited",
+    "bandwidth": 1000,
+    "bandwidthMax": 10000,
+    "countries": [
+     {
+      "name": "Germany",
+      "shortcode": "de"
+     },
+     {
+      "name": "Finland",
+      "shortcode": "fi"
+     }
+    ],
+    "datacenter": {
+     "FSN1": {
+      "datacenter": "FSN1",
+      "countryShortCode": "de",
+      "locationId": 2
+     },
+     "HEL1": {
+      "datacenter": "HEL1",
+      "countryShortCode": "fi",
+      "locationId": 5
+     }
+    }
+   },
+   "filterData": {
+    "ramMin": 64,
+    "ramMax": 192,
+    "ramEcc": true,
+    "driveMin": 1000,
+    "driveMax": 3840,
+    "driveAmount": 4,
+    "driveCountDetailed": {
+     "HDD": 0,
+     "SATA": 0,
+     "NVMe": 4
+    },
+    "driveSizeDetailed": {
+     "HDD": 0,
+     "SATA": 0,
+     "NVMe": 3840
+    }
+   },
+   "specials": [
+    "IPv4",
+    "ECC"
+   ]
+  },
+  {
+   "name": "GEX45",
+   "product": {
+    "id": 176525,
+    "key": 176525,
+    "productKey": "ROBOT_1768+ROBOT_1266",
+    "category": "Dedicated Root Server GPU",
+    "matrixName": "Dedicated GPU Servers",
+    "link": "https://www.hetzner.com/dedicated-rootserver/gex45/configurator/",
+    "instantAvailable": true,
+    "variationCount": 1
+   },
+   "variations": [
+    {
+     "ram": [
+      {
+       "RealSize": 64,
+       "Size": 64,
+       "SizeUnit": "GB",
+       "Amount": 1,
+       "Generation": "DDR4",
+       "Type": null
+      }
+     ],
+     "drive": [
+      {
+       "RealSize": 512,
+       "Size": 512,
+       "SizeUnit": "GB",
+       "Amount": 2,
+       "Generation": null,
+       "Type": "NVMe",
+       "DCEdition": 0
+      }
+     ]
+    }
+   ],
+   "priceData": {
+    "price": 214,
+    "hourPrice": 0.3429,
+    "setupPrice": 209,
+    "maxPrice": 214,
+    "ipPrice": {
+     "Monthly": 1.7,
+     "Hourly": 0.0027,
+     "Amount": 1
+    }
+   },
+   "cpuData": {
+    "cpu": "Intel® Core™ i5-13500",
+    "cpuName": "Intel® Core™ i5-13500 14-Core Raptor Lake-S incl. Hyper-Threading Technology",
+    "cores": 14,
+    "threads": 20,
+    "cpuBenchmark": 0,
+    "cpuGeneration": "Raptor Lake-S",
+    "frequency": 2.5
+   },
+   "gpuData": {
+    "gpu": "NVIDIA RTX PRO™ 4000 Blackwell SFF Edition"
+   },
+   "details": {
+    "traffic": "Unlimited",
+    "bandwidth": 1000,
+    "bandwidthMax": 1000,
+    "countries": [
+     {
+      "name": "Finland",
+      "shortcode": "fi"
+     }
+    ],
+    "datacenter": {
+     "HEL1": {
+      "datacenter": "HEL1",
+      "countryShortCode": "fi",
+      "locationId": 5
+     }
+    }
+   },
+   "filterData": {
+    "ramMin": 64,
+    "ramMax": 64,
+    "ramEcc": false,
+    "driveMin": 512,
+    "driveMax": 512,
+    "driveAmount": 2,
+    "driveCountDetailed": {
+     "HDD": 0,
+     "SATA": 0,
+     "NVMe": 2
+    },
+    "driveSizeDetailed": {
+     "HDD": 0,
+     "SATA": 0,
+     "NVMe": 512
+    }
+   },
+   "specials": [
+    "IPv4"
+   ]
+  }
+ ],
+ "serverCount": 3
+}

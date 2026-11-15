@@ -1,0 +1,237 @@
+[
+ {
+  "best_for": [],
+  "cpu": {
+   "description": "32 CPU",
+   "number_of_cores": 32
+  },
+  "deploy_warning": null,
+  "description": "Dedicated Hardware Instance",
+  "gpu": {
+   "description": "1x GB300 SXM6 288GB",
+   "number_of_gpus": 1
+  },
+  "gpu_memory": {
+   "description": "288GB GPU RAM",
+   "size_in_gigabytes": 288
+  },
+  "id": "fb300f00-0000-4000-8000-fb300f000001",
+  "instance_type": "1GB300.32V",
+  "memory": {
+   "description": "225GB RAM",
+   "size_in_gigabytes": 225
+  },
+  "model": "GB300",
+  "name": "GB300 SXM6 288GB",
+  "p2p": "1.8 TB/s",
+  "price_per_hour": "14.27",
+  "spot_price": "7.136",
+  "location_prices": [
+   {
+    "location_code": "FIN-01",
+    "price_per_hour": "14.27",
+    "spot_price": "7.136"
+   },
+   {
+    "location_code": "FIN-02",
+    "price_per_hour": "14.27",
+    "spot_price": "7.136"
+   },
+   {
+    "location_code": "FIN-03",
+    "price_per_hour": "14.27",
+    "spot_price": "7.136"
+   }
+  ],
+  "dynamic_price": null,
+  "max_dynamic_price": "14.27",
+  "serverless_price": "0",
+  "serverless_spot_price": "0",
+  "storage": {
+   "description": "dynamic"
+  },
+  "currency": "usd",
+  "manufacturer": "NVIDIA",
+  "display_name": null,
+  "supported_os": []
+ },
+ {
+  "best_for": [],
+  "cpu": {
+   "description": "64 CPU",
+   "number_of_cores": 64
+  },
+  "deploy_warning": null,
+  "description": "Dedicated Hardware Instance",
+  "gpu": {
+   "description": "2x GB300 SXM6 288GB",
+   "number_of_gpus": 2
+  },
+  "gpu_memory": {
+   "description": "576GB GPU RAM",
+   "size_in_gigabytes": 576
+  },
+  "id": "fb300f00-0000-4000-8000-fb300f000002",
+  "instance_type": "2GB300.64V",
+  "memory": {
+   "description": "450GB RAM",
+   "size_in_gigabytes": 450
+  },
+  "model": "GB300",
+  "name": "GB300 SXM6 288GB",
+  "p2p": "1.8 TB/s",
+  "price_per_hour": "28.54",
+  "spot_price": "14.27",
+  "location_prices": [
+   {
+    "location_code": "FIN-01",
+    "price_per_hour": "28.54",
+    "spot_price": "14.27"
+   },
+   {
+    "location_code": "FIN-02",
+    "price_per_hour": "28.54",
+    "spot_price": "14.27"
+   },
+   {
+    "location_code": "FIN-03",
+    "price_per_hour": "28.54",
+    "spot_price": "14.27"
+   }
+  ],
+  "dynamic_price": null,
+  "max_dynamic_price": "28.54",
+  "serverless_price": "0",
+  "serverless_spot_price": "0",
+  "storage": {
+   "description": "dynamic"
+  },
+  "currency": "usd",
+  "manufacturer": "NVIDIA",
+  "display_name": null,
+  "supported_os": []
+ },
+ {
+  "best_for": [
+   "Running services",
+   "API server",
+   "Data transfers"
+  ],
+  "cpu": {
+   "description": "4 CPU (AMD EPYC Turin 9655 96-Core)",
+   "number_of_cores": 4,
+   "model": "AMD EPYC Turin 9655 96-Core"
+  },
+  "deploy_warning": null,
+  "description": "Dedicated Hardware Instance",
+  "gpu": {
+   "description": "",
+   "number_of_gpus": 0
+  },
+  "gpu_memory": {
+   "description": "",
+   "size_in_gigabytes": 0
+  },
+  "id": "3f9a2584-901b-4453-8db5-0bffec5768f0",
+  "instance_type": "CPU-TURIN.4V.16G",
+  "memory": {
+   "description": "16GB RAM",
+   "size_in_gigabytes": 16
+  },
+  "model": "CPU Node Turin",
+  "name": "AMD Turin",
+  "p2p": null,
+  "price_per_hour": "0.04800",
+  "spot_price": "0.01920",
+  "location_prices": [
+   {
+    "location_code": "FIN-01",
+    "price_per_hour": "0.04800",
+    "spot_price": "0.01920"
+   },
+   {
+    "location_code": "FIN-02",
+    "price_per_hour": "0.04800",
+    "spot_price": "0.01920"
+   },
+   {
+    "location_code": "FIN-03",
+    "price_per_hour": "0.04800",
+    "spot_price": "0.01920"
+   }
+  ],
+  "dynamic_price": null,
+  "max_dynamic_price": "0.04800",
+  "serverless_price": "0",
+  "serverless_spot_price": "0",
+  "storage": {
+   "description": "dynamic"
+  },
+  "currency": "usd",
+  "manufacturer": "AMD",
+  "display_name": "Turin",
+  "supported_os": [
+   "24.04.base",
+   "24.04.cuda12.9",
+   "24.04.cuda12.9.docker",
+   "24.04.cuda13.0",
+   "24.04.cuda13.0.docker",
+   "24.04.cuda13.0.verda-gpuburn",
+   "24.04.cuda13.0.verda-gpureset",
+   "24.04.cuda13.1",
+   "24.04.cuda13.2",
+   "24.04.cuda13.2.docker",
+   "24.04.cuda13.4",
+   "24.04.cuda13.4.docker",
+   "26.04.base",
+   "26.04.cuda12.9",
+   "26.04.cuda12.9.docker",
+   "26.04.cuda13.0",
+   "26.04.cuda13.0.docker",
+   "26.04.cuda13.1",
+   "26.04.cuda13.1.docker",
+   "26.04.cuda13.1.kubernetes-1.35.4",
+   "26.04.cuda13.2",
+   "26.04.cuda13.2.docker",
+   "26.04.cuda13.2.kubernetes-1.35.8",
+   "26.04.cuda13.2.kubernetes-1.36.4",
+   "26.04.cuda13.2.kubernetes-1.37.0",
+   "26.04.cuda13.4",
+   "26.04.cuda13.4.docker",
+   "26.04.cuda13.4.docker.jupyterlab",
+   "26.04.cuda13.4.kubernetes-1.35.8",
+   "26.04.cuda13.4.kubernetes-1.36.4",
+   "26.04.cuda13.4.kubernetes-1.37.0",
+   "debian13.base",
+   "debian13.cuda13.4",
+   "debian13.cuda13.4.kubernetes-1.35.8",
+   "debian13.cuda13.4.kubernetes-1.36.4",
+   "debian13.cuda13.4.kubernetes-1.37.0",
+   "jupyter",
+   "jupyter.cuda.12.8",
+   "ubuntu-22.04",
+   "ubuntu-22.04-cuda-12.0",
+   "ubuntu-22.04-cuda-12.0-docker",
+   "ubuntu-22.04-cuda-12.1",
+   "ubuntu-22.04-cuda-12.1-docker",
+   "ubuntu-22.04-cuda-12.3",
+   "ubuntu-22.04-cuda-12.3-docker",
+   "ubuntu-22.04-cuda-12.4",
+   "ubuntu-22.04-cuda-12.4-cluster",
+   "ubuntu-22.04-cuda-12.4-docker",
+   "ubuntu-22.04-cuda-12.8-cluster",
+   "ubuntu-22.04-cuda-12.8-open",
+   "ubuntu-22.04-cuda-12.8-open-docker",
+   "ubuntu-22.04-cuda-13.0-open",
+   "ubuntu-22.04-cuda-13.0-open-docker",
+   "ubuntu-24.04",
+   "ubuntu-24.04-cuda-12.6",
+   "ubuntu-24.04-cuda-12.6-docker",
+   "ubuntu-24.04-cuda-12.8-open",
+   "ubuntu-24.04-cuda-12.8-open-docker",
+   "ubuntu-24.04-cuda-13.0-open",
+   "ubuntu-24.04-cuda-13.0-open-docker",
+   "ubuntu-26.04"
+  ]
+ }
+]
