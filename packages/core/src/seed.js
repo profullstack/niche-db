@@ -198,6 +198,12 @@ export const COLLECTIONS = [
       'What is on sale and which coupon codes work right now, from the deal communities and editorial deal desks that publish keyless feeds: the Slickdeals front page, popular list and coupon-code search, DealNews with the retailer, price and expiry as fields, Dealcatcher, Ben’s Bargains, and r/deals and r/coupons. Every row names its store under the same key across sources, and a code written in the post is lifted into a field, so a coupon site can list it without reading the thread.',
   },
   {
+    slug: 'injuries',
+    name: 'ER injuries',
+    description:
+      'What sends people to the emergency room, from the CPSC\u2019s National Electronic Injury Surveillance System: a sample of about a hundred US hospital emergency departments where every injury visit involving a product, a sport or a pastime is written down with the age, sex, body part, diagnosis, where it happened, whether the patient was admitted and a line of the triage narrative, and weighted to stand for the visits nationally. Read here two ways: every sampled visit since 2019, and per product per year the national estimate with its commonest diagnoses, body parts, ages and the change on the year before, flagged where the sample is too thin to publish. Public domain, published each spring for the year before. Follow trampolines, e-bikes, pickleball (coded as paddle ball) or the visits that ended in a death.',
+  },
+  {
     slug: 'prices',
     name: 'Prices',
     description:
@@ -1035,6 +1041,72 @@ export const DEFAULT_FEEDS = [
     description:
       'The organization half of the registry: hospitals, pharmacies, laboratories and agencies.',
     query: { kinds: ['provider'], tags: ['organization'] },
+  },
+  {
+    collection: 'injuries',
+    slug: 'injury-estimates',
+    name: 'National injury estimates by product',
+    query: { kinds: ['estimate'] },
+  },
+  {
+    collection: 'injuries',
+    slug: 'rising-injury-estimates',
+    name: 'Injuries rising 25% or more on the year',
+    query: { kinds: ['estimate'], tags: ['rising'] },
+  },
+  {
+    collection: 'injuries',
+    slug: 'er-visits',
+    name: 'ER injury visits',
+    query: { kinds: ['er-visit'] },
+  },
+  {
+    collection: 'injuries',
+    slug: 'er-visit-deaths',
+    name: 'ER visits that ended in a death',
+    query: { kinds: ['er-visit'], tags: ['fatal'] },
+  },
+  {
+    collection: 'injuries',
+    slug: 'er-visit-admissions',
+    name: 'ER injury visits admitted to hospital',
+    query: { kinds: ['er-visit'], tags: ['admitted'] },
+  },
+  {
+    collection: 'injuries',
+    slug: 'e-mobility-injuries',
+    name: 'E-bike, e-scooter and hoverboard injuries',
+    query: { tags: ['e-mobility'] },
+  },
+  {
+    collection: 'injuries',
+    slug: 'pickleball-injuries',
+    name: 'Pickleball injuries',
+    query: { tags: ['pickleball'] },
+  },
+  {
+    collection: 'injuries',
+    slug: 'racquet-sport-injuries',
+    name: 'Pickleball, tennis and racquet sport injuries',
+    query: { tags: ['racquet-sports'] },
+  },
+  {
+    collection: 'injuries',
+    slug: 'sports-venue-injuries',
+    name: 'Injuries at sports venues',
+    query: { kinds: ['er-visit'], tags: ['at-sports-venue'] },
+  },
+  {
+    collection: 'injuries',
+    slug: 'toddler-injuries',
+    name: 'Injuries to children under five',
+    query: { kinds: ['er-visit'], tags: ['age-0-4'] },
+  },
+  {
+    collection: 'injuries',
+    slug: 'older-adult-injuries',
+    name: 'Injuries to adults 65 and over',
+    query: { kinds: ['er-visit'], tags: ['age-65-plus'] },
   },
   {
     collection: 'parts',

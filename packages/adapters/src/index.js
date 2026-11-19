@@ -109,6 +109,7 @@ import { musicbrainzCatalog } from './musicbrainz-catalog.js';
 import { musicbrainzEvents } from './musicbrainz-events.js';
 import { nasdaqHalts } from './nasdaqhalts.js';
 import { ndbcBuoys } from './ndbc.js';
+import { neiss } from './neiss.js';
 import { newsChannels } from './newschannels.js';
 import { newsfeed } from './newsfeed.js';
 import { nhcCyclones } from './nhc.js';
@@ -464,6 +465,9 @@ export const ADAPTERS = [
   // Parts: the appliance models a part has to fit, and the recalls against them.
   energyStarModels,
   cpscRecalls,
+  // Injuries: emergency room visits from the CPSC's NEISS sample, and the
+  // national estimate per product per year.
+  neiss,
   // Health: the US provider registry, from the CMS monthly bulk file.
   nppesProviders,
   // Listings: things on offer, read from the seller's own OpenListing file.

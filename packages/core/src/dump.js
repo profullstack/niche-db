@@ -365,16 +365,21 @@ export async function* bzip2Chunks(path, { onTruncated } = {}) {
  * record whatever `skip` says, for a reader that needs the column names
  * before the rows it resumes at.
  *
+ * `delimiter` is the field separator, a comma unless told otherwise. The
+ * CPSC's NEISS files are tab-separated with the same RFC quoting (a quoted
+ * narrative may hold a tab), so they read through here with `'\t'`.
+ *
  * @param {AsyncIterable<Uint8Array>} chunks
- * @param {{ skip?: number, keepHeader?: boolean, escape?: string|null }} [opts]
+ * @param {{ skip?: number, keepHeader?: boolean, escape?: string|null, delimiter?: string }} [opts]
  * @returns {AsyncGenerator<Array<string|null>>}
  */
 export async function* csvRecords(
   chunks,
-  { skip = 0, keepHeader = false, escape: escapeChar = null } = {},
+  { skip = 0, keepHeader = false, escape: escapeChar = null, delimiter = ',' } = {},
 ) {
   const decoder = new TextDecoder('utf-8');
   const esc = escapeChar ? String(escapeChar).charCodeAt(0) : -1;
+  const sep = String(delimiter || ',').charCodeAt(0);
   let seen = 0;
   let fields = [];
   let field = '';
@@ -466,7 +471,7 @@ export async function* csvRecords(
         i += 1;
         continue;
       }
-      if (c === 44) {
+      if (c === sep) {
         started = true;
         endField();
         i += 1;
