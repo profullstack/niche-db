@@ -120,6 +120,7 @@ describe('registry', () => {
         'trains',
         'transit',
         'prices',
+        'injuries',
       ]).toContain(a.collection);
     }
     expect(adapterByName('steam').title).toContain('Steam');
