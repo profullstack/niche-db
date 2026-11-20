@@ -1,11 +1,12 @@
 import { expect, test } from 'bun:test';
 import { createHash } from 'node:crypto';
 import { readFile } from 'node:fs/promises';
-import * as q from '../packages/db/src/queries.js';
+import { upsertItemBatch } from '../packages/db/src/item-upsert.js';
 import { migratedPglite, pgliteSql } from './helpers/pglite.js';
 
 const MIGRATION = new URL('../packages/db/migrations/0047_item_suppressions.sql', import.meta.url);
 const heldUrl = 'https://courtlistener.example/opinion/held/';
+const noBound = (_db, _timeout, makeQuery) => makeQuery(_db);
 
 test('removed URLs stay suppressed while unrelated items still ingest', async () => {
   const db = await migratedPglite();
@@ -50,11 +51,13 @@ test('removed URLs stay suppressed while unrelated items still ingest', async ()
 
     const urlSha256 = createHash('sha256').update(heldUrl).digest('hex');
     await db.query('insert into item_suppressions (url_sha256) values ($1)', [urlSha256]);
-    const first = await q.upsertItems({
+    const first = await upsertItemBatch({
       collectionId,
       sourceId,
       items: [{ externalId: 'held-1', title: 'Held', url: heldUrl }],
       db: sql,
+      writeTimeoutMs: 0,
+      bound: noBound,
     });
     expect(first).toEqual({ added: 0, updated: 0 });
 
@@ -64,15 +67,17 @@ test('removed URLs stay suppressed while unrelated items still ingest', async ()
       "insert into sources (collection_id, adapter, slug, name) values ($1, 'other', 'other-opinions', 'Other opinions') returning id",
       [collectionId],
     );
-    const second = await q.upsertItems({
+    const second = await upsertItemBatch({
       collectionId,
       sourceId: secondSourceId,
       items: [{ externalId: 'held-2', title: 'Held again', url: heldUrl }],
       db: sql,
+      writeTimeoutMs: 0,
+      bound: noBound,
     });
     expect(second).toEqual({ added: 0, updated: 0 });
 
-    const unrelated = await q.upsertItems({
+    const unrelated = await upsertItemBatch({
       collectionId,
       sourceId,
       items: [
@@ -83,6 +88,8 @@ test('removed URLs stay suppressed while unrelated items still ingest', async ()
         },
       ],
       db: sql,
+      writeTimeoutMs: 0,
+      bound: noBound,
     });
     expect(unrelated).toEqual({ added: 1, updated: 0 });
     const count = await db.query('select count(*)::int as count from items');
