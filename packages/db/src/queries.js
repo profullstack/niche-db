@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { config } from '@nichedb/config';
 import { GeoQueryError, geoQueryFields } from '@nichedb/core/geo';
 import { geoSql } from './geo.js';
@@ -892,12 +893,15 @@ export async function crawlStatus({ db = sql, overdueMinutes = 30, limit = 25 } 
  *
  * Deduplicated on external_id first: Postgres refuses an upsert whose own batch
  * names the same conflict target twice, and fails the whole statement.
+ * URLs in item_suppressions are filtered here so a source refresh cannot
+ * restore an item that has been removed from public pages.
  */
-export async function upsertItems({ collectionId, sourceId, items }) {
+export async function upsertItems({ collectionId, sourceId, items, db = sql }) {
   const unique = new Map();
   for (const it of items) unique.set(it.externalId, it);
   const rows = [...unique.values()].map((it) => ({
     external_id: it.externalId,
+    url_sha256: it.url ? createHash('sha256').update(String(it.url)).digest('hex') : null,
     kind: it.kind ?? 'item',
     title: it.title,
     summary: it.summary ?? null,
@@ -928,9 +932,9 @@ export async function upsertItems({ collectionId, sourceId, items }) {
    * idempotent per (source_id, external_id).
    */
   const out = await bounded(
-    sql,
+    db,
     config.ingest.writeTimeoutMs,
-    (db) => db`
+    (conn) => conn`
     insert into items (collection_id, source_id, external_id, kind, title, summary, url,
                        image_url, published_at, time_known, precision, tags, data, content_hash,
                        dedupe_key)
@@ -939,9 +943,13 @@ export async function upsertItems({ collectionId, sourceId, items }) {
            coalesce(r.precision, 'minute'), coalesce(r.tags, '{}'), coalesce(r.data, '{}'),
            r.content_hash, r.dedupe_key
     from jsonb_to_recordset(${JSON.stringify(rows)}::text::jsonb) as r(
-      external_id text, kind text, title text, summary text, url text, image_url text,
+      external_id text, url_sha256 text, kind text, title text, summary text, url text,
+      image_url text,
       published_at timestamptz, time_known boolean, precision text, tags text[],
       data jsonb, content_hash text, dedupe_key text)
+    where r.url_sha256 is null or not exists (
+      select 1 from item_suppressions s where s.url_sha256 = r.url_sha256
+    )
     on conflict (source_id, external_id) do update set
       kind = excluded.kind, title = excluded.title,
       summary = coalesce(excluded.summary, items.summary),
