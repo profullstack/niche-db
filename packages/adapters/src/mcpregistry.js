@@ -113,32 +113,147 @@ export function collapse(items) {
   return rows;
 }
 
+export const REGISTRY = 'https://registry.modelcontextprotocol.io/v0/servers';
+/** How often the whole registry is walked again, so edits and deletions land. */
+export const FULL_WALK_EVERY_MS = 7 * 86_400_000;
+/** Leave this much of the run's deadline for the last batch to be written. */
+const DEADLINE_MARGIN_MS = 20_000;
+
+/** One page of the registry, newest version per server only, deleted servers dropped. */
+async function page(http, params) {
+  const res = await http.json(`${REGISTRY}?${new URLSearchParams(params)}`);
+  const entries = (res.servers ?? []).filter(
+    (e) => e._meta?.['io.modelcontextprotocol.registry/official']?.status !== 'deleted',
+  );
+  return {
+    entries,
+    seen: (res.servers ?? []).length,
+    next: res.metadata?.nextCursor ?? res.metadata?.next_cursor ?? null,
+  };
+}
+
+/**
+ * What this run does, from the cursor the last one left.
+ *
+ * - `walk`: the full backfill. `version=latest` gives one entry per server
+ *   (70,100 of them on 2026-11-22, 702 pages), walked in registry order, the
+ *   registry's own cursor saved after every page, so a run that hits its
+ *   deadline or dies resumes on the next page instead of starting over. The
+ *   old pull fetched three pages from the top every time and so only ever saw
+ *   the alphabetically first ~300 versions.
+ * - `since`: once a walk has finished, only what changed (`updated_since`, the
+ *   start of the previous run) until the full walk is due again.
+ *
+ * @returns {{ mode: 'walk' | 'since', state: object }}
+ */
+export function plan(cursor, now = Date.now()) {
+  const c = cursor?.v === 2 ? cursor : {};
+  if (c.walking) return { mode: 'walk', state: c };
+  const due = !c.fullAt || now - Date.parse(c.fullAt) > FULL_WALK_EVERY_MS || !c.since;
+  if (due)
+    return {
+      mode: 'walk',
+      state: {
+        v: 2,
+        walking: true,
+        next: null,
+        walkStarted: new Date(now).toISOString(),
+        fullAt: c.fullAt ?? null,
+      },
+    };
+  return { mode: 'since', state: c };
+}
+
 export const mcpRegistry = defineAdapter({
   name: 'mcp-registry',
   title: 'MCP server registry',
   collection: 'mcp',
   description:
-    'Servers published to the official Model Context Protocol registry, newest first, with their packages and remote endpoints. Keyless.',
+    'Every server published to the official Model Context Protocol registry, at its newest version, with its packages and remote endpoints: backfilled in full, then kept current from what changed. Keyless.',
   docs: 'https://registry.modelcontextprotocol.io/docs',
   kinds: ['mcp-server'],
   cadenceMinutes: 30,
   configFields: [{ key: 'search', label: 'Search', placeholder: 'github' }],
   defaults: {},
-  defaultSources: [{ slug: 'mcp-servers', name: 'MCP: newly registered servers' }],
-  async pull({ config, http, log }) {
-    const items = [];
-    let cursor = null;
-    for (let p = 0; p < 3; p++) {
-      const params = new URLSearchParams({ limit: '100' });
-      if (config.search) params.set('search', String(config.search));
-      if (cursor) params.set('cursor', cursor);
-      const res = await http.json(`https://registry.modelcontextprotocol.io/v0/servers?${params}`);
-      for (const e of res.servers ?? []) items.push(toItem(e));
-      cursor = res.metadata?.nextCursor ?? res.metadata?.next_cursor ?? null;
-      if (!cursor) break;
+  defaultSources: [{ slug: 'mcp-servers', name: 'MCP: official registry' }],
+  async *pull({ config, cursor, http, log, deadline = Infinity }) {
+    const started = new Date().toISOString();
+    const base = { limit: '100', version: 'latest' };
+
+    // A source with a search term is a narrow slice: walk it whole every run.
+    if (config.search) {
+      const items = [];
+      let next = null;
+      do {
+        const p = await page(http, {
+          ...base,
+          search: String(config.search),
+          ...(next ? { cursor: next } : {}),
+        });
+        for (const e of p.entries) items.push(toItem(e));
+        next = p.next;
+      } while (next && Date.now() < deadline - DEADLINE_MARGIN_MS);
+      const rows = collapse(items);
+      yield { items: rows };
+      return { note: `${rows.length} server(s) matching "${config.search}"` };
     }
+
+    const { mode, state } = plan(cursor);
+
+    if (mode === 'walk') {
+      let s = state;
+      let pages = 0;
+      let servers = 0;
+      for (;;) {
+        if (Date.now() > deadline - DEADLINE_MARGIN_MS) {
+          log(`backfill paused after ${pages} page(s), ${servers} server(s); resumes at ${s.next}`);
+          return {
+            cursor: s,
+            note: `backfill: ${servers} server(s) in ${pages} page(s), continuing`,
+            nextInMinutes: 1,
+          };
+        }
+        const p = await page(http, { ...base, ...(s.next ? { cursor: s.next } : {}) });
+        pages++;
+        const rows = collapse(p.entries.map(toItem));
+        servers += rows.length;
+        if (!p.next) {
+          // The walk is complete: changes since it started are what the next run asks for.
+          s = { v: 2, walking: false, fullAt: s.walkStarted, since: s.walkStarted };
+          yield { items: rows, cursor: s };
+          log(`backfill complete: ${servers} server(s) this run`);
+          return {
+            cursor: s,
+            note: `backfill complete: ${servers} server(s) in ${pages} page(s) this run`,
+          };
+        }
+        s = { ...s, next: p.next };
+        yield { items: rows, cursor: s };
+      }
+    }
+
+    // Incremental: everything updated since the previous run started.
+    const items = [];
+    let next = null;
+    let seen = 0;
+    do {
+      const p = await page(http, {
+        ...base,
+        updated_since: state.since,
+        ...(next ? { cursor: next } : {}),
+      });
+      for (const e of p.entries) items.push(toItem(e));
+      seen += p.seen;
+      next = p.next;
+    } while (next && Date.now() < deadline - DEADLINE_MARGIN_MS);
     const rows = collapse(items);
-    log(`${rows.length} servers from ${items.length} published versions`);
-    return { items: rows, note: `${rows.length} server(s) of ${items.length} version(s)` };
+    // If the deadline cut the walk short, ask again from the same point rather than skip changes.
+    const s = next ? state : { ...state, since: started };
+    for (let i = 0; i < rows.length; i += 500) yield { items: rows.slice(i, i + 500) };
+    log(`${rows.length} server(s) updated since ${state.since}`);
+    return {
+      cursor: s,
+      note: `${rows.length} server(s) updated since ${state.since} (${seen} entries)`,
+    };
   },
 });
