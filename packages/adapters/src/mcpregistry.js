@@ -132,6 +132,16 @@ async function page(http, params) {
   };
 }
 
+/** One retry, a second later: a single slow page is not a broken registry. */
+async function pageWithRetry(http, params) {
+  try {
+    return await page(http, params);
+  } catch {
+    await new Promise((r) => setTimeout(r, 1000));
+    return page(http, params);
+  }
+}
+
 /**
  * What this run does, from the cursor the last one left.
  *
@@ -213,7 +223,20 @@ export const mcpRegistry = defineAdapter({
             nextInMinutes: 1,
           };
         }
-        const p = await page(http, { ...base, ...(s.next ? { cursor: s.next } : {}) });
+        let p;
+        try {
+          p = await pageWithRetry(http, { ...base, ...(s.next ? { cursor: s.next } : {}) });
+        } catch (err) {
+          // Nothing fetched this run: the upstream is down, let the crawler rule flag it.
+          if (pages === 0) throw err;
+          // Hundreds of pages answered and one would not: keep what was walked and carry
+          // on from this page at the normal cadence instead of parking a 700-page walk.
+          log(`page at ${s.next} failed twice (${err?.message ?? err}); resuming there next run`);
+          return {
+            cursor: s,
+            note: `backfill: ${servers} server(s) in ${pages} page(s), stopped at a failing page: ${String(err?.message ?? err).slice(0, 120)}`,
+          };
+        }
         pages++;
         const rows = collapse(p.entries.map(toItem));
         servers += rows.length;
@@ -237,7 +260,7 @@ export const mcpRegistry = defineAdapter({
     let next = null;
     let seen = 0;
     do {
-      const p = await page(http, {
+      const p = await pageWithRetry(http, {
         ...base,
         updated_since: state.since,
         ...(next ? { cursor: next } : {}),
