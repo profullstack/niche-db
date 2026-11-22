@@ -455,6 +455,7 @@ async function fetchPage(http, url) {
  * @param {(loc: string) => boolean} site.pageFilter   which URLs are server pages
  * @param {(html: string, url: string) => object|null} site.parse
  * @param {number} [site.delayMs]
+ * @param {number} [site.pagesPerRun]
  */
 export function directoryAdapter(site) {
   return defineAdapter({
@@ -468,7 +469,12 @@ export function directoryAdapter(site) {
     // No `attribution`: that labels a source "Licensed data", and none of these is licensed.
     // Each row carries `data.credit` instead, which is what links it back to its listing.
     configFields: [
-      { key: 'pagesPerRun', label: 'Pages per run', type: 'number', placeholder: '100' },
+      {
+        key: 'pagesPerRun',
+        label: 'Pages per run',
+        type: 'number',
+        placeholder: String(site.pagesPerRun ?? 100),
+      },
       {
         key: 'delayMs',
         label: 'Pause between pages (ms)',
@@ -476,7 +482,7 @@ export function directoryAdapter(site) {
         placeholder: String(site.delayMs ?? 1000),
       },
     ],
-    defaults: { pagesPerRun: 100, delayMs: site.delayMs ?? 1000 },
+    defaults: { pagesPerRun: site.pagesPerRun ?? 100, delayMs: site.delayMs ?? 1000 },
     defaultSources: [{ slug: site.slug, name: site.sourceName }],
     site,
     async *pull({ config, cursor, http, log, deadline = Infinity }) {
@@ -651,5 +657,8 @@ export const mcpServersOrg = directoryAdapter({
     return p.length === 3 && p[0] === 'servers';
   },
   parse: parseMcpServers,
-  delayMs: 1000,
+  // Its Cloudflare edge answered 429 after about 130 uncached pages at one a
+  // second (2026-11-22), so three seconds apart and 60 pages a run.
+  delayMs: 3000,
+  pagesPerRun: 60,
 });
