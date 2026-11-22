@@ -20,6 +20,17 @@ import {
   sameState,
 } from '@profullstack/coinpay-onboard/oauth';
 
+/** Names nichedb.dev on CoinPay's token and userinfo calls (its logs and throttle key on it). */
+const appVersion = String(process.env.npm_package_version ?? '').trim();
+export const COINPAY_UA = `nichedb.dev${appVersion ? `/${appVersion}` : ''} (+https://nichedb.dev)`;
+
+/** `fetch` with our User-Agent, for finishSignIn's fetch hook. */
+export function coinpayFetch(input, init = {}) {
+  const headers = new Headers(init.headers);
+  headers.set('user-agent', COINPAY_UA);
+  return fetch(input, { ...init, headers });
+}
+
 export const CALLBACK_PATH = '/api/v1/coinpay/oauth/callback';
 export const PENDING_COOKIE = 'ndb_cp';
 export const PENDING_TTL_SECONDS = 600;
@@ -101,7 +112,7 @@ export function finishCoinpaySignIn(cfg, { code, verifier, nonce }, doFetch) {
     clientSecret: cfg.clientSecret,
     redirectUri: cfg.redirectUri,
     base: cfg.issuer,
-    fetch: doFetch,
+    fetch: doFetch ?? coinpayFetch,
   });
 }
 

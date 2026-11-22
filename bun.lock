@@ -14,14 +14,14 @@
     },
     "apps/cli": {
       "name": "@profullstack/nichedb",
-      "version": "0.64.0",
+      "version": "0.68.1",
       "bin": {
         "nichedb": "./bin/nichedb.js",
       },
     },
     "apps/web": {
       "name": "@nichedb/web",
-      "version": "0.64.0",
+      "version": "0.68.1",
       "dependencies": {
         "@logicsrc/openaccess": "^0.3.1",
         "@nichedb/adapters": "workspace:*",
@@ -36,7 +36,7 @@
         "@nichedb/premium": "workspace:*",
         "@nichedb/queue": "workspace:*",
         "@profullstack/affiliates": "^0.2.0",
-        "@profullstack/coinpay-onboard": "^0.5.0",
+        "@profullstack/coinpay-onboard": "^0.5.1",
         "@profullstack/footer": "latest",
         "@profullstack/leaderboard": "^0.3.1",
         "@profullstack/nichedb": "workspace:*",
@@ -47,7 +47,7 @@
         "@profullstack/redeem-credits": "^0.2.0",
         "@profullstack/throttle": "^0.4.0",
         "@profullstack/webhooks": "0.2.1",
-        "@profullstack/x402-gateway": "^0.18.1",
+        "@profullstack/x402-gateway": "^0.18.2",
         "@simplewebauthn/browser": "^14.0.0",
         "hono": "^4.13.14",
         "satellite.js": "5.0.0",
@@ -55,7 +55,7 @@
     },
     "apps/worker": {
       "name": "@nichedb/worker",
-      "version": "0.64.0",
+      "version": "0.68.1",
       "dependencies": {
         "@nichedb/config": "workspace:*",
         "@nichedb/core": "workspace:*",
@@ -66,7 +66,7 @@
     },
     "packages/adapters": {
       "name": "@nichedb/adapters",
-      "version": "0.64.0",
+      "version": "0.68.1",
       "dependencies": {
         "@nichedb/core": "workspace:*",
         "@profullstack/openprofile": "^0.2.0",
@@ -74,7 +74,7 @@
     },
     "packages/auth": {
       "name": "@nichedb/auth",
-      "version": "0.64.0",
+      "version": "0.68.1",
       "dependencies": {
         "@nichedb/config": "workspace:*",
         "@nichedb/db": "workspace:*",
@@ -84,11 +84,11 @@
     },
     "packages/config": {
       "name": "@nichedb/config",
-      "version": "0.64.0",
+      "version": "0.68.1",
     },
     "packages/core": {
       "name": "@nichedb/core",
-      "version": "0.64.0",
+      "version": "0.68.1",
       "dependencies": {
         "@nichedb/adapters": "workspace:*",
         "@nichedb/config": "workspace:*",
@@ -101,7 +101,7 @@
     },
     "packages/db": {
       "name": "@nichedb/db",
-      "version": "0.64.0",
+      "version": "0.68.1",
       "dependencies": {
         "@nichedb/config": "workspace:*",
         "@nichedb/core": "workspace:*",
@@ -111,7 +111,7 @@
     },
     "packages/enrichers": {
       "name": "@nichedb/enrichers",
-      "version": "0.64.0",
+      "version": "0.68.1",
       "dependencies": {
         "@nichedb/config": "workspace:*",
         "@nichedb/core": "workspace:*",
@@ -120,11 +120,11 @@
     },
     "packages/knowledge": {
       "name": "@nichedb/knowledge",
-      "version": "0.64.0",
+      "version": "0.68.1",
     },
     "packages/notify": {
       "name": "@nichedb/notify",
-      "version": "0.64.0",
+      "version": "0.68.1",
       "dependencies": {
         "@nichedb/config": "workspace:*",
         "@nichedb/db": "workspace:*",
@@ -136,7 +136,7 @@
     },
     "packages/payments": {
       "name": "@nichedb/payments",
-      "version": "0.64.0",
+      "version": "0.68.1",
       "dependencies": {
         "@profullstack/coinpay": "^0.25.0",
         "@profullstack/referrals": "^0.1.0",
@@ -144,11 +144,11 @@
     },
     "packages/premium": {
       "name": "@nichedb/premium",
-      "version": "0.64.0",
+      "version": "0.68.1",
     },
     "packages/queue": {
       "name": "@nichedb/queue",
-      "version": "0.64.0",
+      "version": "0.68.1",
       "dependencies": {
         "@nichedb/config": "workspace:*",
         "@nichedb/core": "workspace:*",
@@ -380,7 +380,7 @@
 
     "@profullstack/coinpay": ["@profullstack/coinpay@0.25.0", "", { "dependencies": { "@inquirer/prompts": "^8.3.0", "@noble/curves": "^1.6.0", "@noble/hashes": "^1.5.0", "@profullstack/hqtui": "^0.6.3", "@scure/bip32": "^1.5.0", "@scure/bip39": "^1.4.0" }, "bin": { "coinpay": "bin/coinpay.js" } }, "sha512-ZoK8COqBCdJXvr0fO5UWw9HPh88CdMBLycc/dU6kXwAyeIrwZ4WkBApisuDgs4leXNN+SMjwex2etgrEvlICTQ=="],
 
-    "@profullstack/coinpay-onboard": ["@profullstack/coinpay-onboard@0.5.0", "", { "dependencies": { "@modelcontextprotocol/sdk": "^1.32.2", "zod": "^4.6.7" }, "bin": { "coinpay-onboard": "bin/coinpay-onboard" } }, "sha512-yqSx3pgJLP521Km+XNNn9fyjbbHppgozuGTtzTln9yy+2I0h0bjqXSpsFPwoSgVb5QcyBx+Wzv5170Qb7va1iQ=="],
+    "@profullstack/coinpay-onboard": ["@profullstack/coinpay-onboard@0.5.1", "", { "dependencies": { "@modelcontextprotocol/sdk": "^1.32.2", "zod": "^4.6.7" }, "bin": { "coinpay-onboard": "bin/coinpay-onboard" } }, "sha512-vuM/1vYvkXP2E/tBcTBZ8JY4K49qtSPPY1N9XRQvIlcy0Sezr+spOf6vYBkRPhasKcFqda44MRLgxPseG9Kvdg=="],
 
     "@profullstack/cross-promo": ["@profullstack/cross-promo@0.1.0", "", { "bin": { "cross-promo": "bin/cross-promo.js" } }, "sha512-LQMxZSvApH1T+8WmMu/Nj1LqojXeTw6wAtpLfhuKFwx9eR36hQG/7vVIDkKpmU5zKw7UwARe20MOfFCak2+ejA=="],
 
@@ -416,7 +416,7 @@
 
     "@profullstack/webhooks": ["@profullstack/webhooks@0.2.1", "", {}, "sha512-QHeSkpu4O44oJ620qhQqxqFlD3u/OhupmXRnBHw4MGKuDTa0R+Y/727nnF7psSHxxSfnbWfNuVl15z3IXuaZiw=="],
 
-    "@profullstack/x402-gateway": ["@profullstack/x402-gateway@0.18.1", "", { "dependencies": { "@profullstack/keys": "^0.1.0" } }, "sha512-zc2JGLXMX8eCk7Mp4X91E175enOTNcWPZncKf3LXzoGE+XEhHDJHM1LRZkkY3x2pjLYX3AB11Vx/TP3cobSQ/g=="],
+    "@profullstack/x402-gateway": ["@profullstack/x402-gateway@0.18.2", "", { "dependencies": { "@profullstack/keys": "^0.1.0" } }, "sha512-PM0S2ADXPKPvPLLlWVbEqMq+EhKxiNxg1wp0jeGf9S5tz2ZGaNIFqun69cO5lJGZgfh03ST4UkJZGr8CmvCWyg=="],
 
     "@protobufjs/aspromise": ["@protobufjs/aspromise@1.1.2", "", {}, "sha512-j+gKExEuLmKwvz3OgROXtrJ2UG2x8Ch2YZUxahh+s1F2HZ+wAceUNLkvy6zKCPVRkU++ZWQrdxsUeQXmcg4uoQ=="],
 
