@@ -113,7 +113,7 @@ describe('mcpmarket.com', () => {
     expect(row.data.credit.listing).toBe(listing);
   });
 
-  test('a record naming an npm page still keys on the owner\'s repository link', async () => {
+  test("a record naming an npm page still keys on the owner's repository link", async () => {
     const page = parseMcpMarket(await fixture('mcpmarket-server-kubernetes.html'));
     expect(page.repository).toBe('https://github.com/flux159/mcp-server-kubernetes');
     expect(page.extra.website).toBe('https://www.npmjs.com/package/mcp-server-kubernetes');
