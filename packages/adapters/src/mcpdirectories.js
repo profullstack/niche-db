@@ -465,7 +465,8 @@ export function directoryAdapter(site) {
     docs: site.home,
     kinds: ['mcp-server'],
     cadenceMinutes: 60 * 24,
-    attribution: { name: site.name, text: `Listed on ${site.name}`, url: site.home },
+    // No `attribution`: that labels a source "Licensed data", and none of these is licensed.
+    // Each row carries `data.credit` instead, which is what links it back to its listing.
     configFields: [
       { key: 'pagesPerRun', label: 'Pages per run', type: 'number', placeholder: '100' },
       {
