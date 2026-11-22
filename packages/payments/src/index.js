@@ -31,7 +31,7 @@ import { createHmac, timingSafeEqual } from 'node:crypto';
 
 /* ------------------------------------------------------------------- wiring -- */
 
-/** @type {{sql: Function, coinpay: object, siteUrl: string, property?: string} | null} */
+/** @type {{sql: Function, coinpay: object, siteUrl: string, property?: string, userAgent?: string} | null} */
 let deps = null;
 
 /**
@@ -60,6 +60,22 @@ function need() {
     throw new Error('configurePayments() has not been called; wire it up at boot');
   }
   return deps;
+}
+
+/**
+ * The User-Agent sent on every CoinPay call: `<property>[/<version>] (+https://<property>)`.
+ *
+ * Every sibling runs on one host, so the runtime default (`Bun/1.4.4`) made them one
+ * caller in CoinPay's logs and throttle. Brand-neutral on purpose (this file is copied
+ * between siblings): the name is the payment property, the version is whatever
+ * npm/bun run exported. `userAgent` passed to configurePayments replaces it whole.
+ */
+export function coinpayUserAgent() {
+  const { userAgent } = need();
+  if (userAgent) return String(userAgent);
+  const host = paymentProperty();
+  const version = String(process.env.npm_package_version ?? '').trim();
+  return `${host}${version ? `/${version}` : ''} (+https://${host})`;
 }
 
 /** Whether money can be taken at all. Every caller checks this before offering to. */
@@ -193,6 +209,7 @@ export async function createCheckout({
     headers: {
       authorization: `Bearer ${coinpay.apiKey}`,
       'content-type': 'application/json',
+      'user-agent': coinpayUserAgent(),
     },
     body: JSON.stringify({
       amount: amountCents / 100,
@@ -253,7 +270,7 @@ export async function getCheckoutSession(sessionId) {
   const { coinpay } = need();
   if (!/^cs_[A-Za-z0-9]+$/.test(String(sessionId ?? ''))) return null;
   const res = await fetch(`${baseUrlOf(coinpay)}/api/checkout/sessions/${sessionId}`, {
-    headers: { authorization: `Bearer ${coinpay.apiKey}` },
+    headers: { authorization: `Bearer ${coinpay.apiKey}`, 'user-agent': coinpayUserAgent() },
     signal: AbortSignal.timeout(10_000),
   });
   if (!res.ok) return null;
