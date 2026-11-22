@@ -119,6 +119,45 @@ describe('mcp-registry backfill', () => {
     expect(result.cursor.fullAt).toBe(since);
   });
 
+  test('a page that fails twice mid-walk ends the run cleanly at that page; one that fails once is retried', async () => {
+    const { http } = registry(pages);
+    let failsLeft = 0;
+    const flaky = {
+      async json(url) {
+        if (
+          new URL(url).searchParams.get('cursor') === 'com.profullstack/board-saas:1.0.0' &&
+          failsLeft-- > 0
+        )
+          throw Object.assign(new Error('The operation timed out.'), { name: 'TimeoutError' });
+        return http.json(url);
+      },
+    };
+    failsLeft = 2;
+    const stopped = await run(mcpRegistry.pull(ctx(flaky)));
+    expect(stopped.result.cursor).toMatchObject({
+      walking: true,
+      next: 'com.profullstack/board-saas:1.0.0',
+    });
+    expect(stopped.result.note).toMatch(/stopped at a failing page/);
+    expect(stopped.batches).toHaveLength(2);
+
+    failsLeft = 1;
+    const retried = await run(mcpRegistry.pull(ctx(flaky, stopped.result.cursor)));
+    expect(retried.result.cursor.walking).toBe(false);
+  });
+
+  test('a registry that fails on the first page still throws, so the crawler rule flags it', async () => {
+    const down = {
+      async json() {
+        throw Object.assign(
+          new Error('502 from https://registry.modelcontextprotocol.io/v0/servers'),
+          { status: 502 },
+        );
+      },
+    };
+    await expect(run(mcpRegistry.pull(ctx(down)))).rejects.toThrow(/502/);
+  });
+
   test('a full walk comes due again after a week, and an old v1 cursor starts one', () => {
     const old = new Date(Date.now() - FULL_WALK_EVERY_MS - 1000).toISOString();
     expect(plan({ v: 2, walking: false, fullAt: old, since: old }).mode).toBe('walk');
