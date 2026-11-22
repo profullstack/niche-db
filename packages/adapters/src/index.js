@@ -101,6 +101,7 @@ import { lichessBroadcasts } from './lichess.js';
 import { linodeTypes } from './linode.js';
 import { livetennis } from './livetennis.js';
 import { lowendbox } from './lowendbox.js';
+import { mcpMarket, mcpServersOrg, mcpSo } from './mcpdirectories.js';
 import { mcpRegistry } from './mcpregistry.js';
 import { isoMicExchanges } from './mic.js';
 import { modelsdev } from './modelsdev.js';
@@ -316,6 +317,11 @@ export const ADAPTERS = [
   // them and adds only what none of them carry. Keyed and licensed: every row
   // it does add credits Glama and links to the Glama listing.
   glamaMcp,
+  // The sitemap-only directories, after everything else: read one page per
+  // server, so what they add is only what no API or list above carries.
+  mcpSo,
+  mcpMarket,
+  mcpServersOrg,
   /*
    * Agent workflows, and the four things people install, each in the
    * collection somebody looking for one would open: skills, subagents, slash

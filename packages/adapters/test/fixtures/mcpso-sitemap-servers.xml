@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://mcp.so/servers/scrapling</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://mcp.so/servers/scrapling"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://mcp.so/zh/servers/scrapling"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://mcp.so/ja/servers/scrapling"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://mcp.so/servers/scrapling"/>
+    <lastmod>2026-11-07T02:31:44.173Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+<url>
+    <loc>https://mcp.so/servers/sequentialthinking</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://mcp.so/servers/sequentialthinking"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://mcp.so/zh/servers/sequentialthinking"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://mcp.so/ja/servers/sequentialthinking"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://mcp.so/servers/sequentialthinking"/>
+    <lastmod>2026-11-05T10:00:54.784Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.79</priority>
+  </url>
+<url>
+    <loc>https://mcp.so/servers/redis</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://mcp.so/servers/redis"/>
+    <xhtml:link rel="alternate" hreflang="zh" href="https://mcp.so/zh/servers/redis"/>
+    <xhtml:link rel="alternate" hreflang="ja" href="https://mcp.so/ja/servers/redis"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://mcp.so/servers/redis"/>
+    <lastmod>2026-10-16T18:31:04.629Z</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.79</priority>
+  </url>
+</urlset>
