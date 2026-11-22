@@ -328,7 +328,8 @@ describe('registration', () => {
       expect(names.indexOf(a.name)).toBeGreaterThan(names.indexOf('mcp-registry'));
     }
     for (const a of [mcpSo, mcpMarket, mcpServersOrg]) expect(a.attribution).toBeUndefined();
-    expect(mcpMarket.defaults.delayMs).toBe(2000); // the crawl delay mcpmarket.com asks for
+    expect(mcpMarket.defaults.delayMs).toBe(2000);
+    expect(mcpServersOrg.defaults).toEqual({ pagesPerRun: 60, delayMs: 3000 }); // its edge 429s at 1/s // the crawl delay mcpmarket.com asks for
     expect(mcpSo.defaultSources[0].slug).toBe('mcpso-servers');
   });
 });
