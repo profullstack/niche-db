@@ -25,6 +25,7 @@ import { whereToBuy } from '../books.js';
 import { businessReport, hasInput, normaliseInput, rdapLookup } from '../business.js';
 import * as credits from '../credits.js';
 import { liveReputationDeps } from '../dnsbl.js';
+import { phoneReport } from '../phone.js';
 import { areaOut } from '../population.js';
 import { searchProducts } from '../products.js';
 import {
@@ -1030,6 +1031,23 @@ export const TOOLS = [
         truncated,
         results: results.map((r) => ({ ...r, cheapest: byTld.get(r.tld)?.best ?? null })),
       };
+    },
+  },
+  {
+    name: 'phone_lookup',
+    title: 'Phone Number Lookup',
+    annotations: LOOKUP,
+    description:
+      'A phone number, with its country code (+1 202 555 0143; ten digits are read as North American). Answers `number` (valid, country, national and international format, line type where the country publishes it), and for North America `areaCode`, `exchange`, `block` and `carrier` (the carrier the block was ASSIGNED to by NANPA, with a landline/wireless/voip guess from its name; ports are not public), `reports.fcc` (unwanted-call complaints naming it as caller or call-back number: count, types, recent) and `reports.sms` (the smshub.dev SMS blacklist), and `businesses` that publish it. Never the owner of a personal line.',
+    inputSchema: {
+      type: 'object',
+      properties: { number: str('A phone number with country code, e.g. +1 202 555 0143') },
+      required: ['number'],
+    },
+    run: async ({ number }) => {
+      const r = await phoneReport(number);
+      if (r.error) throw toolError(r.error);
+      return r;
     },
   },
   {

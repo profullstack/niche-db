@@ -197,6 +197,7 @@ export const Layout = (props) => (
           <a href="/vin">VIN</a>
           <a href="/isbn">ISBN</a>
           <a href="/business">Business</a>
+          <a href="/phone">Phone</a>
           <a href="/tlds">TLDs</a>
           <a href="/airplanes">Airplanes</a>
           <a href="/satellites">Satellites</a>

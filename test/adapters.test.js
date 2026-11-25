@@ -114,6 +114,7 @@ describe('registry', () => {
         'weed',
         'launches',
         'blacklists',
+        'phone',
         'aircraft',
         'satellites',
         'ships',
