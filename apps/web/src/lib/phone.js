@@ -3,6 +3,7 @@ import * as blacklists from '@nichedb/db/blacklists';
 import * as q from '@nichedb/db/queries';
 import { parsePhoneNumberFromString } from 'libphonenumber-js/max';
 import { cachedCallerId } from './caller-id.js';
+import { mapLink, placeOf, timeZonesOf, wikidataOwners } from './phone-place.js';
 import { rowOut } from './vehicles.js';
 
 /**
@@ -150,7 +151,7 @@ export async function phoneReport(raw) {
   }
   const tag = numberTag(n.e164);
   const phone = await q.getCollection('phone').catch(() => null);
-  const [block, complaintRows, sms, tagged, callerId] = await Promise.all([
+  const [block, complaintRows, sms, tagged, callerId, place, zones, owners] = await Promise.all([
     n.nanp ? nanpBlock(n) : null,
     phone
       ? q
@@ -167,6 +168,9 @@ export async function phoneReport(raw) {
     q.recentItems({ tags: [tag], limit: 50, timeoutMs: 8_000 }).catch(() => []),
     // Cached only: a page never pays for a lookup (lib/caller-id.js).
     n.nanp ? cachedCallerId(n.e164) : null,
+    placeOf(n).catch(() => null),
+    timeZonesOf(n).catch(() => []),
+    wikidataOwners(n).catch(() => []),
   ]);
 
   const complaints = complaintRows.map(rowOut).map((r) => complaintOut(r, n.e164));
@@ -184,12 +188,38 @@ export async function phoneReport(raw) {
       url: r.url,
       page: r.page,
       source: r.data?.source ?? null,
+      address: addressText(r.data?.address),
     }));
+
+  // Where the number is: the prefix's city, the exchange's state, the owner's
+  // own address when an organisation publishes the number.
+  const pinned = owners.find((o) => Number.isFinite(o.lat));
+  const placeName =
+    place ?? (block?.areaCode?.location ? `${block.areaCode.location}, ${n.country}` : null);
+  const location = {
+    place: placeName,
+    state: block?.exchange?.state ?? null,
+    country: n.country,
+    rateCenter: block?.exchange?.rateCenter ?? null,
+    timeZones: zones.length ? zones : (block?.areaCode?.timeZones ?? []),
+    address:
+      pinned?.address ?? owners[0]?.address ?? businesses.find((b) => b.address)?.address ?? null,
+    lat: pinned?.lat ?? null,
+    lon: pinned?.lon ?? null,
+    precision: pinned ? 'address' : placeName ? 'city' : 'country',
+  };
+  location.map = mapLink({
+    lat: location.lat,
+    lon: location.lon,
+    query: location.address ?? placeName,
+  });
 
   return {
     number: n,
     callerId: callerId ?? null,
     callerIdAvailable: n.nanp,
+    owners,
+    location,
     ...(block ?? {}),
     reports: {
       fcc: {
@@ -219,6 +249,18 @@ export async function phoneReport(raw) {
       'smshub.dev SMS blacklist',
       businesses.length ? 'businesses that publish the number (NPPES organisations)' : null,
       callerId ? 'caller ID (CNAM) via Telnyx Number Lookup' : null,
+      place ? 'libphonenumber geocoding and time zones (Apache-2.0)' : null,
+      owners.length ? 'Wikidata (CC0)' : null,
     ].filter(Boolean),
   };
+}
+
+/** An NPPES-style address object as one line, or null. */
+function addressText(a) {
+  if (!a || typeof a !== 'object') return null;
+  const street = Array.isArray(a.street) ? a.street.join(', ') : a.street;
+  const line = [street, a.city, [a.state, a.postalCode].filter(Boolean).join(' ')]
+    .filter(Boolean)
+    .join(', ');
+  return line || null;
 }

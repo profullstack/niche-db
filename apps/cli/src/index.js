@@ -15,7 +15,7 @@ import { homedir, tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createInterface } from 'node:readline';
 
-export const VERSION = '0.71.0';
+export const VERSION = '0.72.0';
 const GEO_FLAGS = ['lat', 'long', 'radius', 'unit', 'bbox', 'sort', 'offset'];
 const DEFAULT_API = process.env.NICHEDB_API ?? 'https://nichedb.dev';
 const CONFIG_DIR = join(process.env.XDG_CONFIG_HOME ?? join(homedir(), '.config'), 'nichedb');
@@ -1240,6 +1240,14 @@ export async function run(
       if (r.callerId)
         out(
           `caller ID: ${r.callerId.name ?? '(no name)'}${r.callerId.lineType ? `, ${r.callerId.lineType}` : ''}${r.callerId.carrier ? `, ${r.callerId.carrier}` : ''}`,
+        );
+      for (const o of r.owners ?? [])
+        out(
+          `owner: ${o.name}${o.address ? `, ${o.address}` : ''}${o.website ? `  ${o.website}` : ''}`,
+        );
+      if (r.location)
+        out(
+          `location: ${[r.location.address ?? r.location.place, r.location.country].filter(Boolean).join(', ')}${r.location.timeZones?.length ? ` (${r.location.timeZones.join(', ')})` : ''}`,
         );
       if (r.areaCode) out(`area code ${n.npa}: ${r.areaCode.location ?? '?'}`);
       if (r.exchange)
