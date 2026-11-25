@@ -67,6 +67,81 @@ export function PhoneLanding({ user, counts, error, query }) {
   );
 }
 
+/** Organisations that publish this number as their own (Wikidata). */
+const Owners = ({ owners }) => {
+  if (!owners?.length) return null;
+  return (
+    <div class="owners">
+      <h2>Owner</h2>
+      <ul>
+        {owners.map((o) => (
+          <li>
+            <strong>
+              <a href={o.url}>{o.name}</a>
+            </strong>
+            {o.description ? ` · ${o.description}` : ''}
+            {o.address ? (
+              <>
+                <br />
+                {o.address}
+              </>
+            ) : o.place ? (
+              <>
+                <br />
+                {o.place}
+              </>
+            ) : null}
+            <br />
+            {o.website ? <a href={o.website}>{o.website.replace(/^https?:\/\//, '')}</a> : null}
+            {o.website && Number.isFinite(o.lat) ? ' · ' : ''}
+            {Number.isFinite(o.lat) ? (
+              <a
+                href={`https://www.openstreetmap.org/?mlat=${o.lat}&mlon=${o.lon}#map=17/${o.lat}/${o.lon}`}
+              >
+                map ({o.lat.toFixed(4)}, {o.lon.toFixed(4)})
+              </a>
+            ) : null}{' '}
+            <small>({o.source})</small>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+};
+
+/** City, state, country and time zone, with a map link. */
+const LocationText = ({ loc, n }) => {
+  if (!loc) return n.country ?? 'unknown';
+  const parts = [
+    loc.address ?? loc.place,
+    loc.address
+      ? null
+      : loc.state && !String(loc.place ?? '').includes(loc.state)
+        ? loc.state
+        : null,
+    loc.country,
+  ].filter(Boolean);
+  const zone = loc.timeZones?.length ? loc.timeZones.join(', ') : null;
+  return (
+    <>
+      {parts.join(', ') || 'unknown'}
+      {zone ? ` · ${zone}` : ''}
+      {loc.map ? (
+        <>
+          {' · '}
+          <a href={loc.map}>map</a>
+        </>
+      ) : null}
+      <br />
+      <small>
+        {loc.precision === 'address'
+          ? 'The address of the organisation that publishes this number.'
+          : 'Where the number was issued, from its prefix; a mobile or a ported number can be used anywhere.'}
+      </small>
+    </>
+  );
+};
+
 /** The caller ID block: the name if we have it, else the button that asks. */
 const CallerId = ({ n, callerId, available, error }) => {
   if (!available) return null;
@@ -114,8 +189,13 @@ export function PhonePage({ user, report, callerIdError }) {
           <code>{n.international}</code>
         </h1>
         <CallerId n={n} callerId={cid} available={report.callerIdAvailable} error={callerIdError} />
+        <Owners owners={report.owners} />
         <Lookup value={n.international} />
         <dl>
+          <dt>Location</dt>
+          <dd>
+            <LocationText loc={report.location} n={n} />
+          </dd>
           <dt>Country</dt>
           <dd>
             {n.country ?? 'unknown'} (+{n.callingCode}) ·{' '}
