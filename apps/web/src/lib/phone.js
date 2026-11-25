@@ -2,6 +2,7 @@ import { lineTypeGuess, numberTag } from '@nichedb/adapters/phone-common';
 import * as blacklists from '@nichedb/db/blacklists';
 import * as q from '@nichedb/db/queries';
 import { parsePhoneNumberFromString } from 'libphonenumber-js/max';
+import { cachedCallerId } from './caller-id.js';
 import { rowOut } from './vehicles.js';
 
 /**
@@ -149,7 +150,7 @@ export async function phoneReport(raw) {
   }
   const tag = numberTag(n.e164);
   const phone = await q.getCollection('phone').catch(() => null);
-  const [block, complaintRows, sms, tagged] = await Promise.all([
+  const [block, complaintRows, sms, tagged, callerId] = await Promise.all([
     n.nanp ? nanpBlock(n) : null,
     phone
       ? q
@@ -164,6 +165,8 @@ export async function phoneReport(raw) {
       : [],
     blacklists.smsNumber(n.e164).catch(() => null),
     q.recentItems({ tags: [tag], limit: 50, timeoutMs: 8_000 }).catch(() => []),
+    // Cached only: a page never pays for a lookup (lib/caller-id.js).
+    n.nanp ? cachedCallerId(n.e164) : null,
   ]);
 
   const complaints = complaintRows.map(rowOut).map((r) => complaintOut(r, n.e164));
@@ -185,6 +188,8 @@ export async function phoneReport(raw) {
 
   return {
     number: n,
+    callerId: callerId ?? null,
+    callerIdAvailable: n.nanp,
     ...(block ?? {}),
     reports: {
       fcc: {
@@ -213,6 +218,7 @@ export async function phoneReport(raw) {
       'FCC Consumer Complaints Data (public domain)',
       'smshub.dev SMS blacklist',
       businesses.length ? 'businesses that publish the number (NPPES organisations)' : null,
+      callerId ? 'caller ID (CNAM) via Telnyx Number Lookup' : null,
     ].filter(Boolean),
   };
 }

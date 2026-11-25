@@ -1,11 +1,12 @@
 {
   "name": "@nichedb/db",
-  "version": "0.70.0",
+  "version": "0.71.0",
   "private": true,
   "type": "module",
   "exports": {
     ".": "./src/index.js",
     "./queries": "./src/queries.js",
+    "./caller-id": "./src/caller-id.js",
     "./migrate": "./src/migrate.js",
     "./knowledge": "./src/knowledge.js",
     "./automotive": "./src/automotive.js",

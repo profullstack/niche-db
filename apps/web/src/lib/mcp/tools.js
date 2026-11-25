@@ -23,9 +23,10 @@ import * as trafficStore from '@nichedb/db/traffic';
 import { enqueueRun } from '@nichedb/queue';
 import { whereToBuy } from '../books.js';
 import { businessReport, hasInput, normaliseInput, rdapLookup } from '../business.js';
+import { lookupCallerId } from '../caller-id.js';
 import * as credits from '../credits.js';
 import { liveReputationDeps } from '../dnsbl.js';
-import { phoneReport } from '../phone.js';
+import { parseNumber, phoneReport } from '../phone.js';
 import { areaOut } from '../population.js';
 import { searchProducts } from '../products.js';
 import {
@@ -1031,6 +1032,25 @@ export const TOOLS = [
         truncated,
         results: results.map((r) => ({ ...r, cheapest: byTld.get(r.tld)?.best ?? null })),
       };
+    },
+  },
+  {
+    name: 'caller_id_lookup',
+    title: 'Caller ID Lookup',
+    annotations: LOOKUP,
+    description:
+      'The caller ID name (CNAM) for a US or Canadian number: the name a phone shows when it calls, usually the business for a business line and often none for a mobile, plus the line type and carrier as the network has them today (ports included). A paid lookup, cached 30 days and capped daily; answers `callerId` { name, lineType, carrier, ocn, ported, lookedUpAt }.',
+    inputSchema: {
+      type: 'object',
+      properties: { number: str('A US or Canadian number, e.g. +1 202 456 1111') },
+      required: ['number'],
+    },
+    run: async ({ number }) => {
+      const n = parseNumber(number);
+      if (!n) throw toolError('not a phone number with its country code');
+      const r = await lookupCallerId(n.e164);
+      if (r.error) throw toolError(r.error);
+      return { number: n.e164, ...r };
     },
   },
   {
