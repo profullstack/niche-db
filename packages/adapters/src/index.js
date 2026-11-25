@@ -64,6 +64,7 @@ import { exploitgym } from './exploitgym.js';
 import { faaRegistry } from './faa-registry.js';
 import { faaAirportStatus } from './faanas.js';
 import { fbiCrimeEstimates } from './fbicrime.js';
+import { fccUnwantedCalls } from './fcc-unwanted-calls.js';
 import { fdicInstitutions, fdicStructureChanges } from './fdic.js';
 import { federalRegister } from './federalregister.js';
 import { findhost } from './findhost.js';
@@ -108,6 +109,7 @@ import { modelsdev } from './modelsdev.js';
 import { musicbrainz } from './musicbrainz.js';
 import { musicbrainzCatalog } from './musicbrainz-catalog.js';
 import { musicbrainzEvents } from './musicbrainz-events.js';
+import { nanpa } from './nanpa.js';
 import { nasdaqHalts } from './nasdaqhalts.js';
 import { ndbcBuoys } from './ndbc.js';
 import { neiss } from './neiss.js';
@@ -404,6 +406,9 @@ export const ADAPTERS = [
   // Prices people paid, by barcode, at OSM shops; also feeds the product graph.
   openprices,
   smshubBlacklist,
+  // Phone: who holds each North American number block, and who reported it.
+  nanpa,
+  fccUnwantedCalls,
   // Hosting: who sells servers, at what price, and the deals the small ones announce.
   findhost,
   vultrPlans,

@@ -26,6 +26,7 @@ import { registerManage } from './routes/manage.js';
 import { registerMcp } from './routes/mcp.js';
 import { registerOpenSaaS } from './routes/opensaas.js';
 import { registerPages } from './routes/pages.js';
+import { registerPhone } from './routes/phone.js';
 import { registerPopulation } from './routes/population.js';
 import { registerPremium } from './routes/premium.js';
 import { registerProducts } from './routes/products.js';
@@ -179,6 +180,8 @@ registerTraffic(app);
 registerReputation(app);
 /** Blacklists: /blacklists/sms, the numbers smshub.dev users flagged as spam or scam, and /api/v1/blacklists/sms. */
 registerBlacklists(app);
+/** Phone numbers: /phone, one number at /phone/<digits>, /api/v1/phone/<number> (lib/phone.js). */
+registerPhone(app);
 /** The product graph: /products, one product across every store, and /api/v1/products (core/products.js). */
 registerProducts(app);
 /** Vulnerabilities: /vulns, the /c/vulns/<id> deep dive (OpenVuln, JSON too), /api/v1/vulns and /.well-known/openvuln.json. */

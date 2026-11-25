@@ -1,5 +1,6 @@
 import { defineAdapter, slugify } from '@nichedb/core/adapter';
 import { csvRecords, dumpDir } from '@nichedb/core/dump';
+import { numberTag, toE164 } from './phone-common.js';
 
 /**
  * Every healthcare provider in the United States.
@@ -273,6 +274,9 @@ export function toItem(cells, names, opts = {}) {
 
   const where = [address.city, address.state].filter(Boolean).join(', ');
   const what = primary?.name ?? primary?.code ?? null;
+  // An organisation's practice phone is found by /phone; an individual's is
+  // never kept (addressOf withholds it), so it is never tagged either.
+  const phone = address.phone ? toE164(address.phone, 'US') : null;
 
   return {
     externalId: `npi-${npi}`,
@@ -291,6 +295,7 @@ export function toItem(cells, names, opts = {}) {
       'npi',
       individual ? 'individual' : 'organization',
       ...(active ? [] : ['deactivated']),
+      ...(phone ? [numberTag(phone)] : []),
       ...(address.state ? [slugify(address.state)] : []),
       ...taxonomies
         .slice(0, 4)

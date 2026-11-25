@@ -246,6 +246,12 @@ export const COLLECTIONS = [
       'What ThreatCrush and other OpenThreat reporters identified in the open: findings in public repositories, attacks observed against the reporter’s own hosts, indicators worth blocking, advisories. Each row is read from the reporter’s own /.well-known/openthreat.json, in the reporter’s words, with the reporter named and the subject linked, and re-read hourly so a threat goes fixed, blocked or withdrawn in place. Never from a private scan: a reporter publishes only what was already visible to anyone who looked, a secret is published unlocated, and a paying user’s scan never appears. Beside them, every CVE the NVD publishes and revises, read every fifteen minutes with CVSS, CWE, affected products and CISA KEV dates (this product uses the NVD API but is not endorsed or certified by the NVD), and SURBL’s public reputation lists as a catalogue with the house domains checked against them by DNS every half hour, each row moving only when its standing does.',
   },
   {
+    slug: 'phone',
+    name: 'Phone numbers',
+    description:
+      'Where a phone number is from, who it was assigned to, and who reported it. Every North American area code and exchange from the reports NANPA publishes nightly (the carrier and OCN each block of numbers was assigned to, its rate centre and state, with landline or mobile guessed from the carrier\u2019s name, because a number ported since keeps its block), and every unwanted-call complaint people filed with the FCC that names the calling number. Look a number up at /phone, which joins these with the smshub.dev SMS blacklist and the businesses that publish the number. Nothing ties a number to a private person: complainants keep only their state, and an individual\u2019s phone is never kept.',
+  },
+  {
     slug: 'blacklists',
     name: 'Blacklists',
     description:
@@ -505,6 +511,28 @@ export const DEFAULT_FEEDS = [
     slug: 'railway-stations',
     name: 'European railway stations',
     query: { kinds: ['station'] },
+  },
+  {
+    collection: 'phone',
+    slug: 'fcc-unwanted-calls',
+    name: 'Unwanted-call complaints (FCC)',
+    description:
+      'Every unwanted-call complaint filed with the FCC that names the caller, newest first.',
+    query: { sources: ['fcc-unwanted-calls'] },
+  },
+  {
+    collection: 'phone',
+    slug: 'fcc-robocalls',
+    name: 'Robocall complaints (FCC)',
+    query: { tags: ['call-prerecorded-voice'] },
+  },
+  {
+    collection: 'phone',
+    slug: 'nanp-exchanges',
+    name: 'North American exchanges (NANPA)',
+    description:
+      'Every assigned NPA-NXX; after the first walk, new rows are newly assigned exchanges.',
+    query: { sources: ['nanpa-numbering'], kinds: ['exchange'] },
   },
   {
     collection: 'aircraft',

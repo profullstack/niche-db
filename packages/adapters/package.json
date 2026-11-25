@@ -1,13 +1,15 @@
 {
   "name": "@nichedb/adapters",
-  "version": "0.69.2",
+  "version": "0.70.0",
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.js"
+    ".": "./src/index.js",
+    "./phone-common": "./src/phone-common.js"
   },
   "dependencies": {
     "@nichedb/core": "workspace:*",
-    "@profullstack/openprofile": "^0.2.0"
+    "@profullstack/openprofile": "^0.2.0",
+    "libphonenumber-js": "1.13.17"
   }
 }

@@ -15,7 +15,7 @@ import { homedir, tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createInterface } from 'node:readline';
 
-export const VERSION = '0.69.2';
+export const VERSION = '0.70.0';
 const GEO_FLAGS = ['lat', 'long', 'radius', 'unit', 'bbox', 'sort', 'offset'];
 const DEFAULT_API = process.env.NICHEDB_API ?? 'https://nichedb.dev';
 const CONFIG_DIR = join(process.env.XDG_CONFIG_HOME ?? join(homedir(), '.config'), 'nichedb');
@@ -237,6 +237,13 @@ export const COMMANDS = [
     summary:
       'Is a domain name registered? Asks the registry over RDAP; a bare word is tried under each ending.',
     options: ['--tlds <list>', '--json'],
+  },
+  {
+    name: 'phone',
+    usage: 'phone <number with country code> [--json]',
+    summary:
+      'A phone number: where it is from, the carrier its block was assigned to, landline or mobile, FCC complaints and the SMS blacklist.',
+    options: ['--json'],
   },
   {
     name: 'airplane',
@@ -1210,6 +1217,40 @@ export async function run(
         out(`${pad(x.name, 32)} ${pad(word[x.status] ?? x.status, 15)} ${detail}`);
       }
       if (r.truncated) out('(only the first names were checked)');
+      return 0;
+    }
+    case 'phone': {
+      const term = rest.join(' ').trim();
+      if (!term) throw new Error('phone <number with country code>');
+      const r = await client.get(`/api/v1/phone/${encodeURIComponent(term)}`);
+      if (json) {
+        out(JSON.stringify(r, null, 2));
+        return 0;
+      }
+      const n = r.number;
+      out(`${n.international}  ${n.country ?? '?'}  ${n.valid ? 'valid' : 'not valid'}`);
+      if (r.areaCode) out(`area code ${n.npa}: ${r.areaCode.location ?? '?'}`);
+      if (r.exchange)
+        out(
+          `exchange ${r.exchange.npaNxx}: ${r.exchange.rateCenter ?? '?'}, ${r.exchange.state ?? '?'}`,
+        );
+      if (r.carrier)
+        out(
+          `assigned to ${r.carrier.name}${r.carrier.ocn ? ` (OCN ${r.carrier.ocn})` : ''}, ${r.carrier.lineTypeGuess ?? '?'} (guess)`,
+        );
+      else if (n.type) out(`line type: ${n.type}`);
+      const f = r.reports?.fcc;
+      out(
+        f?.count
+          ? `FCC complaints: ${f.capped ? '200+' : f.count}, last ${String(f.last).slice(0, 10)}`
+          : 'FCC complaints: none',
+      );
+      out(
+        r.reports?.sms?.listed
+          ? `SMS blacklist: listed (${r.reports.sms.reporters} reporters)`
+          : 'SMS blacklist: not listed',
+      );
+      for (const b of r.businesses ?? []) out(`published by: ${b.name}  ${b.page}`);
       return 0;
     }
     case 'airplane':

@@ -16,15 +16,23 @@
 import { mkdir, open, stat, unlink } from 'node:fs/promises';
 import { dirname } from 'node:path';
 import { BULK_DOWNLOAD_TIMEOUT_MS, CRAWL_FETCH_TIMEOUT_MS } from './crawl.js';
+import { fetchRoutesFromEnv, reroute, shouldReroute } from './fetch-routes.js';
 import { requestMusicBrainz, retryDelay } from './musicbrainz-http.js';
 
-export function makeHttp({ userAgent, log = () => {} }) {
+export function makeHttp({ userAgent, log = () => {}, routes = fetchRoutesFromEnv() }) {
   async function request(url, opts = {}) {
+    let res;
     try {
-      return await send(url, opts);
+      res = await send(url, opts);
     } catch (err) {
       throw markUpstream(err, url);
     }
+    // A publisher that refuses this address is asked again from another
+    // machine: a c0mpute node, then a person's desktop (fetch-routes.js).
+    if (routes.length && opts.reroute !== false && (await shouldReroute(res, opts))) {
+      return reroute(res, url, { ...opts, userAgent }, { routes, log });
+    }
+    return res;
   }
 
   async function send(

@@ -1,6 +1,6 @@
 {
   "name": "@nichedb/web",
-  "version": "0.69.2",
+  "version": "0.70.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -36,6 +36,7 @@
     "@profullstack/x402-gateway": "^0.18.4",
     "@simplewebauthn/browser": "^14.0.0",
     "hono": "^4.13.14",
+    "libphonenumber-js": "1.13.17",
     "satellite.js": "5.0.0"
   }
 }
