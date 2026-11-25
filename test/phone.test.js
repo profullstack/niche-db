@@ -1,5 +1,9 @@
 import { describe, expect, test } from 'bun:test';
-import { complaintItem, complaintNumber } from '../packages/adapters/src/fcc-unwanted-calls.js';
+import {
+  complaintItem,
+  complaintNumber,
+  soqlTimestamp,
+} from '../packages/adapters/src/fcc-unwanted-calls.js';
 import { adapterByName } from '../packages/adapters/src/index.js';
 import {
   areaCodeItem,
@@ -17,7 +21,7 @@ import {
 } from '../packages/adapters/src/phone-common.js';
 import { normaliseItem } from '../packages/core/src/adapter.js';
 
-process.env.DATABASE_URL ??= 'postgres://test:test@localhost:5432/test';
+process.env.DATABASE_URL ??= 'postgres://localhost:5432/test';
 process.env.SITE_URL ??= 'https://nichedb.test';
 const { COLLECTIONS, DEFAULT_FEEDS } = await import('../packages/core/src/seed.js');
 const { isReservedNicheSlug } = await import('../packages/knowledge/src/index.js');
@@ -178,6 +182,23 @@ describe('fcc-unwanted-calls', () => {
     location_1: { latitude: '33.74', longitude: '-111.84' },
     type_of_property_goods_or_services: 'Irs Services',
   };
+
+  test('a damaged cursor never reaches the SoQL query', async () => {
+    expect(soqlTimestamp('2026-11-25T01:00:00.000')).toBe('2026-11-25T01:00:00.000');
+    expect(soqlTimestamp("2026' OR '1'='1")).toBeNull();
+    const asked = [];
+    const http = {
+      json: async (url) => (asked.push(decodeURIComponent(url.replace(/\+/g, ' '))), []),
+    };
+    const gen = adapterByName('fcc-unwanted-calls').pull({
+      cursor: { since: "x' OR 1=1 --" },
+      http,
+      log: () => {},
+    });
+    while (!(await gen.next()).done);
+    expect(asked[0]).toContain("ticket_created > '2016-01-01T00:00:00.000'");
+    expect(asked[0]).not.toContain('OR 1=1');
+  });
 
   test('only real ten-digit NANP numbers count', () => {
     expect(complaintNumber('520-655-1816')).toBe('+15206551816');

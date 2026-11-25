@@ -27,6 +27,17 @@ import { numberTag, toE164 } from './phone-common.js';
 
 export const DATASET = 'https://opendata.fcc.gov/resource/3xyp-aqkj.json';
 const PAGE = 5000;
+const START = '2016-01-01T00:00:00.000';
+
+/**
+ * A cursor value as the floating timestamp SoQL compares, or null. Only this
+ * exact shape is ever placed in the query, so a damaged cursor cannot change
+ * what is asked.
+ */
+export function soqlTimestamp(v) {
+  const s = String(v ?? '');
+  return /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}$/.test(s) ? s : null;
+}
 const PAGES_PER_RUN = 40;
 
 const clean = (v) => {
@@ -114,11 +125,12 @@ export const fccUnwantedCalls = defineAdapter({
   defaultSources: [{ slug: 'fcc-unwanted-calls', name: 'FCC: unwanted-call complaints' }],
 
   async *pull({ cursor, http, log }) {
-    let since = cursor?.since ?? '2016-01-01T00:00:00.000';
+    let since = soqlTimestamp(cursor?.since) ?? START;
     let total = 0;
     for (let page = 0; page < PAGES_PER_RUN; page++) {
       const params = new URLSearchParams({
-        $where: `issue='Unwanted Calls' AND caller_id_number IS NOT NULL AND ticket_created > '${since}'`,
+        // SoQL (Socrata), not a database query; `since` is checked by soqlTimestamp.
+        $where: `issue='Unwanted Calls' AND caller_id_number IS NOT NULL AND ticket_created > '${soqlTimestamp(since) ?? START}'`,
         $order: 'ticket_created ASC, id ASC',
         $limit: String(PAGE),
       });
