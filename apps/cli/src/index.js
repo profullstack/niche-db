@@ -15,7 +15,7 @@ import { homedir, tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createInterface } from 'node:readline';
 
-export const VERSION = '0.70.0';
+export const VERSION = '0.71.0';
 const GEO_FLAGS = ['lat', 'long', 'radius', 'unit', 'bbox', 'sort', 'offset'];
 const DEFAULT_API = process.env.NICHEDB_API ?? 'https://nichedb.dev';
 const CONFIG_DIR = join(process.env.XDG_CONFIG_HOME ?? join(homedir(), '.config'), 'nichedb');
@@ -240,10 +240,10 @@ export const COMMANDS = [
   },
   {
     name: 'phone',
-    usage: 'phone <number with country code> [--json]',
+    usage: 'phone <number with country code> [--caller-id] [--json]',
     summary:
-      'A phone number: where it is from, the carrier its block was assigned to, landline or mobile, FCC complaints and the SMS blacklist.',
-    options: ['--json'],
+      'A phone number: who it belongs to (caller ID name with --caller-id), where it is from, its carrier, landline or mobile, FCC complaints and the SMS blacklist.',
+    options: ['--caller-id', '--json'],
   },
   {
     name: 'airplane',
@@ -1220,15 +1220,27 @@ export async function run(
       return 0;
     }
     case 'phone': {
-      const term = rest.join(' ').trim();
-      if (!term) throw new Error('phone <number with country code>');
-      const r = await client.get(`/api/v1/phone/${encodeURIComponent(term)}`);
+      // `--caller-id +1202...` hands the number to the flag; take it back.
+      const callerIdFlag = Boolean(flags.callerId);
+      const number = [typeof flags.callerId === 'string' ? flags.callerId : '', ...rest]
+        .join(' ')
+        .trim();
+      if (!number) throw new Error('phone <number with country code> [--caller-id]');
+      const r = await client.get(`/api/v1/phone/${encodeURIComponent(number)}`);
+      if (callerIdFlag && r.callerIdAvailable && !r.callerId) {
+        const c = await client.get(`/api/v1/phone/${encodeURIComponent(number)}/caller-id`);
+        r.callerId = c.callerId;
+      }
       if (json) {
         out(JSON.stringify(r, null, 2));
         return 0;
       }
       const n = r.number;
       out(`${n.international}  ${n.country ?? '?'}  ${n.valid ? 'valid' : 'not valid'}`);
+      if (r.callerId)
+        out(
+          `caller ID: ${r.callerId.name ?? '(no name)'}${r.callerId.lineType ? `, ${r.callerId.lineType}` : ''}${r.callerId.carrier ? `, ${r.callerId.carrier}` : ''}`,
+        );
       if (r.areaCode) out(`area code ${n.npa}: ${r.areaCode.location ?? '?'}`);
       if (r.exchange)
         out(

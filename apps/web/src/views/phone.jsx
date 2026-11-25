@@ -67,22 +67,53 @@ export function PhoneLanding({ user, counts, error, query }) {
   );
 }
 
-export function PhonePage({ user, report }) {
+/** The caller ID block: the name if we have it, else the button that asks. */
+const CallerId = ({ n, callerId, available, error }) => {
+  if (!available) return null;
+  if (callerId) {
+    return (
+      <p class="lede">
+        Caller ID:{' '}
+        <strong>{callerId.name ?? 'no name on file (often a mobile or an unlisted line)'}</strong>
+        {callerId.lineType ? ` · ${callerId.lineType}` : ''}
+        {callerId.carrier ? ` · ${callerId.carrier}` : ''}
+        {callerId.ported ? ' · ported' : ''}
+        <br />
+        <small>
+          The name a phone shows when this number calls (CNAM), looked up {day(callerId.lookedUpAt)}
+          . Business lines usually carry the business name; mobiles often carry none.
+        </small>
+      </p>
+    );
+  }
+  return (
+    <form method="post" action={`/phone/${n.digits}/caller-id`} class="inline">
+      {error ? <p class="error">{error}</p> : null}
+      <button type="submit">Show caller ID name</button>{' '}
+      <small>The name a phone displays when this number calls, plus its current carrier.</small>
+    </form>
+  );
+};
+
+export function PhonePage({ user, report, callerIdError }) {
   if (report.error) return <PhoneLanding user={user} error={report.error} />;
   const n = report.number;
   const fcc = report.reports?.fcc;
   const sms = report.reports?.sms;
+  const cid = report.callerId;
   return (
     <Layout
       user={user}
       canonical={`/phone/${n.digits}`}
       title={`${n.international}: who called?`}
-      description={`Where ${n.international} is from, its carrier, and whether people reported it.`}
+      description={`Who ${n.international} belongs to, where it is from, its carrier, and whether people reported it.`}
+      noindex={Boolean(cid?.name)}
     >
       <section class="hero">
         <h1>
           <code>{n.international}</code>
         </h1>
+        <CallerId n={n} callerId={cid} available={report.callerIdAvailable} error={callerIdError} />
         <Lookup value={n.international} />
         <dl>
           <dt>Country</dt>
@@ -92,9 +123,11 @@ export function PhonePage({ user, report }) {
           </dd>
           <dt>Line type</dt>
           <dd>
-            {report.carrier?.lineTypeGuess && n.nanp
-              ? `${report.carrier.lineTypeGuess} (guessed from the carrier's name)`
-              : (n.type ?? 'not published for this country')}
+            {cid?.lineType
+              ? `${cid.lineType} (from the network)`
+              : report.carrier?.lineTypeGuess && n.nanp
+                ? `${report.carrier.lineTypeGuess} (guessed from the carrier's name)`
+                : (n.type ?? 'not published for this country')}
           </dd>
           {report.areaCode ? (
             <>
